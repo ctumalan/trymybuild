@@ -2,77 +2,77 @@
   {
     "slug": "afterschooltogether",
     "name": "AfterSchool Together",
-    "url": "projects/afterschool-together/index.html",
+    "url": "https://trymybuild.com/projects/afterschool-together/index.html",
     "summary": "Find out whether one adult can actually make every after-school trip.",
     "category": "Family life"
   },
   {
     "slug": "stackscout",
     "name": "StackScout",
-    "url": "https://stack-scout-cw.tumalanct.chatgpt.site",
+    "url": "https://trymybuild.com/projects/stack-scout/index.html",
     "summary": "Compare technology choices without drowning in technical language.",
     "category": "Technology"
   },
   {
     "slug": "gamegrid",
     "name": "GameGrid",
-    "url": "https://game-grid-cw.tumalanct.chatgpt.site",
+    "url": "https://trymybuild.com/projects/game-grid/index.html",
     "summary": "Turn scattered game details into one clear team schedule.",
     "category": "Sports & teams"
   },
   {
     "slug": "lessonlab",
     "name": "LessonLab",
-    "url": "https://lesson-lab-cw.tumalanct.chatgpt.site",
+    "url": "https://trymybuild.com/projects/lesson-lab/index.html",
     "summary": "Build a balanced lesson around the time you actually have.",
     "category": "Teaching & learning"
   },
   {
     "slug": "cartcompare",
     "name": "CartCompare",
-    "url": "https://cart-compare-cw.tumalanct.chatgpt.site",
+    "url": "https://trymybuild.com/projects/cart-compare/index.html",
     "summary": "Compare what purchases really cost before you decide.",
     "category": "Shopping"
   },
   {
     "slug": "pocketbalance",
     "name": "PocketBalance",
-    "url": "https://pocket-balance-cw.tumalanct.chatgpt.site",
+    "url": "https://trymybuild.com/projects/pocket-balance/index.html",
     "summary": "See your month clearly without building a complicated budget.",
     "category": "Money"
   },
   {
     "slug": "dayframe",
     "name": "DayFrame",
-    "url": "https://day-frame-cw.tumalanct.chatgpt.site",
+    "url": "https://trymybuild.com/projects/day-frame/index.html",
     "summary": "Plan a day that respects your actual time and energy.",
     "category": "Personal planning"
   },
   {
     "slug": "mealmap",
     "name": "MealMap",
-    "url": "https://meal-map-cw.tumalanct.chatgpt.site",
+    "url": "https://trymybuild.com/projects/meal-map/index.html",
     "summary": "Make a practical weeknight meal plan from what works for you.",
     "category": "Food & home"
   },
   {
     "slug": "homerhythm",
     "name": "HomeRhythm",
-    "url": "https://home-rhythm-cw.tumalanct.chatgpt.site",
+    "url": "https://trymybuild.com/projects/home-rhythm/index.html",
     "summary": "Keep small home-maintenance jobs from becoming big surprises.",
     "category": "Food & home"
   },
   {
     "slug": "packlight",
     "name": "PackLight",
-    "url": "https://pack-light-cw.tumalanct.chatgpt.site",
+    "url": "https://trymybuild.com/projects/pack-light/index.html",
     "summary": "Pack for a trip without carrying your whole closet.",
     "category": "Travel"
   },
   {
     "slug": "briefbuilder",
     "name": "BriefBuilder",
-    "url": "https://brief-builder-cw.tumalanct.chatgpt.site",
+    "url": "https://trymybuild.com/projects/brief-builder/index.html",
     "summary": "Turn a loose idea into a brief another person can understand.",
     "category": "Creative work"
   }

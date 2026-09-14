@@ -14,7 +14,7 @@ export async function prepareNotifications(db:any,id:string,admin:boolean){
   const eligible=candidates.filter((p:any)=>p.owner_user_id&&p.owner_user_id!==id&&!prior.some((f:any)=>f.project_slug===p.slug));
   const candidate=eligible[Number(week)%Math.max(eligible.length,1)];
   if(candidate){const profile=await db.from('profiles').select('display_name').eq('user_id',candidate.owner_user_id).maybeSingle();if(profile.error)throw profile.error;
-   add('review-opportunity:'+week,'review-opportunity',`Earn 1 credit with a qualifying review: help ${profile.data?.display_name||'the creator'} improve ${candidate.title}. Try & review →`,'/tell/'+candidate.slug);
+   add('review-opportunity:'+week,'review-opportunity',`A project you might enjoy helping: help ${profile.data?.display_name||'the creator'} improve ${candidate.title}. Try & review →`,'/tell/'+candidate.slug);
   }
  }
  if(pref.saved_updates){const saved=check(await db.from('saved_projects').select('project_slug,created_at').eq('user_id',id));if(saved.length){

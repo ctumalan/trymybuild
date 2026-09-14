@@ -1156,7 +1156,7 @@ document.addEventListener("click", async event => {
 });
 
 document.addEventListener("keydown", event => {
-  if (event.defaultPrevented || document.querySelector('.cw-overlay[open]')) return;
+  if (event.defaultPrevented || document.querySelector('.cw-overlay[open], .invitation-dialog[open]')) return;
   const dialog = document.querySelector(".detail-dialog");
   if (!dialog) return;
   if (event.key === "Escape") { event.preventDefault(); closeProductDetail(); return; }

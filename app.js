@@ -328,7 +328,7 @@ function discover(communityFocused = false) {
   // Never fall back to the built-in catalog on the server; show loading/unavailable instead.
   const activeView = communityFocused ? 'test' : homeView;
   const tabs = homeViewTabs(activeView);
-  if (activeView === 'test') return `<section class="page-shell discover-page home-creator-view">${tabs}<div id="home-panel" role="tabpanel" aria-labelledby="home-tab-test">${listingJourney()}${window.CW_SERVER && catalogState !== 'ready' ? catalogStatusPanel() : membershipPromo()}</div></section>`;
+  if (activeView === 'test') return `<section class="page-shell discover-page home-creator-view">${tabs}<div id="home-panel" role="tabpanel" aria-labelledby="home-tab-test">${listingJourney()}</div></section>`;
   if (window.CW_SERVER && catalogState !== 'ready') return `<section class="page-shell discover-page">${tabs}<div id="home-panel" role="tabpanel" aria-labelledby="home-tab-find">${catalogStatusPanel()}</div></section>`;
   const candidates = projects.filter(product => {
     const categoryMatch = state.category === "All" || product.category === state.category;
@@ -390,7 +390,7 @@ function projectFirstStep(product) {
 }
 function homeCommunity() {
   const candidates = [...projects].sort((a,b) => Number(creatorFor(a).type === 'company') - Number(creatorFor(b).type === 'company')).slice(0,2);
-  return `<section class="home-community" id="home-community" tabindex="-1" aria-labelledby="home-community-title"><p class="eyebrow">Community</p><div class="home-community-heading"><div><h2 id="home-community-title">Help a creator move forward</h2><p>A few minutes of your time can make the next version better.</p></div><a href="/dashboard/community#credit-rules">How feedback credits work →</a></div><div class="home-community-grid">${candidates.length ? candidates.map(p=>`<article class="home-community-card">${creatorLink(p,true)}<h3>${esc(p.name)}</h3><p class="community-step-label">A first step to try</p><p>${esc(projectFirstStep(p))}</p><button class="text-button" data-product="${esc(p.slug)}">Try &amp; give feedback →</button></article>`).join('') : '<div class="home-community-empty"><h3>Bring the first conversation.</h3><p>Share a project you’re working on and invite people to try it.</p><button class="secondary-button" data-route="share">Share my app</button></div>'}</div><p class="home-community-note">Try a first task, then share what worked, what confused you, or what could improve.</p></section>`;
+  return `<section class="home-community" id="home-community" tabindex="-1" aria-labelledby="home-community-title"><p class="eyebrow">Community</p><div class="home-community-heading"><div><h2 id="home-community-title">Help a creator move forward</h2><p>A few minutes of your time can make the next version better.</p></div><a href="/dashboard/community#credit-rules">How participation works →</a></div><div class="home-community-grid">${candidates.length ? candidates.map(p=>`<article class="home-community-card">${creatorLink(p,true)}<h3>${esc(p.name)}</h3><p class="community-step-label">A first step to try</p><p>${esc(projectFirstStep(p))}</p><button class="text-button" data-product="${esc(p.slug)}">Try &amp; give feedback →</button></article>`).join('') : '<div class="home-community-empty"><h3>Bring the first conversation.</h3><p>Share a project you’re working on and invite people to try it.</p><button class="secondary-button" data-route="share">Share my app</button></div>'}</div><p class="home-community-note">Try a first task, then share what worked, what confused you, or what could improve.</p></section>`;
 }
 function catalogRow(product) {
   const saved = state.saved.has(product.slug);
@@ -645,6 +645,11 @@ function saveListingDraft() {
 function listingUrl(value) {
   try { const url = new URL(value); return ['http:', 'https:'].includes(url.protocol) && !url.username && !url.password ? url.href : ''; } catch { return ''; }
 }
+function listingNameFromUrl(value) {
+  const url = listingUrl(value); if (!url) return '';
+  const host = new URL(url).hostname.replace(/^www\./i,'').split('.')[0];
+  return host.split(/[-_]+/).filter(Boolean).map(word=>word.charAt(0).toUpperCase()+word.slice(1)).join(' ').slice(0,80);
+}
 let listingCapture = { state: 'idle', message: '', attempted: '', revision: 0, controller: null };
 function listingImage() {
   // A stored image may be an absolute http(s) link or a same-origin server path (/api/project-image/…).
@@ -756,6 +761,13 @@ function listingPreview() {
   queueMicrotask(() => { void ensureListingScreenshot(); });
   return `<div data-listing-preview-region><article class="listing-preview-card"><header class="mealmap-top"><span class="mealmap-wordmark">${esc(listingDraft.title || 'Your project')}<small>${esc(listingDraft.category)} · ${esc(listingDraft.stage)}</small></span></header><div class="mealmap-intro listing-preview-hero">${image ? `<img data-listing-screenshot src="${esc(image)}" alt="Preview of ${esc(listingDraft.title)}" referrerpolicy="no-referrer" />` : ''}<h2>${esc(listingDraft.does || listingDraft.title || 'Your project')}</h2></div><section class="mealmap-answers">${url ? `<div class="mealmap-action"><a class="primary-button" href="${esc(url)}" target="_blank" rel="noopener noreferrer">Open ${esc(listingDraft.title || 'project')} ↗</a></div>` : ''}<div class="mealmap-answer-grid"><article><h3>How does it help me?</h3><p>${esc(listingDraft.helps)}</p></article><article><h3>What feature should I try first?</h3><p>${esc(listingDraft.firstTry)}</p></article></div></section></article>${listingImageControls()}</div>`;
 }
+function listingIdentityConfirmation() {
+  const image = listingImage();
+  const busy = ['loading','uploading'].includes(listingCapture.state), guest = window.CW_SERVER && !state.session?.authenticated;
+  const message = listingCapture.message || (image ? 'Your website preview is ready.' : 'We’ll capture the public page. You can replace the image.');
+  queueMicrotask(() => { void ensureListingScreenshot(); });
+  return `<div class="listing-identity-confirmation">${image ? `<img data-listing-screenshot src="${esc(image)}" alt="Screenshot captured from your app" referrerpolicy="no-referrer" />` : `<div class="listing-capture-placeholder" aria-hidden="true"><span></span><span></span><span></span></div>`}<div class="listing-identity-tools"><p role="status" aria-live="polite">${esc(message)}</p><div><label class="secondary-button">${image?'Replace image':'Upload screenshot'}<input class="sr-only" type="file" data-listing-image-upload accept="image/png,image/jpeg,image/webp"></label><button type="button" class="secondary-button" data-listing-capture ${guest?'hidden':''} ${busy?'disabled':''}>${busy?'Preparing…':'Retry capture'}</button></div></div></div>`;
+}
 function listingSettingsPage() {
   if (!window.CW_SERVER && !state.session) return listingAccountPage();
   if (!state.session) return `<section class="page-shell listing-review"><h1>Loading your account…</h1></section>`;
@@ -784,20 +796,9 @@ function sharePage() {
 }
 function listingJourney() {
   if (listingSettings) return listingSettingsPage();
-  if (listingStep === 4) return listingAccountPage();
-  if (listingStep < 3) return inlineListingForm();
-  if (listingStep === 3) return `<section class="page-shell listing-review"><p class="eyebrow">4 · Preview your listing</p><h1>Preview your listing.</h1><p>Check the three things visitors need to know before they try it.</p>${listingPreview()}<section class="video-editor"><h2>Project video <span>(optional)</span></h2>${videoField()}<p data-video-status class="video-status" role="status"></p></section><div class="form-actions share-start-actions"><button class="primary-button" data-listing-share>Share now</button><button class="secondary-button" data-listing-back>Back</button><button type="button" class="secondary-button listing-reset-button" data-listing-reset>Start over</button></div><p class="privacy-note">Next: sign up or sign in, then choose your project settings. Nothing is published yet.</p><p data-listing-status role="status"></p></section>`;
-  const content = [
-    { headline: 'You have an idea. How do you know if it’s good?', note: 'Start with a link. You’ll preview the listing before creating your account.', image: 'creatorworks-idea-v1.png', title: 'What are you building?', copy: 'Add a name and a link people can open.', fields: listingField('title','Project name','For example: MealMap') + listingField('url','Project link','https://your-project.com') },
-    { headline: 'Help people see what’s possible.', note: 'A clear description and one small first task give visitors a reason to try your project.', image: 'creatorworks-small-difference-v1.png', title: 'Three things to know.', copy: 'Use everyday language. Keep each answer between 4 and 10 words.', fields: listingField('does','What does your project do?','For example: Turns ingredients into meal ideas.',true) + listingField('helps','How does it help people?','For example: Makes dinner decisions easier and reduces food waste.',true) + listingField('firstTry','What feature should someone try first?','For example: Enter three ingredients from your fridge.',true) },
-    { headline: 'Your app doesn’t have to be finished to be listed.', note: 'Let visitors know what to expect. Your project can be useful before it is finished.', image: 'creatorworks-first-user-v1.png', title: 'What stage is it at?', copy: 'Choose the closest match. You can change it later.', fields: `${videoField()}<div class="choice-grid" role="group" aria-label="Project stage">${['Still taking shape','Ready for a first try','Being tested by early users','Finished and launched'].map(stage => `<button type="button" class="choice-button ${stage === listingDraft.stage ? 'is-selected' : ''}" aria-pressed="${stage === listingDraft.stage}" data-listing-stage="${stage}"><span aria-hidden="true">${stage === listingDraft.stage ? '✓' : ''}</span>${stage}</button>`).join('')}</div>` }
-  ][listingStep];
-  const evidence = [
-    '<p><strong>42% of failed startups said people didn’t need their product.</strong></p><p class="share-evidence-source">Based on 101 failed startups studied by CB Insights. <a href="https://s3-us-west-2.amazonaws.com/cbi-content/research-reports/The-20-Reasons-Startups-Fail.pdf" target="_blank" rel="noopener noreferrer">Source</a></p>',
-    '<p>“Focus on the user’s problem rather than possible solutions.”</p><p class="share-evidence-source">— GOV.UK Service Manual. <a href="https://www.gov.uk/service-manual/user-research/start-by-learning-user-needs" target="_blank" rel="noopener noreferrer">Source</a></p>',
-    '<p>“The feedback you get from engaging directly with your earliest users will be the best you ever get.”</p><p class="share-evidence-source">— Paul Graham, <a href="https://paulgraham.com/ds.html" target="_blank" rel="noopener noreferrer">Do Things That Don’t Scale</a>, 2013.</p>'
-  ][listingStep];
-  return `<section class="share-page page-shell"><div class="share-layout share-layout-intro listing-flow"><aside class="share-visual share-visual-intro"><div class="share-visual-copy"><p class="eyebrow">For people who make things</p><h2>${content.headline}</h2></div><div class="share-evidence">${evidence}</div><img src="assets/illustrations/${content.image}" alt="A creator developing a useful project." width="1536" height="1024" /><p class="share-reassurance">${content.note}</p></aside><div class="share-work"><div class="share-progress"><span style="width:${(listingStep+1)/4*100}%"></span></div><p class="eyebrow">Create your listing · ${listingStep+1} of 3</p><h1>${content.title}</h1><p class="share-copy">${content.copy}</p><form data-listing-step>${content.fields}<div class="form-actions share-start-actions"><button class="primary-button" type="submit">${listingStep === 2 ? 'Preview my listing' : 'Continue'}</button>${listingStep ? '<button class="secondary-button" type="button" data-listing-back>Back</button>' : '<button class="share-browse-link" type="button" data-route="discover">Browse other projects</button>'}<button type="button" class="secondary-button listing-reset-button" data-listing-reset>Start over</button></div><p data-listing-status role="status"></p></form><p class="privacy-note">Your draft stays on this device. Nothing is public yet.</p></div></div></section>`;
+  if (listingStep === 8) return listingAccountPage();
+  if (listingStep < 7) return inlineListingForm();
+  return `<section class="page-shell listing-review"><p class="eyebrow">8 · Preview your listing</p><h1>Ready to share.</h1><p>Check what visitors will see before you continue.</p>${listingPreview()}<div class="form-actions share-start-actions"><button class="primary-button" data-listing-share>Confirm and continue</button><button class="secondary-button" data-listing-back>Back</button><button type="button" class="secondary-button listing-reset-button" data-listing-reset>Start over</button></div><p class="privacy-note">Next: sign up or sign in, then confirm project settings. Nothing is published or sent yet.</p><p data-listing-status role="status"></p></section>`;
 }
 document.addEventListener('input', event => {
   const field = event.target.closest('[data-listing-field]');
@@ -848,10 +849,10 @@ document.addEventListener('submit', event => {
   event.preventDefault();
   const status = form.querySelector('[data-listing-status]');
   const firstInvalidField = markListingFieldsForAttention(form);
-  const fields = form.hasAttribute('data-inline-listing') ? ['title','url','does','helps','firstTry'] : form.hasAttribute('data-listing-settings') || listingStep === 0 ? ['title','url'] : listingStep === 1 ? ['does','helps','firstTry'] : [];
-  if (form.hasAttribute('data-inline-listing') && !normalizeCategory(listingDraft.category)) { status.textContent='Choose or suggest a category before continuing.'; return; }
+  const journeyFields = {0:['url'],1:['title'],2:['does'],3:['helps'],4:['firstTry']};
+  const fields = form.hasAttribute('data-listing-settings') ? ['title','url','does','helps','firstTry'] : (journeyFields[listingStep] || []);
   if (fields.some(key => !listingDraft[key].trim())) { status.textContent = 'Please add a short answer to each field.'; return; }
-  if ((form.hasAttribute('data-inline-listing') || listingStep === 1 || form.hasAttribute('data-listing-settings')) && ['does','helps','firstTry'].some(key=>!CWListingRules.valid(listingDraft[key]))) { status.textContent='Each of the three project answers must contain 4–10 words.'; firstInvalidField?.focus(); return; }
+  if ((form.hasAttribute('data-listing-settings') ? ['does','helps','firstTry'] : fields).some(key=>['does','helps','firstTry'].includes(key)&&!CWListingRules.valid(listingDraft[key]))) { status.textContent='Use 4–10 words before continuing.'; firstInvalidField?.focus(); return; }
   if (!listingUrl(listingDraft.url)) { status.textContent = 'Enter a complete http or https project link.'; return; }
   if (form.hasAttribute('data-listing-settings')) {
     const normalizedCategory = normalizeCategory(listingDraft.category);
@@ -874,8 +875,8 @@ document.addEventListener('submit', event => {
     }
     return;
   }
-  if (listingStep === 0) void ensureListingScreenshot();
-  listingStep = form.hasAttribute('data-inline-listing') ? 3 : Math.min(3,listingStep+1); render();
+  if (listingStep === 0) { if (!listingDraft.title.trim()) listingDraft.title = listingNameFromUrl(listingDraft.url); saveListingDraft(); void ensureListingScreenshot(); }
+  listingStep = Math.min(7,listingStep+1); render();
 });
 
 // Server-backed listing persistence. The on-device draft is never cleared until the server confirms,
@@ -925,10 +926,11 @@ document.addEventListener('click', event => {
   const stage = event.target.closest('[data-listing-stage]');
   if (stage) { listingDraft.stage = stage.dataset.listingStage; saveListingDraft(); render(); }
   if (event.target.closest('[data-listing-back]')) { listingStep = Math.max(0,listingStep-1); render(); }
-  if (event.target.closest('[data-listing-review]')) { listingSettings = false; listingStep = 3; state.route = 'share'; render(); }
+  if (event.target.closest('[data-listing-review]')) { listingSettings = false; listingStep = 7; state.route = 'share'; render(); }
+  if (event.target.closest('[data-listing-decide-later]')) { listingDraft.sharingPreference = 'not_sure'; saveListingDraft(); listingStep = 7; render(); }
   if (event.target.closest('[data-listing-share]')) {
     if (!saveListingDraft()) { document.querySelector('[data-listing-status]').textContent = 'Your browser could not save this draft. Please enable site storage before signing in.'; return; }
-    if (state.session?.authenticated) { listingSettings = true; void saveServerListing().then(() => render()).catch(error => { const el = document.querySelector('[data-listing-status]'); if (el) el.textContent = error.message; }); } else listingStep = 4;
+    if (state.session?.authenticated) { listingSettings = true; void saveServerListing().then(() => render()).catch(error => { const el = document.querySelector('[data-listing-status]'); if (el) el.textContent = error.message; }); } else listingStep = 8;
     render();
   }
 });

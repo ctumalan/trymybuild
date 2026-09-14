@@ -43,12 +43,17 @@ test('comment input has its own flexible grid track; counters and status cannot 
  assert.match(css,/\.compact-comment \[data-comment-status\]:empty\{display:none\}/);
  assert.match(css,/\.card-comments \.inline-help\[open\]\{grid-column:1\/-1\}/);
 });
-test('listing journey presents core fields together and keeps tab navigation',()=>{
- const ctx=vm.createContext({document:{addEventListener(){}},listingPricingField:()=>'<select>Free + paid options</select>',listingCategoryPicker:()=>'<select></select>',listingField:(name)=>`FIELD:${name}`,categoryCatalog:[{name:'Technology'}],listingDraft:{category:'Technology'},esc:String});
+test('listing journey asks for one decision at a time and keeps tab navigation',()=>{
+ const ctx=vm.createContext({document:{addEventListener(){}},listingField:(name)=>`FIELD:${name}`,listingIdentityConfirmation:()=>'<div>APP CONFIRMATION</div>',listingStep:0,listingDraft:{stage:'Ready for a first try',sharingPreference:'not_sure'},esc:String});
  vm.runInContext(entry,ctx);
- const html=ctx.inlineListingForm();
- for(const field of ['title','url','does','helps','firstTry'])assert.match(html,new RegExp('FIELD:'+field));
- assert.match(html,/data-inline-listing/);
+ let html=ctx.inlineListingForm();assert.match(html,/FIELD:url/);assert.doesNotMatch(html,/FIELD:title|Who should see it/);
+ assert.match(html,/role="progressbar"/);assert.match(html,/aria-valuenow="1"/);assert.equal((html.match(/FIELD:/g)||[]).length,1);
+ ctx.listingStep=1;html=ctx.inlineListingForm();assert.match(html,/APP CONFIRMATION/);assert.match(html,/FIELD:title/);assert.doesNotMatch(html,/FIELD:url|FIELD:does/);
+ for(const [step,field] of [[2,'does'],[3,'helps'],[4,'firstTry']]){ctx.listingStep=step;html=ctx.inlineListingForm();assert.match(html,new RegExp('FIELD:'+field));assert.equal((html.match(/FIELD:/g)||[]).length,1);}
+ ctx.listingStep=5;html=ctx.inlineListingForm();assert.match(html,/How ready is it\?/);assert.equal((html.match(/data-listing-stage=/g)||[]).length,4);
+ ctx.listingStep=6;html=ctx.inlineListingForm();assert.match(html,/Who should see it\?/);assert.match(html,/Invite only/);assert.match(html,/Public/);assert.match(html,/Decide later/);assert.doesNotMatch(html,/Not sure yet/);
+ assert.match(html,/data-inline-listing/);assert.match(html,/button type="submit" class="primary-button" disabled/);
+ assert.match(entry,/data-listing-stage[^\n]+requestCreatorQuote\(2\)/);
  assert.match(app,/homeViewTabs\('test'\).*listingJourney\(\)/);
  assert.doesNotMatch(app,/Meet the creator|<h3>Tell the creator<\/h3>/);
 });

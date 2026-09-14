@@ -49,17 +49,15 @@ test('home tabs separate discovery from community and preserve search',()=>{
  ctx.state.query='App 2';
  ctx.selectHomeView('test');
  html=ctx.discover();
- assert.match(html,/COMMUNITY CONTENT/);
+ assert.match(html,/Listing form/);
+ assert.doesNotMatch(html,/COMMUNITY CONTENT/);
  assert.doesNotMatch(html,/Small contributions\. Better projects/);
  assert.doesNotMatch(html,/data-catalog-search/);
  assert.match(html,/id="home-tab-test"[^>]*aria-selected="true"/);
  ctx.selectHomeView('find');
  assert.equal(ctx.state.query,'App 2');
  assert.equal((ctx.discover().match(/<article>/g)||[]).length,1);
- ctx.window.CW_SERVER=true;ctx.catalogState='loading';
- for(const view of ['find','test']){
-  ctx.selectHomeView(view);html=ctx.discover();
-  assert.match(html,/CATALOG UNAVAILABLE/);
-  assert.doesNotMatch(html,/COMMUNITY CONTENT|<article>/);
- }
+ ctx.window.CW_SERVER=true;ctx.catalogState='loading';ctx.selectHomeView('find');html=ctx.discover();
+ assert.match(html,/CATALOG UNAVAILABLE/);assert.doesNotMatch(html,/COMMUNITY CONTENT|<article>/);
+ ctx.selectHomeView('test');html=ctx.discover();assert.match(html,/Listing form/);assert.doesNotMatch(html,/CATALOG UNAVAILABLE|COMMUNITY CONTENT/);
 });

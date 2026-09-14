@@ -19,6 +19,12 @@ test('listing validation highlights only invalid answers and clears corrected fi
  assert.equal(ctx.markListingFieldsForAttention(form),null);
  assert.deepEqual(fields.map(f=>f['aria-invalid']),['false','false','false']);
 });
+test('app confirmation suggests a short editable name from the submitted link',()=>{
+ const ctx=vm.createContext({URL});
+ vm.runInContext(app.slice(app.indexOf('function listingUrl('),app.indexOf('let listingCapture =')),ctx);
+ assert.equal(ctx.listingNameFromUrl('https://www.my-useful-app.com/welcome'),'My Useful App');
+ assert.equal(ctx.listingNameFromUrl('javascript:alert(1)'),'');
+});
 function scope(){const ctx=vm.createContext({document:{addEventListener(){}},state:{session:null},listingDraft:{},esc:String,homeView:'find',homeViewTabs:()=>'<nav>Tabs</nav>'});vm.runInContext(entry,ctx);vm.runInContext(app.slice(app.indexOf('function homeHowItWorks()'),app.indexOf('function catalogSearchWords(')),ctx);return ctx;}
 test('sharing choices use a private default and preserve explicit intent',()=>{
  const ctx=scope();assert.match(ctx.sharingPreferenceFields(),/value="not_sure" checked/);
@@ -38,8 +44,8 @@ test('promo has exactly five benefits and a member-aware call to action',()=>{
  const ctx=scope();assert.equal((ctx.membershipPromo().match(/<li>/g)||[]).length,5);
  assert.match(ctx.membershipPromo(),/Free to join\. Better together\./);
  assert.doesNotMatch(ctx.membershipPromo(),/Make more of your membership/);
- assert.match(ctx.membershipPromo(),/qualifying reviews/);assert.match(ctx.membershipPromo(),/Create my free account/);
- ctx.state.session={authenticated:true};assert.match(ctx.membershipPromo(),/Your community credits/);assert.doesNotMatch(ctx.membershipPromo(),/Create my free account/);
+ assert.match(ctx.membershipPromo(),/one honest observation/);assert.match(ctx.membershipPromo(),/Create my free account/);assert.doesNotMatch(ctx.membershipPromo(),/Earn community credits|Unlock additional project slots/);
+ ctx.state.session={authenticated:true};assert.match(ctx.membershipPromo(),/Give &amp; receive feedback/);assert.doesNotMatch(ctx.membershipPromo(),/Create my free account/);
 });
 test('guest information is available without account creation',()=>{
  const ctx=scope();assert.match(ctx.aboutPage(),/Chris Nava/);assert.match(ctx.contactPage(),/mailto:hello@trymybuild.com/);

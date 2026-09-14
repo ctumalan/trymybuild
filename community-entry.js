@@ -21,11 +21,11 @@ function sharingPreferenceNote(preference) {
 function membershipPromo() {
  return `<section class="membership-promo" id="home-community"><p class="eyebrow">Free to join. Better together.</p><h2>Build better. Discover more. Help each other.</h2><ol>${[
  ['Get real feedback','Invite friends and community members to try your app and share what could improve.'],
- ['Earn community credits','Earn credits for qualifying reviews, with bonuses when creators recognize your help.'],
- ['Grow your presence','Unlock additional project slots through consistent, useful contributions.'],
+ ['Help a creator','Try something that interests you and share one honest observation.'],
+ ['Start a conversation','Ask one specific question about your project, then reply to the people who help.'],
  ['Keep your favorites close','Save useful apps and opt in to notifications about new ones matching your interests.'],
  ['Inspire what gets built next','Share a wish—or turn someone’s need into your next project.']
- ].map(([title,copy])=>`<li><strong>${title}</strong><p>${copy}</p></li>`).join('')}</ol><div class="promo-actions">${state.session?.authenticated?'<a class="primary-button" href="/dashboard/community">Your community credits</a>':'<button class="primary-button" data-route="account">Create my free account</button>'}<a href="/dashboard/community#credit-rules">How feedback credits work →</a></div></section>`;
+ ].map(([title,copy])=>`<li><strong>${title}</strong><p>${copy}</p></li>`).join('')}</ol><div class="promo-actions">${state.session?.authenticated?'<a class="primary-button" href="/dashboard/community">Give &amp; receive feedback</a>':'<button class="primary-button" data-route="account">Create my free account</button>'}<a href="/dashboard/community#credit-rules">How participation works →</a></div></section>`;
 }
 function aboutPage() {
  return `<section class="page-shell">${homeViewTabs(homeView)}<article class="public-info founder-info"><p class="eyebrow">About TryMyBuild</p><h1>Useful ideas deserve a place to grow.</h1><div class="founder-story"><img class="founder-photo" src="/assets/avatars/chris-nava-founder.jpg" alt="Chris Nava, founder of TryMyBuild, in his recording studio" width="1084" height="971"><div><h2>Chris Nava · Founder</h2><p>TryMyBuild was founded by Chris Nava, a Grammy-winning musician with a curiosity for building useful things. After creating his own apps using rapidly evolving AI tools, Chris wanted a place to share his work, hear honest feedback, and help others do the same. TryMyBuild grew from that need: a community where people discover useful apps, creators learn from real users, and everyday problems inspire what gets built next.</p><button class="text-button" data-route="contact">Get in touch →</button></div></div></article>${homeHowItWorks()}</section>`;
@@ -36,7 +36,8 @@ function contactPage() {
 document.addEventListener('change',event=>{
  if(!event.target.matches('[data-sharing-preference]'))return;
  listingDraft.sharingPreference=event.target.value;saveListingDraft();
- event.target.closest('fieldset').querySelector('[data-sharing-note]').textContent=sharingPreferenceNote(event.target.value);
+ const note=event.target.closest('fieldset')?.querySelector('[data-sharing-note]');if(note)note.textContent=sharingPreferenceNote(event.target.value);
+ const form=event.target.closest('[data-listing-step]');if(form)form.querySelector('button[type="submit"]')?.removeAttribute('disabled');
 });
 const creatorQuotes=[
  {text:'The feedback you get from engaging directly with your earliest users will be the best you ever get.',author:'Paul Graham',source:'https://paulgraham.com/ds.html'},
@@ -77,10 +78,26 @@ document.addEventListener('change',event=>{
  if(event.target.matches('[data-inline-listing] select[data-listing-field="stage"]')&&event.target.value)requestCreatorQuote(2);
 });
 document.addEventListener('click',event=>{
+ const stage=event.target.closest('[data-inline-listing] [data-listing-stage]');if(stage)requestCreatorQuote(2);
  if(event.target.closest('[data-quote-dismiss]')){quoteDismissed=true;clearTimeout(quoteTimer);pendingQuotes.length=0;activeQuoteCard?.remove();activeQuoteCard=null;}
 });
 function inlineListingForm() {
- return `<section class="inline-listing"><h1>Get your app tested by close friends or community members.</h1><p>Listing your project is free. Your drafts stay private until you’re ready to publish.</p><form data-listing-step data-inline-listing>${sharingPreferenceFields()}${listingField('title','Project name','Your app name')}${listingField('url','Project link','https://your-project.com')}<details class="listing-details" open><summary>Tell people what to try</summary>${listingField('does','What does your project do?','Describe it in 4–10 words',true)}${listingField('helps','How does it help people?','Describe the benefit in 4–10 words',true)}${listingField('firstTry','What should someone try first?','Suggest a task in 4–10 words',true)}${listingCategoryPicker()}${listingPricingField()}<label>Project stage<select data-listing-field="stage">${['Still taking shape','Ready for a first try','Being tested by early users','Finished and launched'].map(stage=>`<option ${listingDraft.stage===stage?'selected':''}>${stage}</option>`).join('')}</select></label></details><button type="submit" class="primary-button">Preview my listing</button><p data-listing-status role="status"></p><p>Nothing is published until you submit it for review.</p></form></section>`;
+ const steps=[
+  {title:'Start with your app link.',copy:'We’ll use it to prepare your listing.',fields:listingField('url','App link','https://your-app.com'),next:'Continue'},
+  {title:'Is this the right app?',copy:'Confirm the name and image people will see.',fields:`${listingIdentityConfirmation()}${listingField('title','App name','Your app name')}`,next:'Yes, continue'},
+  {title:'What does your app do?',copy:'Describe the result in 4–10 words.',fields:listingField('does','One clear sentence','For example: Turns ingredients into meal ideas.',true),next:'Continue'},
+  {title:'How does it help?',copy:'Name the practical benefit in 4–10 words.',fields:listingField('helps','The benefit','For example: Makes dinner decisions easier and reduces waste.',true),next:'Continue'},
+  {title:'What should someone try first?',copy:'Give visitors one clear starting point in 4–10 words.',fields:listingField('firstTry','First action','For example: Enter three ingredients from your fridge.',true),next:'Continue'},
+  {title:'How ready is it?',copy:'Choose the closest stage. You can change it later.',fields:`<div class="choice-grid listing-stage-choices" role="group" aria-label="Project stage">${['Still taking shape','Ready for a first try','Being tested by early users','Finished and launched'].map(stage=>`<button type="button" class="choice-button ${stage===listingDraft.stage?'is-selected':''}" aria-pressed="${stage===listingDraft.stage}" data-listing-stage="${stage}"><span aria-hidden="true">${stage===listingDraft.stage?'✓':''}</span>${stage}</button>`).join('')}</div>`,next:'Continue'},
+  {title:'Who should see it?',copy:'Choose how you want to begin.',fields:listingJourneyVisibility(),next:'Preview my listing'}
+ ];
+ const step=steps[listingStep]||steps[0],first=listingStep===0,visibility=listingStep===steps.length-1;
+ return `<section class="inline-listing listing-journey-step ${first?'listing-journey-first':''}"><div class="journey-progress" role="progressbar" aria-label="Create your listing" aria-valuemin="1" aria-valuemax="${steps.length}" aria-valuenow="${listingStep+1}"><span style="width:${(listingStep+1)/steps.length*100}%"></span></div><p class="eyebrow">Create your listing · ${listingStep+1} of ${steps.length}</p><h1>${step.title}</h1><p class="journey-copy">${step.copy}</p><form data-listing-step data-inline-listing>${step.fields}<div class="journey-actions"><button type="submit" class="primary-button" ${visibility&&listingDraft.sharingPreference==='not_sure'?'disabled':''}>${step.next}</button>${first?'':'<button class="secondary-button" type="button" data-listing-back>Back</button>'}</div>${visibility?'<button class="share-browse-link listing-decide-later" type="button" data-listing-decide-later>Decide later</button>':''}<p data-listing-status role="status"></p><p class="privacy-note">${visibility?'Nothing is shared or published yet.':'Your draft stays on this device.'}</p></form></section>`;
+}
+
+function listingJourneyVisibility(){
+ const preference=listingDraft.sharingPreference||'not_sure';
+ return `<fieldset class="journey-visibility"><legend class="sr-only">Choose who should see your app</legend>${[['private','Invite only','Share with people you choose.'],['public','Public','Apply to appear in TryMyBuild discovery.']].map(([value,title,copy])=>`<label class="visibility-card"><input type="radio" name="sharingPreference" data-sharing-preference value="${value}" ${preference===value?'checked':''} required><span><strong>${title}</strong><small>${copy}</small></span></label>`).join('')}</fieldset>`;
 }
 function welcomeAccountPage() {
  let selected=[],alerts=false;try{selected=JSON.parse(localStorage.getItem('trymybuild-signup-interests')||'[]');alerts=localStorage.getItem('trymybuild-signup-alerts')==='true';}catch{}

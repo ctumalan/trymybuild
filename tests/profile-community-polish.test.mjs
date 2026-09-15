@@ -59,7 +59,7 @@ test('motion respects reduced motion; textareas grow; sharing remains a delibera
 test('a native invitation keeps Escape and keyboard focus above the project drawer',()=>{
  const app=read('app.js');
  const handler=app.slice(app.indexOf('document.addEventListener("keydown"'),app.indexOf('document.addEventListener("input"'));
- assert.match(handler,/if \(event.defaultPrevented \|\| document.querySelector\('\.cw-overlay\[open\], \.invitation-dialog\[open\]'\)\) return;/);
+ assert.match(handler,/if \(event.defaultPrevented \|\| document.querySelector\('\.cw-overlay\[open\], \.invitation-dialog\[open\], \.return-feedback-dialog\[open\]'\)\) return;/);
  assert.ok(handler.indexOf('.invitation-dialog[open]')<handler.indexOf('event.key === "Escape"'));
  assert.match(read('share-invitation.js'),/dialog.addEventListener\('cancel',event=>\{event.preventDefault\(\);close\(\);\}\)/);
 });

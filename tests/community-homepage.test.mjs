@@ -4,10 +4,10 @@ import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 const app=read('app.js');
-test('header keeps only the account menu and footer retains consistent gateways',()=>{
+test('header keeps account menu and footer avoids duplicate app navigation',()=>{
  const html=read('index.html');
- assert.equal((html.match(/data-home-view="find">Find an app/g)||[]).length,1);
- assert.equal((html.match(/data-home-view="test">Get feedback on my app/g)||[]).length,1);
+ assert.doesNotMatch(html,/data-home-view="find"/);
+ assert.doesNotMatch(html,/data-home-view="test"/);
  const header=html.slice(html.indexOf('<header'),html.indexOf('</header>'));
  assert.doesNotMatch(header,/data-home-view|menu-toggle/);
  assert.match(header,/profile-button.*data-route="account"/);

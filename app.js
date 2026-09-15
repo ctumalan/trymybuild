@@ -163,6 +163,7 @@ const nav = document.querySelector(".site-nav");
 const menu = document.querySelector(".menu-toggle");
 document.addEventListener('toggle',event=>{if(event.target.matches?.('.catalog-filter-menu')&&event.target.isConnected)state.filterOpen=event.target.open;},true);
 let detailReturnFocus = null;
+let detailProjectHistory = [];
 let detailScrollY = 0;
 const esc = value => String(value ?? "").replace(/[&<>'"]/g, char => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[char]));
 // Navigation must be validated as well as HTML-escaped.
@@ -200,9 +201,9 @@ function creatorVerificationBadge(creator) {
   return verified ? `<span class="creator-verified" title="${esc(note)}">✓ Verified creator</span>` : '';
 }
 
-function creatorLink(project, compact = false) {
+function creatorLink(project, compact = false, showVerification = true) {
   const creator = creatorFor(project);
-  return `<button class="creator-link ${compact ? "is-compact" : ""}" data-profile="${esc(creator.slug)}">${avatar(creator)}<span><strong>${esc(creator.name)}</strong>${creatorVerificationBadge(creator)}<small>${esc(creator.label)}</small></span></button>`;
+  return `<button class="creator-link ${compact ? "is-compact" : ""}" data-profile="${esc(creator.slug)}">${avatar(creator)}<span><strong>${esc(creator.name)}</strong>${showVerification ? creatorVerificationBadge(creator) : ''}<small>${esc(creator.label)}</small></span></button>`;
 }
 
 function projectDestination(url) {
@@ -243,8 +244,8 @@ function productCard(product, compact = false) {
 }
 
 function catalogStatusPanel() {
-  if (catalogState === 'loading') return `<section class="page-shell discover-page"><div class="page-intro"><p class="eyebrow">Discover</p><h1>Loading projects…</h1></div><div class="empty-state"><p>Fetching the latest published listings.</p></div></section>`;
-  return `<section class="page-shell discover-page"><div class="page-intro"><p class="eyebrow">Discover</p><h1>Projects are temporarily unavailable.</h1></div><div class="empty-state"><h2>We couldn’t load the catalog.</h2><p>This is a temporary problem reaching our servers. Nothing is wrong with your account.</p><button class="primary-button" data-catalog-retry>Try again</button></div></section>`;
+  if (catalogState === 'loading') return `<div class="home-catalog-status" role="status"><p>Loading apps…</p></div>`;
+  return `<div class="home-catalog-status" role="status"><p>Apps are temporarily unavailable.</p><button class="text-button" data-catalog-retry>Try again</button></div>`;
 }
 // Calendar dates keep a tip stable throughout the visitor's local day.
 const creatorTips = [
@@ -282,7 +283,7 @@ function catalogSortLabel(sort = state.sort) {
 }
 let homeView = 'find';
 function homeViewTabs(active) {
-  return `<div class="home-view-tabs" role="tablist" aria-label="What would you like to do?">${[['find','Find an app'],['test','Get feedback on my app']].map(([key,label])=>`<button type="button" role="tab" id="home-tab-${key}" data-home-view="${key}" aria-controls="home-panel" aria-selected="${active===key}" tabindex="${active===key?'0':'-1'}">${label}</button>`).join('')}</div>`;
+  return `<div class="home-view-tabs" role="tablist" aria-label="What would you like to do?">${[['find','Explore apps'],['test','Share your app']].map(([key,label])=>`<button type="button" role="tab" id="home-tab-${key}" data-home-view="${key}" aria-controls="home-panel" aria-selected="${active===key}" tabindex="${active===key?'0':'-1'}">${label}</button>`).join('')}</div>`;
 }
 function selectHomeView(view) {
   const previous=homeView;
@@ -293,7 +294,7 @@ function selectHomeView(view) {
     document.getElementById('home-panel')?.animate([{opacity:.45,transform:'translateY(5px)'},{opacity:1,transform:'translateY(0)'}],{duration:250,easing:'ease-out'});
   }
   const tab = document.getElementById('home-tab-'+homeView);
-  tab?.focus({preventScroll:true}); tab?.scrollIntoView({block:'nearest'});
+  tab?.focus({preventScroll:true});
 }
 function homeHowItWorks() {
   return `<section class="home-how" aria-labelledby="home-how-title"><p class="eyebrow">How it works</p><h2 id="home-how-title">Small contributions. Better projects.</h2><ol><li><span>1</span><div><h3>Share your project</h3><p>Bring what you’re building and explain what someone should try.</p><button class="text-button" data-route="share">Share my app →</button></div></li><li><span>2</span><div><h3>Try someone else’s</h3><p>Explore a project. Share what worked, what confused you, or what could improve.</p><button class="text-button" data-home-view="find">Find an app →</button></div></li><li><span>3</span><div><h3>Learn and improve together</h3><p>Keep the conversation going and turn honest feedback into your next improvement.</p><a href="/dashboard/messages">Your conversations →</a></div></li></ol></section>`;
@@ -329,7 +330,7 @@ function discover(communityFocused = false) {
   const activeView = communityFocused ? 'test' : homeView;
   const tabs = homeViewTabs(activeView);
   if (activeView === 'test') return `<section class="page-shell discover-page home-creator-view">${tabs}<div id="home-panel" role="tabpanel" aria-labelledby="home-tab-test">${listingJourney()}</div></section>`;
-  if (window.CW_SERVER && catalogState !== 'ready') return `<section class="page-shell discover-page">${tabs}<div id="home-panel" role="tabpanel" aria-labelledby="home-tab-find">${catalogStatusPanel()}</div></section>`;
+  if (window.CW_SERVER && catalogState !== 'ready') return `<section class="page-shell discover-page">${tabs}<div id="home-panel" tabindex="-1" role="tabpanel" aria-labelledby="home-tab-find">${catalogStatusPanel()}</div></section>`;
   const candidates = projects.filter(product => {
     const categoryMatch = state.category === "All" || product.category === state.category;
     const kind = CWPricing.kind(product.price);
@@ -340,18 +341,19 @@ function discover(communityFocused = false) {
   const searchResults=rankCatalogSearch(candidates,state.query);
   const filtered=searchResults.items;
   return `<section class="page-shell discover-page">
-    ${tabs}<div id="home-panel" role="tabpanel" aria-labelledby="home-tab-find"><h1 class="visually-hidden">Find an app</h1>
+    ${tabs}<div id="home-panel" tabindex="-1" role="tabpanel" aria-labelledby="home-tab-find">
     <div class="catalog-controls">
-      <label class="catalog-search"><span aria-hidden="true">⌕</span><input data-catalog-search value="${esc(state.query)}" aria-label="Search projects by task, need, or tool" placeholder="Search by task, need, or tool" /></label>
-      <details class="catalog-filter-menu" ${state.filterOpen?'open':''}><summary>Filter &amp; sort${state.creatorType !== 'all' || state.verifiedOnly || state.price !== 'all' ? ' · active' : ''}</summary><div class="catalog-filter-options">
+      <label class="catalog-search"><span aria-hidden="true">⌕</span><input data-catalog-search value="${esc(state.query)}" aria-label="Search apps by task, need, or tool" placeholder="Search by task, need, or tool" /></label>
+      <details class="catalog-filter-menu" ${state.filterOpen?'open':''}><summary>Filter &amp; sort${state.category !== 'All' ? ` · ${esc(state.category)}` : ''}${state.creatorType !== 'all' || state.verifiedOnly || state.price !== 'all' ? ' · active' : ''}</summary><div class="catalog-filter-options">
+    <nav class="category-strip" aria-label="Filter apps by category"><div class="category-strip-scroll"><button data-category-filter="All" class="${state.category === "All" ? "is-selected" : ""}"><span>All apps</span><b>${projects.length}</b></button>${publishedCategories().map(category => `<button data-category-filter="${esc(category.name)}" class="${state.category === category.name ? "is-selected" : ""}">${categoryIcon(category.name)}<span>${esc(category.name)}</span><b>${category.count}</b></button>`).join("")}</div></nav>
       <label class="sort-control">Price <select data-price-select><option value="all" ${state.price === 'all' ? 'selected' : ''}>All prices</option><option value="free" ${state.price === 'free' ? 'selected' : ''}>Free</option><option value="freemium" ${state.price === 'freemium' ? 'selected' : ''}>Free + paid options</option><option value="paid" ${state.price === 'paid' ? 'selected' : ''}>Paid</option></select></label>
       <label class="sort-control">Sort by <select data-sort-select><option value="recent" ${state.sort === "recent" ? "selected" : ""}>Most recent</option><option value="reviewed" ${state.sort === "reviewed" ? "selected" : ""}>Most reviewed</option><option value="saved" ${state.sort === "saved" ? "selected" : ""}>Most saved</option></select></label>
       <div class="sort-control creator-filter-row"><label for="creator-filter">Creators</label><select id="creator-filter" data-creator-type-select><option value="all" ${state.creatorType === 'all' ? 'selected' : ''}>All creators</option><option value="independent" ${state.creatorType === 'independent' ? 'selected' : ''}>Independent</option><option value="company" ${state.creatorType === 'company' ? 'selected' : ''}>Companies</option></select></div>
       <div class="verified-builder-option"><label for="verified-builder-filter"><input id="verified-builder-filter" type="checkbox" data-verified-select ${state.verifiedOnly ? 'checked' : ''}> <span>Verified builders only</span></label><button type="button" class="creator-filter-info" data-verification-info aria-label="About builder verification" aria-expanded="false" aria-controls="creator-verification-help">?</button></div>
       <p id="creator-verification-help" class="creator-verification-help" hidden>Verified Builder is earned by independent creators after qualifying contributions and confirmation that they own their published app. It does not rate app quality.</p></div></details>
     </div>
-    <nav class="category-strip" aria-label="Filter projects by category"><div class="category-strip-scroll"><button data-category-filter="All" class="${state.category === "All" ? "is-selected" : ""}"><span>All published tools</span><b>${projects.length}</b></button>${publishedCategories().map(category => `<button data-category-filter="${esc(category.name)}" class="${state.category === category.name ? "is-selected" : ""}">${categoryIcon(category.name)}<span>${esc(category.name)}</span><b>${category.count}</b></button>`).join("")}</div></nav>
-    <div class="catalog-results"><div class="results-heading"><strong>${state.query.trim()?'Closest matches':`${filtered.length} ${filtered.length === 1 ? 'solution' : 'solutions'}`}</strong><span>${state.query.trim()&&!searchResults.suggestions?'Most relevant first.':catalogSortLabel()}</span></div>${state.query.trim()?`<p class="search-guidance">${searchResults.suggestions?'Try describing a specific task. Here are some apps to explore within your filters.':'Explore these apps, or tell creators what you still need.'} <button class="text-button" data-wish-focus>Submit a wish</button></p>`:''}<div class="catalog-list">${filtered.length ? filtered.map(product => catalogRow(product)).join("") : `<div class="empty-state"><h2>${state.query.trim()?'Explore more possibilities':'More apps are on the way'}</h2><p>There are no published apps within these filters yet. Broaden your filters or share what you need.</p><button class="secondary-button" data-clear-search>Browse all apps</button><button class="primary-button" data-wish-focus>Submit a wish</button></div>`}</div></div>
+
+    <div class="catalog-results"><div class="results-heading"><strong>${state.query.trim()?'Closest matches':`${filtered.length} ${filtered.length === 1 ? 'app' : 'apps'}`}</strong><span>${state.query.trim()&&!searchResults.suggestions?'Most relevant first.':catalogSortLabel()}</span></div>${state.query.trim()?`<p class="search-guidance">${searchResults.suggestions?'Try describing a specific task. Here are some apps to explore within your filters.':'Explore these apps, or tell creators what you still need.'} <button class="text-button" data-wish-focus>Submit a wish</button></p>`:''}<div class="catalog-list">${filtered.length ? filtered.map(product => catalogRow(product)).join("") : `<div class="empty-state"><h2>${state.query.trim()?'Explore more possibilities':'More apps are on the way'}</h2><p>There are no published apps within these filters yet. Broaden your filters or share what you need.</p><button class="secondary-button" data-clear-search>Browse all apps</button><button class="primary-button" data-wish-focus>Submit a wish</button></div>`}</div></div>
     ${wishListSection()}
   </div></section>`;
 }
@@ -392,10 +394,11 @@ function homeCommunity() {
   const candidates = [...projects].sort((a,b) => Number(creatorFor(a).type === 'company') - Number(creatorFor(b).type === 'company')).slice(0,2);
   return `<section class="home-community" id="home-community" tabindex="-1" aria-labelledby="home-community-title"><p class="eyebrow">Community</p><div class="home-community-heading"><div><h2 id="home-community-title">Help a creator move forward</h2><p>A few minutes of your time can make the next version better.</p></div><a href="/dashboard/community#credit-rules">How participation works →</a></div><div class="home-community-grid">${candidates.length ? candidates.map(p=>`<article class="home-community-card">${creatorLink(p,true)}<h3>${esc(p.name)}</h3><p class="community-step-label">A first step to try</p><p>${esc(projectFirstStep(p))}</p><button class="text-button" data-product="${esc(p.slug)}">Try &amp; give feedback →</button></article>`).join('') : '<div class="home-community-empty"><h3>Bring the first conversation.</h3><p>Share a project you’re working on and invite people to try it.</p><button class="secondary-button" data-route="share">Share my app</button></div>'}</div><p class="home-community-note">Try a first task, then share what worked, what confused you, or what could improve.</p></section>`;
 }
+const openedCatalogApps = new Set();
 function catalogRow(product) {
   const saved = state.saved.has(product.slug);
   const count = experienceCount(product);
-return `<article class="catalog-row"><div class="row-media"><button class="row-preview" data-product="${esc(product.slug)}" aria-label="View ${esc(product.name)} details"><img src="${esc(product.preview)}" alt="Preview of the ${esc(product.name)} website" loading="lazy" /></button><button class="save-button-row ${saved ? "is-saved" : ""}" data-save="${esc(product.slug)}" aria-label="${saved ? "Remove" : "Save"} ${esc(product.name)}">${saved ? "♥ Saved" : "♡ Save"}</button></div><div class="row-copy"><div class="product-meta"><span class="price-badge">${esc(product.price)}</span><span>${esc(product.category)}</span><span class="${product.stage === 'New' ? 'new-badge' : ''}">${product.stage === 'New' ? 'NEW' : esc(product.stage)}</span>${Number(product.recentCommentCount)>=3?`<span class="activity-badge" title="Published comments and public reviews in the past 30 days">💬 Active discussion · ${Number(product.recentCommentCount)}</span>`:''}</div><button class="row-title" data-product="${esc(product.slug)}">${esc(product.name)}</button><p>${esc(product.summary)}</p>${creatorLink(product, true)}<section class="card-comments" aria-label="Comments on ${esc(product.name)}">${state.communityPosts.filter(post=>post.projectSlug===product.slug).slice(0,2).map(post=>experienceCard(post)).join('')}${projectCommentComposer(product, true)}</section></div></article>`;
+return `<article class="catalog-row"><div class="row-media"><button class="row-preview" data-product="${esc(product.slug)}" aria-label="View ${esc(product.name)} details"><img src="${esc(product.preview)}" alt="Preview of the ${esc(product.name)} website" loading="lazy" /></button><div class="card-secondary-actions"><button class="save-button-row ${saved ? "is-saved" : ""}" data-save="${esc(product.slug)}" aria-label="${saved ? "Remove" : "Save"} ${esc(product.name)}">${saved ? "♥ Saved" : "♡ Save"}</button><button type="button" class="save-button-row" data-share-product="${esc(product.slug)}" aria-label="Share ${esc(product.name)}">Share</button></div></div><div class="row-copy"><div class="product-meta"><span class="price-badge">${esc(product.price)}</span><span>${esc(product.category)}</span>${product.stage && product.stage !== 'New' ? `<span>${esc(product.stage)}</span>` : ''}${Number(product.recentCommentCount)>=3?`<span class="activity-badge" title="Published comments and public reviews in the past 30 days">💬 Active discussion · ${Number(product.recentCommentCount)}</span>`:''}</div><button class="row-title" data-product="${esc(product.slug)}">${esc(product.name)}</button><p>${esc(product.summary)}</p>${creatorLink(product, true, false)}<div class="card-try-actions"><a class="primary-button" href="${esc(safeProjectUrl(product.url))}" target="_blank" rel="noopener noreferrer" data-try-app="${esc(product.slug)}" aria-label="Try ${esc(product.name)} (opens in a new tab)">Try this app ↗</a>${product.accessNote ? `<small>${esc(product.accessNote)}</small>` : ''}</div><section class="card-comments" aria-label="Comments on ${esc(product.name)}">${state.communityPosts.filter(post=>post.projectSlug===product.slug).slice(0,2).map(post=>experienceCard(post)).join('')}<p class="card-return-prompt" data-return-prompt="${esc(product.slug)}" ${openedCatalogApps.has(product.slug)?'':'hidden'}>Had a chance to try it? Tell the maker what you think.</p><details class="card-feedback" ${projectCommentDraft(product.slug).trim()?'open':''}><summary>Give feedback</summary>${projectCommentComposer(product, true)}</details></section></div></article>`;
 }
 
 const projectPresentation = {
@@ -486,25 +489,102 @@ function projectCommentDraft(slug) {
 function saveProjectCommentDraft(slug, value) {
   try { localStorage.setItem(projectCommentDraftKey(slug), value); return true; } catch { return false; }
 }
-function projectCommentComposer(product, compact = false) {
+function projectCommentComposer(product, compact = false, context = '') {
   const draft = projectCommentDraft(product.slug);
   const count = commentWordCount(draft);
-  const id = (compact ? 'card-' : 'detail-') + product.slug;
+  const id = (context || (compact ? 'card-' : 'detail-')) + product.slug;
   const empty = !state.communityPosts.some(post=>post.projectSlug===product.slug);
-  const placeholder = compact && empty ? 'Be the first one to review this project' : 'What is the first thing you liked? Was the price right? What was confusing? Mention one or two improvements.';
-  return `<form class="detail-comment-form compact-comment" data-project-comment="${esc(product.slug)}"><div class="comment-input-wrap"><label class="visually-hidden" for="comment-${esc(id)}">Add your comment</label><textarea id="comment-${esc(id)}" name="comment" maxlength="800" rows="2" required aria-describedby="comment-count-${esc(id)}" data-project-comment-field placeholder="${placeholder}">${esc(draft)}</textarea><button class="comment-send" type="submit" aria-label="Send comment" ${draft.trim()?'':'hidden'}>➤</button></div><details class="inline-help"><summary aria-label="Comment guidelines">?</summary><p><strong>Be thoughtful. Be respectful.</strong> Discuss the project, not the person. Use clear, considerate language. <a href="/community-guidelines">Guidelines</a>. Write 7–150 words.</p></details><small id="comment-count-${esc(id)}" data-project-comment-count class="${draft.trim()?'word-counter':'visually-hidden'}">${count} / 7–150 words</small><small class="comment-public-note">Public after review. Guests appear as “Guest.” <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a></small><p data-comment-status role="status" aria-live="polite"></p></form>`;
+  const placeholder = compact && empty ? 'Be the first one to review this app' : 'What is the first thing you liked? Was the price right? What was confusing? Mention one or two improvements.';
+  return `<form class="detail-comment-form compact-comment" data-project-comment="${esc(product.slug)}"><div class="comment-input-wrap"><label class="visually-hidden" for="comment-${esc(id)}">Add your comment</label><textarea id="comment-${esc(id)}" name="comment" maxlength="800" rows="2" required aria-describedby="comment-count-${esc(id)}" data-project-comment-field placeholder="${placeholder}">${esc(draft)}</textarea><button class="comment-send" type="submit" aria-label="Send comment" ${draft.trim()?'':'hidden'}>➤</button></div><details class="inline-help"><summary aria-label="Comment guidelines">?</summary><p><strong>Be thoughtful. Be respectful.</strong> Discuss the app, not the person. Use clear, considerate language. <a href="/community-guidelines">Guidelines</a>. Write 7–150 words. Guests appear as “Guest.”</p></details><small id="comment-count-${esc(id)}" data-project-comment-count class="${draft.trim()?'word-counter':'visually-hidden'}">${count} / 7–150 words</small><small class="comment-public-note">Public after review.</small><p data-comment-status role="status" aria-live="polite"></p></form>`;
 }
+
+// A return is an invitation to comment, never proof that an app was used.
+const promptedReturnApps = new Set();
+let pendingReturnFeedback = null;
+function armReturnFeedback(slug) {
+  pendingReturnFeedback = {slug, awayAt: null};
+}
+function markFeedbackDeparture() {
+  if (pendingReturnFeedback && pendingReturnFeedback.awayAt === null) pendingReturnFeedback.awayAt = Date.now();
+}
+function maybeShowReturnFeedback() {
+  if (document.visibilityState !== 'visible' || !document.hasFocus()) return;
+  const pending = pendingReturnFeedback;
+  if (!pending || pending.awayAt === null) return;
+  pendingReturnFeedback = null;
+  const awayMs = Date.now() - pending.awayAt;
+  if (awayMs < 7000) return;
+  const quick = awayMs < 15000;
+  const promptKey = `${pending.slug}:${quick ? 'quick' : 'review'}`;
+  if (promptedReturnApps.has(promptKey)) return;
+  if (document.querySelector('dialog[open]') || document.activeElement?.matches('textarea, input, [contenteditable="true"]')) return;
+  const product = projects.find(item => item.slug === pending.slug);
+  if (!product) return;
+  promptedReturnApps.add(promptKey);
+  const previousFocus = document.activeElement;
+  const dialog = document.createElement('dialog');
+  dialog.className = 'return-feedback-dialog';
+  dialog.setAttribute('aria-labelledby', 'return-feedback-title');
+  const quickOptions = ['Too much to read', 'Hard to understand', 'Not what I expected', 'Just curious'];
+  dialog.innerHTML = `<button type="button" class="return-feedback-close" aria-label="Close feedback prompt">×</button>${quick ? `<h2 id="return-feedback-title">A quick thought on ${esc(product.name)}?</h2><p>Was there anything that made you stop exploring?</p><form data-quick-return-feedback><fieldset><legend>Select any that fit</legend>${quickOptions.map((label,index)=>`<label><input type="checkbox" name="reason" value="${index}"><span>${label}</span></label>`).join('')}</fieldset><button class="primary-button return-feedback-send" type="submit">Send response</button><p class="quick-preview-note">Shared privately with the creator.</p><p data-quick-status role="status"></p></form>` : `<h2 id="return-feedback-title">How was ${esc(product.name)}?</h2><p>Your feedback can make the next version better. What worked, or what could be better?</p>${projectCommentComposer(product, false, 'return-')}`}<button type="button" class="text-button" data-return-dismiss>Not now</button>`;
+  if (!quick) {
+    const submit = dialog.querySelector('[type="submit"]');
+    submit.textContent = 'Send feedback';
+    submit.setAttribute('aria-label', 'Send feedback');
+    submit.className = 'primary-button return-feedback-send';
+    dialog.querySelector('textarea').placeholder = 'For example: “I liked how easy it was to get started. I’d love a way to…”';
+  } else {
+    dialog.querySelector('form').addEventListener('submit', async event => {
+      event.preventDefault();
+      const answers = [...dialog.querySelectorAll('input:checked')].map(input=>quickOptions[Number(input.value)]);
+      const status = dialog.querySelector('[data-quick-status]');
+      if (!answers.length) {status.textContent='Choose an option, or select Not now.';return;}
+      const form = event.currentTarget;
+      const button = form.querySelector('[type="submit"]');
+      const reasonKeys = ['too_much_to_read','hard_to_understand','unexpected','curious'];
+      const reasons = [...dialog.querySelectorAll('input:checked')].map(input=>reasonKeys[Number(input.value)]);
+      form.dataset.requestId ||= crypto.randomUUID();
+      button.disabled = true;
+      status.textContent = 'Sending…';
+      try {
+        const response = await fetch('/api/quick-feedback', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({slug:product.slug,reasons,requestId:form.dataset.requestId})});
+        const data = await response.json();
+        if (!response.ok || !data.ok) throw Error(data.error || 'Your response could not be sent.');
+        status.textContent = data.message;
+        dialog.querySelector('fieldset').disabled = true;
+        dialog.querySelector('[data-return-dismiss]').textContent = 'Done';
+      } catch(error) {status.textContent=error.message || 'Your response could not be sent. Please try again.';button.disabled=false;}
+
+    });
+  }
+  const dismiss = () => {
+    dialog.close(); dialog.remove();
+    if (previousFocus?.isConnected) previousFocus.focus({preventScroll:true});
+  };
+  dialog.querySelector('.return-feedback-close').onclick = dismiss;
+  dialog.querySelector('[data-return-dismiss]').onclick = dismiss;
+  dialog.addEventListener('cancel', event => {event.preventDefault(); dismiss();});
+  dialog.addEventListener('click', event => {if (event.target === dialog) {const r=dialog.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)dismiss();}});
+  document.body.append(dialog);
+  dialog.showModal();
+  dialog.querySelector(quick ? 'input' : 'textarea').focus();
+}
+window.addEventListener('blur', markFeedbackDeparture);
+window.addEventListener('focus', maybeShowReturnFeedback);
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') markFeedbackDeparture();
+  else maybeShowReturnFeedback();
+});
 
 function detailDrawer(product) {
   const copy = projectPresentation[product.slug] || ['', '',product.summary,'',''];
   const saved = state.saved.has(product.slug);
   return `<div class="detail-overlay" data-detail-overlay>
-    <button class="detail-backdrop" data-detail-close aria-label="Close product details"></button>
-    <section class="detail-dialog mealmap-detail invitation-detail" role="dialog" aria-modal="true" aria-labelledby="detail-title-${esc(product.slug)}" tabindex="-1">
+    <button class="detail-backdrop" data-detail-close aria-label="Close app details"></button>
+    <section class="detail-dialog mealmap-detail invitation-detail" data-showcase-theme="${product.slug === 'stackscout' ? 'stackscout' : ['coral','teal','blue','gold','green','violet'].includes(product.color) ? product.color : 'teal'}" role="dialog" aria-modal="true" aria-labelledby="detail-title-${esc(product.slug)}" tabindex="-1">
       <div class="detail-scroll">
-        <header class="mealmap-top"><div class="mealmap-wordmark">${esc(product.name)} <span class="project-byline">by <button class="text-button" data-profile="${esc(creatorFor(product).slug)}">${esc(creatorFor(product).name)}</button></span></div><div class="detail-header-controls"><button class="detail-save ${saved ? "is-saved" : ""}" data-save="${esc(product.slug)}">${saved ? "♥ Saved" : "♡ Save"}</button><button type="button" class="detail-share" data-share-product="${esc(product.slug)}" aria-label="Share ${esc(product.name)}">Share</button><span class="detail-share-status" data-share-status role="status"></span><button class="detail-close" data-detail-close aria-label="Close ${esc(product.name)} details">×</button></div></header>
-        <section class="recipient-hero"><div class="recipient-copy"><p class="eyebrow">You're invited to try something new</p><span class="recipient-category">${esc(product.price)} · ${esc(product.category)} · ${esc(product.stage)}</span><h2 id="detail-title-${esc(product.slug)}">${esc(copy[2])}</h2><p class="recipient-project-name">${esc(product.name)}</p>${creatorLink(product,true)}</div><div class="recipient-preview-column"><div class="recipient-art"><img src="${esc(product.preview)}" alt="Preview of ${esc(product.name)}"><span>Made by a person. Ready for your perspective.</span></div><a class="primary-button" href="${esc(safeProjectUrl(product.url))}" target="_blank" rel="noopener noreferrer">Try this project ↗</a></div></section>
-        <section class="recipient-answers"><article><p class="eyebrow">Why try it?</p><h3>How it helps</h3><p>${esc(copy[3])}</p></article><article><p class="eyebrow">Start here</p><h3>One thing to try first</h3><p>${esc(copy[4])}</p></article></section>
+        <header class="mealmap-top">${detailProjectHistory.length ? `<button type="button" class="detail-back" data-detail-back aria-label="Back to ${esc(detailProjectHistory.at(-1).product.name)}" title="Previous project">←</button>` : ''}<div class="mealmap-wordmark">${esc(product.name)}<span class="detail-app-meta">${esc(product.price)} · ${esc(product.category)} · ${esc(product.stage)}</span><div class="detail-creator">${creatorLink(product,true)}</div></div><div class="detail-header-controls"><button class="detail-save ${saved ? "is-saved" : ""}" data-save="${esc(product.slug)}">${saved ? "♥ Saved" : "♡ Save"}</button><button type="button" class="detail-share" data-share-product="${esc(product.slug)}" aria-label="Share ${esc(product.name)}">Share</button><span class="detail-share-status" data-share-status role="status"></span><button class="detail-close" data-detail-close aria-label="Close ${esc(product.name)} details">×</button></div></header>
+        <section class="recipient-hero"><div class="recipient-copy"><h2 id="detail-title-${esc(product.slug)}">${esc(copy[2])}</h2><div class="detail-description-notes"><div><h3>How it helps</h3><p>${esc(copy[3])}</p></div><div><h3>One thing to try first</h3><p>${esc(copy[4])}</p></div></div></div><div class="recipient-preview-column"><div class="recipient-art"><img src="${esc(product.preview)}" alt="Preview of ${esc(product.name)}"><span>Made by a person. Ready for your perspective.</span></div><a class="primary-button" href="${esc(safeProjectUrl(product.url))}" target="_blank" rel="noopener noreferrer" data-try-app="${esc(product.slug)}">Try this app ↗</a>${product.accessNote ? `<small class="app-access-note">${esc(product.accessNote)}</small>` : ''}</div></section>
         ${videoPlayer(product.video)}<div class="mealmap-after"><section class="mealmap-feedback">${projectCommentComposer(product)}<div class="mealmap-comments">${state.communityPosts.filter(post => post.projectSlug === product.slug).length ? state.communityPosts.filter(post => post.projectSlug === product.slug).map(post => experienceCard(post)).join('') : '<p>No reviews yet. Start the conversation.</p>'}</div></section></div>${similarSection(product)}
       </div>
     </section>
@@ -564,6 +644,17 @@ document.addEventListener('submit', async event => {
 });
 
 function openProductDetail(product, trigger) {
+  if (!product) return;
+  const current = document.querySelector('.detail-overlay');
+  if (current) {
+    if (state.selected?.slug === product.slug) return;
+    detailProjectHistory.push({product: state.selected, scrollTop: current.querySelector('.detail-scroll')?.scrollTop || 0});
+    state.selected = product;
+    current.outerHTML = detailDrawer(product);
+    document.querySelector('.detail-back')?.focus({preventScroll:true});
+    return;
+  }
+  detailProjectHistory = [];
   closeProductDetail(false);
   state.selected = product;
   detailReturnFocus = trigger || document.activeElement;
@@ -574,6 +665,16 @@ function openProductDetail(product, trigger) {
   document.body.style.top = `-${detailScrollY}px`;
   document.body.style.width = "100%";
   document.querySelector(".detail-close")?.focus();
+}
+
+function backProductDetail() {
+  const previous = detailProjectHistory.pop();
+  const current = document.querySelector('.detail-overlay');
+  if (!previous || !current) return;
+  state.selected = previous.product;
+  current.outerHTML = detailDrawer(previous.product);
+  document.querySelector('.detail-scroll').scrollTop = previous.scrollTop;
+  (document.querySelector('.detail-back') || document.querySelector('.detail-close'))?.focus({preventScroll:true});
 }
 
 function closeProductDetail(restoreFocus = true) {
@@ -593,6 +694,7 @@ function closeProductDetail(restoreFocus = true) {
   if (restoreFocus && detailReturnFocus?.isConnected) detailReturnFocus.focus({ preventScroll: true });
   if (wasOpen) window.scrollTo({ top: detailScrollY, behavior: "auto" });
   detailReturnFocus = null;
+  detailProjectHistory = [];
 }
 
 function experienceCard(post, showProject = false) {
@@ -616,8 +718,8 @@ function profilePage() {
 function feedbackPage() {
   const product = state.selected || projects[0];
   const creator = creatorFor(product);
-  if (window.CW_SERVER) return `<section class="page-shell feedback-page"><div class="feedback-card">${creatorLink(product, true)}<p class="eyebrow">Your experience with ${esc(product.name)}</p><h1>What happened when you tried it?</h1><p>Anyone who tries a project can respond. No invitation needed.</p>${state.session?.authenticated ? `<p>Sharing as ${esc(state.session.user.displayName)}.</p><div class="feedback-choices"><button data-feedback-choice>It helped me finish the task</button><button data-feedback-choice>I understood how it worked</button><button data-feedback-choice>I got stuck somewhere</button><button data-feedback-choice>I would use it again</button></div><label>Your observation<textarea data-feedback-response maxlength="800" placeholder="What worked? What could be better?"></textarea></label><p class="comment-conduct"><strong>Be thoughtful. Be respectful.</strong> Discuss the project, not the person. Insults, harassment, and abusive wording aren’t welcome. <a href="/community-guidelines">Guidelines</a></p><small data-feedback-word-count class="word-counter">0 / 7–150 words</small><p class="feedback-error" data-feedback-error aria-live="polite"></p><button class="primary-button" data-feedback-submit>Share my experience</button><p class="prototype-disclosure">Your name and observation will be public once reviewed. This feedback goes to TryMyBuild Studio.</p>` : '<p>Sign in so your observation has a person behind it.</p><a class="primary-button" href="/auth/sign-in">Sign in to respond</a>'}</div></section>`;
-  return `<section class="page-shell feedback-page"><div class="feedback-card">${creatorLink(product, true)}<p class="eyebrow">Your experience with ${esc(product.name)}</p><h1>What happened when you tried it?</h1><p>You do not need an invitation. Share something useful with ${esc(creator.name.split(" ")[0])} and with people considering this project.</p><div class="feedback-identity"><label>Name to show<input data-feedback-name maxlength="60" placeholder="Your name or public nickname" /></label><label>How you describe yourself<input data-feedback-label maxlength="60" placeholder="For example: Musician or Parent" /></label></div><div class="feedback-choices"><button data-feedback-choice>It helped me finish the task</button><button data-feedback-choice>I understood how it worked</button><button data-feedback-choice>I got stuck somewhere</button><button data-feedback-choice>I would use it again</button></div><label>What should the creator understand?<textarea data-feedback-response maxlength="800" placeholder="Tell them what worked, what surprised you, or what got in your way."></textarea></label><p class="comment-conduct"><strong>Be thoughtful. Be respectful.</strong> Discuss the project, not the person. Insults, harassment, and abusive wording aren’t welcome. <a href="/community-guidelines">Guidelines</a></p><small data-feedback-word-count class="word-counter">0 / 7–150 words</small><p class="feedback-error" data-feedback-error aria-live="polite"></p><div class="form-actions"><button class="secondary-button" data-product="${esc(product.slug)}">Not now</button><button class="primary-button" data-feedback-submit>Share my experience</button></div><p class="prototype-disclosure">Prototype note: this is not a verified account yet. Your response is saved only in this browser and can be cleared with browser data.</p></div></section>`;
+  if (window.CW_SERVER) return `<section class="page-shell feedback-page"><div class="feedback-card">${creatorLink(product, true)}<p class="eyebrow">Your experience with ${esc(product.name)}</p><h1>What happened when you tried it?</h1><p>Anyone who tries a project can respond. No invitation needed.</p>${state.session?.authenticated ? `<p>Sharing as ${esc(state.session.user.displayName)}.</p><div class="feedback-choices"><button data-feedback-choice>It helped me finish the task</button><button data-feedback-choice>I understood how it worked</button><button data-feedback-choice>I got stuck somewhere</button><button data-feedback-choice>I would use it again</button></div><label>Your observation<textarea data-feedback-response maxlength="800" placeholder="What worked? What could be better?"></textarea></label><p class="comment-conduct"><strong>Be thoughtful. Be respectful.</strong> Discuss the app, not the person. Insults, harassment, and abusive wording aren’t welcome. <a href="/community-guidelines">Guidelines</a></p><small data-feedback-word-count class="word-counter">0 / 7–150 words</small><p class="feedback-error" data-feedback-error aria-live="polite"></p><button class="primary-button" data-feedback-submit>Share my experience</button><p class="prototype-disclosure">Your name and observation will be public once reviewed. This feedback goes to TryMyBuild Studio.</p>` : '<p>Sign in so your observation has a person behind it.</p><a class="primary-button" href="/auth/sign-in">Sign in to respond</a>'}</div></section>`;
+  return `<section class="page-shell feedback-page"><div class="feedback-card">${creatorLink(product, true)}<p class="eyebrow">Your experience with ${esc(product.name)}</p><h1>What happened when you tried it?</h1><p>You do not need an invitation. Share something useful with ${esc(creator.name.split(" ")[0])} and with people considering this project.</p><div class="feedback-identity"><label>Name to show<input data-feedback-name maxlength="60" placeholder="Your name or public nickname" /></label><label>How you describe yourself<input data-feedback-label maxlength="60" placeholder="For example: Musician or Parent" /></label></div><div class="feedback-choices"><button data-feedback-choice>It helped me finish the task</button><button data-feedback-choice>I understood how it worked</button><button data-feedback-choice>I got stuck somewhere</button><button data-feedback-choice>I would use it again</button></div><label>What should the creator understand?<textarea data-feedback-response maxlength="800" placeholder="Tell them what worked, what surprised you, or what got in your way."></textarea></label><p class="comment-conduct"><strong>Be thoughtful. Be respectful.</strong> Discuss the app, not the person. Insults, harassment, and abusive wording aren’t welcome. <a href="/community-guidelines">Guidelines</a></p><small data-feedback-word-count class="word-counter">0 / 7–150 words</small><p class="feedback-error" data-feedback-error aria-live="polite"></p><div class="form-actions"><button class="secondary-button" data-product="${esc(product.slug)}">Not now</button><button class="primary-button" data-feedback-submit>Share my experience</button></div><p class="prototype-disclosure">Prototype note: this is not a verified account yet. Your response is saved only in this browser and can be cleared with browser data.</p></div></section>`;
 }
 
 function readListingDraft() {
@@ -792,7 +894,7 @@ function listingAccountPage() {
   return `<section class="page-shell listing-review"><p class="eyebrow">Keep your project yours</p><h1>Create your creator account.</h1><p>Your draft is ready. Sign up or sign in to continue to project settings.</p><form method="get" action="/auth/sign-in" class="legal-signup"><input type="hidden" name="signup" value="1"><input type="hidden" name="next" value="listing"><label class="legal-agreement"><input type="checkbox" required> <span>I agree to the <a href="/terms" target="_blank" rel="noopener">Terms of Service</a> and <a href="/privacy" target="_blank" rel="noopener">Privacy Policy</a>.</span></label><button class="primary-button" type="submit">Create my account</button></form><div class="form-actions share-start-actions"><a class="share-browse-link" href="/auth/sign-in?next=listing">Already have an account? Sign in</a><button class="share-browse-link" data-listing-review>Back</button></div><p class="privacy-note">Your draft stays on this device through sign-in. Nothing is public yet.</p></section>`;
 }
 function sharePage() {
-  return `<section class="page-shell">${homeViewTabs('test')}${listingJourney()}</section>`;
+  return discover(true);
 }
 function listingJourney() {
   if (listingSettings) return listingSettingsPage();
@@ -1051,6 +1153,18 @@ document.addEventListener('keydown', event => {
   selectHomeView(event.key === 'Home' ? 'find' : event.key === 'End' ? 'test' : event.target.dataset.homeView === 'find' ? 'test' : 'find');
 });
 document.addEventListener("click", async event => {
+  const tryApp = event.target.closest('[data-try-app]');
+  if (tryApp) {
+    armReturnFeedback(tryApp.dataset.tryApp);
+    openedCatalogApps.add(tryApp.dataset.tryApp);
+    document.querySelectorAll('[data-return-prompt]').forEach(prompt => {
+      if (prompt.dataset.returnPrompt === tryApp.dataset.tryApp) {
+        prompt.hidden = false;
+        prompt.closest('.card-comments')?.classList.add('awaiting-feedback');
+      }
+    });
+  }
+
   const viewButton = event.target.closest('[data-home-view]');
   if (viewButton) { selectHomeView(viewButton.dataset.homeView); return; }
   const homeSection = event.target.closest('[data-home-section]');
@@ -1064,6 +1178,7 @@ document.addEventListener("click", async event => {
     document.getElementById(verificationInfo.getAttribute('aria-controls')).hidden = !expanded;
     return;
   }
+  if (event.target.closest("[data-detail-back]")) { backProductDetail(); return; }
   if (event.target.closest("[data-detail-close]")) { closeProductDetail(); return; }
   const profile = event.target.closest("[data-profile]");
   if (profile) { state.profileSlug = profile.dataset.profile; if(window.CW_SERVER && !state.profileSlug.startsWith("creator-"))window.CWPanels.open("/people/"+encodeURIComponent(state.profileSlug),"profile"); else window.CWPanels.show(profilePage(),"profile"); return; }
@@ -1156,7 +1271,7 @@ document.addEventListener("click", async event => {
 });
 
 document.addEventListener("keydown", event => {
-  if (event.defaultPrevented || document.querySelector('.cw-overlay[open], .invitation-dialog[open]')) return;
+  if (event.defaultPrevented || document.querySelector('.cw-overlay[open], .invitation-dialog[open], .return-feedback-dialog[open]')) return;
   const dialog = document.querySelector(".detail-dialog");
   if (!dialog) return;
   if (event.key === "Escape") { event.preventDefault(); closeProductDetail(); return; }
@@ -1345,7 +1460,7 @@ function videoPlayer(value) {
 }
 function similarSection(product) {
   const suggestions = CWMedia.similarProjects(product, projects, state.saved, state.interests);
-  return `<section class="similar-projects"><h3>Explore similar projects</h3>${suggestions.length ? `<div class="similar-grid">${suggestions.map(p => `<button type="button" class="similar-card" data-similar-project="${esc(p.slug)}"><img src="${esc(p.preview)}" alt="" loading="lazy"><strong>${esc(p.name)}</strong><span>${esc(p.category)}</span></button>`).join('')}</div>` : '<p>More related projects are on the way.</p>'}</section>`;
+  return `<section class="similar-projects"><h3>Explore similar apps</h3>${suggestions.length ? `<div class="similar-grid">${suggestions.map(p => `<button type="button" class="similar-card" data-similar-project="${esc(p.slug)}"><img src="${esc(p.preview)}" alt="" loading="lazy"><strong>${esc(p.name)}</strong><span>${esc(p.category)}</span></button>`).join('')}</div>` : '<p>More related apps are on the way.</p>'}</section>`;
 }
 document.addEventListener('click', event => {
   const similar = event.target.closest('[data-similar-project]');

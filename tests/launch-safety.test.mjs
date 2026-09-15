@@ -18,7 +18,7 @@ function fn(name) {
 function renderers() {
  const product={slug:'sample',name:'Sample',category:'Technology',stage:'Ready',color:'green',preview:'/preview.png',url:'https://example.com',summary:'Useful app',outcome:'Helps people',price:'Free'};
  const creator={slug:'maker',name:'Maker',label:'Builder',initials:'M',color:'green'};
- const context=vm.createContext({URL,location:{origin:'https://trymybuild.com'},window:{CW_SERVER:true},projects:[product],state:{selected:product,saved:new Set(),communityPosts:[],session:null},creatorFor:()=>creator,creatorVerificationBadge:()=>'',categoryIcon:()=>'',experienceCount:()=>0,projectCommentComposer:()=>''});
+ const context=vm.createContext({URL,location:{origin:'https://trymybuild.com'},window:{CW_SERVER:true},openedCatalogApps:new Set(),projectCommentDraft:()=>'',projects:[product],state:{selected:product,saved:new Set(),communityPosts:[],session:null},creatorFor:()=>creator,creatorVerificationBadge:()=>'',categoryIcon:()=>'',experienceCount:()=>0,projectCommentComposer:()=>''});
  vm.runInContext(source.split('\n').find(line=>line.startsWith('const esc =')),context);
  for(const name of ['safeProjectUrl','avatar','creatorLink','productCard','catalogRow','experienceCard','feedbackPage'])vm.runInContext(fn(name),context);
  return {context,product,creator};

@@ -20,9 +20,9 @@ test('wish categories include the complete existing category menu',()=>{
 });
 test('compact comments have unique labels, contextual placeholders and hidden empty send arrow',()=>{
  const ctx=vm.createContext({projectCommentDraft:()=>'',commentWordCount:()=>0,state:{communityPosts:[]},esc:String});
- vm.runInContext(app.slice(app.indexOf('function projectCommentComposer('),app.indexOf('function detailDrawer(')),ctx);
+ vm.runInContext(app.slice(app.indexOf('function projectCommentComposer('),app.indexOf('// A return is an invitation')),ctx);
  const p={slug:'example'};
- assert.match(ctx.projectCommentComposer(p,true),/Be the first one to review this project/);
+ assert.match(ctx.projectCommentComposer(p,true),/Be the first one to review this app/);
  assert.match(ctx.projectCommentComposer(p,true),/id="comment-card-example"/);
  assert.match(ctx.projectCommentComposer(p),/id="comment-detail-example"/);
  assert.match(ctx.projectCommentComposer(p),/Mention one or two improvements/);
@@ -54,7 +54,7 @@ test('listing journey asks for one decision at a time and keeps tab navigation',
  ctx.listingStep=6;html=ctx.inlineListingForm();assert.match(html,/Who should see it\?/);assert.match(html,/Invite only/);assert.match(html,/Public/);assert.match(html,/Decide later/);assert.doesNotMatch(html,/Not sure yet/);
  assert.match(html,/data-inline-listing/);assert.match(html,/button type="submit" class="primary-button" disabled/);
  assert.match(entry,/data-listing-stage[^\n]+requestCreatorQuote\(2\)/);
- assert.match(app,/homeViewTabs\('test'\).*listingJourney\(\)/);
+ assert.match(app,/const tabs = homeViewTabs\(activeView\);[\s\S]*listingJourney\(\)/);
  assert.doesNotMatch(app,/Meet the creator|<h3>Tell the creator<\/h3>/);
 });
 test('signup and wish return paths remain same-origin and strictly allowlisted',()=>{

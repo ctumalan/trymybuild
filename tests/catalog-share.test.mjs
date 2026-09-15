@@ -3,15 +3,16 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 const source=readFileSync(new URL('../app.js',import.meta.url),'utf8');
-test('compact account cards offer Share while catalog cards open a detail view',()=>{
- const ctx=vm.createContext({state:{saved:new Set(),communityPosts:[]},projectCommentComposer:()=>'<form></form>',experienceCount:()=>0,creatorLink:()=>'',categoryIcon:()=>'',esc:String,projectFirstStep:()=> 'Try a feature.'});
+test('account and catalog cards offer Share while preserving detail and save actions',()=>{
+ const ctx=vm.createContext({state:{saved:new Set(),communityPosts:[]},openedCatalogApps:new Set(),safeProjectUrl:String,projectCommentDraft:()=>'',projectCommentComposer:()=>'<form></form>',experienceCount:()=>0,creatorLink:()=>'',categoryIcon:()=>'',esc:String,projectFirstStep:()=> 'Try a feature.'});
  vm.runInContext(source.slice(source.indexOf('function productCard('),source.indexOf('function discover('))+source.slice(source.indexOf('function catalogRow('),source.indexOf('const projectPresentation =')),ctx);
  const products=vm.runInNewContext(source.match(/^const projects = (\[[\s\S]*?\n\]);/)[1]);
  for(const p of products){
   const compact=ctx.productCard(p,true),catalog=ctx.catalogRow(p);
   assert.ok(compact.includes(`data-share-product="${p.slug}"`));
   assert.ok(compact.includes(`aria-label="Share ${p.name}"`));
-  assert.doesNotMatch(catalog,/data-share-product/);
+  assert.ok(catalog.includes(`data-share-product="${p.slug}"`));
+  assert.ok(catalog.includes(`data-try-app="${p.slug}"`));
   assert.ok(catalog.includes(`data-product="${p.slug}"`));
   assert.ok(catalog.includes(`data-save="${p.slug}"`));
  }

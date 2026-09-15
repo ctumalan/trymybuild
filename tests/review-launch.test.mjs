@@ -74,9 +74,9 @@ test('creator filters compose without treating companies as verified builders',(
  assert.equal(context.match({type:'company',verified:true},'all',true),false);
  assert.equal(context.match({type:'independent',verified:true},'company',false),false);
 });
-test('discovery keeps categories above a responsive compact project grid',()=>{
+test('discovery keeps categories inside filters above a responsive compact app grid',()=>{
  const app=read('app.js'),css=read('launch-refinements.css');
- assert.match(app,/<nav class="category-strip" aria-label="Filter projects by category">/);
+ assert.match(app,/<nav class="category-strip" aria-label="Filter apps by category">/);
  assert.match(app,/class="category-strip-scroll"/);
  assert.doesNotMatch(app,/<aside class="filter-panel">/);
  assert.match(app,/<div class="catalog-controls">[\s\S]*<nav class="category-strip"[\s\S]*<div class="catalog-results">/);

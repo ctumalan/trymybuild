@@ -7,7 +7,7 @@ test('All eleven projects use the approved presentation with their own action ta
   const source = readFileSync(new URL('../app.js', import.meta.url), 'utf8');
   const firstListener = Math.min(...["document.addEventListener('input'", "document.addEventListener('submit'"].map(marker=>source.indexOf(marker)).filter(index=>index>0));
   const functions = source.slice(source.indexOf('const projectPresentation ='), firstListener);
-  const context = vm.createContext({ videoPlayer: () => '', similarSection: () => '', projectDestination: url => /^https?:\/\//i.test(url) ? 'Opens external website' : 'Opens here on TryMyBuild', state: { saved: new Set(), communityPosts: [], session: null }, esc: value => String(value ?? ''), avatar: () => '<span class="person-avatar"></span>', creatorLink: () => 'TryMyBuild Studio', creatorFor: () => ({ slug: 'creatorworks-studio', name: 'TryMyBuild Studio' }) });
+  const context = vm.createContext({ window:{addEventListener(){}},document:{addEventListener(){}},detailProjectHistory:[],videoPlayer: () => '', similarSection: () => '', projectDestination: url => /^https?:\/\//i.test(url) ? 'Opens external website' : 'Opens here on TryMyBuild', state: { saved: new Set(), communityPosts: [], session: null }, esc: value => String(value ?? ''), avatar: () => '<span class="person-avatar"></span>', creatorLink: () => 'TryMyBuild Studio', creatorFor: () => ({ slug: 'creatorworks-studio', name: 'TryMyBuild Studio' }) });
   context.URL=URL;
   context.location={origin:'https://trymybuild.com'};
   vm.runInContext(source.slice(source.indexOf('function safeProjectUrl'),source.indexOf('function ',source.indexOf('function safeProjectUrl')+9)),context);
@@ -34,7 +34,7 @@ test('All eleven projects use the approved presentation with their own action ta
     assert.ok(html.includes(`data-save="${slug}"`));
     assert.ok(html.includes(`assets/previews/${slug}.png`));
     assert.ok(html.includes(`https://example.com/${slug}`));
-    assert.ok(html.indexOf('recipient-art') < html.indexOf('Try this project ↗'));
-    assert.ok(html.indexOf('Try this project ↗') < html.indexOf('recipient-answers'));
+    assert.ok(html.indexOf('recipient-art') < html.indexOf('Try this app ↗'));
+    assert.ok(html.indexOf('detail-description-notes') < html.indexOf('recipient-art'));
   }
 });

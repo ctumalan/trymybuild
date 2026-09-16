@@ -3,7 +3,7 @@ document.addEventListener('click',async event=>{
  const button=event.target.closest('[data-save-public]');if(!button)return;
  const status=button.closest('article,section,main')?.querySelector('[data-save-status]');button.disabled=true;
  try{const me=await fetch('/api/me').then(r=>r.json());if(!me.authenticated){window.CWJoin.offer({action:'save',slug:button.dataset.savePublic,project:button.closest('.cw-overlay:not(.profile-panel)')?.querySelector('[data-public-project]')?.dataset.publicProject});return;}
- const r=await fetch('/api/saved',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({slug:button.dataset.savePublic,saved:button.dataset.saved!=='true'})});if(!r.ok)throw Error();button.dataset.saved=button.dataset.saved==='true'?'false':'true';button.textContent=button.dataset.saved==='true'?'♥ Saved':'♡ Save';if(status)status.textContent=button.dataset.saved==='true'?'Saved to your dashboard.':'Removed from saved projects.';
+ const r=await fetch('/api/saved',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({slug:button.dataset.savePublic,saved:button.dataset.saved!=='true'})});if(!r.ok)throw Error();button.dataset.saved=button.dataset.saved==='true'?'false':'true';button.textContent=button.dataset.saved==='true'?'♥ Saved':'♡ Save';if(status)status.textContent=button.dataset.saved==='true'?'Saved to your dashboard.':'Removed from saved projects.';window.dispatchEvent(new Event('cw-saved-changed'));
  }catch{if(status)status.textContent='That change could not be saved. Please try again.';}finally{button.disabled=false;}
 });
 

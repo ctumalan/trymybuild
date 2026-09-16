@@ -27,7 +27,7 @@ export const POST:APIRoute=async context=>{
    return context.redirect(`/dashboard/messages?thread=${existing.data.id}`,303);
   }
   if(result.error)throw result.error;
-  if(context.request.headers.get('accept')?.includes('application/json'))return json({ok:true,message:'Your review was sent. Credit eligibility is assessed separately.',href:`/dashboard/messages?thread=${result.data.id}`});
+  if(context.request.headers.get('accept')?.includes('application/json'))return json({ok:true,message:'Your feedback was sent. Qualifying reviews count toward your badge after approval.',href:`/dashboard/messages?thread=${result.data.id}`});
   return context.redirect(`/dashboard/messages?thread=${result.data.id}&sent=1`,303);
  }catch{if(context.request.headers.get('accept')?.includes('application/json'))return json({error:'Your review could not be confirmed. Your text is still here; check Messages before retrying.'},503);return context.redirect(slug?`/tell/${slug}?error=1`:'/dashboard?error=1',303);}
 };

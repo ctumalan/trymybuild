@@ -22,7 +22,7 @@ test('compact comments have unique labels, contextual placeholders and hidden em
  const ctx=vm.createContext({projectCommentDraft:()=>'',commentWordCount:()=>0,state:{communityPosts:[]},esc:String});
  vm.runInContext(app.slice(app.indexOf('function projectCommentComposer('),app.indexOf('// A return is an invitation')),ctx);
  const p={slug:'example'};
- assert.match(ctx.projectCommentComposer(p,true),/Be the first one to review this app/);
+ assert.match(ctx.projectCommentComposer(p,true),/Be the first to leave a public comment/);
  assert.match(ctx.projectCommentComposer(p,true),/id="comment-card-example"/);
  assert.match(ctx.projectCommentComposer(p),/id="comment-detail-example"/);
  assert.match(ctx.projectCommentComposer(p),/Mention one or two improvements/);

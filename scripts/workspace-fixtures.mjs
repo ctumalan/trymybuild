@@ -35,7 +35,7 @@ export function workspaceFixtures(){
  Object.assign(scope,moduleFixture('src/server/credit-rules.ts',['creditRules','creditSummaryCopy'],scope));
  Object.assign(scope,moduleFixture('src/server/community-map.ts',['communityMap'],scope));
  Object.assign(scope,moduleFixture('src/server/credit-explainer.ts',['creditExplainer'],scope));
- Object.assign(scope,moduleFixture('src/server/public-comment-ui.ts',['publicCommentComposer'],scope));
+ Object.assign(scope,moduleFixture('src/server/public-comment-ui.ts',['publicCommentComposer','projectFeedbackActions'],scope));
  Object.assign(scope,moduleFixture('src/server/project-ui.ts',['projectCard','publicActions'],scope));
  scope.creditSummary=async()=>({balance:12,slots:3,used:2,eligible:7,towardNext:2,verification:{earned:18,hasPublished:true,verified:false,caseId:null,eligible:false},projects,requests:[],qualifications:[]});
  scope.feedbackQueue=async()=>[];

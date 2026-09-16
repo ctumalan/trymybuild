@@ -20,7 +20,8 @@ test('All eleven projects use the approved presentation with their own action ta
   assert.doesNotMatch(markup, /Illustrative plan|mealmap-screenshot|mealmap-lead/);
   assert.match(markup, /data-project-comment="mealmap"/);
   assert.match(markup, /data-project-comment-field/);
-  assert.doesNotMatch(markup, /href="\/tell\/mealmap"/);
+  assert.match(markup, /href="\/tell\/mealmap" data-guided-open="mealmap">Give feedback/);
+  assert.match(markup, /<summary>Leave a public comment<\/summary>/);
   assert.match(markup, /data-save="mealmap"/);
   assert.ok(markup.includes(product.url));
   const slugs = vm.runInContext('Object.keys(projectPresentation)', context);

@@ -1,11 +1,12 @@
 // In-place reading uses the same protected routes as full pages; no client grants access.
 (() => {
- let dialog,opener,loadVersion=0;
+ let dialog,opener,loadVersion=0;const parents=[];
  function closePanel(){const target=dialog;if(!target||target.dataset.closing)return;loadVersion++;if(matchMedia('(prefers-reduced-motion: reduce)').matches){target.close();return;}target.dataset.closing='true';target.animate([{opacity:1,transform:'translateX(0)'},{opacity:0,transform:`translateX(${target.classList.contains('profile-panel')?'-':''}65px)`}],{duration:200,easing:'ease-in',fill:'forwards'}).finished.then(()=>target.isConnected&&target.dataset.closing==='true'&&target.close(),()=>{});}
- const allowed=url=>url.origin===location.origin&&(/^\/people\/[a-z0-9-]+$/.test(url.pathname)||['/admin/project','/dashboard/project'].includes(url.pathname));
+ const allowed=url=>url.origin===location.origin&&(/^\/(people|projects)\/[a-z0-9-]+$/.test(url.pathname)||['/admin/project','/dashboard/project'].includes(url.pathname));
  function show(content,kind='project'){
   if(dialog?.dataset.closing){delete dialog.dataset.closing;dialog.getAnimations().forEach(animation=>animation.cancel());}
-  if(!dialog){opener=document.activeElement;dialog=document.createElement('dialog');dialog.className='cw-overlay';dialog.setAttribute('aria-label','Details');dialog.innerHTML='<header class="overlay-toolbar"><span>TryMyBuild</span><button type="button" aria-label="Close detail window">×</button></header><div class="overlay-content"></div>';document.body.append(dialog);dialog.querySelector('button').onclick=closePanel;dialog.addEventListener('cancel',event=>{event.preventDefault();closePanel();});dialog.addEventListener('click',event=>{if(event.target===dialog){const r=dialog.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)closePanel();}});dialog.addEventListener('close',()=>{loadVersion++;dialog.remove();dialog=null;opener?.isConnected&&opener.focus({preventScroll:true});});dialog.showModal();}
+  if(kind==='project'&&dialog?.classList.contains('profile-panel')){parents.push({dialog,opener});dialog=undefined;}
+  if(!dialog){opener=document.activeElement;dialog=document.createElement('dialog');dialog.className='cw-overlay';dialog.setAttribute('aria-label','Details');dialog.innerHTML='<header class="overlay-toolbar"><span>TryMyBuild</span><button type="button" aria-label="Close detail window">×</button></header><div class="overlay-content"></div>';document.body.append(dialog);dialog.querySelector('button').onclick=closePanel;dialog.addEventListener('cancel',event=>{event.preventDefault();closePanel();});dialog.addEventListener('click',event=>{if(event.target===dialog){const r=dialog.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)closePanel();}});dialog.addEventListener('close',()=>{loadVersion++;dialog.remove();opener?.isConnected&&opener.focus({preventScroll:true});const parent=parents.pop();dialog=parent?.dialog||null;opener=parent?.opener;});dialog.showModal();}
   dialog.classList.toggle('profile-panel',kind==='profile');dialog.querySelector('.overlay-content').replaceChildren(content);return dialog;
  }
  async function open(href,kind='project'){
@@ -14,12 +15,13 @@
   try{const response=await fetch(url,{credentials:'same-origin',headers:{Accept:'text/html'}});if(!response.ok)throw Error(response.status===404?'This profile or project is not available.':'Unable to load this view. Please try again.');
    const doc=new DOMParser().parseFromString(await response.text(),'text/html'),content=doc.querySelector('[data-panel-content]')||doc.querySelector('.cw-admin-content')||doc.querySelector('main');if(!content)throw Error('This view could not be loaded.');
    content.querySelectorAll('script,iframe,object,embed,base').forEach(el=>el.remove());
-   if(version!==loadVersion||!dialog)return;show(content,kind);dialog.querySelector('.overlay-toolbar button').focus({preventScroll:true});
+   if(content.matches('[data-public-project]')){content.querySelectorAll(':scope > .invite-actions').forEach(el=>el.remove());}
+   if(version!==loadVersion||!dialog)return;show(content,kind);dialog.querySelector('.overlay-toolbar button').focus({preventScroll:true});window.dispatchEvent(new Event('cw-panel-ready'));
   }catch(error){if(version!==loadVersion||!dialog)return;const p=document.createElement('p');p.setAttribute('role','alert');p.textContent=error.message;show(p,kind);}
  }
  window.CWPanels={open,show(html,kind){const template=document.createElement('template');template.innerHTML=html;show(template.content,kind);}};
  document.addEventListener('click',event=>{
-  const link=event.target.closest('a[data-panel],a[href^="/people/"],a[href^="/admin/project?"],a[href^="/dashboard/project?"]');
+  const link=event.target.closest('a[data-panel],a[href^="/projects/"],a[href^="/people/"],a[href^="/admin/project?"],a[href^="/dashboard/project?"]');
   if(link&&!event.metaKey&&!event.ctrlKey&&!event.shiftKey&&!event.altKey&&event.button===0){const url=new URL(link.href);if(allowed(url)){event.preventDefault();event.stopPropagation();const menu=link.closest('.account-menu');if(menu){menu.open=false;menu.querySelector('summary').focus();}open(url.href,url.pathname.startsWith('/people/')?'profile':'project');}}
   document.querySelectorAll('.inline-help[open],.project-actions[open]').forEach(el=>{if(!el.contains(event.target))el.open=false;});
  });
@@ -63,3 +65,7 @@
   try{const r=await fetch('/api/projects',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action,id:button.dataset.id,version:Number(button.dataset.version),confirm:action==='delete'?'DELETE':undefined})}),data=await r.json();if(!r.ok)throw Error(data.error||'Not saved.');if(data.cleanupPending)alert('The draft was deleted, but its preview file needs cleanup. Please contact support.');location.reload();}catch(error){if(status)status.textContent=error.message;button.disabled=false;}
  });
 })();
+
+document.addEventListener('click',event=>{const tab=event.target.closest('[data-profile-tab]');if(!tab)return;const card=tab.closest('[data-profile-slug]');card.querySelectorAll('[data-profile-tab]').forEach(t=>{t.setAttribute('aria-selected',String(t===tab));t.tabIndex=t===tab?0:-1;});card.querySelectorAll('[data-profile-pane]').forEach(p=>p.hidden=p.dataset.profilePane!==tab.dataset.profileTab);});
+
+document.addEventListener('keydown',event=>{const tab=event.target.closest('[data-profile-tab]');if(!tab||!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;event.preventDefault();const tabs=[...tab.parentElement.querySelectorAll('[data-profile-tab]')],index=tabs.indexOf(tab),next=event.key==='Home'?0:event.key==='End'?tabs.length-1:(index+(event.key==='ArrowRight'?1:-1)+tabs.length)%tabs.length;tabs[next].click();tabs[next].focus();});

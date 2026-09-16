@@ -45,8 +45,10 @@ export const POST: APIRoute = async context => {
     const website = publicWebsite(body.website || ''); if(website === null) return json({error:'Use a complete https website address.'},400);
     const name = publicName(body.displayName);
     if (!name || typeof body.bio !== 'string' || body.bio.length > 500) return json({ error: 'Enter a name and a biography under 500 characters.' }, 400);
+    if(body.creatorType!==undefined&&!['independent','company'].includes(body.creatorType))return json({error:'Choose Independent or Company.'},400);
+    if(body.location!==undefined&&(typeof body.location!=='string'||body.location.length>100))return json({error:'Use a location under 100 characters.'},400);
     const member = await ensureMember(user);
-    const result = await database().from('profiles').update({ website, ...(avatar !== undefined ? {avatar_path:avatar || null} : {}), display_name: name, identity_label: publicName(body.label), bio: body.bio.trim(), is_public: body.isPublic === true }).eq('user_id', member.id);
+    const result = await database().from('profiles').update({ ...(body.creatorType!==undefined?{creator_type:body.creatorType}:{}),...(body.location!==undefined?{location:body.location.trim(),location_public:body.locationPublic===true}:{}), website, ...(avatar !== undefined ? {avatar_path:avatar || null} : {}), display_name: name, identity_label: publicName(body.label), bio: body.bio.trim(), is_public: body.isPublic === true }).eq('user_id', member.id);
     if (result.error) throw result.error;
     return json({ saved: true });
   } catch { return json({ error: 'Your profile could not be saved. Please try again.' }, 503); }

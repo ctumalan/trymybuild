@@ -9,7 +9,7 @@ export async function memberContext(context:APIContext) {
 }
 export function notice(context:APIContext) {
  const error=context.url.searchParams.get('error');
- if(error==='eligibility')return '<p class="cw-notice" role="alert">Your verification request was not confirmed. You need an approved published project and an active account. If those requirements are met, try again or contact Help &amp; contact.</p>';
+ if(error==='eligibility')return '<p class="cw-notice" role="alert">Your verification request was not confirmed. You need five qualifying approved reviews across three other creators, a published app, and an active independent creator account. If those requirements are met, try again or contact Help &amp; contact.</p>';
  if(error==='reauth')return '<p class="cw-notice" role="alert">No account was removed. Your identity confirmation expired. Confirm your identity in <a href="/dashboard/security">Account &amp; security</a>, then retry within five minutes.</p>';
  if(error==='cleanup')return '<p class="cw-notice" role="alert">The account is removed from the site, but external cleanup is not complete. See Privacy requests to retry the unfinished cleanup.</p>';
  return context.url.searchParams.has('saved')?'<p class="cw-notice" role="status">Your changes were saved.</p>':context.url.searchParams.has('error')?'<p class="cw-notice" role="alert">That change was not confirmed. Reload and try again.</p>':'';

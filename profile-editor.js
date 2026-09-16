@@ -12,7 +12,7 @@ document.getElementById('photo').onchange = async event => {
 document.getElementById('profile-form').addEventListener('submit', async event => {
  event.preventDefault(); const form=event.currentTarget, values=new FormData(form), button=form.querySelector('button[type="submit"]'), status=document.getElementById('profile-status');
  button.disabled=true; status.textContent='Saving…';
- try { const result=await fetch('/api/me',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({avatar:avatarValue,website:values.get('website'),displayName:values.get('displayName'),label:values.get('label'),bio:values.get('bio'),isPublic:values.get('isPublic')==='on'})}); const data=await result.json(); if(!result.ok)throw new Error(data.error||'Please try again.'); status.textContent='Your profile is saved.'; }
+ try { const result=await fetch('/api/me',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({creatorType:values.get('creatorType'),location:values.get('location'),locationPublic:values.get('locationPublic')==='on',avatar:avatarValue,website:values.get('website'),displayName:values.get('displayName'),label:values.get('label'),bio:values.get('bio'),isPublic:values.get('isPublic')==='on'})}); const data=await result.json(); if(!result.ok)throw new Error(data.error||'Please try again.'); status.textContent='Your profile is saved.'; }
  catch(error){status.textContent=error.message||'Your profile could not be saved. Please try again.';} finally{button.disabled=false;}
 });
 })();

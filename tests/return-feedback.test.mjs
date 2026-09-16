@@ -16,7 +16,7 @@ function setup(){
  const elements=new Map();
  const dialog={setAttribute(){},querySelector(s){if(!elements.has(s))elements.set(s,{setAttribute(){},focus(){},addEventListener(){}});return elements.get(s);},addEventListener(){},showModal(){shows++;},close(){},remove(){}};
  const document={visibilityState:'visible',hasFocus:()=>true,activeElement:{matches:()=>false},querySelector:()=>null,createElement:()=>dialog,body:{append(){}},addEventListener(){}};
- const ctx=vm.createContext({document,window:{addEventListener(){}},Date:{now:()=>now},projects:[{slug:'one',name:'One'}],esc:String,projectCommentComposer:()=>'<form>saved draft</form>'});
+ const ctx=vm.createContext({document,window:{addEventListener(){}},Date:{now:()=>now},projects:[{slug:'one',name:'One'}],esc:String,projectCommentComposer:()=>'<form>saved draft</form>',guidedReturnComposer:()=>'<form data-guided-feedback><textarea></textarea></form>'});
  vm.runInContext(source.slice(source.indexOf('const promptedReturnApps'),source.indexOf('function detailDrawer')),ctx);
  return {ctx,document,dialog,elements,tick:n=>now+=n,shows:()=>shows};
 }
@@ -56,3 +56,6 @@ test('each app independently receives its quick and detailed prompts',()=>{
  }
  assert.equal(x.shows(),4);assert.match(x.dialog.innerHTML,/How was Two/);
 });
+
+for(const [ms,detailed] of [[120000,false],[120001,true]])test(`long visit boundary ${ms}ms selects the correct feedback form`,()=>{const x=setup();x.ctx.armReturnFeedback('one');x.ctx.markFeedbackDeparture();x.tick(ms);x.ctx.maybeShowReturnFeedback();assert.equal(x.shows(),1);assert.equal(x.dialog.innerHTML.includes('data-guided-feedback'),detailed);});
+test('a written review does not suppress the later guided feedback form',()=>{const x=setup();for(const ms of [16000,120001]){x.ctx.armReturnFeedback('one');x.ctx.markFeedbackDeparture();x.tick(ms);x.ctx.maybeShowReturnFeedback();}assert.equal(x.shows(),2);assert.match(x.dialog.innerHTML,/data-guided-feedback/);});

@@ -5,9 +5,9 @@ import {workspaceFixtures,moduleFixture,read} from '../scripts/workspace-fixture
 import {sameOrigin} from '../src/server/security.mjs';
 import {feedbackDestination} from '../src/server/feedback-policy.mjs';
 const ctx=path=>({url:new URL(path,'https://example.invalid'),params:{},cookies:{get(){}},redirect:(href,status)=>new Response(null,{status,headers:{location:href}})});
-test('launch community leads with participation, keeping old credit artwork out of the active page',async()=>{
- const f=workspaceFixtures(),r=await f.routes['/dashboard/community'](ctx('/dashboard/community')),html=await r.text();
- assert.equal(r.status,200);assert.match(html,/Give &amp; receive feedback/);assert.match(html,/Help someone build something better/);assert.doesNotMatch(html,/community-credits-explainer.png|<progress /);assert.match(html,/<summary>Your saved contribution records/);
+test('retired community route redirects and sidebar preserves Saved apps',async()=>{
+ const f=workspaceFixtures(),r=await f.routes['/dashboard/community'](ctx('/dashboard/community'));assert.equal(r.status,302);assert.equal(r.headers.get('location'),'/dashboard/overview');
+ const html=await f.scope.surface('Dashboard','', 'overview').text();assert.doesNotMatch(html,/Give &amp; receive feedback|Saved &amp; feedback/);assert.match(html,/Saved apps/);
 });
 test('guest identity is server-signed, expires, resists tampering and uses a protected cookie',()=>{
  const jar=new Map(),options=[],context={cookies:{get:key=>jar.has(key)?{value:jar.get(key)}:undefined,set(key,value,o){jar.set(key,value);options.push(o);}},url:new URL('https://example.invalid')};
@@ -20,11 +20,8 @@ test('participation copy preserves records without imposing reward ladders',()=>
  const f=workspaceFixtures(),html=f.scope.communityMap({balance:2,slots:2,used:1,towardNext:3,verification:{earned:27,hasPublished:false,eligible:false}});
  assert.doesNotMatch(html,/<progress |5 creators →|50 →|1 credit →/);assert.match(html,/Recorded balance/);assert.match(html,/Browsing or selecting interests does not sign you up/);assert.match(html,/not an automatic matching service/);
 });
-test('project menu exposes private-safe share and requests without a balance gate',()=>{
- const f=workspaceFixtures();const published=f.scope.projectActions({...f.tables.projects[0],feedbackBalance:2});
- assert.match(published,/data-invite-project/);assert.match(published,/dashboard\/request-feedback\?project=sample-0/);assert.doesNotMatch(published,/1 credit|disabled/);
- const draft=f.scope.projectActions(f.tables.projects[1]);assert.match(draft,/Publish before requesting feedback/);assert.doesNotMatch(draft,/name="action" value="create"/);
- assert.match(f.scope.projectActions({...f.tables.projects[0],feedbackBalance:0,feedbackRequest:f.id}),/Cancel feedback request/);
+test('project menu invites feedback through Share',()=>{
+ const f=workspaceFixtures();for(const p of f.tables.projects){const html=f.scope.projectActions(p);assert.match(html,/data-invite-project/);assert.doesNotMatch(html,/Request feedback|Publish before requesting feedback|Cancel feedback request/);}
 });
 test('empty project lists avoid empty database filters and deleted profiles are not public',async()=>{
  const f=workspaceFixtures();await f.scope.requestState(f.db,f.owner,[]);assert.ok(!f.db.calls.some(c=>c[0]==='feedback_requests'));
@@ -53,7 +50,7 @@ test('guest success is optional signup only after confirmed submission; no autom
 });
 test('motion respects reduced motion; textareas grow; sharing remains a deliberate action',()=>{
  const css=read('ui-refinements.css'),js=read('interaction-polish.js'),share=read('share-invitation.js');assert.match(css,/prefers-reduced-motion:reduce/);assert.match(css,/resize:none!important/);assert.match(js,/Math.min\(280/);assert.match(js,/localStorage.getItem\('trymybuild-brand-intro'\)/);
- assert.match(share,/Send invitation/);assert.match(share,/data-invite-action="email"/);assert.match(share,/graphicEmail\?'Email with image':'Email'/);for(const label of ['>Text<','Copy invitation','More options'])assert.ok(share.includes(label));assert.match(share,/data-share-profile/);
+ assert.match(share,/Send invitation/);assert.match(share,/data-send-invitation/);for(const label of ['Text','Copy invitation','Choose an app','Gmail in browser','Yahoo in browser'])assert.ok(share.includes(label));assert.match(share,/data-share-profile/);
  assert.doesNotMatch(read('app.js').slice(read('app.js').indexOf('function detailDrawer'),read('app.js').indexOf("document.addEventListener('input'")),/What saving does|About opening this app/);
 });
 test('a native invitation keeps Escape and keyboard focus above the project drawer',()=>{
@@ -61,5 +58,5 @@ test('a native invitation keeps Escape and keyboard focus above the project draw
  const handler=app.slice(app.indexOf('document.addEventListener("keydown"'),app.indexOf('document.addEventListener("input"'));
  assert.match(handler,/if \(event.defaultPrevented \|\| document.querySelector\('\.cw-overlay\[open\], \.invitation-dialog\[open\], \.return-feedback-dialog\[open\]'\)\) return;/);
  assert.ok(handler.indexOf('.invitation-dialog[open]')<handler.indexOf('event.key === "Escape"'));
- assert.match(read('share-invitation.js'),/dialog.addEventListener\('cancel',event=>\{event.preventDefault\(\);close\(\);\}\)/);
+ assert.match(read('share-invitation.js'),/dialog.addEventListener\('cancel',e=>\{e.preventDefault\(\);close\(\);\}\)/);
 });

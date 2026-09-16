@@ -19,8 +19,8 @@ test('opening an invitation does not send, copy, or open external sharing apps',
  let handler,shared=0,copied=0,shown=false;
  const controls=new Map();const control=key=>{if(!controls.has(key))controls.set(key,{value:'Hello there',textContent:'',addEventListener(){},select(){}});return controls.get(key);};
  const dialog={isConnected:true,setAttribute(){},showModal(){shown=true;},addEventListener(){},querySelector:control,innerHTML:''};
- const ctx=vm.createContext({navigator:{share:async()=>shared++,clipboard:{writeText:async()=>copied++}},fetch:async()=>({ok:true,json:async()=>({name:'MealMap',description:'Plan meals for your family',category:'Food',builder:'Builder',url:'https://example.com/projects/mealmap',image:'/image.png'})}),document:{addEventListener:(_,h)=>handler=h,querySelector:()=>null,createElement:()=>dialog,body:{append(){}}}});
+ const ctx=vm.createContext({AbortController,navigator:{share:async()=>shared++,clipboard:{writeText:async()=>copied++}},fetch:async()=>({ok:true,json:async()=>({name:'MealMap',description:'Plan meals for your family',category:'Food',builder:'Builder',url:'https://example.com/projects/mealmap',image:'/image.png'})}),document:{addEventListener:(_,h)=>handler=h,querySelector:()=>null,createElement:()=>dialog,body:{append(){}}}});
  vm.runInContext(readFileSync(new URL('../share-invitation.js',import.meta.url),'utf8'),ctx);
  await handler({target:{closest:()=>({dataset:{shareProduct:'mealmap'}})},preventDefault(){}});
- assert.equal(shown,true);assert.equal(shared,0);assert.equal(copied,0);assert.match(dialog.innerHTML,/Nothing has been sent/);assert.match(dialog.innerHTML,/Preview recipient page/);
+ assert.equal(shown,true);assert.equal(shared,0);assert.equal(copied,0);assert.match(dialog.innerHTML,/Review and send in your chosen app/);assert.match(dialog.innerHTML,/Gmail in browser/);assert.match(dialog.innerHTML,/data-send-invitation/);
 });

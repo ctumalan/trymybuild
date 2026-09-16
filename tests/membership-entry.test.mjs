@@ -45,14 +45,13 @@ test('promo has exactly five benefits and a member-aware call to action',()=>{
  assert.match(ctx.membershipPromo(),/Free to join\. Better together\./);
  assert.doesNotMatch(ctx.membershipPromo(),/Make more of your membership/);
  assert.match(ctx.membershipPromo(),/one honest observation/);assert.match(ctx.membershipPromo(),/Create my free account/);assert.doesNotMatch(ctx.membershipPromo(),/Earn community credits|Unlock additional project slots/);
- ctx.state.session={authenticated:true};assert.match(ctx.membershipPromo(),/Give &amp; receive feedback/);assert.doesNotMatch(ctx.membershipPromo(),/Create my free account/);
+ ctx.state.session={authenticated:true};assert.match(ctx.membershipPromo(),/Open my dashboard/);assert.doesNotMatch(ctx.membershipPromo(),/Create my free account/);
 });
 test('guest information is available without account creation',()=>{
- const ctx=scope();assert.match(ctx.aboutPage(),/Chris Nava/);assert.match(ctx.contactPage(),/mailto:hello@trymybuild.com/);
+ const ctx=scope();assert.match(ctx.aboutPage(),/Christian Tumalan/);assert.match(ctx.contactPage(),/mailto:hello@trymybuild.com/);
  assert.match(ctx.aboutPage(),/src="\/assets\/avatars\/chris-nava-founder.jpg"/);
- assert.match(ctx.aboutPage(),/alt="Chris Nava, founder of TryMyBuild, in his recording studio"/);
- assert.match(ctx.aboutPage(),/<\/article><section class="home-how"/);
- assert.match(ctx.aboutPage(),/Small contributions\. Better projects\./);
+ assert.match(ctx.aboutPage(),/alt="Christian Tumalan, founder of TryMyBuild, in his recording studio"/);
+ assert.doesNotMatch(ctx.aboutPage(),/class="home-how"|Small contributions\. Better projects\./);
  assert.doesNotMatch(app.slice(app.indexOf('function discover('),app.indexOf('function discussionDraftKey(')),/homeHowItWorks\(/);
  assert.match(read('index.html'),/data-route="contact">Contact/);
  const menu=read('account-nav.js').split('let root=anchor.closest')[0];assert.match(menu,/data-route="contact"/);

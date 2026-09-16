@@ -8,11 +8,11 @@ const STUDIO = {
   type: 'company',
   name: 'TryMyBuild Studio',
   initials: 'TMB',
-  label: 'In-house creator · Founded by Christian Tumalán',
+  label: 'In-house creator · Founded by Christian Tumalan',
   bio: 'Our launch collection of practical tools, built in-house at TryMyBuild.',
-  verified: true,
+  verified: false,
 };
-const studioNote = 'Founder-confirmed: Christian Tumalán confirmed control of TryMyBuild Studio and its listed projects on September 4, 2026. This is not independent verification or a guarantee of product quality.';
+const studioNote = 'Founder-confirmed: Christian Tumalan confirmed control of TryMyBuild Studio and its listed projects on September 4, 2026. This is not independent verification or a guarantee of product quality.';
 
 const initialsOf = (name: string) => String(name || 'Member').split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase() || 'M';
 
@@ -24,8 +24,10 @@ const PUBLIC_CATALOG_FIELDS = `${PROJECT_FIELDS},saved_projects(count)`;
 async function attributions(db: any, rows: any[]) {
   const ownerIds = [...new Set(rows.filter(r => !r.is_studio && r.owner_user_id).map(r => r.owner_user_id))];
   const profiles = ownerIds.length
-    ? (await db.from('profiles').select('user_id,slug,display_name,identity_label,is_public,avatar_path,verified').in('user_id', ownerIds)).data || []
+    ? (await db.from('profiles').select('user_id,slug,display_name,identity_label,is_public,avatar_path,creator_type,verified').in('user_id', ownerIds)).data || []
     : [];
+  const badgeResults=await Promise.all(profiles.filter((p:any)=>p.verified&&p.creator_type!=='company').map(async(p:any)=>{const r=await db.rpc('cw_badge_progress',{p_user:p.user_id});const b=r.data?.[0];return [p.user_id,!r.error&&!!b?.verified&&Number(b.reviews)>=5&&Number(b.creators)>=3&&b.ownership_confirmed];}));
+  const badges=new Map(badgeResults as [string,boolean][]);
   const byUser = new Map(profiles.map((p: any) => [p.user_id, p]));
   return (row: any) => {
     if (row.is_studio || !row.owner_user_id) return { ...STUDIO, verificationNote: studioNote };
@@ -33,14 +35,14 @@ async function attributions(db: any, rows: any[]) {
     if (!p) return { slug: '', type: 'independent', name: 'A TryMyBuild creator', initials: 'C', label: 'TryMyBuild creator', bio: '', verified: false };
     return {
       slug: p.is_public ? p.slug : '',
-      type: 'independent',
+      type: p.creator_type==='company'?'company':'independent',
       name: p.display_name,
       avatar: p.avatar_path || '',
       initials: initialsOf(p.display_name),
       label: p.identity_label || 'TryMyBuild creator',
       bio: '',
-      verified: p.verified === true,
-      verificationNote: p.verified ? 'Creator identity reviewed by TryMyBuild. This is not a guarantee of product quality.' : '',
+      verified: badges.get(p.user_id)===true,
+      verificationNote: badges.get(p.user_id)===true ? 'Contributing creator and app ownership confirmed. This is not a guarantee of product quality.' : '',
     };
   };
 }

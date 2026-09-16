@@ -23,9 +23,8 @@ test('request API checks origin, verified membership and question bounds before 
  assert.ok(f.db.calls.some(x=>x[0]==='cw_launch_feedback_request'&&x[1].p_user===f.owner&&x[1].p_question===fields.question));
  assert.ok(!f.db.calls.some(x=>x[0]==='cw_credit_request'));
 });
-test('request questions are escaped in the community queue',async()=>{
- const f=workspaceFixtures(),route=moduleFixture('src/pages/dashboard/community.ts',['GET'],{...f.scope,feedbackQueue:async()=>[{project_slug:'sample-guest',project:f.tables.projects.at(-1),question:'<img src=x onerror=bad>'}]}).GET;
- const html=await(await route(ctx('/dashboard/community'))).text();assert.match(html,/&lt;img src=x onerror=bad&gt;/);assert.doesNotMatch(html,/<img src=x/);
+test('retired feedback dashboard redirects to Overview',async()=>{
+ const f=workspaceFixtures(),r=await f.routes['/dashboard/community'](ctx('/dashboard/community'));assert.equal(r.status,302);assert.equal(r.headers.get('location'),'/dashboard/overview');
 });
 test('publication preflight uses server launch allowance, not reviewer milestones or assignment history',async()=>{
  const access=moduleFixture('src/server/community-credits.ts',['publicationAccess'],{}).publicationAccess;

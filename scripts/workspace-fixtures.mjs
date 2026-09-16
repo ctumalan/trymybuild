@@ -21,16 +21,18 @@ export function workspaceFixtures(){
  projects.push({...projects[0],slug:'sample-guest',id:randomUUID(),title:'Daily sketchbook',owner_user_id:author});
  const feedback={id,project_slug:'sample-0',author_user_id:author,helpful:'somewhat',price:'free',attempt:'completed',focus:'ease',visibility:'private',moderation_status:'pending',message:'I tried adding a grocery list but could not find the save button.',created_at:now};
  const tables={projects,creator_feedback:[feedback],profiles:[{user_id:owner,slug:'sample-creator',display_name:'Sample Creator',is_public:true,identity_label:'Building useful everyday tools',bio:'Local visual test profile.',avatar_path:'/assets/avatars/sun.svg',website:''},{user_id:author,slug:'sample-reviewer',display_name:'Sample Reviewer',is_public:true}],saved_projects:[{user_id:owner,project_slug:'sample-guest',created_at:now}],notifications:[],support_cases:[],feedback_replies:[],feedback_qualifications:[{feedback_id:id,status:'qualified',reason:'Original firsthand review'}],feedback_ratings:[],project_experiences:Array.from({length:6},(_,i)=>({id:randomUUID(),project_slug:'sample-0',author_user_id:author,response:'The calendar was easy to understand, but finding my saved plans took a few tries.',moderation_status:'pending',created_at:now})),account_deletion_requests:[]};
- const db=mockDatabase(tables,{cw_project_unread:()=>projects.map(p=>({slug:p.slug,unread_count:2})),cw_combined_inbox:()=>[{id,project_slug:'sample-0',title:'Grocery planner',counterpart:'Sample Reviewer',last_message:feedback.message,last_at:now,unread:true,total_count:1}]});
+ const db=mockDatabase(tables,{cw_badge_progress:()=>[{reviews:2,creators:1,has_published:true,ownership_confirmed:false,verified:false,case_id:null}],cw_project_unread:()=>projects.map(p=>({slug:p.slug,unread_count:2})),cw_combined_inbox:()=>[{id,project_slug:'sample-0',title:'Grocery planner',counterpart:'Sample Reviewer',last_message:feedback.message,last_at:now,unread:true,total_count:1}]});
  const user={id:'fixture-user',firstName:'Sample',email:'sample@example.invalid',emailVerified:true},member={id:owner};
  const scope={...policy,e,Response,URL,URLSearchParams,Date,randomUUID,console,sessionLabel,signInDescription,memberContext:async()=>({user,member,db,admin:true}),currentUser:async()=>user,ensureMember:async()=>member,database:()=>db,databaseReady:()=>true,env:()=>'',isFounder:()=>true,adminUser:async()=>user,creditSummary:async()=>({balance:12}),accountSession:async()=>({user,sessionId:'fixture-session',authenticationMethod:'GoogleOAuth'}),validProof:()=>false,workos:()=>({userManagement:{listSessions:async()=>({autoPagination:async()=>[1,2].map(i=>({id:i===1?'fixture-session':'other',userId:user.id,status:'active',authMethod:'GoogleOAuth',createdAt:now,userAgent:'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/153.0.0.0 Safari/537.36'}))})}})};
- Object.assign(scope,moduleFixture('src/server/feedback-ui.ts',['surface','adminSurface','feedbackCard','pages','pageNumber','signIn','unavailable'],scope));
+ Object.assign(scope,moduleFixture('src/server/feedback-ui.ts',['surface','adminSurface','signals','feedbackCard','pages','pageNumber','signIn','unavailable'],scope));
  Object.assign(scope,moduleFixture('src/server/project-requests.ts',['requestState','feedbackRequestAction'],scope));
  Object.assign(scope,moduleFixture('src/server/direct-messages.ts',['directComposer','directThread','directConversation'],scope));
  Object.assign(scope,moduleFixture('src/server/dashboard-cards.ts',['OWNED_CARD_FIELDS','shortStatus','miniPreview','projectActions','ownedProjectCard','performancePanel','replyComposer','savedReviewComposer'],scope));
+ Object.assign(scope,moduleFixture('src/server/verification.ts',['verificationProgress','verificationCard'],scope));
+ Object.assign(scope,moduleFixture('src/server/quick-feedback-view.ts',['quickFeedbackPanel'],scope));
  Object.assign(scope,moduleFixture('src/server/workspace.ts',['workspace','notice','empty'],scope));
  Object.assign(scope,moduleFixture('src/server/conversation.ts',['conversation'],scope));
- Object.assign(scope,moduleFixture('src/server/credit-rules.ts',['creditRules'],scope));
+ Object.assign(scope,moduleFixture('src/server/credit-rules.ts',['creditRules','creditSummaryCopy'],scope));
  Object.assign(scope,moduleFixture('src/server/community-map.ts',['communityMap'],scope));
  Object.assign(scope,moduleFixture('src/server/credit-explainer.ts',['creditExplainer'],scope));
  Object.assign(scope,moduleFixture('src/server/public-comment-ui.ts',['publicCommentComposer'],scope));
@@ -41,12 +43,15 @@ export function workspaceFixtures(){
  scope.STUDIO={slug:'creatorworks-studio',name:'TryMyBuild Studio'};
  Object.assign(scope,moduleFixture('src/server/public-profile.ts',['publicProfile'],scope));
  scope.listPublished=async()=>projects.filter(p=>p.listing_status==='published').map(p=>({...p,name:p.title,preview:p.preview_public_url||'/assets/previews/stackscout.png',url:'https://example.invalid',stage:'New',price:'Free',saveCount:6,reviewCount:3,recentCommentCount:3,presentation:{headline:p.headline,help:p.help_text,firstTry:p.first_try},creator:{name:'Sample Creator',slug:'sample-creator',initials:'SC',label:'Local sample creator',verified:false}}));
+ scope.invitationImageUrl=(p,base)=>new URL('/assets/previews/stackscout.png',base).href;
  scope.getPublishedProject=async slug=>(await scope.listPublished()).find(p=>p.slug===slug)||null;
  scope.origin=context=>context.url.origin;
+ scope.getProjectRow=async slug=>projects.find(p=>p.slug===slug);
  const routes={};
  for(const [path,file,name='GET'] of [['/dashboard','src/server/dashboard-projects.ts','projectDashboard'],['/dashboard/overview','src/pages/dashboard/[section].ts'],['/dashboard/messages','src/pages/dashboard/messages.ts'],['/dashboard/profile','src/pages/dashboard/profile.ts'],['/dashboard/security','src/pages/dashboard/security.ts'],['/dashboard/project','src/pages/dashboard/project.ts'],['/admin','src/pages/admin/index.ts'],['/admin/project','src/pages/admin/project.ts'],['/dashboard/thread/'+id,'src/pages/dashboard/thread/[id].ts']])routes[path]=moduleFixture(file,[name],scope)[name];
  routes['/dashboard/community']=moduleFixture('src/pages/dashboard/community.ts',['GET'],scope).GET;
  routes['/people/sample-creator']=moduleFixture('src/server/profile-view.ts',['profileView'],scope).profileView;
  routes['/projects/sample-0']=moduleFixture('src/pages/projects/[slug].ts',['GET'],scope).GET;
+ routes['/tell/sample-0']=moduleFixture('src/pages/tell/[slug].ts',['GET'],scope).GET;
  return {scope,tables,db,id,owner,author,routes};
 }

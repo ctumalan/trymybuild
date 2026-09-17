@@ -50,7 +50,7 @@ test('guest success is optional signup only after confirmed submission; no autom
 });
 test('motion respects reduced motion; textareas grow; sharing remains a deliberate action',()=>{
  const css=read('ui-refinements.css'),js=read('interaction-polish.js'),share=read('share-invitation.js');assert.match(css,/prefers-reduced-motion:reduce/);assert.match(css,/resize:none!important/);assert.match(js,/Math.min\(280/);assert.match(js,/localStorage.getItem\('trymybuild-brand-intro'\)/);
- assert.match(share,/Send invitation/);assert.match(share,/data-send-invitation/);for(const label of ['Text','Copy invitation','Choose an app','Gmail in browser','Yahoo in browser'])assert.ok(share.includes(label));assert.match(share,/data-share-profile/);
+ assert.match(share,/Open email draft/);assert.match(share,/data-send-invitation/);for(const label of ['Text','Copy invitation','Choose an app','Gmail in browser','Yahoo in browser'])assert.ok(share.includes(label));assert.match(share,/data-share-profile/);
  assert.doesNotMatch(read('app.js').slice(read('app.js').indexOf('function detailDrawer'),read('app.js').indexOf("document.addEventListener('input'")),/What saving does|About opening this app/);
 });
 test('a native invitation keeps Escape and keyboard focus above the project drawer',()=>{

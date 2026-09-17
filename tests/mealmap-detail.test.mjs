@@ -18,10 +18,10 @@ test('All eleven projects use the approved presentation with their own action ta
   assert.match(markup, /How it helps/);
   assert.match(markup, /One thing to try first/);
   assert.doesNotMatch(markup, /Illustrative plan|mealmap-screenshot|mealmap-lead/);
-  assert.match(markup, /data-project-comment="mealmap"/);
-  assert.match(markup, /data-project-comment-field/);
+  assert.doesNotMatch(markup, /data-project-comment="mealmap"/);
+  assert.match(markup, /class="recipient-answers"/);
   assert.match(markup, /href="\/tell\/mealmap" data-guided-open="mealmap">Give feedback/);
-  assert.match(markup, /<summary>Leave a public comment<\/summary>/);
+  assert.doesNotMatch(markup, /<summary>Leave a public comment<\/summary>/);
   assert.match(markup, /data-save="mealmap"/);
   assert.ok(markup.includes(product.url));
   const slugs = vm.runInContext('Object.keys(projectPresentation)', context);
@@ -29,13 +29,13 @@ test('All eleven projects use the approved presentation with their own action ta
   for (const slug of slugs) {
     const explanation = vm.runInContext(`projectPresentation[${JSON.stringify(slug)}][2]`, context);
     const html = context.detailDrawer({ ...product, slug, name: slug, preview: `assets/previews/${slug}.png`, url: `https://example.com/${slug}` });
-    assert.ok(html.includes(`data-project-comment="${slug}"`));
+    assert.ok(html.includes(`data-guided-open="${slug}"`));
     assert.ok(html.includes(`>${explanation}</h2>`));
     assert.doesNotMatch(html, /What does it do\?/);
     assert.ok(html.includes(`data-save="${slug}"`));
     assert.ok(html.includes(`assets/previews/${slug}.png`));
     assert.ok(html.includes(`https://example.com/${slug}`));
-    assert.ok(html.indexOf('recipient-art') < html.indexOf('Try this app ↗'));
-    assert.ok(html.indexOf('detail-description-notes') < html.indexOf('recipient-art'));
+    assert.ok(html.indexOf('recipient-art') < html.indexOf('Try this project ↗'));
+    assert.ok(html.indexOf('recipient-art') < html.indexOf('recipient-answers'));
   }
 });

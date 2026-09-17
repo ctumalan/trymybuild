@@ -4,17 +4,17 @@ import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
 const source=readFileSync(new URL('../app.js',import.meta.url),'utf8');
 test('listing and project detail try links use the same return-feedback hook',()=>{
- for(const [start,end] of [['function catalogRow(', 'const projectPresentation'],['function detailDrawer(', "document.addEventListener('input'"]]){
+ for(const [start,end] of [['function catalogRow(', 'const projectPresentation'],['function projectDetailContent(', "document.addEventListener('input'"]]){
   const section=source.slice(source.indexOf(start),source.indexOf(end,source.indexOf(start)));
   assert.match(section,/data-try-app="\$\{esc\(product.slug\)\}"/);
-  assert.match(section,/>Try this app ↗<\/a>/);
+  assert.match(section,/>Try this (?:app|project) ↗<\/a>/);
  }
  assert.match(source,/armReturnFeedback\(tryApp.dataset.tryApp\)/);
 });
 function setup(){
  let now=0,shows=0;
  const elements=new Map();
- const dialog={setAttribute(){},querySelector(s){if(!elements.has(s))elements.set(s,{setAttribute(){},focus(){},addEventListener(){}});return elements.get(s);},addEventListener(){},showModal(){shows++;},close(){},remove(){}};
+ const dialog={setAttribute(){},querySelector(s){if(!elements.has(s))elements.set(s,{setAttribute(){},focus(){},addEventListener(type,handler){this[type]=handler;}});return elements.get(s);},addEventListener(){},showModal(){shows++;},close(){},remove(){}};
  const document={visibilityState:'visible',hasFocus:()=>true,activeElement:{matches:()=>false},querySelector:()=>null,createElement:()=>dialog,body:{append(){}},addEventListener(){}};
  const ctx=vm.createContext({document,window:{addEventListener(){}},Date:{now:()=>now},projects:[{slug:'one',name:'One'}],esc:String,projectCommentComposer:()=>'<form>saved draft</form>',guidedReturnComposer:()=>'<form data-guided-feedback><textarea></textarea></form>'});
  vm.runInContext(source.slice(source.indexOf('const promptedReturnApps'),source.indexOf('function detailDrawer')),ctx);
@@ -59,3 +59,12 @@ test('each app independently receives its quick and detailed prompts',()=>{
 
 for(const [ms,detailed] of [[120000,false],[120001,true]])test(`long visit boundary ${ms}ms selects the correct feedback form`,()=>{const x=setup();x.ctx.armReturnFeedback('one');x.ctx.markFeedbackDeparture();x.tick(ms);x.ctx.maybeShowReturnFeedback();assert.equal(x.shows(),1);assert.equal(x.dialog.innerHTML.includes('data-guided-feedback'),detailed);});
 test('a written review does not suppress the later guided feedback form',()=>{const x=setup();for(const ms of [16000,120001]){x.ctx.armReturnFeedback('one');x.ctx.markFeedbackDeparture();x.tick(ms);x.ctx.maybeShowReturnFeedback();}assert.equal(x.shows(),2);assert.match(x.dialog.innerHTML,/data-guided-feedback/);});
+test('opting out skips both short prompt types while long visits still open guided feedback',()=>{const x=setup();x.ctx.window.CWReturnPrompts={suppressed:kind=>kind!=='detailed',option:()=>'<label>Don’t show this again</label>'};for(const ms of [10000,16000]){x.ctx.armReturnFeedback('one');x.ctx.markFeedbackDeparture();x.tick(ms);x.ctx.maybeShowReturnFeedback();assert.equal(x.shows(),0);}x.ctx.armReturnFeedback('one');x.ctx.markFeedbackDeparture();x.tick(120001);x.ctx.maybeShowReturnFeedback();assert.equal(x.shows(),1);assert.match(x.dialog.innerHTML,/data-guided-feedback/);assert.doesNotMatch(x.dialog.innerHTML,/Don’t show this again/);});
+test('the return-prompt preference is not submitted as a feedback reason',async()=>{
+ const x=setup();let payload;
+ x.ctx.crypto={randomUUID:()=> 'request-id'};x.ctx.fetch=async(url,request)=>{payload=JSON.parse(request.body);return {ok:true,json:async()=>({ok:true,message:'Received'})};};
+ x.dialog.querySelectorAll=selector=>selector==='input[name=reason]:checked'?[{value:'3'}]:[{value:'3'},{value:'on'}];
+ x.ctx.armReturnFeedback('one');x.ctx.markFeedbackDeparture();x.tick(10000);x.ctx.maybeShowReturnFeedback();
+ const form=x.elements.get('form');form.dataset={};form.querySelector=()=>({});await form.submit({preventDefault(){},currentTarget:form});
+ assert.deepEqual(payload.reasons,['curious']);
+});

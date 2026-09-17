@@ -10,9 +10,10 @@ const STUDIO = {
   initials: 'TMB',
   label: 'In-house creator · Founded by Christian Tumalan',
   bio: 'Our launch collection of practical tools, built in-house at TryMyBuild.',
-  verified: false,
+  verified: true,
+  founderException: true,
 };
-const studioNote = 'Founder-confirmed: Christian Tumalan confirmed control of TryMyBuild Studio and its listed projects on September 4, 2026. This is not independent verification or a guarantee of product quality.';
+const studioNote = 'Founder exception—not earned through feedback. Founder-confirmed: Christian Tumalan confirmed control of TryMyBuild Studio and its listed projects on September 4, 2026. This is not independent verification or a guarantee of product quality.';
 
 const initialsOf = (name: string) => String(name || 'Member').split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase() || 'M';
 

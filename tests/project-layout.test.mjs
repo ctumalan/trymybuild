@@ -3,12 +3,12 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 const app=readFileSync(new URL('../app.js',import.meta.url),'utf8');
 const css=readFileSync(new URL('../launch-refinements.css',import.meta.url),'utf8');
-const drawer=app.slice(app.indexOf('function detailDrawer(product)'),app.indexOf("document.addEventListener('input'",app.indexOf('function detailDrawer(product)')));
+const drawer=app.slice(app.indexOf('function projectDetailContent(product'),app.indexOf("document.addEventListener('input'",app.indexOf('function detailDrawer(product)')));
 test('detail view uses the invitation screenshot layout and relevant information',()=>{
  assert.match(drawer,/class="recipient-art"/);
  assert.doesNotMatch(drawer,/--project-wallpaper|Good to know/);
  assert.doesNotMatch(drawer,/What saving does|About opening this app/);
- assert.match(drawer,/Try this app ↗/);
+ assert.match(drawer,/Try this project ↗/);
  assert.match(drawer,/No public comments yet/);
  assert.match(drawer,/videoPlayer\(product.video\)/);
  assert.match(css,/\.mealmap-detail \.project-screenshot\{[^}]*object-fit:contain/);

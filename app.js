@@ -25,7 +25,7 @@ const creators = [
 
 // The launch collection is attributed to its actual in-house studio.
 creators.push({ slug: "creatorworks-studio", name: "TryMyBuild Studio", initials: "TMB",
-  type: "company",
+  type: "company", verified: true, founderException: true,
   label: "In-house creator · Founded by Christian Tumalan",
   bio: "Our launch collection of practical tools, built in-house at TryMyBuild. Try something useful and tell us what worked, what confused you, and what would make it better." });
 
@@ -182,7 +182,7 @@ function creatorFor(project) {
 function creatorMatchesFilters(creator, creatorType = 'all', verifiedOnly = false) {
   const type = creator?.type === 'company' ? 'company' : 'independent';
   return (creatorType === 'all' || type === creatorType)
-    && (!verifiedOnly || (type === 'independent' && creator?.verified === true));
+    && (!verifiedOnly || ((type === 'independent' || creator?.founderException === true) && creator?.verified === true));
 }
 
 function experienceCount(project) {
@@ -193,12 +193,12 @@ function avatar(creator, className = "") {
   return `<span class="person-avatar ${esc(creator.color || "")} ${className}" aria-hidden="true">${creator.avatar ? `<img src="${esc(creator.avatar)}" alt="" />` : esc(creator.initials)}</span>`;
 }
 
-const studioVerification = 'Founder-confirmed: Christian Tumalan confirmed control of TryMyBuild Studio and its 11 listed projects on September 4, 2026. This is not independent verification or a guarantee of product quality.';
+const studioVerification = 'Founder exception—not earned through feedback. Founder-confirmed: Christian Tumalan confirmed control of TryMyBuild Studio and its 11 listed projects on September 4, 2026. This is not independent verification or a guarantee of product quality.';
 
 function creatorVerificationBadge(creator) {
   const verified = creator.verified === true || (!window.CW_SERVER && creator.slug === 'creatorworks-studio');
   const note = creator.slug === 'creatorworks-studio' ? studioVerification : 'Qualifying contribution and app ownership confirmed. Not a product-quality guarantee.';
-  return verified ? `<span class="creator-verified" title="${esc(note)}">✓ Verified creator</span>` : '';
+  return verified ? `<span class="creator-verified" title="${esc(note)}">✓ Verified Creator</span>` : '';
 }
 
 function creatorLink(project, compact = false, showVerification = true) {
@@ -353,7 +353,7 @@ function discover(communityFocused = false) {
       <p id="creator-verification-help" class="creator-verification-help" hidden>Verified Builder is earned by independent creators after qualifying contributions and confirmation that they own their published app. It does not rate app quality.</p></div></details>
     </div>
 
-    <div class="catalog-results"><div class="results-heading"><strong>${state.query.trim()?'Closest matches':`${filtered.length} ${filtered.length === 1 ? 'app' : 'apps'}`}</strong><span>${state.query.trim()&&!searchResults.suggestions?'Most relevant first.':catalogSortLabel()}</span></div>${state.query.trim()?`<p class="search-guidance">${searchResults.suggestions?'Try describing a specific task. Here are some apps to explore within your filters.':'Explore these apps, or tell creators what you still need.'} <button class="text-button" data-wish-focus>Submit a wish</button></p>`:''}<div class="catalog-list">${filtered.length ? filtered.map(product => catalogRow(product)).join("") : `<div class="empty-state"><h2>${state.query.trim()?'Explore more possibilities':'More apps are on the way'}</h2><p>${state.verifiedOnly?'No independent creators with the earned badge match these filters yet. TryMyBuild Studio is founder-confirmed and does not hold this badge.':'There are no published apps within these filters yet. Broaden your filters or share what you need.'}</p><button class="secondary-button" data-clear-search>Browse all apps</button><button class="primary-button" data-wish-focus>Submit a wish</button></div>`}</div></div>
+    <div class="catalog-results"><div class="results-heading"><strong>${state.query.trim()?'Closest matches':`${filtered.length} ${filtered.length === 1 ? 'app' : 'apps'}`}</strong><span>${state.query.trim()&&!searchResults.suggestions?'Most relevant first.':catalogSortLabel()}</span></div>${state.query.trim()?`<p class="search-guidance">${searchResults.suggestions?'Try describing a specific task. Here are some apps to explore within your filters.':'Explore these apps, or tell creators what you still need.'} <button class="text-button" data-wish-focus>Submit a wish</button></p>`:''}<div class="catalog-list">${filtered.length ? filtered.map(product => catalogRow(product)).join("") : `<div class="empty-state"><h2>${state.query.trim()?'Explore more possibilities':'More apps are on the way'}</h2><p>${state.verifiedOnly?'No verified creators match these filters. TryMyBuild Studio holds a disclosed founder exception.':'There are no published apps within these filters yet. Broaden your filters or share what you need.'}</p><button class="secondary-button" data-clear-search>Browse all apps</button><button class="primary-button" data-wish-focus>Submit a wish</button></div>`}</div></div>
     ${wishListSection()}
   </div></section>`;
 }
@@ -398,7 +398,7 @@ const openedCatalogApps = new Set();
 function catalogRow(product) {
   const saved = state.saved.has(product.slug);
   const count = experienceCount(product);
-return `<article class="catalog-row"><div class="row-media"><button class="row-preview" data-product="${esc(product.slug)}" aria-label="View ${esc(product.name)} details"><img src="${esc(product.preview)}" alt="Preview of the ${esc(product.name)} website" loading="lazy" /></button><div class="card-secondary-actions"><button class="save-button-row ${saved ? "is-saved" : ""}" data-save="${esc(product.slug)}" aria-label="${saved ? "Remove" : "Save"} ${esc(product.name)}">${saved ? "♥ Saved" : "♡ Save"}</button><button type="button" class="save-button-row" data-share-product="${esc(product.slug)}" aria-label="Share ${esc(product.name)}">Share</button></div></div><div class="row-copy"><div class="product-meta"><span class="price-badge">${esc(product.price)}</span><span>${esc(product.category)}</span>${product.stage && product.stage !== 'New' ? `<span>${esc(product.stage)}</span>` : ''}${Number(product.recentCommentCount)>=3?`<span class="activity-badge" title="Published comments and public reviews in the past 30 days">💬 Active discussion · ${Number(product.recentCommentCount)}</span>`:''}</div><button class="row-title" data-product="${esc(product.slug)}">${esc(product.name)}</button><p>${esc(product.summary)}</p>${creatorLink(product, true, false)}<div class="card-try-actions"><a class="primary-button" href="${esc(safeProjectUrl(product.url))}" target="_blank" rel="noopener noreferrer" data-try-app="${esc(product.slug)}" aria-label="Try ${esc(product.name)} (opens in a new tab)">Try this app ↗</a></div><section class="card-comments" aria-label="Comments on ${esc(product.name)}">${state.communityPosts.filter(post=>post.projectSlug===product.slug).slice(0,2).map(post=>experienceCard(post)).join('')}<p class="card-return-prompt" data-return-prompt="${esc(product.slug)}" ${openedCatalogApps.has(product.slug)?'':'hidden'}>Had a chance to try it? Tell the maker what you think.</p><a class="text-button feedback-primary" href="/tell/${esc(product.slug)}" data-guided-open="${esc(product.slug)}">Give feedback</a><details class="card-feedback" ${projectCommentDraft(product.slug).trim()?'open':''}><summary>Leave a public comment</summary>${projectCommentComposer(product, true)}</details></section></div></article>`;
+return `<article class="catalog-row"><div class="row-media"><button class="row-preview" data-product="${esc(product.slug)}" aria-label="View ${esc(product.name)} details"><img src="${esc(product.preview)}" alt="Preview of the ${esc(product.name)} website" loading="lazy" /></button><div class="card-secondary-actions"><button class="save-button-row ${saved ? "is-saved" : ""}" data-save="${esc(product.slug)}" aria-label="${saved ? "Remove" : "Save"} ${esc(product.name)}">${saved ? "♥ Saved" : "♡ Save"}</button><button type="button" class="save-button-row" data-share-product="${esc(product.slug)}" aria-label="Share ${esc(product.name)}">Share</button></div></div><div class="row-copy"><div class="product-meta"><span class="price-badge">${esc(product.price)}</span><span>${esc(product.category)}</span>${product.stage && product.stage !== 'New' ? `<span>${esc(product.stage)}</span>` : ''}${Number(product.recentCommentCount)>=3?`<span class="activity-badge" title="Published comments and public reviews in the past 30 days">💬 Active discussion · ${Number(product.recentCommentCount)}</span>`:''}</div><button class="row-title" data-product="${esc(product.slug)}">${esc(product.name)}</button><p>${esc(product.summary)}</p>${creatorLink(product, true)}<div class="card-try-actions"><a class="primary-button" href="${esc(safeProjectUrl(product.url))}" target="_blank" rel="noopener noreferrer" data-try-app="${esc(product.slug)}" aria-label="Try ${esc(product.name)} (opens in a new tab)">Try this app ↗</a></div><section class="card-comments" aria-label="Comments on ${esc(product.name)}">${state.communityPosts.filter(post=>post.projectSlug===product.slug).slice(0,2).map(post=>experienceCard(post)).join('')}<p class="card-return-prompt" data-return-prompt="${esc(product.slug)}" ${openedCatalogApps.has(product.slug)?'':'hidden'}>Had a chance to try it? Tell the maker what you think.</p><a class="text-button feedback-primary" href="/tell/${esc(product.slug)}" data-guided-open="${esc(product.slug)}">Give feedback</a></section></div></article>`;
 }
 
 const projectPresentation = {
@@ -517,7 +517,7 @@ function maybeShowReturnFeedback() {
   const quick = awayMs < 15000;
   const detailed = awayMs > 120000;
   const promptKey = `${pending.slug}:${quick ? 'quick' : detailed ? 'detailed' : 'review'}`;
-  if (promptedReturnApps.has(promptKey)) return;
+  if (promptedReturnApps.has(promptKey) || window.CWReturnPrompts?.suppressed(detailed?'detailed':quick?'quick':'comment')) return;
   if (document.querySelector('dialog[open]:not(.cw-overlay)') || document.activeElement?.matches('textarea, input, [contenteditable="true"]')) return;
   const product = projects.find(item => item.slug === pending.slug);
   if (!product) return;
@@ -527,7 +527,7 @@ function maybeShowReturnFeedback() {
   dialog.className = 'return-feedback-dialog';
   dialog.setAttribute('aria-labelledby', 'return-feedback-title');
   const quickOptions = ['Too much to read', 'Hard to understand', 'Not what I expected', 'Just curious'];
-  dialog.innerHTML = `<button type="button" class="return-feedback-close" aria-label="Close feedback prompt">×</button>${quick ? `<h2 id="return-feedback-title">A quick thought on ${esc(product.name)}?</h2><p>Was there anything that made you stop exploring?</p><form data-quick-return-feedback><fieldset><legend>Select any that fit</legend>${quickOptions.map((label,index)=>`<label><input type="checkbox" name="reason" value="${index}"><span>${label}</span></label>`).join('')}</fieldset><button class="primary-button return-feedback-send" type="submit">Send response</button><p class="quick-preview-note">Shared privately with the creator.</p><p data-quick-status role="status"></p></form>` : detailed ? `<h2 id="return-feedback-title">What stood out in ${esc(product.name)}?</h2><p>Tell the creator what worked and what could improve.</p>${guidedReturnComposer(product)}` : `<h2 id="return-feedback-title">How was ${esc(product.name)}?</h2><p>Leave a public comment about what worked or could be better.</p>${projectCommentComposer(product, false, 'return-')}`}<button type="button" class="text-button" data-return-dismiss>Not now</button>`;
+  dialog.innerHTML = `<button type="button" class="return-feedback-close" aria-label="Close feedback prompt">×</button>${quick ? `<h2 id="return-feedback-title">A quick thought on ${esc(product.name)}?</h2><p>Was there anything that made you stop exploring?</p><form data-quick-return-feedback><fieldset><legend>Select any that fit</legend>${quickOptions.map((label,index)=>`<label><input type="checkbox" name="reason" value="${index}"><span>${label}</span></label>`).join('')}</fieldset><button class="primary-button return-feedback-send" type="submit">Send response</button><p class="quick-preview-note">Shared privately with the creator.</p><p data-quick-status role="status"></p></form>` : detailed ? `<h2 id="return-feedback-title">What stood out in ${esc(product.name)}?</h2><p>Tell the creator what worked and what could improve.</p>${guidedReturnComposer(product)}` : `<h2 id="return-feedback-title">How was ${esc(product.name)}?</h2><p>Leave a public comment about what worked or could be better.</p>${projectCommentComposer(product, false, 'return-')}`}${!detailed?window.CWReturnPrompts?.option()||'':''}<button type="button" class="text-button" data-return-dismiss>Not now</button>`;
   if (!quick && !detailed) {
     const submit = dialog.querySelector('[type="submit"]');
     submit.textContent = 'Send comment';
@@ -537,13 +537,13 @@ function maybeShowReturnFeedback() {
   } else if (quick) {
     dialog.querySelector('form').addEventListener('submit', async event => {
       event.preventDefault();
-      const answers = [...dialog.querySelectorAll('input:checked')].map(input=>quickOptions[Number(input.value)]);
+      const answers = [...dialog.querySelectorAll('input[name=reason]:checked')].map(input=>quickOptions[Number(input.value)]);
       const status = dialog.querySelector('[data-quick-status]');
       if (!answers.length) {status.textContent='Choose an option, or select Not now.';return;}
       const form = event.currentTarget;
       const button = form.querySelector('[type="submit"]');
       const reasonKeys = ['too_much_to_read','hard_to_understand','unexpected','curious'];
-      const reasons = [...dialog.querySelectorAll('input:checked')].map(input=>reasonKeys[Number(input.value)]);
+      const reasons = [...dialog.querySelectorAll('input[name=reason]:checked')].map(input=>reasonKeys[Number(input.value)]);
       form.dataset.requestId ||= crypto.randomUUID();
       button.disabled = true;
       status.textContent = 'Sending…';
@@ -578,16 +578,21 @@ document.addEventListener('visibilitychange', () => {
   else maybeShowReturnFeedback();
 });
 
-function detailDrawer(product) {
+function projectDetailContent(product, preview = false) {
   const copy = projectPresentation[product.slug] || ['', '',product.summary,'',''];
+  const presentation = product.presentation || {headline:copy[2],help:copy[3],firstTry:copy[4]};
+  const creator = preview ? `<div class="public-builder"><span class="person-avatar">${esc((state.session?.user?.displayName||'You').slice(0,1))}</span><div><strong>Built by ${esc(state.session?.user?.displayName||'You')}</strong></div></div>` : creatorLink(product,true);
+  return `<section class="recipient-hero"><div class="recipient-copy"><p class="eyebrow">You’re invited to try something new</p><span class="recipient-category">${esc(product.category)} · ${esc(product.stage)}</span><h2 ${preview?'':`id="detail-title-${esc(product.slug)}"`}>${esc(presentation.headline||product.name)}</h2><p class="recipient-project-name">${esc(product.name)}</p>${creator}</div><div class="recipient-preview-column"><div class="recipient-art">${product.preview?`<img ${preview?'data-listing-screenshot':''} src="${esc(product.preview)}" alt="Preview of ${esc(product.name)}" referrerpolicy="no-referrer">`:''}<span>Made by a person. Ready for your perspective.</span></div>${product.url?`<a class="primary-button" href="${esc(safeProjectUrl(product.url))}" target="_blank" rel="noopener noreferrer" ${preview?'':`data-try-app="${esc(product.slug)}"`}>Try this project ↗</a>`:''}</div></section><section class="recipient-answers"><article><p class="eyebrow">Why try it?</p><h2>How it helps</h2><p>${esc(presentation.help)}</p></article><article><p class="eyebrow">Start here</p><h2>One thing to try first</h2><p>${esc(presentation.firstTry)}</p></article></section>`;
+}
+
+function detailDrawer(product) {
   const saved = state.saved.has(product.slug);
   return `<div class="detail-overlay" data-detail-overlay>
     <button class="detail-backdrop" data-detail-close aria-label="Close app details"></button>
     <section class="detail-dialog mealmap-detail invitation-detail" data-showcase-theme="${product.slug === 'stackscout' ? 'stackscout' : ['coral','teal','blue','gold','green','violet'].includes(product.color) ? product.color : 'teal'}" role="dialog" aria-modal="true" aria-labelledby="detail-title-${esc(product.slug)}" tabindex="-1">
       <div class="detail-scroll">
-        <header class="mealmap-top">${detailProjectHistory.length ? `<button type="button" class="detail-back" data-detail-back aria-label="Back to ${esc(detailProjectHistory.at(-1).product.name)}" title="Previous project">←</button>` : ''}<div class="mealmap-wordmark">${esc(product.name)}<span class="detail-app-meta">${esc(product.price)} · ${esc(product.category)} · ${esc(product.stage)}</span><div class="detail-creator">${creatorLink(product,true)}</div></div><div class="detail-header-controls"><button class="detail-save ${saved ? "is-saved" : ""}" data-save="${esc(product.slug)}">${saved ? "♥ Saved" : "♡ Save"}</button><button type="button" class="detail-share" data-share-product="${esc(product.slug)}" aria-label="Share ${esc(product.name)}">Share</button><span class="detail-share-status" data-share-status role="status"></span><button class="detail-close" data-detail-close aria-label="Close ${esc(product.name)} details">×</button></div></header>
-        <section class="recipient-hero"><div class="recipient-copy"><h2 id="detail-title-${esc(product.slug)}">${esc(copy[2])}</h2><div class="detail-description-notes"><div><h3>How it helps</h3><p>${esc(copy[3])}</p></div><div><h3>One thing to try first</h3><p>${esc(copy[4])}</p></div></div></div><div class="recipient-preview-column"><div class="recipient-art"><img src="${esc(product.preview)}" alt="Preview of ${esc(product.name)}"><span>Made by a person. Ready for your perspective.</span></div><a class="primary-button" href="${esc(safeProjectUrl(product.url))}" target="_blank" rel="noopener noreferrer" data-try-app="${esc(product.slug)}">Try this app ↗</a></div></section>
-        ${videoPlayer(product.video)}<div class="mealmap-after"><section class="mealmap-feedback"><a class="primary-button feedback-primary" href="/tell/${esc(product.slug)}" data-guided-open="${esc(product.slug)}">Give feedback</a><p class="feedback-guidance">Start a conversation with the creator.</p><details class="card-feedback"><summary>Leave a public comment</summary>${projectCommentComposer(product)}</details><div class="mealmap-comments">${state.communityPosts.filter(post => post.projectSlug === product.slug).length ? state.communityPosts.filter(post => post.projectSlug === product.slug).map(post => experienceCard(post)).join('') : '<p>No public comments yet.</p>'}</div></section></div>${similarSection(product)}
+        <header class="project-panel-bar"><span>TryMyBuild</span><button class="detail-close" data-detail-close aria-label="Close ${esc(product.name)} details">×</button></header><div class="project-detail-content"><header class="public-detail-header">${detailProjectHistory.length ? `<button type="button" class="detail-back" data-detail-back aria-label="Previous project">←</button>` : ''}<div><strong>${esc(product.name)}</strong><small>${esc(product.category)} · ${esc(product.price)}</small></div><div class="invite-actions"><button class="secondary-button detail-save ${saved?'is-saved':''}" data-save="${esc(product.slug)}">${saved?'♥ Saved':'♡ Save'}</button><button class="secondary-button detail-share" data-share-product="${esc(product.slug)}">Share</button><span class="detail-share-status" data-share-status role="status"></span></div></header>${projectDetailContent(product)}
+        ${videoPlayer(product.video)}<div class="mealmap-after"><section class="mealmap-feedback"><a class="primary-button feedback-primary" href="/tell/${esc(product.slug)}" data-guided-open="${esc(product.slug)}">Give feedback</a><p class="feedback-guidance">Start a conversation with the creator.</p><div class="mealmap-comments">${state.communityPosts.filter(post => post.projectSlug === product.slug).length ? state.communityPosts.filter(post => post.projectSlug === product.slug).map(post => experienceCard(post)).join('') : '<p>No public comments yet.</p>'}</div></section></div>${similarSection(product)}</div>
       </div>
     </section>
   </div>`;
@@ -863,7 +868,8 @@ function listingPreview() {
   const url = listingUrl(listingDraft.url);
   const image = listingImage();
   queueMicrotask(() => { void ensureListingScreenshot(); });
-  return `<div data-listing-preview-region><article class="listing-preview-card"><header class="mealmap-top"><span class="mealmap-wordmark">${esc(listingDraft.title || 'Your project')}<small>${esc(listingDraft.category)} · ${esc(listingDraft.stage)}</small></span></header><div class="mealmap-intro listing-preview-hero">${image ? `<img data-listing-screenshot src="${esc(image)}" alt="Preview of ${esc(listingDraft.title)}" referrerpolicy="no-referrer" />` : ''}<h2>${esc(listingDraft.does || listingDraft.title || 'Your project')}</h2></div><section class="mealmap-answers">${url ? `<div class="mealmap-action"><a class="primary-button" href="${esc(url)}" target="_blank" rel="noopener noreferrer">Open ${esc(listingDraft.title || 'project')} ↗</a></div>` : ''}<div class="mealmap-answer-grid"><article><h3>How does it help me?</h3><p>${esc(listingDraft.helps)}</p></article><article><h3>What feature should I try first?</h3><p>${esc(listingDraft.firstTry)}</p></article></div></section></article>${listingImageControls()}</div>`;
+  const product={slug:'listing-preview',name:listingDraft.title||'Your project',category:listingDraft.category,stage:listingDraft.stage,preview:image,url,presentation:{headline:listingDraft.does,help:listingDraft.helps,firstTry:listingDraft.firstTry}};
+  return `<div data-listing-preview-region><article class="listing-preview-card project-detail-content"><header class="public-detail-header"><div><strong>${esc(product.name)}</strong><small>${esc(product.category)} · ${esc(product.stage)}</small></div></header>${projectDetailContent(product,true)}</article>${listingImageControls()}</div>`;
 }
 function listingIdentityConfirmation() {
   const image = listingImage();
@@ -1333,7 +1339,7 @@ function hydrateCatalog(list) {
     projectPresentation[p.slug] = [pr.eyebrow || p.category || '', '', pr.headline || p.summary || p.name, pr.help || '', pr.firstTry || ''];
     if (p.creator && (p.creator.slug || p.creator.name)) {
       const slug = p.creator.slug || 'creator-' + p.slug;
-      const data = { slug, type: p.creator.type === 'company' ? 'company' : 'independent', avatar: p.creator.avatar || '', name: p.creator.name, initials: p.creator.initials || String(p.creator.name || 'C').slice(0, 2).toUpperCase(), label: p.creator.label || 'TryMyBuild creator', bio: p.creator.bio || '', verified: !!p.creator.verified };
+      const data = { slug, type: p.creator.type === 'company' ? 'company' : 'independent', avatar: p.creator.avatar || '', name: p.creator.name, initials: p.creator.initials || String(p.creator.name || 'C').slice(0, 2).toUpperCase(), label: p.creator.label || 'TryMyBuild creator', bio: p.creator.bio || '', verified: !!p.creator.verified, founderException: p.creator.founderException === true };
       const existing = creators.find(c => c.slug === slug);
       if (existing) Object.assign(existing, data); else creators.push(data);
     }

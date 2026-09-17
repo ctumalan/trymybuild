@@ -16,7 +16,7 @@ test('account and catalog cards offer Share while preserving detail and save act
   assert.ok(catalog.includes(`data-product="${p.slug}"`));
   assert.ok(catalog.includes(`data-save="${p.slug}"`));
  }
- assert.match(source,/class="detail-share" data-share-product=/);
+ assert.match(source,/class="secondary-button detail-share" data-share-product=/);
 });
 test('shared project URLs lead to a dedicated recipient page',()=>{
  const ctx=vm.createContext({URL,location:{origin:'https://creatorworks.vercel.app'}});

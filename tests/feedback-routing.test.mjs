@@ -4,11 +4,11 @@ import vm from 'node:vm';
 import {workspaceFixtures,moduleFixture,read} from '../scripts/workspace-fixtures.mjs';
 
 const context=slug=>({url:new URL('https://example.invalid/tell/'+slug),params:{slug},cookies:{get(){}}});
-test('recipient feedback has a guided primary action and a secondary public comment',async()=>{
+test('recipient feedback has one guided action with public visibility inside the form',async()=>{
  const f=workspaceFixtures(),html=await (await f.routes['/projects/sample-0'](context('sample-0'))).text();
  assert.match(html,/class="primary-button feedback-primary" href="\/tell\/sample-0" data-guided-open="sample-0">Give feedback/);
- assert.match(html,/<details class="card-feedback"><summary>Leave a public comment<\/summary>/);
- assert.match(html,/Guests appear as Guest/);assert.match(html,/sign in to update yours/);
+ assert.doesNotMatch(html,/<summary>Leave a public comment<\/summary>|data-public-comment=/);
+ const composer=f.scope.publicCommentComposer("sample-0");assert.match(composer,/Guests appear as Guest/);assert.match(composer,/sign in to update yours/);
  assert.doesNotMatch(html,/Join before posting/);
 });
 test('guided page exposes guest form, owner guidance and existing thread without leaking drafts',async()=>{

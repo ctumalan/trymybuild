@@ -7,7 +7,7 @@ import { stripTypeScriptTypes } from 'node:module';
 const read = path => readFileSync(new URL('../' + path, import.meta.url), 'utf8');
 
 test('discovery introduces both project discovery and creator participation', () => {
-  assert.match(read('index.html'), /class="brand-promise">Discover apps. Share what you’ve built.<\/span>/);
+  assert.match(read('index.html'), /class="brand-promise">Discover apps. Share your app.<\/span>/);
   assert.match(read('index.html'), /<title>TryMyBuild — Share your app. Discover apps to try.<\/title>/);
   const app = read('app.js');
   assert.match(app, /Explore apps/);

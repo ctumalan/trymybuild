@@ -52,6 +52,11 @@ test('messages use server-side sorting and inline conversations, with one empty 
  assert.equal((await privateRoute(context('/dashboard/thread/'+f.id+'?fragment=1',{id:f.id}))).status,401);
  assert.equal(await f.scope.conversation(f.db,'unrelated-user',f.id,new URL('https://example.invalid')),null);
 });
+test('maker sees the reply commitment while an invited tester is waiting',async()=>{
+ const f=workspaceFixtures();f.tables.feedback_requests=[{id:f.id,user_id:f.owner,project_slug:'sample-0',question:'Where did the first task become unclear?',status:'queued',created_at:'2026-09-12T15:00:00Z'}];
+ const thread=await f.scope.conversation(f.db,f.owner,f.id,new URL('https://example.invalid/dashboard/messages?thread='+f.id));
+ assert.match(thread,/This tester is waiting for you/);assert.match(thread,/Reply within two days/);
+});
 test('public profiles preserve visibility while own preview stays authenticated',async()=>{
  const f=workspaceFixtures(),profile=moduleFixture('src/server/profile-view.ts',['profileView'],{...f.scope,STUDIO:{slug:'studio'},listPublished:async()=>[],projectCard:()=>''}).profileView;
  f.tables.profiles[0].is_public=false;

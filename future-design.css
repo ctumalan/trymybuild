@@ -566,3 +566,24 @@ a.secondary-button,.cw-main a.secondary-button { background: #f2edf8; color: #5e
 .wish-dialog .wish-list { padding: 0; margin: 0; border: 0; background: transparent; box-shadow: none; }
 .wish-dialog .wish-items { max-height: 180px; overflow: auto; }
 .wish-dialog .wish-list>p { color: #68616e; font-size: .9rem; line-height: 1.5; }
+
+/* A trial is presented as a short conversation with a named maker. */
+.trial-brief { margin: 26px 0; padding: clamp(22px,4vw,34px); border: 1px solid #d9cbe8; border-radius: 22px; background: linear-gradient(135deg,#fff9f6,#f2edf8); color: #382b46; }
+.trial-maker { display: flex; align-items: center; gap: 14px; margin-bottom: 22px; }
+.trial-maker>img,.trial-maker>span { width: 52px; height: 52px; flex: 0 0 52px; border-radius: 50%; object-fit: cover; display: grid; place-items: center; background: #ffaaa4; color: #382b46; font-weight: 800; }
+.trial-maker .eyebrow { margin: 0 0 4px; color: #7545ad; }
+.trial-maker h2 { margin: 0; font-size: clamp(1.35rem,3vw,2rem); }
+.trial-brief dl { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 12px; margin: 0; }
+.trial-brief dl>div { padding: 16px; border: 1px solid #e2d8ec; border-radius: 14px; background: #fffdfa; }
+.trial-brief dt { margin-bottom: 7px; color: #7545ad; font-size: .74rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
+.trial-brief dd { margin: 0; line-height: 1.5; }
+.trial-reply-promise { margin: 18px 0 0; font-weight: 700; }
+.trial-form-prompt { margin: 18px 0 26px; padding: 18px; border-radius: 14px; background: #f2edf8; }
+.trial-form-prompt p { margin: 4px 0 14px; }
+.trial-form-prompt small { color: #5e516a; font-weight: 650; }
+.trial-owner-actions .cw-row { justify-content: flex-start; }
+.project-action-menu form { margin: 0; }
+.project-action-menu form>button { display: block; width: 100%; margin: 0; padding: 10px; border: 0; border-radius: 8px; background: none; color: var(--ink); text-align: left; font: inherit; font-size: .85rem; cursor: pointer; }
+.project-action-menu form>button:hover { background: #f2edf8; }
+.maker-reply-promise,.trial-sent-notice { border: 1px solid #d9cbe8; background: #f2edf8; color: #493953; }
+@media(max-width:700px) { .trial-brief dl { grid-template-columns: 1fr; } }

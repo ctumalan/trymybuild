@@ -14,10 +14,17 @@ test('recipient feedback has one guided action with public visibility inside the
 test('guided page exposes guest form, owner guidance and existing thread without leaking drafts',async()=>{
  const f=workspaceFixtures(),guest=moduleFixture('src/pages/tell/[slug].ts',['GET'],{...f.scope,currentUser:async()=>null}).GET;
  let html=await (await guest(context('sample-0'))).text();assert.match(html,/data-guided-panel/);assert.match(html,/action="\/api\/feedback"/);assert.match(html,/data-guided-feedback/);
- html=await (await f.routes['/tell/sample-0'](context('sample-0'))).text();assert.match(html,/data-guided-panel/);assert.match(html,/Creators don’t submit reviews of their own projects/);assert.doesNotMatch(html,/data-guided-feedback/);
+ html=await (await f.routes['/tell/sample-0'](context('sample-0'))).text();assert.match(html,/data-guided-panel/);assert.match(html,/Creators don’t submit feedback on their own projects/);assert.doesNotMatch(html,/data-guided-feedback/);
  const existing=moduleFixture('src/pages/tell/[slug].ts',['GET'],{...f.scope,currentUser:async()=>({id:f.author}),ensureMember:async()=>({id:f.author})}).GET;
  html=await (await existing(context('sample-0'))).text();assert.match(html,/data-guided-panel/);assert.match(html,new RegExp('/dashboard/messages\\?thread='+f.id));assert.doesNotMatch(html,/data-guided-feedback/);
  assert.equal((await guest(context('sample-1'))).status,404);
+});
+test('an open feedback request becomes a focused trial brief and removes the pricing detour',async()=>{
+ const f=workspaceFixtures();f.tables.feedback_requests=[{id:f.id,user_id:f.owner,project_slug:'sample-0',question:'Was it clear how to save your first shared list?',status:'queued',created_at:'2026-09-12T15:00:00Z'}];
+ const project=await (await f.routes['/projects/sample-0'](context('sample-0'))).text();
+ assert.match(project,/A short trial with a real maker/);assert.match(project,/About 5–10 minutes/);assert.match(project,/Was it clear how to save your first shared list/);assert.match(project,/>Finish the trial</);
+ const guest=moduleFixture('src/pages/tell/[slug].ts',['GET'],{...f.scope,currentUser:async()=>null}).GET,form=await (await guest(context('sample-0'))).text();
+ assert.match(form,/Were you able to complete the task/);assert.match(form,/What did you expect, and what happened/);assert.match(form,/Could this solve a real problem for you/);assert.match(form,/name="price" value="unsure"/);assert.doesNotMatch(form,/How did the price feel/);
 });
 test('catalog loads the handlers needed by guided and native project overlays',()=>{
  const html=read('index.html');for(const file of ['community-input.js','public-comments.js','project-actions.js'])assert.match(html,new RegExp('src="'+file.replaceAll('.','\\.')+'" defer'));
@@ -30,7 +37,7 @@ test('guided submission requires membership and creates a replyable review rathe
  const request=()=>new Request('https://example.invalid/api/feedback',{method:'POST',headers:{accept:'application/json'},body:new URLSearchParams(fields)});
  const scope={...f.scope,json:(body,status=200)=>Response.json(body,{status}),database:()=>db,sameOrigin:()=>true,allowRequest:async()=>true,currentUser:async()=>({id:f.author,emailVerified:true}),ensureMember:async()=>({id:f.author})};
  const route=moduleFixture('src/pages/api/feedback.ts',['POST'],scope).POST;
- let response=await route({...context('sample-0'),request:request()});assert.equal(response.status,200);const data=await response.json();assert.equal(data.href,'/dashboard/messages?thread='+f.id);assert.match(data.message,/after approval/);
+ let response=await route({...context('sample-0'),request:request()});assert.equal(response.status,200);const data=await response.json();assert.equal(data.href,'/dashboard/messages?thread='+f.id);assert.match(data.message,/sent to the maker/);
  assert.equal(writes.length,1);assert.equal(writes[0].table,'creator_feedback');assert.equal(writes[0].row.visibility,'private');assert.equal(writes[0].row.author_user_id,f.author);assert.equal(writes[0].row.message,fields.message);
  const guest=moduleFixture('src/pages/api/feedback.ts',['POST'],{...scope,currentUser:async()=>null}).POST;
  response=await guest({...context('sample-0'),request:request()});assert.equal(response.status,401);assert.equal(writes.length,1);

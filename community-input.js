@@ -15,7 +15,7 @@ document.querySelectorAll('[data-mark-thread-read]').forEach(form=>{
 document.addEventListener('change',event=>{
  if(event.target.name!=='attempt')return;
  const prompt=document.querySelector('[data-review-prompt]');
- if(prompt)prompt.textContent=event.target.value==='not_tried'?'What would you like to ask? (No automatic credit until you try it.)':['stuck','blocked'].includes(event.target.value)?'What were you trying to do, and what stopped you?':'What did you try, and what happened?';
+ if(prompt)prompt.textContent=event.target.value==='not_tried'?'3. What would you like to ask the maker?':['stuck','blocked'].includes(event.target.value)?'3. What did you expect to happen, and what stopped you?':'3. What did you expect, and what happened?';
 });
 
 // Keep completed feedback locally through joining. Posting always requires a member.
@@ -55,7 +55,7 @@ document.addEventListener('change',event=>{
   if(!save(form)){status.textContent='Your browser cannot keep this draft. Enable site storage before joining.';return;}
   const button=form.querySelector('[type="submit"]');button.disabled=true;
   try{const me=await fetch('/api/me').then(r=>{if(!r.ok)throw Error('Unable to check your account. Please try again.');return r.json();});if(!me.authenticated){window.CWJoin.offer({action:'feedback',slug:form.elements.slug.value,project:form.closest('.return-feedback-dialog')?form.elements.slug.value:undefined,browse:window.CWBrowseContext?.()});return;}
-   const r=await fetch('/api/feedback',{method:'POST',headers:{Accept:'application/json'},body:new URLSearchParams(new FormData(form))}),data=await r.json();if(!r.ok)throw Error(data.error);localStorage.removeItem(key(form.elements.slug.value));form.reset();status.textContent=data.duplicate?'You already started a conversation on this app.':'Your feedback was sent.';const a=document.createElement('a');a.href=data.href;a.textContent=' Open in Messages';status.append(a);
+   const r=await fetch('/api/feedback',{method:'POST',headers:{Accept:'application/json'},body:new URLSearchParams(new FormData(form))}),data=await r.json();if(!r.ok)throw Error(data.error);localStorage.removeItem(key(form.elements.slug.value));form.reset();status.textContent=data.duplicate?'You already started a conversation on this app.':data.message||'Your feedback was sent.';const a=document.createElement('a');a.href=data.href;a.textContent=' Open the conversation';status.append(a);
   }catch(error){status.textContent=error.message||'Unable to send. Your draft is kept.';}finally{button.disabled=false;}
  });
 })();

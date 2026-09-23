@@ -6,17 +6,18 @@ const ctx=path=>({url:new URL(path,'https://example.invalid'),params:{},cookies:
 test('feedback request form is owner-only, published-only, and asks a bounded public question',async()=>{
  const f=workspaceFixtures(),route=moduleFixture('src/pages/dashboard/request-feedback.ts',['GET'],f.scope).GET;
  const html=await (await route(ctx('/dashboard/request-feedback?project=sample-0'))).text();
- assert.match(html,/name="question" minlength="10" maxlength="300" required/);assert.match(html,/No credit charge/);assert.match(html,/Don’t include private information/);
+ assert.match(html,/name="question" minlength="10" maxlength="300" required/);assert.match(html,/name="responseCommitment" required/);assert.match(html,/reply to each tester within two days/);assert.match(html,/Don’t include private information/);
  for(const slug of ['sample-1','sample-guest','unknown'])assert.equal((await route(ctx('/dashboard/request-feedback?project='+slug))).status,404);
  f.tables.projects[0].title='<script>bad</script>';
  assert.match(await (await route(ctx('/dashboard/request-feedback?project=sample-0'))).text(),/&lt;script&gt;bad&lt;\/script&gt;/);
 });
 test('request API checks origin, verified membership and question bounds before the no-charge RPC',async()=>{
  const f=workspaceFixtures(),scope={...f.scope,sameOrigin,origin:()=> 'https://example.invalid',allowRequest:async()=>true},route=moduleFixture('src/pages/api/community-credits.ts',['POST'],scope).POST;
- const fields={action:'create',slug:'sample-0',id:f.id,returnTo:'projects',question:'Was the first task clear enough to complete?'};
+ const fields={action:'create',slug:'sample-0',id:f.id,returnTo:'projects',question:'Was the first task clear enough to complete?',responseCommitment:'on'};
  const request=(data,origin='https://example.invalid')=>new Request('https://example.invalid/api/community-credits',{method:'POST',headers:{origin},body:new URLSearchParams(data)});
  assert.equal((await route({...ctx('/api/community-credits'),request:request(fields,'https://evil.invalid')})).status,403);
  assert.equal((await route({...ctx('/api/community-credits'),request:request({...fields,question:'short'})})).status,400);
+ assert.equal((await route({...ctx('/api/community-credits'),request:request({...fields,responseCommitment:''})})).status,400);
  const guest=moduleFixture('src/pages/api/community-credits.ts',['POST'],{...scope,memberContext:async()=>null}).POST;
  assert.equal((await guest({...ctx('/api/community-credits'),request:request(fields)})).status,401);
  const r=await route({...ctx('/api/community-credits'),request:request(fields)});assert.equal(r.status,303);

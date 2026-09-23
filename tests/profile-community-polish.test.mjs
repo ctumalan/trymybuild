@@ -20,8 +20,8 @@ test('participation copy preserves records without imposing reward ladders',()=>
  const f=workspaceFixtures(),html=f.scope.communityMap({balance:2,slots:2,used:1,towardNext:3,verification:{earned:27,hasPublished:false,eligible:false}});
  assert.doesNotMatch(html,/<progress |5 creators →|50 →|1 credit →/);assert.match(html,/Recorded balance/);assert.match(html,/Browsing or selecting interests does not sign you up/);assert.match(html,/not an automatic matching service/);
 });
-test('project menu invites feedback through Share',()=>{
- const f=workspaceFixtures();for(const p of f.tables.projects){const html=f.scope.projectActions(p);assert.match(html,/data-invite-project/);assert.doesNotMatch(html,/Request feedback|Publish before requesting feedback|Cancel feedback request/);}
+test('project menu invites testers and exposes the feedback request',()=>{
+ const f=workspaceFixtures();for(const p of f.tables.projects){const html=f.scope.projectActions(p);assert.match(html,/data-invite-project/);assert.match(html,/Invite testers/);assert.match(html,/Request feedback|Publish before requesting feedback|Cancel feedback request/);}
 });
 test('empty project lists avoid empty database filters and deleted profiles are not public',async()=>{
  const f=workspaceFixtures();await f.scope.requestState(f.db,f.owner,[]);assert.ok(!f.db.calls.some(c=>c[0]==='feedback_requests'));

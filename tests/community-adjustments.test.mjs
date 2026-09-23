@@ -54,7 +54,7 @@ test('listing journey asks for one decision at a time and keeps tab navigation',
  ctx.listingStep=6;html=ctx.inlineListingForm();assert.match(html,/Who should see it\?/);assert.match(html,/Invite only/);assert.match(html,/Public/);assert.match(html,/Decide later/);assert.doesNotMatch(html,/Not sure yet/);
  assert.match(html,/data-inline-listing/);assert.match(html,/button type="submit" class="primary-button" disabled/);
  assert.match(entry,/data-listing-stage[^\n]+requestCreatorQuote\(2\)/);
- assert.match(app,/const tabs = homeViewTabs\(activeView\);[\s\S]*listingJourney\(\)/);
+ assert.match(app,/discoveryHero\(true\)[\s\S]*listingJourney\(\)/);
  assert.doesNotMatch(app,/Meet the creator|<h3>Tell the creator<\/h3>/);
 });
 test('signup and wish return paths remain same-origin and strictly allowlisted',()=>{

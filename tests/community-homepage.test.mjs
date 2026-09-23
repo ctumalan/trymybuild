@@ -53,7 +53,8 @@ test('home tabs separate discovery from community and preserve search',()=>{
  assert.doesNotMatch(html,/COMMUNITY CONTENT/);
  assert.doesNotMatch(html,/Small contributions\. Better projects/);
  assert.doesNotMatch(html,/data-catalog-search/);
- assert.match(html,/id="home-tab-test"[^>]*aria-selected="true"/);
+ assert.match(html,/data-entry-mode="list"[^>]*aria-pressed="true"/);
+ assert.match(html,/data-entry-mode="search"[^>]*>Find an app<\/button>/);
  ctx.selectHomeView('find');
  assert.equal(ctx.state.query,'App 2');
  assert.equal((ctx.discover().match(/<article>/g)||[]).length,1);

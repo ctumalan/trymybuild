@@ -19,3 +19,4 @@ for (const dir of ['assets', 'projects']) {
 }
 console.log('Prepared website assets.');
 await copyFile(path.join(root, 'launch-refinements.css'), path.join(output, 'launch-refinements.css'));
+await copyFile(path.join(root, 'future-design.css'), path.join(output, 'future-design.css'));

@@ -6,4 +6,6 @@ node_modules
 .astro
 .cw-public
 dist
+output
+tmp
 *.md

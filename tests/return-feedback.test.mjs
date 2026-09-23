@@ -7,7 +7,7 @@ test('listing and project detail try links use the same return-feedback hook',()
  for(const [start,end] of [['function catalogRow(', 'const projectPresentation'],['function projectDetailContent(', "document.addEventListener('input'"]]){
   const section=source.slice(source.indexOf(start),source.indexOf(end,source.indexOf(start)));
   assert.match(section,/data-try-app="\$\{esc\(product.slug\)\}"/);
-  assert.match(section,/>Try this (?:app|project) ↗<\/a>/);
+  assert.match(section,/data-try-app="\$\{esc\(product.slug\)\}"[^>]*>Try (?:this (?:app|project) ↗|app <span aria-hidden="true">↗<\/span>)<\/a>/);
  }
  assert.match(source,/armReturnFeedback\(tryApp.dataset.tryApp\)/);
 });

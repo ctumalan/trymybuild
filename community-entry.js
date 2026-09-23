@@ -138,7 +138,7 @@ function wishResults() {
 function wishListSection() {
  restoreWishSelection();
  const draft=readWishDraft(),description=typeof draft.description==='string'?draft.description:(state.query||''),other=wishCategory==='__other__';
- return `<section class="wish-list" id="wish-list"><h2>Community wish list</h2><p>Real needs. Ideas worth building. What do you wish an app could do?</p>
+ return `<section class="wish-list" id="wish-list"><h2 id="wish-dialog-title">Submit a wish</h2><p>Real needs. Ideas worth building. What do you wish an app could do?</p>
  <form data-wish-form>
  <label>Category<select name="category" data-wish-category-filter aria-describedby="wish-category-hint">${wishCategoryOptions()}</select></label>
  <small id="wish-category-hint">Browse wishes here, or choose a category for your own wish.</small>
@@ -156,7 +156,30 @@ function updateWishCategoryForm(form) {
  input.required=other;input.disabled=!other;input.setCustomValidity('');
  form.elements.category.setCustomValidity('');
 }
-document.addEventListener('click',event=>{if(event.target.closest('[data-wish-focus]')){document.querySelector('[data-wish-form] textarea')?.focus();}});
+function openWishDialog() {
+ const existing=document.querySelector('.wish-dialog');
+ if(existing){existing.querySelector('textarea')?.focus();return;}
+ const opener=document.activeElement,dialog=document.createElement('dialog');
+ dialog.className='return-feedback-dialog wish-dialog';
+ dialog.setAttribute('aria-labelledby','wish-dialog-title');
+ dialog.innerHTML='<button type="button" class="return-feedback-close" aria-label="Close wish form">×</button>'+wishListSection();
+ const close=()=>dialog.close();
+ dialog.querySelector('.return-feedback-close').addEventListener('click',close);
+ dialog.addEventListener('click',event=>{
+  if(event.target!==dialog)return;
+  const box=dialog.getBoundingClientRect();
+  if(event.clientX<box.left||event.clientX>box.right||event.clientY<box.top||event.clientY>box.bottom)close();
+ });
+ dialog.addEventListener('close',()=>{
+  dialog.remove();
+  if(opener?.isConnected)opener.focus({preventScroll:true});
+  else document.querySelector('[data-wish-focus]')?.focus({preventScroll:true});
+ });
+ document.body.append(dialog);dialog.showModal();
+ dialog.querySelector('textarea')?.focus({preventScroll:true});
+ void loadCommunityWishes();
+}
+document.addEventListener('click',event=>{if(event.target.closest('[data-wish-focus]'))openWishDialog();});
 document.addEventListener('change',event=>{
  if(!event.target.matches('[data-wish-category-filter]'))return;
  const form=event.target.closest('[data-wish-form]');
@@ -226,5 +249,5 @@ document.addEventListener('DOMContentLoaded',async()=>{
  await loadCommunityWishes();
  const page=new URLSearchParams(location.search).get('page');if(['about','contact'].includes(page)){state.route=page;render();}
  if(new URLSearchParams(location.search).has('welcome')){state.route='account';render();}
- if(new URLSearchParams(location.search).has('wish')){state.route='discover';homeView='find';render();document.getElementById('wish-list')?.scrollIntoView();}
+ if(new URLSearchParams(location.search).has('wish')){state.route='discover';homeView='find';render();openWishDialog();}
 });

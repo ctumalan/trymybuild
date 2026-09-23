@@ -79,7 +79,7 @@ test('discovery keeps categories inside filters above a responsive compact app g
  assert.match(app,/<nav class="category-strip" aria-label="Filter apps by category">/);
  assert.match(app,/class="category-strip-scroll"/);
  assert.doesNotMatch(app,/<aside class="filter-panel">/);
- assert.match(app,/<div class="catalog-controls">[\s\S]*<nav class="category-strip"[\s\S]*<div class="catalog-results">/);
+ assert.match(app,/<div class="catalog-results"><div class="results-heading">[\s\S]*<div class="catalog-controls">[\s\S]*<nav class="category-strip"/);
  assert.match(css,/\.discover-page \.catalog-list,.profile-work \.catalog-list\{display:grid;grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/);
  assert.match(css,/@media\(max-width:1050px\)\{\.discover-page \.catalog-list,.profile-work \.catalog-list\{grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
  assert.match(css,/@media\(max-width:680px\)[\s\S]*\.discover-page \.catalog-list,.profile-work \.catalog-list\{grid-template-columns:minmax\(0,1fr\)/);

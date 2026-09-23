@@ -35,7 +35,7 @@ export function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } });
 }
 export function authMessage(message: string, status = 503) {
-  return new Response(`<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>TryMyBuild sign-in</title><link rel="stylesheet" href="/styles.css"><main class="account-hero"><p class="eyebrow">TryMyBuild</p><h1>Welcome.</h1><p>${message}</p><a class="primary-button" href="/">Browse the projects</a></main></html>`, { status, headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' } });
+  return new Response(`<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>TryMyBuild sign-in</title><link rel="stylesheet" href="/styles.css"><link rel="stylesheet" href="/future-design.css"><main class="account-hero"><p class="eyebrow">TryMyBuild</p><h1>Welcome.</h1><p>${message}</p><a class="primary-button" href="/">Browse the projects</a></main></html>`, { status, headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' } });
 }
 
 async function permittedUser(user: any) {

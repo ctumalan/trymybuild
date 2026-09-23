@@ -19,7 +19,7 @@ test('All eleven projects use the approved presentation with their own action ta
   assert.match(markup, /One thing to try first/);
   assert.doesNotMatch(markup, /Illustrative plan|mealmap-screenshot|mealmap-lead/);
   assert.doesNotMatch(markup, /data-project-comment="mealmap"/);
-  assert.match(markup, /class="recipient-answers"/);
+  assert.match(markup, /class="detail-description-notes"/);
   assert.match(markup, /href="\/tell\/mealmap" data-guided-open="mealmap">Give feedback/);
   assert.doesNotMatch(markup, /<summary>Leave a public comment<\/summary>/);
   assert.match(markup, /data-save="mealmap"/);
@@ -35,7 +35,7 @@ test('All eleven projects use the approved presentation with their own action ta
     assert.ok(html.includes(`data-save="${slug}"`));
     assert.ok(html.includes(`assets/previews/${slug}.png`));
     assert.ok(html.includes(`https://example.com/${slug}`));
-    assert.ok(html.indexOf('recipient-art') < html.indexOf('Try this project ↗'));
-    assert.ok(html.indexOf('recipient-art') < html.indexOf('recipient-answers'));
+    assert.ok(html.indexOf('recipient-art') < html.indexOf('Try this app ↗'));
+    assert.ok(html.indexOf('detail-description-notes') < html.indexOf('recipient-art'));
   }
 });

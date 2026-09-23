@@ -36,7 +36,7 @@ test('short-return opt-out persists across views while detailed feedback remains
 test('server project presentation places the image and centered action before guidance and escapes creator copy',()=>{
  const f=workspaceFixtures(),render=f.scope.projectDetailContent;
  const html=render({name:'<bad>',category:'Utilities',stage:'New',slug:'example',url:'https://example.invalid',preview:'/image.png',presentation:{headline:'<headline>',help:'Helpful',firstTry:'Try this'},creator:{name:'<creator>',verified:true,verificationNote:'Founder exception—not earned through feedback'}});
- assert.ok(html.indexOf('recipient-art')<html.indexOf('Try this project'));assert.ok(html.indexOf('Try this project')<html.indexOf('recipient-answers'));assert.match(html,/&lt;headline&gt;/);assert.match(html,/&lt;creator&gt;/);assert.doesNotMatch(html,/<bad>|<creator>/);assert.match(html,/title="Founder exception—not earned through feedback"/);
+ assert.ok(html.indexOf('recipient-art')<html.indexOf('Try this app'));assert.ok(html.indexOf('detail-description-notes')<html.indexOf('recipient-art'));assert.match(html,/&lt;headline&gt;/);assert.match(html,/&lt;creator&gt;/);assert.doesNotMatch(html,/<bad>|<creator>/);assert.match(html,/title="Founder exception—not earned through feedback"/);
  const founder=render({name:'Studio app',category:'Utilities',stage:'New',slug:'studio',url:'https://example.invalid',presentation:{headline:'Studio app',help:'Helpful',firstTry:'Try this'},creator:{name:'Studio',verified:true,founderException:true}});
  assert.match(founder,/title="Founder exception—not earned through feedback\. Not a product-quality guarantee\."/);
 });

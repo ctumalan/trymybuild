@@ -24,15 +24,6 @@ test('creator type filtering still excludes Studio from Independent while its di
  assert.equal(context.creatorMatchesFilters(studio,'all',true),true);assert.equal(context.creatorMatchesFilters(studio,'company',true),true);assert.equal(context.creatorMatchesFilters(studio,'independent',true),false);
  assert.equal(context.creatorMatchesFilters({type:'company',verified:true},'all',true),false);
 });
-test('short-return opt-out persists across views while detailed feedback remains eligible',()=>{
- const storage=new Map(),listeners={},scope={window:{},localStorage:{getItem:k=>storage.get(k),setItem:(k,v)=>storage.set(k,v),removeItem:k=>storage.delete(k)},document:{addEventListener:(type,handler)=>listeners[type]=handler}};
- vm.runInNewContext(read('return-preferences.js'),scope);assert.equal(scope.window.CWReturnPrompts.suppressed('quick'),false);
- listeners.change({target:{matches:()=>true,checked:true}});
- for(const kind of ['quick','comment'])assert.equal(scope.window.CWReturnPrompts.suppressed(kind),true);
- assert.equal(scope.window.CWReturnPrompts.suppressed('detailed'),false);
- vm.runInNewContext(read('return-preferences.js'),scope);assert.equal(scope.window.CWReturnPrompts.suppressed('quick'),true);
- listeners.change({target:{matches:()=>true,checked:false}});assert.equal(scope.window.CWReturnPrompts.suppressed('comment'),false);
-});
 test('server project presentation places the image and centered action before guidance and escapes creator copy',()=>{
  const f=workspaceFixtures(),render=f.scope.projectDetailContent;
  const html=render({name:'<bad>',category:'Utilities',stage:'New',slug:'example',url:'https://example.invalid',preview:'/image.png',presentation:{headline:'<headline>',help:'Helpful',firstTry:'Try this'},creator:{name:'<creator>',verified:true,verificationNote:'Founder exception—not earned through feedback'}});

@@ -39,7 +39,7 @@ test('new logo is an outlined sun with two violet technology paths',()=>{
  assert.equal((svg.match(/<path /g)||[]).length,4);
  assert.doesNotMatch(svg,/#FFF9ED/);
 });
-test('home tabs separate discovery from community and preserve search',()=>{
+test('listing navigation stays in the homepage frame and preserves search',()=>{
  const ctx=vm.createContext({matchMedia:()=>({matches:true}),CWPricing:{kind:value=>value==='Free'?'free':'paid'},wishListSection:()=>'',listingJourney:()=>'<form>Listing form</form>',window:{CW_SERVER:false},catalogState:'ready',document:{addEventListener(){},getElementById(){return null;}},render(){},state:{category:'All',price:'all',creatorType:'all',query:'',sort:'recent'},projects:Array.from({length:5},(_,i)=>({name:`App ${i}`,price:'Free',category:'Tools'})),esc:String,creatorFor:()=>({}),creatorMatchesFilters:()=>true,compareCatalogProjects:()=>0,publishedCategories:()=>[],catalogSortLabel:()=>'',catalogRow:p=>`<article>${p.name}</article>`,membershipPromo:()=>'<section>COMMUNITY CONTENT</section>',communityRail:()=>'',catalogStatusPanel:()=>'<p>CATALOG UNAVAILABLE</p>'});
  vm.runInContext(app.slice(app.indexOf("let homeView = 'find'"),app.indexOf('function discussionDraftKey(')),ctx);
  let html=ctx.discover();
@@ -53,8 +53,8 @@ test('home tabs separate discovery from community and preserve search',()=>{
  assert.doesNotMatch(html,/COMMUNITY CONTENT/);
  assert.doesNotMatch(html,/Small contributions\. Better projects/);
  assert.doesNotMatch(html,/data-catalog-search/);
- assert.match(html,/data-entry-mode="list"[^>]*aria-pressed="true"/);
- assert.match(html,/data-entry-mode="search"[^>]*>Find an app<\/button>/);
+ assert.doesNotMatch(html,/discovery-entry-modes/);
+ assert.match(html,/data-entry-mode="search"[^>]*>← Back to apps<\/button>/);
  ctx.selectHomeView('find');
  assert.equal(ctx.state.query,'App 2');
  assert.equal((ctx.discover().match(/<article>/g)||[]).length,1);

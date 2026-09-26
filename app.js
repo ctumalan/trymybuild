@@ -332,7 +332,7 @@ function rankCatalogSearch(candidates,query) {
   const relevant=ranked.filter(result=>result.score>0);
   return {items:(relevant.length?relevant:ranked.slice(0,6)).map(result=>result.product),suggestions:!relevant.length};
 }
-// Validate a complete web address before continuing in sharing mode.
+// Only complete HTTP(S) web addresses start a listing; other text searches the catalog.
 function homepageAppUrl(value) {
   const raw = String(value || '').trim();
   if (!raw || /\s/.test(raw)) return '';
@@ -340,10 +340,33 @@ function homepageAppUrl(value) {
   if (!candidate) return '';
   try { const url = new URL(candidate); return url.hostname.includes('.') && !url.username && !url.password ? url.href : ''; } catch { return ''; }
 }
+function homepageEntryIntent(value) {
+  const url = homepageAppUrl(value);
+  return { url, label: url ? 'Share your app →' : String(value || '').trim() ? 'Search apps →' : 'Continue' };
+}
+function updateHomepageEntry(form) {
+  const value = form.querySelector('[data-catalog-search]').value;
+  const intent = homepageEntryIntent(value);
+  state.entryMode = intent.url ? 'list' : 'search';
+  state.entryUrl = intent.url ? value : '';
+  state.query = intent.url ? '' : value;
+  form.querySelector('[data-entry-submit]').textContent = intent.label;
+  form.querySelector('[data-entry-reassurance]').hidden = !intent.url;
+  form.querySelector('[data-entry-status]').textContent = '';
+  return intent;
+}
 function discoveryHero(listing = false) {
+  const value = state.entryMode === 'search' ? state.query || '' : state.entryUrl || '';
+  const intent = homepageEntryIntent(value);
+  const prompt = 'Paste your app’s URL or search by keyword or category';
   return `<header class="discovery-hero discovery-hero-minimal${listing ? ' listing-entry-header' : ''}" aria-label="Share or find an app">
     <div class="discovery-hero-copy">
-      <form class="discovery-entry" data-discovery-entry><div class="discovery-entry-modes" role="group" aria-label="What would you like to do?"><button type="button" data-entry-mode="list" aria-pressed="${listing || state.entryMode !== 'search'}">Share your app</button><button type="button" data-entry-mode="search" aria-pressed="${!listing && state.entryMode === 'search'}">Find an app</button></div>${listing ? '' : `<label class="visually-hidden" for="discovery-input">${state.entryMode === 'search'?'Search by category, need, or keyword':'Paste your app’s URL'}</label><div class="discovery-entry-row"><input id="discovery-input" data-catalog-search value="${esc(state.entryMode === 'search' ? state.query : state.entryUrl || '')}" type="text" maxlength="2048" autocomplete="off" spellcheck="false" placeholder="${state.entryMode === 'search'?'Search by category, need, or keyword':'Paste your app’s URL'}" /><button type="submit" class="primary-button" data-entry-submit>${state.entryMode === 'search'?'Search →':'Continue →'}</button></div><p class="discovery-entry-reassurance" id="entry-sharing-choice" data-entry-reassurance ${state.entryMode === 'search'?'hidden':''}>Share privately or submit to the public catalog. You choose.</p><p class="discovery-entry-status" data-entry-status role="status"></p>`}</form>
+      ${listing ? '<button type="button" class="text-button" data-entry-mode="search">← Back to apps</button>' : `<form class="discovery-entry" data-discovery-entry>
+        <label class="visually-hidden" for="discovery-input">${prompt}</label>
+        <div class="discovery-entry-row"><div class="discovery-entry-field"><input id="discovery-input" data-catalog-search value="${esc(value)}" type="text" maxlength="2048" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="${prompt}" /><span class="entry-placeholder" aria-hidden="true">${prompt}</span></div><button type="submit" class="primary-button" data-entry-submit>${intent.label}</button></div>
+        <p class="discovery-entry-reassurance" id="entry-sharing-choice" data-entry-reassurance ${intent.url ? '' : 'hidden'}>Share privately or submit to the public catalog. You choose.</p>
+        <p class="discovery-entry-status" data-entry-status role="status"></p>
+      </form>${state.listingInProgress ? '<button type="button" class="text-button entry-resume" data-entry-mode="list">Continue your draft →</button>' : ''}`}
     </div>
   </header>`;
 }
@@ -980,14 +1003,14 @@ document.addEventListener('submit', event => {
   const form = event.target.closest('[data-discovery-entry]');
   if (!form) return;
   event.preventDefault();
-  if (state.entryMode === 'search') {
+  const { url } = updateHomepageEntry(form);
+  if (!url) {
+    render(true);
     const panel = document.getElementById('home-panel');
     panel?.scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block:'start'});
     panel?.focus({preventScroll:true});
     return;
   }
-  const url = homepageAppUrl(form.querySelector('[data-catalog-search]').value);
-  if (!url) { form.querySelector('[data-entry-status]').textContent = 'Enter your app’s web address, such as example.com.'; return; }
   const different = listingDraft.url && listingUrl(listingDraft.url) !== url;
   if (different && !confirm('Start a listing for this URL? This replaces the draft saved on this device. Listings saved to your account stay unchanged.')) return;
   if (different) { invalidateListingCapture(); resetListingDraft(); }
@@ -1203,6 +1226,7 @@ function render(preserveScroll = false) {
   if(guestControls){guestControls.hidden=!!state.session?.authenticated;guestControls.querySelector('input').checked=state.personalization;}
   if (focusedSearch) { const input = document.querySelector('[data-catalog-search]'); input?.focus({preventScroll:true}); input?.setSelectionRange(focusedSearch.start, focusedSearch.end); }
   else if (!preserveScroll) window.scrollTo({ top: 0, behavior: "smooth" });
+  window.CWEntryIntro?.mount(app);
 }
 
 document.addEventListener('keydown', event => {
@@ -1214,27 +1238,12 @@ document.addEventListener('keydown', event => {
 document.addEventListener("click", async event => {
   const entryMode = event.target.closest('[data-entry-mode]');
   if (entryMode) {
-    state.entryMode = entryMode.dataset.entryMode === 'search' ? 'search' : 'list';
-    if (state.route === 'share' || homeView === 'test' || (state.entryMode === 'list' && state.listingInProgress)) {
-      state.listingInProgress = true;
-      state.route = state.entryMode === 'search' ? 'discover' : 'share';
-      homeView = state.entryMode === 'search' ? 'find' : 'test';
-      renderMenuChange('[data-entry-mode="' + state.entryMode + '"]');
-      return;
-    }
-    const form = entryMode.closest('[data-discovery-entry]');
-    const input = form.querySelector('[data-catalog-search]');
-    const searching = state.entryMode === 'search';
-    input.value = searching ? state.query : state.entryUrl || '';
-    input.placeholder = searching ? 'Search by category, need, or keyword' : 'Paste your app’s URL';
-    form.querySelector('label').textContent = input.placeholder;
-    form.querySelector('[data-entry-submit]').textContent = searching ? 'Search →' : 'Continue →';
-    form.querySelector('[data-entry-status]').textContent = '';
-    form.querySelector('[data-entry-reassurance]').hidden = searching;
-    form.querySelectorAll('[data-entry-mode]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.entryMode === state.entryMode)));
-    const template = document.createElement('template'); template.innerHTML = discover();
-    const results = document.querySelector('.catalog-results');
-    if (results) results.replaceWith(template.content.querySelector('.catalog-results'));
+    const searching = entryMode.dataset.entryMode === 'search';
+    state.listingInProgress = true;
+    state.entryMode = searching ? 'search' : 'list';
+    state.route = searching ? 'discover' : 'share';
+    homeView = searching ? 'find' : 'test';
+    renderMenuChange(searching ? '[data-catalog-search]' : '[data-entry-mode="search"]');
     return;
   }
   const browseApps = event.target.closest('[data-browse-apps]');
@@ -1378,9 +1387,7 @@ document.addEventListener("keydown", event => {
 
 document.addEventListener("input", event => {
   if (event.target.matches("[data-catalog-search]")) {
-    if (state.entryMode === 'search') state.query = event.target.value;
-    else state.entryUrl = event.target.value;
-    const status = document.querySelector('[data-entry-status]'); if (status) status.textContent = '';
+    updateHomepageEntry(event.target.closest('[data-discovery-entry]'));
     const template = document.createElement('template'); template.innerHTML = discover();
     const results = document.querySelector('.catalog-results');
     if (results) results.replaceWith(template.content.querySelector('.catalog-results'));

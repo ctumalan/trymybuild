@@ -529,6 +529,8 @@ a.secondary-button,.cw-main a.secondary-button { background: #f2edf8; color: #5e
 /* One front-door field; filters belong to the app catalog. */
 .discovery-entry { margin: 0; }
 .discovery-entry-row { display: flex; flex-wrap: wrap; gap: 10px; }
+.discovery-entry-field { position: relative; flex: 1 1 260px; min-width: 0; }
+.discovery-entry-field input { display: block; box-sizing: border-box; height: 100%; }
 .discovery-entry-row input { flex: 1 1 260px; min-width: 0; width: 100%; padding: 15px 16px; background: #fff; color: #382b46; border: 1px solid #d7c9e7; border-radius: 12px; font: inherit; font-size: .9rem; }
 .discovery-entry-row input::placeholder { color: #68616e; }
 .discovery-entry-row .primary-button { flex: 0 0 auto; min-height: 50px; padding: 12px 20px; font-size: .9rem; white-space: nowrap; }
@@ -539,20 +541,30 @@ a.secondary-button,.cw-main a.secondary-button { background: #f2edf8; color: #5e
 .discovery-explore { display: inline-block; margin-top: 12px; padding: 4px 0; font-size: .85rem; }
 .future-discover .results-heading { gap: 16px; flex-wrap: wrap; align-items: center; }
 .future-discover .results-heading .catalog-controls { margin: 0; }
-@media(max-width:620px) { .discovery-entry-row input { flex-basis: 100%; } .discovery-entry-row .primary-button { width: 100%; } }
+@media(max-width:620px) { .discovery-entry-field { flex-basis: 100%; } .discovery-entry-row input { font-size: 16px; } .discovery-entry-row .primary-button { width: 100%; } }
 
 .discovery-entry-label { display: block; margin-bottom: 10px; color: #493953; font-size: .88rem; font-weight: 600; }
 
-.discovery-entry-modes { display: flex; justify-content: flex-start; gap: 6px; margin-bottom: 14px; }
-.discovery-entry-modes button { padding: 8px 12px; background: transparent; border: 1px solid transparent; border-radius: 8px; font: 600 .84rem/1.4 "DM Sans",sans-serif; color: #68616e; cursor: pointer; }
-.discovery-entry-modes button[aria-pressed="true"] { background: #f2edf8; color: #623694; border-color: #ded3eb; }
 .discovery-entry-row .primary-button { min-width: 154px; }
 
-/* The slogan supplies the introduction; the form supplies the action. */
-.site-header .brand-promise { display: block !important; max-width: none; color: #68616e; font: 400 .76rem/1.5 "DM Sans",sans-serif; white-space: nowrap; text-align: left; }
-@media(max-width:900px) {
-  .site-header .brand { display: grid; grid-template-columns: auto auto; column-gap: 8px; row-gap: 5px; padding-block: 12px; }
-  .site-header .brand-promise { grid-column: 1 / -1; padding-left: 0; border-left: 0; font-size: .7rem; }
+/* A short rolling introduction, without replacing the input or its accessible label. */
+.entry-intro { position: absolute; inset: 1px 16px; overflow: hidden; pointer-events: none; color: #7545ad; font: 500 clamp(13px,2.8vw,15px)/1.5 "DM Sans",sans-serif; }
+.entry-intro>span { position: absolute; top: 50%; left: 0; white-space: nowrap; animation: entry-intro-first 4200ms ease both; }
+.entry-intro>span+span { animation-name: entry-intro-second; }
+.is-introducing input::placeholder { color: transparent; }
+@keyframes entry-intro-first {
+  0% { opacity: 0; transform: translateY(calc(-50% + 12px)); filter: blur(3px); }
+  8%,36% { opacity: 1; transform: translateY(-50%); filter: blur(0); }
+  45%,100% { opacity: 0; transform: translateY(calc(-50% - 12px)); filter: blur(3px); }
+}
+@keyframes entry-intro-second {
+  0%,43% { opacity: 0; transform: translateY(calc(-50% + 12px)); filter: blur(3px); }
+  53%,88% { opacity: 1; transform: translateY(-50%); filter: blur(0); }
+  100% { opacity: 0; transform: translateY(calc(-50% - 12px)); filter: blur(3px); }
+}
+@media(prefers-reduced-motion:reduce) {
+  .entry-intro { display: none; }
+  .is-introducing input::placeholder { color: #68616e; }
 }
 
 .discovery-hero.discovery-hero-minimal { display: block; padding: 32px 0; }
@@ -589,3 +601,15 @@ a.secondary-button,.cw-main a.secondary-button { background: #f2edf8; color: #5e
 @media(max-width:700px) { .trial-brief dl { grid-template-columns: 1fr; } }
 .external-destination{display:block;color:var(--muted,#766b7e);font-size:.76rem;line-height:1.35;margin-top:.45rem;overflow-wrap:anywhere;text-align:center}
 .card-try-actions .external-destination{max-width:14rem}
+
+/* Keep both entry choices readable on phones without shrinking typed text. */
+.entry-placeholder { display: none; }
+.entry-resume { margin-top: 10px; }
+@media(max-width:620px) {
+  .discovery-entry-field input { min-height: 78px; }
+  .discovery-entry-field input::placeholder { color: transparent; }
+  .entry-placeholder { display: block; position: absolute; inset: 0 16px; align-content: center; color: #68616e; font: 400 14px/1.45 "DM Sans",sans-serif; pointer-events: none; }
+  .discovery-entry-field input:not(:placeholder-shown) + .entry-placeholder,
+  .discovery-entry-field input:focus + .entry-placeholder,
+  .discovery-entry-field.is-introducing .entry-placeholder { display: none; }
+}

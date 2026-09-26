@@ -549,7 +549,7 @@ a.secondary-button,.cw-main a.secondary-button { background: #f2edf8; color: #5e
 
 /* A short rolling introduction, without replacing the input or its accessible label. */
 .entry-intro { position: absolute; inset: 1px 16px; overflow: hidden; pointer-events: none; color: #7545ad; font: 500 clamp(13px,2.8vw,15px)/1.5 "DM Sans",sans-serif; }
-.entry-intro>span { position: absolute; top: 50%; left: 0; white-space: nowrap; animation: entry-intro-first 4200ms ease both; }
+.entry-intro>span { position: absolute; top: 50%; left: 0; white-space: nowrap; animation: entry-intro-first 6200ms ease both; }
 .entry-intro>span+span { animation-name: entry-intro-second; }
 .is-introducing input::placeholder { color: transparent; }
 @keyframes entry-intro-first {
@@ -602,14 +602,32 @@ a.secondary-button,.cw-main a.secondary-button { background: #f2edf8; color: #5e
 .external-destination{display:block;color:var(--muted,#766b7e);font-size:.76rem;line-height:1.35;margin-top:.45rem;overflow-wrap:anywhere;text-align:center}
 .card-try-actions .external-destination{max-width:14rem}
 
-/* Keep both entry choices readable on phones without shrinking typed text. */
-.entry-placeholder { display: none; }
+/* A slow teleprompter explains both choices while the field is empty. */
+.discovery-entry-field input::placeholder { color: transparent; }
+.entry-placeholder { display: flex; align-items: center; position: absolute; inset: 1px 16px; overflow: hidden; color: #68616e; font: 400 14px/1.45 "DM Sans",sans-serif; pointer-events: none; }
+.entry-placeholder-track { display: block; flex: 0 0 auto; width: max-content; white-space: nowrap; }
+.entry-placeholder.is-scrolling .entry-placeholder-track { animation: entry-teleprompter var(--entry-duration,20s) linear infinite; }
+.discovery-entry-field:hover .entry-placeholder-track { animation-play-state: paused; }
+.discovery-entry-field input:not(:placeholder-shown) + .entry-placeholder,
+.discovery-entry-field input:focus + .entry-placeholder,
+.discovery-entry-field.is-introducing .entry-placeholder { visibility: hidden; }
+.discovery-entry-field.is-introducing .entry-placeholder-track,
+.discovery-entry-field input:focus + .entry-placeholder .entry-placeholder-track,
+.discovery-entry-field input:not(:placeholder-shown) + .entry-placeholder .entry-placeholder-track { animation: none; }
 .entry-resume { margin-top: 10px; }
+@keyframes entry-teleprompter {
+  0%,10% { transform: translateX(0); opacity: 1; }
+  85%,95% { transform: translateX(var(--entry-travel,0px)); opacity: 1; }
+  97% { transform: translateX(var(--entry-travel,0px)); opacity: 0; }
+  98% { transform: translateX(0); opacity: 0; }
+  100% { transform: translateX(0); opacity: 1; }
+}
 @media(max-width:620px) {
-  .discovery-entry-field input { min-height: 78px; }
+  .discovery-entry-field input { min-height: 64px; }
+}
+@media(prefers-reduced-motion:reduce) {
+  .entry-placeholder.is-scrolling .entry-placeholder-track { animation: none; }
+  .entry-placeholder-track { width: 100%; white-space: normal; }
+  .discovery-entry-field input { min-height: 110px; }
   .discovery-entry-field input::placeholder { color: transparent; }
-  .entry-placeholder { display: block; position: absolute; inset: 0 16px; align-content: center; color: #68616e; font: 400 14px/1.45 "DM Sans",sans-serif; pointer-events: none; }
-  .discovery-entry-field input:not(:placeholder-shown) + .entry-placeholder,
-  .discovery-entry-field input:focus + .entry-placeholder,
-  .discovery-entry-field.is-introducing .entry-placeholder { display: none; }
 }

@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { getPublishedProject,getProjectRow } from '../../../server/catalog-db';
+import {socialCopy, socialImageUrl} from '../../../server/social-share.mjs';
 import { invitationImageUrl } from '../../../server/invitation-image.mjs';
 import {database,ensureMember} from '../../../server/database';
 import { origin,json,currentUser } from '../../../server/auth';
@@ -12,6 +13,6 @@ export const GET:APIRoute=async context=>{
   return json({name:draft.title,description:draft.headline||draft.summary,category:draft.category,builder:'you',image:'',url:draft.external_url,privateListing:true,isOwner:true});
  }
  const user=await currentUser(context),member=user?await ensureMember(user):null,row=member?await getProjectRow(p.slug):null,request=await activeFeedbackRequest(database(),p.slug);
- const base=origin(context);return json({isOwner:!!member&&row?.owner_user_id===member.id,name:p.name,description:p.presentation.headline,category:p.category,builder:p.creator.name,image:invitationImageUrl(p,base),url:new URL('/projects/'+encodeURIComponent(p.slug),base).href,firstTry:p.presentation.firstTry,trialQuestion:request?.question||''});
+ const base=origin(context);return json({isOwner:!!member&&row?.owner_user_id===member.id,social:{...socialCopy(p),image:socialImageUrl(p,origin(context))},name:p.name,description:p.presentation.headline,category:p.category,builder:p.creator.name,image:invitationImageUrl(p,base),url:new URL('/projects/'+encodeURIComponent(p.slug),base).href,firstTry:p.presentation.firstTry,trialQuestion:request?.question||''});
  }catch{return json({error:'Preview unavailable'},503);}
 };

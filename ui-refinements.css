@@ -141,3 +141,35 @@ textarea,.cw-main textarea,.detail-comment-form textarea{resize:none!important;m
 @media(max-width:620px){.mealmap-detail[data-showcase-theme] .recipient-art{padding:12px}}
 
 .listing-image-drop{min-width:0}.listing-image-drop label,.listing-image-drop input[type=file]{box-sizing:border-box;min-width:0;width:100%;max-width:100%}.listing-image-drop span{min-width:0;overflow-wrap:anywhere}
+
+/* Original TryMyBuild social templates, separate from personal invitations. */
+.invitation-dialog.has-social-sharing{width:min(1020px,calc(100vw - 32px));box-sizing:border-box;background:#fcfaf6;color:#382b46;border-color:#ded1eb}
+.invitation-dialog.has-social-sharing h2{font-family:"Newsreader",Georgia,serif;font-size:clamp(1.6rem,4vw,2.1rem);padding-right:35px;overflow-wrap:anywhere;margin-bottom:18px}
+.share-modes,.social-formats{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 20px}
+.share-modes{padding-bottom:16px;border-bottom:1px solid #ded1eb}
+.share-modes button,.social-formats button{border:1px solid transparent;border-radius:10px;background:transparent;padding:10px 14px;color:#66576f;font:600 .88rem "DM Sans",sans-serif;cursor:pointer;min-height:42px}
+.share-modes button[aria-pressed=true],.social-formats button[aria-pressed=true]{background:#eee5f8;border-color:#d7c4ed;color:#6035aa}
+.social-intro{font-size:.94rem;color:#66576f;line-height:1.5;margin:0 0 16px}
+.social-layout{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:26px;align-items:start}
+.social-art{margin:0;border:1px solid #e1d5ed;border-radius:16px;background:#eee5f8;min-height:180px;display:grid;place-items:center;overflow:hidden;aspect-ratio:1200/630}
+.social-art[data-art-format=instagram]{aspect-ratio:4/5;max-width:350px;margin-inline:auto}
+.social-art[data-art-format=story]{aspect-ratio:9/16;max-width:280px;margin-inline:auto}
+.social-art img{width:100%;height:auto;display:block}
+.social-art img[hidden]{display:none}
+.social-art [data-art-status]{padding:24px;text-align:center;font-size:.9rem;line-height:1.5}
+.social-spec{text-align:center;font-size:.74rem;color:#766780;margin:10px 0 16px}
+.social-editor label span{font-weight:400;color:#766780;font-size:.76rem}
+.invitation-dialog .social-editor input,.invitation-dialog .social-editor textarea{border-color:#d7c4e7;background:#fff;color:#382b46;font-size:16px;margin-bottom:15px}
+.invitation-dialog .social-editor textarea{min-height:80px;resize:vertical}
+.invitation-dialog .social-editor #social-caption{min-height:190px;font-size:14px;line-height:1.55}
+.social-actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:22px}
+.social-actions a{text-decoration:none}
+.social-actions [hidden]{display:none}
+.social-actions .primary-button{background:#7545ad;color:white}
+.social-actions .secondary-button{background:#f2edf8;color:#6035aa;border:1px solid #d7c4e7}
+.social-actions button:disabled{opacity:.5;cursor:wait}
+.social-help{font-size:.86rem;line-height:1.6;color:#5b4d64;margin:18px 0 8px}
+.social-note{font-size:.76rem;line-height:1.5;color:#776c7e}
+.invitation-dialog [data-personal-panel][hidden],.invitation-dialog [data-social-panel][hidden]{display:none}
+.invitation-dialog [data-social-status]{font-size:.9rem;line-height:1.5;color:#6035aa}
+@media(max-width:680px){.social-layout{grid-template-columns:1fr;gap:18px}.social-art[data-art-format=instagram]{max-width:250px}.social-art[data-art-format=story]{max-width:200px}.social-actions>.primary-button,.social-actions>.secondary-button{flex:1 1 140px;text-align:center}.social-formats button{flex:1;padding-inline:8px}.invitation-dialog.has-social-sharing{padding:18px}}

@@ -14,7 +14,7 @@ if (!catalogSource) throw new Error('Catalog source not found');
 const catalog = vm.runInNewContext(catalogSource[1], {}, { timeout: 1000 });
 await writeFile(path.join(root, 'src/server/catalog.generated.json'), JSON.stringify(catalog.map(({slug,name,url,summary,category}) => ({slug,name,url,summary,category})), null, 2));
 // Only site assets are published; documents, prompts and configuration stay private.
-for (const file of ['entry-intro.js', 'return-preferences.js', 'interaction-polish.js', 'public-comments.js', 'ui-refinements.css', 'pricing.js', 'workspace-ui.js', 'server-mode.js', 'profile-editor.js', 'community-entry.js', 'community-input.js', 'notification-bell.js', 'project-actions.js', 'listing-rules.js', 'share-invitation.js', 'app.js', 'styles.css', 'feedback.css', 'preview-utils.js', 'project-media.js', 'account-nav.js', 'analytics.js']) await copyFile(path.join(root, file), path.join(output, file));
+for (const file of ['social-share.js', 'entry-intro.js', 'return-preferences.js', 'interaction-polish.js', 'public-comments.js', 'ui-refinements.css', 'pricing.js', 'workspace-ui.js', 'server-mode.js', 'profile-editor.js', 'community-entry.js', 'community-input.js', 'notification-bell.js', 'project-actions.js', 'listing-rules.js', 'share-invitation.js', 'app.js', 'styles.css', 'feedback.css', 'preview-utils.js', 'project-media.js', 'account-nav.js', 'analytics.js']) await copyFile(path.join(root, file), path.join(output, file));
 for (const dir of ['assets']) {
   await cp(path.join(root, dir), path.join(output, dir), { recursive: true, filter: source => !path.basename(source).startsWith('.') });
 }

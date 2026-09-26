@@ -358,12 +358,12 @@ function updateHomepageEntry(form) {
 function discoveryHero(listing = false) {
   const value = state.entryMode === 'search' ? state.query || '' : state.entryUrl || '';
   const intent = homepageEntryIntent(value);
-  const prompt = 'Paste your app’s URL or search by keyword or category';
+  const prompt = 'Paste your app’s URL to share your project | Search other apps by keyword, need, or category';
   return `<header class="discovery-hero discovery-hero-minimal${listing ? ' listing-entry-header' : ''}" aria-label="Share or find an app">
     <div class="discovery-hero-copy">
       ${listing ? '<button type="button" class="text-button" data-entry-mode="search">← Back to apps</button>' : `<form class="discovery-entry" data-discovery-entry>
         <label class="visually-hidden" for="discovery-input">${prompt}</label>
-        <div class="discovery-entry-row"><div class="discovery-entry-field"><input id="discovery-input" data-catalog-search value="${esc(value)}" type="text" maxlength="2048" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="${prompt}" /><span class="entry-placeholder" aria-hidden="true">${prompt}</span></div><button type="submit" class="primary-button" data-entry-submit>${intent.label}</button></div>
+        <div class="discovery-entry-row"><div class="discovery-entry-field"><input id="discovery-input" data-catalog-search value="${esc(value)}" type="text" maxlength="2048" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="${prompt}" /><span class="entry-placeholder" aria-hidden="true"><span class="entry-placeholder-track">${prompt}</span></span></div><button type="submit" class="primary-button" data-entry-submit>${intent.label}</button></div>
         <p class="discovery-entry-reassurance" id="entry-sharing-choice" data-entry-reassurance ${intent.url ? '' : 'hidden'}>Share privately or submit to the public catalog. You choose.</p>
         <p class="discovery-entry-status" data-entry-status role="status"></p>
       </form>${state.listingInProgress ? '<button type="button" class="text-button entry-resume" data-entry-mode="list">Continue your draft →</button>' : ''}`}

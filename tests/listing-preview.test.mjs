@@ -33,6 +33,12 @@ test('capture refuses exhausted time, request and byte budgets',async()=>{
  await assert.rejects(fetchPreviewAsset('https://public.site',{...budget(),deadline:0},0,fakeNetwork([])));
  await assert.rejects(fetchPreviewAsset('https://public.site',budget(),0,fakeNetwork([{body:Buffer.alloc(3000001)}])));
 });
+test('browser capture waits for visible content without waiting for global network idleness',()=>{
+ const source=readFileSync(new URL('../src/server/preview-capture.mjs',import.meta.url),'utf8');
+ assert.match(source,/waitUntil:'domcontentloaded'/);
+ assert.match(source,/document\.images.*image=>image\.complete/);
+ assert.doesNotMatch(source,/waitUntil:'networkidle2'/);
+});
 test('theme never emits arbitrary CSS and enforces readable text and button contrast',()=>{
  for(const color of ['#ffffff','#111111','#eeeeee','#227755','rgb(255, 200, 0)','url(https://bad.site)','rgba(0,0,0,0)']){
   const theme=utils.theme({background:color,color,accent:color,font:'x; background:url(evil)'});

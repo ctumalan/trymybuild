@@ -848,6 +848,11 @@ async function ensureListingScreenshot(force = false) {
   listingCapture.controller?.abort(); const controller = new AbortController(); listingCapture.controller = controller;
   refreshListingPreview();
   const timer = setTimeout(() => controller.abort(), 28000);
+  const slowTimer = setTimeout(() => {
+    if(revision!==listingCapture.revision||listingCapture.state!=='loading')return;
+    listingCapture.message='Still capturing the public page… This can take a few more seconds.';
+    refreshListingPreview();
+  },7000);
   try {
     const response = await fetch('/api/listing-preview', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url }), signal: controller.signal });
     const result = await response.json().catch(() => { throw Error('Website capture is unavailable. Retry or upload a screenshot.'); });
@@ -859,7 +864,7 @@ async function ensureListingScreenshot(force = false) {
   } catch (error) {
     if (revision !== listingCapture.revision) return;
     listingCapture.state = 'error'; listingCapture.message = error.name === 'AbortError' ? 'Capture took too long. Retry or upload your own screenshot.' : error.message;
-  } finally { clearTimeout(timer); if (revision === listingCapture.revision) refreshListingPreview(); }
+  } finally { clearTimeout(timer); clearTimeout(slowTimer); if (revision === listingCapture.revision) refreshListingPreview(); }
 }
 async function useListingScreenshot(file) {
   const error = CWPreviewUtils.fileError(file);

@@ -28,7 +28,12 @@ export async function capturePreview(value) {
     await request.respond({status:asset.status,contentType:asset.contentType,body:asset.body,headers:{'Content-Security-Policy':"script-src 'none'; connect-src 'none'; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'",'X-Content-Type-Options':'nosniff'}});
    })().catch(()=>{if(!request.isInterceptResolutionHandled())void request.abort().catch(()=>{});});
   });
-  await page.goto(main.url,{waitUntil:'networkidle2',timeout:12000});
+  // Waiting for global network idleness is slow on modern sites and unnecessary here:
+  // scripts, trackers, frames and background requests are already blocked above.
+  await page.goto(main.url,{waitUntil:'domcontentloaded',timeout:8000});
+  // Give visible images a short, bounded chance to finish without holding the whole
+  // listing flow open for a site's analytics or other non-visual traffic.
+  await page.waitForFunction(()=>[...document.images].every(image=>image.complete),{timeout:2500}).catch(()=>{});
   const appearance=await page.evaluate(()=>{
    const body=document.body,style=getComputedStyle(body),heading=document.querySelector('h1,h2'),action=document.querySelector('button,a[class*="button"],input[type="submit"]');
    return {text:body?.innerText?.trim().length||0,images:document.images.length,background:style.backgroundColor,color:style.color,accent:action?getComputedStyle(action).backgroundColor:style.color,font:heading?getComputedStyle(heading).fontFamily:style.fontFamily};

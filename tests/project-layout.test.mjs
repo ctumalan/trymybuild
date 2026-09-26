@@ -17,10 +17,10 @@ test('detail view uses the invitation screenshot layout and relevant information
 test('project destination distinguishes built-in and external links',()=>{
  const source=app.slice(app.indexOf('function projectDestination'),app.indexOf('function categoryIcon'));
  const context={};
- Function('context',`${source};context.destination=projectDestination;`)(context);
+ Function('context','window',`${source};context.destination=projectDestination;`)(context,{location:{origin:'https://trymybuild.com'}});
  assert.equal(context.destination('projects/afterschool-together/index.html'),'Opens here on TryMyBuild');
  assert.equal(context.destination('/projects/example'),'Opens here on TryMyBuild');
- assert.equal(context.destination('https://example.com/tool'),'Opens external website');
+ assert.equal(context.destination('https://example.com/tool'),'Opens example.com');
 });
 test('categories wrap and violet accents apply to navigation and illustration panels',()=>{
  assert.match(css,/\.category-strip-scroll\{flex-wrap:wrap;overflow:visible/);

@@ -2,77 +2,77 @@
   {
     "slug": "afterschooltogether",
     "name": "AfterSchool Together",
-    "url": "https://trymybuild.com/projects/afterschool-together/index.html",
+    "url": "https://afterschool-together-app.vercel.app",
     "summary": "Find out whether one adult can actually make every after-school trip.",
     "category": "Family life"
   },
   {
     "slug": "stackscout",
     "name": "StackScout",
-    "url": "https://trymybuild.com/projects/stack-scout/index.html",
+    "url": "https://stack-scout-app.vercel.app",
     "summary": "Compare technology choices without drowning in technical language.",
     "category": "Technology"
   },
   {
     "slug": "gamegrid",
     "name": "GameGrid",
-    "url": "https://trymybuild.com/projects/game-grid/index.html",
+    "url": "https://game-grid-app-xi.vercel.app",
     "summary": "Turn scattered game details into one clear team schedule.",
     "category": "Sports & teams"
   },
   {
     "slug": "lessonlab",
     "name": "LessonLab",
-    "url": "https://trymybuild.com/projects/lesson-lab/index.html",
+    "url": "https://lesson-lab-app.vercel.app",
     "summary": "Build a balanced lesson around the time you actually have.",
     "category": "Teaching & learning"
   },
   {
     "slug": "cartcompare",
     "name": "CartCompare",
-    "url": "https://trymybuild.com/projects/cart-compare/index.html",
+    "url": "https://cart-compare-app.vercel.app",
     "summary": "Compare what purchases really cost before you decide.",
     "category": "Shopping"
   },
   {
     "slug": "pocketbalance",
     "name": "PocketBalance",
-    "url": "https://trymybuild.com/projects/pocket-balance/index.html",
+    "url": "https://pocket-balance-app.vercel.app",
     "summary": "See your month clearly without building a complicated budget.",
     "category": "Money"
   },
   {
     "slug": "dayframe",
     "name": "DayFrame",
-    "url": "https://trymybuild.com/projects/day-frame/index.html",
+    "url": "https://day-frame-app.vercel.app",
     "summary": "Plan a day that respects your actual time and energy.",
     "category": "Personal planning"
   },
   {
     "slug": "mealmap",
     "name": "MealMap",
-    "url": "https://trymybuild.com/projects/meal-map/index.html",
+    "url": "https://meal-map-app.vercel.app",
     "summary": "Make a practical weeknight meal plan from what works for you.",
     "category": "Food & home"
   },
   {
     "slug": "homerhythm",
     "name": "HomeRhythm",
-    "url": "https://trymybuild.com/projects/home-rhythm/index.html",
+    "url": "https://home-rhythm-app.vercel.app",
     "summary": "Keep small home-maintenance jobs from becoming big surprises.",
     "category": "Food & home"
   },
   {
     "slug": "packlight",
     "name": "PackLight",
-    "url": "https://trymybuild.com/projects/pack-light/index.html",
+    "url": "https://pack-light-app.vercel.app",
     "summary": "Pack for a trip without carrying your whole closet.",
     "category": "Travel"
   },
   {
     "slug": "briefbuilder",
     "name": "BriefBuilder",
-    "url": "https://trymybuild.com/projects/brief-builder/index.html",
+    "url": "https://brief-builder-app.vercel.app",
     "summary": "Turn a loose idea into a brief another person can understand.",
     "category": "Creative work"
   }

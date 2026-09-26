@@ -2,5 +2,18 @@
   "framework": "astro",
   "buildCommand": "npm run build",
   "installCommand": "npm ci",
+  "redirects": [
+    { "source": "/projects/afterschool-together/:path*", "destination": "https://afterschool-together-app.vercel.app/:path*", "permanent": true },
+    { "source": "/projects/stack-scout/:path*", "destination": "https://stack-scout-app.vercel.app/:path*", "permanent": true },
+    { "source": "/projects/game-grid/:path*", "destination": "https://game-grid-app-xi.vercel.app/:path*", "permanent": true },
+    { "source": "/projects/lesson-lab/:path*", "destination": "https://lesson-lab-app.vercel.app/:path*", "permanent": true },
+    { "source": "/projects/cart-compare/:path*", "destination": "https://cart-compare-app.vercel.app/:path*", "permanent": true },
+    { "source": "/projects/pocket-balance/:path*", "destination": "https://pocket-balance-app.vercel.app/:path*", "permanent": true },
+    { "source": "/projects/day-frame/:path*", "destination": "https://day-frame-app.vercel.app/:path*", "permanent": true },
+    { "source": "/projects/meal-map/:path*", "destination": "https://meal-map-app.vercel.app/:path*", "permanent": true },
+    { "source": "/projects/home-rhythm/:path*", "destination": "https://home-rhythm-app.vercel.app/:path*", "permanent": true },
+    { "source": "/projects/pack-light/:path*", "destination": "https://pack-light-app.vercel.app/:path*", "permanent": true },
+    { "source": "/projects/brief-builder/:path*", "destination": "https://brief-builder-app.vercel.app/:path*", "permanent": true }
+  ],
   "headers": [{ "source": "/(.*)", "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }] }]
 }

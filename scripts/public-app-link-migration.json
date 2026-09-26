@@ -1,79 +1,79 @@
 [
   {
     "slug": "afterschooltogether",
-    "oldUrl": "projects/afterschool-together/index.html",
-    "url": "https://trymybuild.com/projects/afterschool-together/index.html",
+    "oldUrl": "https://trymybuild.com/projects/afterschool-together/index.html",
+    "url": "https://afterschool-together-app.vercel.app",
     "oldLinkNote": "Opens here on TryMyBuild",
     "oldAccessNote": "No sign-in needed to try it"
   },
   {
     "slug": "stackscout",
-    "oldUrl": "https://stack-scout-cw.tumalanct.chatgpt.site",
-    "url": "https://trymybuild.com/projects/stack-scout/index.html",
-    "oldLinkNote": "",
-    "oldAccessNote": "Opens a separate site; sign-in may be required"
+    "oldUrl": "https://trymybuild.com/projects/stack-scout/index.html",
+    "url": "https://stack-scout-app.vercel.app",
+    "oldLinkNote": "Opens here on TryMyBuild",
+    "oldAccessNote": "No sign-in needed to try it"
   },
   {
     "slug": "gamegrid",
-    "oldUrl": "https://game-grid-cw.tumalanct.chatgpt.site",
-    "url": "https://trymybuild.com/projects/game-grid/index.html",
-    "oldLinkNote": "",
-    "oldAccessNote": "Opens a separate site; sign-in may be required"
+    "oldUrl": "https://trymybuild.com/projects/game-grid/index.html",
+    "url": "https://game-grid-app-xi.vercel.app",
+    "oldLinkNote": "Opens here on TryMyBuild",
+    "oldAccessNote": "No sign-in needed to try it"
   },
   {
     "slug": "lessonlab",
-    "oldUrl": "https://lesson-lab-cw.tumalanct.chatgpt.site",
-    "url": "https://trymybuild.com/projects/lesson-lab/index.html",
-    "oldLinkNote": "",
-    "oldAccessNote": "Opens a separate site; sign-in may be required"
+    "oldUrl": "https://trymybuild.com/projects/lesson-lab/index.html",
+    "url": "https://lesson-lab-app.vercel.app",
+    "oldLinkNote": "Opens here on TryMyBuild",
+    "oldAccessNote": "No sign-in needed to try it"
   },
   {
     "slug": "cartcompare",
-    "oldUrl": "https://cart-compare-cw.tumalanct.chatgpt.site",
-    "url": "https://trymybuild.com/projects/cart-compare/index.html",
-    "oldLinkNote": "",
-    "oldAccessNote": "Opens a separate site; sign-in may be required"
+    "oldUrl": "https://trymybuild.com/projects/cart-compare/index.html",
+    "url": "https://cart-compare-app.vercel.app",
+    "oldLinkNote": "Opens here on TryMyBuild",
+    "oldAccessNote": "No sign-in needed to try it"
   },
   {
     "slug": "pocketbalance",
-    "oldUrl": "https://pocket-balance-cw.tumalanct.chatgpt.site",
-    "url": "https://trymybuild.com/projects/pocket-balance/index.html",
-    "oldLinkNote": "",
-    "oldAccessNote": "Opens a separate site; sign-in may be required"
+    "oldUrl": "https://trymybuild.com/projects/pocket-balance/index.html",
+    "url": "https://pocket-balance-app.vercel.app",
+    "oldLinkNote": "Opens here on TryMyBuild",
+    "oldAccessNote": "No sign-in needed to try it"
   },
   {
     "slug": "dayframe",
-    "oldUrl": "https://day-frame-cw.tumalanct.chatgpt.site",
-    "url": "https://trymybuild.com/projects/day-frame/index.html",
-    "oldLinkNote": "",
-    "oldAccessNote": "Opens a separate site; sign-in may be required"
+    "oldUrl": "https://trymybuild.com/projects/day-frame/index.html",
+    "url": "https://day-frame-app.vercel.app",
+    "oldLinkNote": "Opens here on TryMyBuild",
+    "oldAccessNote": "No sign-in needed to try it"
   },
   {
     "slug": "mealmap",
-    "oldUrl": "https://meal-map-cw.tumalanct.chatgpt.site",
-    "url": "https://trymybuild.com/projects/meal-map/index.html",
-    "oldLinkNote": "",
-    "oldAccessNote": "ChatGPT sign-in required"
+    "oldUrl": "https://trymybuild.com/projects/meal-map/index.html",
+    "url": "https://meal-map-app.vercel.app",
+    "oldLinkNote": "Opens here on TryMyBuild",
+    "oldAccessNote": "No sign-in needed to try it"
   },
   {
     "slug": "homerhythm",
-    "oldUrl": "https://home-rhythm-cw.tumalanct.chatgpt.site",
-    "url": "https://trymybuild.com/projects/home-rhythm/index.html",
-    "oldLinkNote": "",
-    "oldAccessNote": "Opens a separate site; sign-in may be required"
+    "oldUrl": "https://trymybuild.com/projects/home-rhythm/index.html",
+    "url": "https://home-rhythm-app.vercel.app",
+    "oldLinkNote": "Opens here on TryMyBuild",
+    "oldAccessNote": "No sign-in needed to try it"
   },
   {
     "slug": "packlight",
-    "oldUrl": "https://pack-light-cw.tumalanct.chatgpt.site",
-    "url": "https://trymybuild.com/projects/pack-light/index.html",
-    "oldLinkNote": "",
-    "oldAccessNote": "Opens a separate site; sign-in may be required"
+    "oldUrl": "https://trymybuild.com/projects/pack-light/index.html",
+    "url": "https://pack-light-app.vercel.app",
+    "oldLinkNote": "Opens here on TryMyBuild",
+    "oldAccessNote": "No sign-in needed to try it"
   },
   {
     "slug": "briefbuilder",
-    "oldUrl": "https://brief-builder-cw.tumalanct.chatgpt.site",
-    "url": "https://trymybuild.com/projects/brief-builder/index.html",
-    "oldLinkNote": "",
-    "oldAccessNote": "Opens a separate site; sign-in may be required"
+    "oldUrl": "https://trymybuild.com/projects/brief-builder/index.html",
+    "url": "https://brief-builder-app.vercel.app",
+    "oldLinkNote": "Opens here on TryMyBuild",
+    "oldAccessNote": "No sign-in needed to try it"
   }
 ]

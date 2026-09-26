@@ -587,3 +587,5 @@ a.secondary-button,.cw-main a.secondary-button { background: #f2edf8; color: #5e
 .project-action-menu form>button:hover { background: #f2edf8; }
 .maker-reply-promise,.trial-sent-notice { border: 1px solid #d9cbe8; background: #f2edf8; color: #493953; }
 @media(max-width:700px) { .trial-brief dl { grid-template-columns: 1fr; } }
+.external-destination{display:block;color:var(--muted,#766b7e);font-size:.76rem;line-height:1.35;margin-top:.45rem;overflow-wrap:anywhere;text-align:center}
+.card-try-actions .external-destination{max-width:14rem}

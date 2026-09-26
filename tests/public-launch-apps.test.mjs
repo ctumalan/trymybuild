@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFile, stat } from 'node:fs/promises';
 import vm from 'node:vm';
 
-test('all eleven in-house catalog destinations are public, same-domain apps', async () => {
+test('all eleven in-house catalog destinations are separate Vercel apps', async () => {
   const source = await readFile(new URL('../app.js', import.meta.url), 'utf8');
   const projects = vm.runInNewContext(source.match(/^const projects = (\[[\s\S]*?\n\]);/)[1]);
   const migration = JSON.parse(await readFile(new URL('../scripts/public-app-link-migration.json', import.meta.url), 'utf8'));
@@ -13,12 +13,15 @@ test('all eleven in-house catalog destinations are public, same-domain apps', as
     assert.equal(project.url, item.url);
     assert.equal(project.accessNote, 'No sign-in needed to try it');
     const url = new URL(project.url);
-    assert.equal(url.origin, 'https://trymybuild.com');
-    const html = await readFile(new URL(`..${url.pathname}`, import.meta.url), 'utf8');
+    assert.equal(url.protocol, 'https:');
+    assert.match(url.hostname, /\.vercel\.app$/);
+    assert.notEqual(url.hostname, 'trymybuild.com');
+    const localPath = item.oldUrl.replace('https://trymybuild.com/', '../');
+    const html = await readFile(new URL(localPath, import.meta.url), 'utf8');
     assert.match(html, /<title>/);
     assert.doesNotMatch(html, /https:\/\/[^\s"']*chatgpt\.site/);
     for (const asset of html.matchAll(/(?:src|href)="\.\/([^"]+)"/g)) {
-      assert.ok((await stat(new URL(`..${url.pathname.replace('index.html', '')}${asset[1]}`, import.meta.url))).isFile());
+      assert.ok((await stat(new URL(`${localPath.replace('index.html', '')}${asset[1]}`, import.meta.url))).isFile());
     }
   }
 });

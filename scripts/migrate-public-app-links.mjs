@@ -27,7 +27,7 @@ for (const item of manifest) {
 }
 for (const item of manifest) {
   const row = rows.find(r => r.slug === item.slug);
-  if (row.external_url === item.url && row.access_note === 'No sign-in needed to try it' && row.link_note === 'Opens here on TryMyBuild') {
+  if (row.external_url === item.url && row.access_note === 'No sign-in needed to try it' && row.link_note === "Opens the creator's website") {
     console.log(`${item.slug}: already migrated`);
     continue;
   }
@@ -39,11 +39,11 @@ for (const item of manifest) {
   target.searchParams.set('listing_status', 'eq.published');
   const update = await fetch(target, {
     method: 'PATCH', headers: { ...headers, Prefer: 'return=representation' },
-    body: JSON.stringify({ external_url: item.url, link_note: 'Opens here on TryMyBuild', access_note: 'No sign-in needed to try it', lock_version: row.lock_version + 1 }),
+    body: JSON.stringify({ external_url: item.url, link_note: "Opens the creator's website", access_note: 'No sign-in needed to try it', lock_version: row.lock_version + 1 }),
   });
   if (!update.ok) throw Error(`Catalog update failed: ${item.slug} (${update.status})`);
   const changed = await update.json();
   if (changed.length !== 1) throw Error(`Concurrent update prevented migration: ${item.slug}`);
   console.log(`${item.slug}: public destination updated`);
 }
-console.log('All eleven launch app links are public.');
+console.log('All eleven launch apps now open on separate Vercel sites.');

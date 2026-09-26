@@ -539,9 +539,12 @@ a.secondary-button,.cw-main a.secondary-button { background: #f2edf8; color: #5e
 .future-discover .catalog-filter-options .sort-control select { min-height:42px; padding:0 4px; background:transparent; }
 .future-discover .catalog-filter-options .sort-control:last-of-type { border-bottom:0; }
 
-.future-card-foot { align-items:center; }
-.future-card-foot .card-try-actions { display:grid; justify-items:center; align-content:center; min-width:0; }
-.future-card-foot .card-try-actions .external-destination { max-width:18rem; margin:.25rem 0 0; overflow-wrap:anywhere; text-align:center; }
+.future-card-foot { display:grid; grid-template-columns:auto auto minmax(0,1fr); align-items:center; gap:8px 18px; min-height:0; padding:10px 14px; }
+.future-card-foot .future-overview { min-height:36px; }
+.future-card-foot .card-try-actions { display:contents; }
+.future-card-foot .card-try-actions .primary-button { grid-column:3; justify-self:end; }
+.future-card-foot .card-try-actions .external-destination { grid-column:1/-1; justify-self:center; max-width:100%; margin:0; overflow-wrap:anywhere; text-align:center; }
+.card-return-prompt a { color:#7545ad; font-weight:700; text-underline-offset:3px; }
 .public-detail-header .invite-actions .secondary-button,.catalog-row .card-secondary-actions .save-button-row { min-height:32px; padding:5px 10px; font-size:.7rem; font-weight:650; box-shadow:none; }
 .project-card-actions { align-items:center; gap:8px; }
 .project-card-actions .compact-action { min-height:32px; padding:5px 10px; background:#fff; font-size:.72rem; box-shadow:none; }
@@ -558,10 +561,9 @@ a.secondary-button,.cw-main a.secondary-button { background: #f2edf8; color: #5e
 @media(max-width:620px) {
   .discovery-categories { overflow-x:auto; flex-wrap:nowrap; }
   .discovery-categories details>div { position:fixed; inset:auto 18px auto auto; width:min(260px,calc(100vw - 36px)); }
-  .future-card-foot { display:grid; grid-template-columns:auto auto; gap:10px 16px; padding:10px 14px; }
+  .future-card-foot { grid-template-columns:auto auto minmax(0,1fr); gap:8px 10px; }
   .future-card-foot .future-overview { min-height:34px; }
-  .future-card-foot .card-try-actions { grid-column:1/-1; width:100%; margin:0; }
-  .future-card-foot .card-try-actions .external-destination { max-width:100%; }
+  .future-card-foot .card-try-actions .primary-button { justify-self:end; }
   .listing-capture-fallback { min-height:240px; }
 }
 

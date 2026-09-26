@@ -10,6 +10,7 @@ test('discovery language, navigation and destinations use the requested public w
  assert.match(app,/>Give feedback<\/a>/);
  assert.match(app,/class="discovery-categories"/);
  assert.match(app,/return parsed\.href/);
+ assert.match(app,/Had a chance to try it\? <a href="\/tell\/\$\{esc\(product\.slug\)\}" data-guided-open/);
 });
 
 test('feedback prompts keep session-only suppression and close after successful submissions',()=>{
@@ -24,6 +25,8 @@ test('visual fixes cover navigation contrast, compact actions, badges and failed
  assert.match(css,/\.project-card-actions \.compact-action/);
  assert.match(css,/\.profile-hero div>p:last-child \{ color:#51675d/);
  assert.match(css,/\.journey-progress>span \{ background:#7545ad/);
+ assert.match(css,/\.future-card-foot \{ display:grid; grid-template-columns:auto auto minmax\(0,1fr\)/);
+ assert.match(css,/\.future-card-foot \.card-try-actions \{ display:contents/);
  assert.match(app,/class="listing-capture-fallback"/);
  assert.match(app,/Preview unavailable/);
 });

@@ -198,21 +198,21 @@ const studioVerification = 'Founder exception—not earned through feedback. Fou
 function creatorVerificationBadge(creator) {
   const verified = creator.verified === true || (!window.CW_SERVER && creator.slug === 'creatorworks-studio');
   const note = creator.slug === 'creatorworks-studio' ? studioVerification : 'Qualifying contribution and app ownership confirmed. Not a product-quality guarantee.';
-  return verified ? `<span class="creator-verified" title="${esc(note)}">✓ Verified Creator</span>` : '';
+  return verified ? `<span class="creator-verified" title="${esc(note)}">✓ Verified</span>` : '';
 }
 
 function creatorLink(project, compact = false, showVerification = true, byline = false) {
   const creator = creatorFor(project);
-  if (byline) return `<button type="button" class="creator-byline" data-profile="${esc(creator.slug)}">by ${esc(creator.name)}${showVerification ? creatorVerificationBadge(creator).replace('✓ Verified Creator', '<span aria-label="Verified creator">✓</span>') : ''}</button>`;
+  if (byline) return `<button type="button" class="creator-byline" data-profile="${esc(creator.slug)}">by ${esc(creator.name)}${showVerification ? creatorVerificationBadge(creator) : ''}</button>`;
   return `<button class="creator-link ${compact ? "is-compact" : ""}" data-profile="${esc(creator.slug)}">${avatar(creator)}<span><strong>${esc(creator.name)}</strong>${showVerification ? creatorVerificationBadge(creator) : ''}<small>${esc(creator.label)}</small></span></button>`;
 }
 
 function projectDestination(url) {
   try {
     const parsed = new URL(String(url || ''), window.location.origin);
-    return parsed.origin === window.location.origin ? 'Opens here on TryMyBuild' : `Opens ${parsed.hostname.replace(/^www\./, '')}`;
+    return parsed.href;
   } catch {
-    return 'Opens the creator’s website';
+    return String(url || 'Destination unavailable');
   }
 }
 
@@ -358,7 +358,7 @@ function updateHomepageEntry(form) {
 function discoveryHero(listing = false) {
   const value = state.entryMode === 'search' ? state.query || '' : state.entryUrl || '';
   const intent = homepageEntryIntent(value);
-  const prompt = 'Paste your app’s URL to share your project | Search other apps by keyword, need, or category';
+  const prompt = 'Search apps, or paste your app’s URL to share it';
   return `<header class="discovery-hero discovery-hero-minimal${listing ? ' listing-entry-header' : ''}" aria-label="Share or find an app">
     <div class="discovery-hero-copy">
       ${listing ? '<button type="button" class="text-button" data-entry-mode="search">← Back to apps</button>' : `<form class="discovery-entry" data-discovery-entry>
@@ -369,6 +369,16 @@ function discoveryHero(listing = false) {
       </form>${state.listingInProgress ? '<button type="button" class="text-button entry-resume" data-entry-mode="list">Continue your draft →</button>' : ''}`}
     </div>
   </header>`;
+}
+function catalogCategoryNavigation() {
+  const categories=publishedCategories(),preferred=['Family life','Technology','Food & home','Personal planning','Creative work'];
+  const visible=preferred.map(name=>categories.find(item=>item.name===name)).filter(Boolean),overflow=categories.filter(item=>!preferred.includes(item.name));
+  if(state.category!=='All'&&!visible.some(item=>item.name===state.category)){
+    const selected=overflow.find(item=>item.name===state.category);if(selected)visible.push(selected);
+  }
+  const button=category=>`<button type="button" data-category-filter="${esc(category.name)}" aria-pressed="${state.category===category.name}">${categoryIcon(category.name)}<span>${esc(category.name==='Personal planning'?'Productivity':category.name)}</span></button>`;
+  const more=overflow.filter(category=>!visible.some(item=>item.name===category.name));
+  return `<nav class="discovery-categories" aria-label="Browse apps by category"><button type="button" data-category-filter="All" aria-pressed="${state.category==='All'}">All apps</button>${visible.map(button).join('')}${more.length?`<details><summary>More categories</summary><div>${more.map(button).join('')}</div></details>`:''}</nav>`;
 }
 function discover(communityFocused = false) {
   // Never fall back to the built-in catalog on the server; show loading/unavailable instead.
@@ -386,9 +396,8 @@ function discover(communityFocused = false) {
   const searchResults=rankCatalogSearch(candidates,query);
   const filtered=searchResults.items;
   return `<section class="page-shell discover-page future-discover">
-    ${discoveryHero()}<div id="home-panel" tabindex="-1" aria-label="Discover apps">
+    ${discoveryHero()}${catalogCategoryNavigation()}<div id="home-panel" tabindex="-1" aria-label="Discover apps">
     <div class="catalog-results"><div class="results-heading"><div><h2>${query.trim()?'Closest matches':state.category !== 'All'?esc(state.category):'Fresh builds'}</h2><span>${filtered.length} ${filtered.length === 1 ? 'app' : 'apps'} · ${query.trim()&&!searchResults.suggestions?'Most relevant first.':catalogSortLabel()}</span></div><div class="catalog-controls">${!query.trim()?'<button type="button" class="text-button" data-wish-focus>Submit a wish</button>':''}<details class="catalog-filter-menu" ${state.filterOpen?'open':''}><summary>Filter &amp; sort${state.category !== 'All' ? ` · ${esc(state.category)}` : ''}${state.creatorType !== 'all' || state.verifiedOnly || state.price !== 'all' ? ' · active' : ''}</summary><div class="catalog-filter-options">
-    <nav class="category-strip" aria-label="Filter apps by category"><div class="category-strip-scroll"><button data-category-filter="All" class="${state.category === "All" ? "is-selected" : ""}"><span>All published apps</span><b>${projects.length}</b></button>${publishedCategories().map(category => `<button data-category-filter="${esc(category.name)}" class="${state.category === category.name ? "is-selected" : ""}">${categoryIcon(category.name)}<span>${esc(category.name)}</span><b>${category.count}</b></button>`).join("")}</div></nav>
       <label class="sort-control">Price <select data-price-select><option value="all" ${state.price === 'all' ? 'selected' : ''}>All prices</option><option value="free" ${state.price === 'free' ? 'selected' : ''}>Free</option><option value="freemium" ${state.price === 'freemium' ? 'selected' : ''}>Free + paid options</option><option value="paid" ${state.price === 'paid' ? 'selected' : ''}>Paid</option></select></label>
       <label class="sort-control">Sort by <select data-sort-select><option value="recent" ${state.sort === "recent" ? "selected" : ""}>Most recent</option><option value="reviewed" ${state.sort === "reviewed" ? "selected" : ""}>Most reviewed</option><option value="saved" ${state.sort === "saved" ? "selected" : ""}>Most saved</option></select></label>
       <div class="sort-control creator-filter-row"><label for="creator-filter">Creators</label><select id="creator-filter" data-creator-type-select><option value="all" ${state.creatorType === 'all' ? 'selected' : ''}>All creators</option><option value="independent" ${state.creatorType === 'independent' ? 'selected' : ''}>Independent</option><option value="company" ${state.creatorType === 'company' ? 'selected' : ''}>Companies</option></select></div>
@@ -441,7 +450,7 @@ function catalogRow(product) {
     <div class="future-card-heading"><span class="future-app-icon ${esc(product.color || 'violet')}" aria-hidden="true">${esc(product.icon || product.name.slice(0,1))}</span><div><button class="row-title" data-product="${esc(product.slug)}">${esc(product.name)}</button>${creatorLink(product, true)}</div><span class="future-card-category">${esc(product.category)}</span></div>
     <div class="row-media"><button class="row-preview" data-product="${esc(product.slug)}" aria-label="View ${esc(product.name)} details"><img src="${esc(product.preview)}" alt="Preview of the ${esc(product.name)} website" loading="lazy" /></button><div class="card-secondary-actions"><button class="save-button-row ${saved ? 'is-saved' : ''}" data-save="${esc(product.slug)}" aria-label="${saved ? 'Remove' : 'Save'} ${esc(product.name)}">${saved ? '♥ Saved' : '♡ Save'}</button><button type="button" class="save-button-row" data-share-product="${esc(product.slug)}" aria-label="Share ${esc(product.name)}">Share</button></div></div>
     <div class="row-copy"><p>${esc(product.summary)}</p><div class="product-meta"><span class="price-badge">${esc(product.price)}</span>${product.stage && product.stage !== 'New' ? `<span>${esc(product.stage)}</span>` : ''}${Number(product.recentCommentCount)>=3?`<span class="activity-badge" title="Published comments and public reviews in the past 30 days">Active discussion · ${Number(product.recentCommentCount)}</span>`:''}</div></div>
-    <div class="future-card-foot"><button type="button" class="future-overview" data-product="${esc(product.slug)}">Overview</button><a class="feedback-primary" href="/tell/${esc(product.slug)}" data-guided-open="${esc(product.slug)}" aria-label="Give feedback on ${esc(product.name)}">Feedback</a><div class="card-try-actions"><a class="primary-button" href="${esc(safeProjectUrl(product.url))}" target="_blank" rel="noopener noreferrer" data-try-app="${esc(product.slug)}" aria-label="Try ${esc(product.name)} (opens in a new tab)">Try app <span aria-hidden="true">↗</span></a><small class="external-destination">${esc(projectDestination(product.url))}</small></div></div>
+    <div class="future-card-foot"><button type="button" class="future-overview" data-product="${esc(product.slug)}">App details</button><a class="feedback-primary" href="/tell/${esc(product.slug)}" data-guided-open="${esc(product.slug)}" aria-label="Give feedback on ${esc(product.name)}">Give feedback</a><div class="card-try-actions"><a class="primary-button" href="${esc(safeProjectUrl(product.url))}" target="_blank" rel="noopener noreferrer" data-try-app="${esc(product.slug)}" aria-label="Try ${esc(product.name)} (opens in a new tab)">Try app <span aria-hidden="true">↗</span></a><small class="external-destination">${esc(projectDestination(product.url))}</small></div></div>
     <section class="card-comments" aria-label="Comments on ${esc(product.name)}" ${posts.length || openedCatalogApps.has(product.slug) ? '' : 'hidden'}>${posts.map(post=>experienceCard(post)).join('')}<p class="card-return-prompt" data-return-prompt="${esc(product.slug)}" ${openedCatalogApps.has(product.slug)?'':'hidden'}>Had a chance to try it? Tell the maker what you think.</p></section>
   </article>`;
 }
@@ -598,7 +607,7 @@ function maybeShowReturnFeedback() {
         if (!response.ok || !data.ok) throw Error(data.error || 'Your response could not be sent.');
         status.textContent = data.message;
         dialog.querySelector('fieldset').disabled = true;
-        dialog.querySelector('[data-return-dismiss]').textContent = 'Done';
+        setTimeout(dismiss, 350);
       } catch(error) {status.textContent=error.message || 'Your response could not be sent. Please try again.';button.disabled=false;}
 
     });
@@ -609,6 +618,7 @@ function maybeShowReturnFeedback() {
   };
   dialog.querySelector('.return-feedback-close').onclick = dismiss;
   dialog.querySelector('[data-return-dismiss]').onclick = dismiss;
+  dialog.addEventListener('cw-feedback-complete', dismiss, {once:true});
   dialog.addEventListener('cancel', event => {event.preventDefault(); dismiss();});
   dialog.addEventListener('click', event => {if (event.target === dialog) {const r=dialog.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)dismiss();}});
   document.body.append(dialog);
@@ -627,7 +637,7 @@ function projectDetailContent(product, preview = false) {
   const copy = projectPresentation[product.slug] || ['', '',product.summary,'',''];
   const presentation = product.presentation || {headline:copy[2],help:copy[3],firstTry:copy[4]};
   const creator = preview ? `<span class="creator-byline">by ${esc(state.session?.user?.displayName||'You')}</span>` : creatorLink(product,true,true,true);
-  return `<div class="detail-creator">${creator}</div><section class="recipient-hero"><div class="recipient-copy"><h2 ${preview?'':`id="detail-title-${esc(product.slug)}"`}>${esc(presentation.headline||product.name)}</h2><div class="detail-description-notes"><div><h3>How it helps</h3><p>${esc(presentation.help)}</p></div><div><h3>One thing to try first</h3><p>${esc(presentation.firstTry)}</p></div></div></div><div class="recipient-preview-column"><div class="recipient-art">${product.preview?`<img ${preview?'data-listing-screenshot':''} src="${esc(product.preview)}" alt="Preview of ${esc(product.name)}" referrerpolicy="no-referrer">`:''}<span>Made by a person. Ready for your perspective.</span></div>${product.url?`<a class="primary-button" href="${esc(safeProjectUrl(product.url))}" target="_blank" rel="noopener noreferrer" ${preview?'':`data-try-app="${esc(product.slug)}"`}>Try this app ↗</a><small class="external-destination">${esc(projectDestination(product.url))} in a new tab</small>`:''}</div></section>`;
+  return `<div class="detail-creator">${creator}</div><section class="recipient-hero"><div class="recipient-copy"><h2 ${preview?'':`id="detail-title-${esc(product.slug)}"`}>${esc(presentation.headline||product.name)}</h2><div class="detail-description-notes"><div><h3>How it helps</h3><p>${esc(presentation.help)}</p></div><div><h3>One thing to try first</h3><p>${esc(presentation.firstTry)}</p></div></div></div><div class="recipient-preview-column"><div class="recipient-art">${product.preview?`<img ${preview?'data-listing-screenshot':''} src="${esc(product.preview)}" alt="Preview of ${esc(product.name)}" referrerpolicy="no-referrer">`:''}<span>Made by a person. Ready for your perspective.</span></div>${product.url?`<a class="primary-button" href="${esc(safeProjectUrl(product.url))}" target="_blank" rel="noopener noreferrer" ${preview?'':`data-try-app="${esc(product.slug)}"`}>Try this app ↗</a><small class="external-destination">${esc(projectDestination(product.url))}</small>`:''}</div></section>`;
 }
 
 function detailDrawer(product) {
@@ -685,12 +695,13 @@ document.addEventListener('submit', async event => {
     const response = await fetch('/api/experiences', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ slug: form.dataset.projectComment, response: field.value.trim(),requestId:form.dataset.requestId }) });
     if(response.status===401){location.href='/auth/sign-in?signup=1&next='+encodeURIComponent('/?project='+encodeURIComponent(form.dataset.projectComment));return;}
     const data=await response.json();if (!response.ok) throw new Error(data.error||'Unable to send');
-    if(data.duplicate){status.textContent=data.message;if(data.guest)window.CWGuestComment?.offer(status);return;}
+    if(data.duplicate){status.textContent=data.message;if(data.guest)window.CWGuestComment?.offer(status);if(form.closest('.return-feedback-dialog'))setTimeout(()=>form.closest('.return-feedback-dialog')?.dispatchEvent(new Event('cw-feedback-complete')),350);return;}
     saveProjectCommentDraft(form.dataset.projectComment,'');status.textContent = data.message||'Your comment was sent for review.';
     if(data.guest)window.CWGuestComment?.offer(status);
     delete form.dataset.requestId;
     form.reset();field.value='';button.hidden=true;
     form.querySelector('[data-project-comment-count]').textContent='0 / 7–150 words';field.setCustomValidity('');
+    if(form.closest('.return-feedback-dialog'))setTimeout(()=>form.closest('.return-feedback-dialog')?.dispatchEvent(new Event('cw-feedback-complete')),350);
   } catch(error) { status.textContent = error.message||'Your comment could not be sent. Please try again.'; }
   finally { button.disabled = false; }
 });
@@ -921,7 +932,8 @@ function listingIdentityConfirmation() {
   const busy = ['loading','uploading'].includes(listingCapture.state), guest = window.CW_SERVER && !state.session?.authenticated;
   const message = listingCapture.message || (image ? 'Your website preview is ready.' : 'We’ll capture the public page. You can replace the image.');
   queueMicrotask(() => { void ensureListingScreenshot(); });
-  return `<div class="listing-identity-confirmation">${image ? `<img data-listing-screenshot src="${esc(image)}" alt="Screenshot captured from your app" referrerpolicy="no-referrer" />` : `<div class="listing-capture-placeholder" aria-hidden="true"><span></span><span></span><span></span></div>`}<div class="listing-identity-tools"><p role="status" aria-live="polite">${esc(message)}</p><div><label class="secondary-button">${image?'Replace image':'Upload screenshot'}<input class="sr-only" type="file" data-listing-image-upload accept="image/png,image/jpeg,image/webp"></label><button type="button" class="secondary-button" data-listing-capture ${guest?'hidden':''} ${busy?'disabled':''}>${busy?'Preparing…':'Retry capture'}</button></div></div></div>`;
+  const visual=image?`<img data-listing-screenshot src="${esc(image)}" alt="Screenshot captured from your app" referrerpolicy="no-referrer" />`:busy?`<div class="listing-capture-placeholder" aria-label="Website preview is loading"><span></span><span></span><span></span></div>`:`<div class="listing-capture-fallback" role="img" aria-label="Website preview unavailable"><strong>Preview unavailable</strong><span>${esc(message)}</span></div>`;
+  return `<div class="listing-identity-confirmation">${visual}<div class="listing-identity-tools"><p role="status" aria-live="polite">${esc(message)}</p><div><label class="secondary-button">${image?'Replace image':'Upload screenshot'}<input class="sr-only" type="file" data-listing-image-upload accept="image/png,image/jpeg,image/webp"></label><button type="button" class="secondary-button" data-listing-capture ${guest?'hidden':''} ${busy?'disabled':''}>${busy?'Preparing…':'Retry capture'}</button></div></div></div>`;
 }
 function listingSettingsPage() {
   if (!window.CW_SERVER && !state.session) return listingAccountPage();
@@ -1461,7 +1473,7 @@ if (window.CW_SERVER) {
   fetch('/api/me').then(response => { if (!response.ok) throw new Error('Unavailable'); return response.json(); }).then(session => {
     state.session = session;
     if (session.authenticated && session.databaseReady) fetch('/api/saved').then(r => r.json()).then(data => { if (Array.isArray(data.saved)) { state.saved = new Set(data.saved); if (state.route === 'discover' && !document.querySelector('.detail-dialog')) render(); } }).catch(() => {});
-    if (session.authenticated) void syncListingProject();
+    if (session.authenticated) { void syncListingProject(); if(listingUrl(listingDraft.url)&&!listingImage()) void ensureListingScreenshot(true); }
     render();openLinkedProject();void window.CWJoin?.restore(session);void loadDailyComments();
   }).catch(() => {
     state.session = { authenticated: false, authReady: false };

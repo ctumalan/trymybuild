@@ -31,6 +31,7 @@ document.addEventListener('change',event=>{
   dialog.innerHTML='<button type="button" class="return-feedback-close" aria-label="Close feedback">×</button><h2 id="guided-feedback-title">Give feedback</h2><div data-feedback-body><p role="status">Loading feedback form…</p></div>';
   const close=()=>{dialog.close();dialog.remove();if(feedbackDialog===dialog)feedbackDialog=null;opener?.isConnected&&opener.focus({preventScroll:true});};
   dialog.querySelector('button').onclick=close;dialog.addEventListener('cancel',event=>{event.preventDefault();close();});
+  dialog.addEventListener('cw-feedback-complete',close,{once:true});
   document.body.append(dialog);dialog.showModal();
   try{
    const response=await fetch('/tell/'+encodeURIComponent(slug),{credentials:'same-origin'});if(!response.ok)throw Error();
@@ -55,7 +56,7 @@ document.addEventListener('change',event=>{
   if(!save(form)){status.textContent='Your browser cannot keep this draft. Enable site storage before joining.';return;}
   const button=form.querySelector('[type="submit"]');button.disabled=true;
   try{const me=await fetch('/api/me').then(r=>{if(!r.ok)throw Error('Unable to check your account. Please try again.');return r.json();});if(!me.authenticated){window.CWJoin.offer({action:'feedback',slug:form.elements.slug.value,project:form.closest('.return-feedback-dialog')?form.elements.slug.value:undefined,browse:window.CWBrowseContext?.()});return;}
-   const r=await fetch('/api/feedback',{method:'POST',headers:{Accept:'application/json'},body:new URLSearchParams(new FormData(form))}),data=await r.json();if(!r.ok)throw Error(data.error);localStorage.removeItem(key(form.elements.slug.value));form.reset();status.textContent=data.duplicate?'You already started a conversation on this app.':data.message||'Your feedback was sent.';const a=document.createElement('a');a.href=data.href;a.textContent=' Open the conversation';status.append(a);
+   const r=await fetch('/api/feedback',{method:'POST',headers:{Accept:'application/json'},body:new URLSearchParams(new FormData(form))}),data=await r.json();if(!r.ok)throw Error(data.error);localStorage.removeItem(key(form.elements.slug.value));form.reset();status.textContent=data.duplicate?'You already started a conversation on this app.':data.message||'Your feedback was sent.';const a=document.createElement('a');a.href=data.href;a.textContent=' Open the conversation';status.append(a);const dialog=form.closest('.return-feedback-dialog');if(dialog)setTimeout(()=>dialog.dispatchEvent(new Event('cw-feedback-complete')),350);
   }catch(error){status.textContent=error.message||'Unable to send. Your draft is kept.';}finally{button.disabled=false;}
  });
 })();

@@ -17,6 +17,6 @@ export function notice(context:APIContext) {
 export function workspace(title:string,body:string,active:string,admin=false,identity?:{name:string,avatar?:string,verified?:boolean,founderException?:boolean}) {
  const initials=(identity?.name||'Member').split(/\s+/).slice(0,2).map(x=>x[0]).join('').toUpperCase();
  const picture=identity?`<span class="workspace-avatar">${identity.avatar?`<img src="${e(identity.avatar)}" alt="">`:e(initials)}</span>`:'';
- return surface(title,`<header class="workspace-heading ${identity?'workspace-welcome':''}">${picture}<div><h1>${e(title)}</h1>${identity?.verified?`<span class="creator-verified welcome-verified" title="${identity.founderException?'Founder exception—not earned through feedback':'Qualifying contribution and app ownership confirmed'}">✓ Verified Creator</span>`:''}</div></header>${body}`,active,200,admin);
+ return surface(title,`<header class="workspace-heading ${identity?'workspace-welcome':''}">${picture}<div><h1>${e(title)}</h1>${identity?.verified?`<span class="creator-verified welcome-verified" title="${identity.founderException?'Founder exception—not earned through feedback':'Qualifying contribution and app ownership confirmed'}">✓ Verified</span>`:''}</div></header>${body}`,active,200,admin);
 }
 export const empty=(text:string)=>`<p class="cw-empty">${e(text)}</p>`;

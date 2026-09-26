@@ -14,13 +14,13 @@ test('detail view uses the invitation screenshot layout and relevant information
  assert.match(css,/\.mealmap-detail \.project-screenshot\{[^}]*object-fit:contain/);
  assert.match(css,/\.listing-preview-card \.listing-preview-hero>img\{[^}]*object-fit:contain/);
 });
-test('project destination distinguishes built-in and external links',()=>{
+test('project destination shows the exact destination URL',()=>{
  const source=app.slice(app.indexOf('function projectDestination'),app.indexOf('function categoryIcon'));
  const context={};
  Function('context','window',`${source};context.destination=projectDestination;`)(context,{location:{origin:'https://trymybuild.com'}});
- assert.equal(context.destination('projects/afterschool-together/index.html'),'Opens here on TryMyBuild');
- assert.equal(context.destination('/projects/example'),'Opens here on TryMyBuild');
- assert.equal(context.destination('https://example.com/tool'),'Opens example.com');
+ assert.equal(context.destination('projects/afterschool-together/index.html'),'https://trymybuild.com/projects/afterschool-together/index.html');
+ assert.equal(context.destination('/projects/example'),'https://trymybuild.com/projects/example');
+ assert.equal(context.destination('https://example.com/tool'),'https://example.com/tool');
 });
 test('categories wrap and violet accents apply to navigation and illustration panels',()=>{
  assert.match(css,/\.category-strip-scroll\{flex-wrap:wrap;overflow:visible/);

@@ -519,6 +519,52 @@ a.secondary-button,.cw-main a.secondary-button { background: #f2edf8; color: #5e
   .recipient-copy,.recipient-preview-column,.invitation-detail[data-showcase-theme] .recipient-copy,.invitation-detail[data-showcase-theme] .recipient-preview-column { animation: none; }
 }
 
+/* September 26 interface consistency pass. */
+.site-header .brand-name,.cw-bar .brand-name,.site-footer .footer-brand { color:#7545ad; }
+.site-header .brand-name-works,.cw-bar .brand-name-works,.site-footer .footer-brand .brand-name-works { color:#17332a; }
+.cw-sidebar nav a[aria-current=page],.cw-admin-nav a[aria-current=page],.cw-admin-layout .cw-admin-nav a[aria-current] { background:#7545ad; color:#fff; }
+.cw-sidebar nav a[aria-current=page]:hover,.cw-admin-nav a[aria-current=page]:hover { background:#623694; color:#fff; }
+.journey-progress { background:#e6e9e5; }
+.journey-progress>span { background:#7545ad; }
+
+.discovery-categories { margin:0 0 22px; padding:10px 0; border-block:1px solid #ded3eb; }
+.discovery-categories>button,.discovery-categories details button { display:inline-flex; align-items:center; justify-content:center; gap:7px; }
+.discovery-categories button svg { width:16px; height:16px; flex:0 0 16px; }
+.discovery-categories details { position:relative; flex:0 0 auto; }
+.discovery-categories summary { display:flex; align-items:center; min-height:42px; padding:0 18px; border:1px solid #ded3eb; border-radius:99px; background:#fff; color:#17332a; font-size:.76rem; cursor:pointer; list-style:none; white-space:nowrap; }
+.discovery-categories summary::-webkit-details-marker { display:none; }
+.discovery-categories details>div { position:absolute; z-index:50; top:calc(100% + 8px); right:0; display:grid; gap:7px; width:220px; padding:10px; border:1px solid #ded3eb; border-radius:14px; background:#fff; box-shadow:0 16px 40px #17332a1f; }
+.discovery-categories details>div button { width:100%; justify-content:flex-start; }
+.future-discover .catalog-filter-options .sort-control { min-height:44px; padding:0; border:0; border-bottom:1px solid #ded3eb; border-radius:0; background:transparent; }
+.future-discover .catalog-filter-options .sort-control select { min-height:42px; padding:0 4px; background:transparent; }
+.future-discover .catalog-filter-options .sort-control:last-of-type { border-bottom:0; }
+
+.future-card-foot { align-items:center; }
+.future-card-foot .card-try-actions { display:grid; justify-items:center; align-content:center; min-width:0; }
+.future-card-foot .card-try-actions .external-destination { max-width:18rem; margin:.25rem 0 0; overflow-wrap:anywhere; text-align:center; }
+.public-detail-header .invite-actions .secondary-button,.catalog-row .card-secondary-actions .save-button-row { min-height:32px; padding:5px 10px; font-size:.7rem; font-weight:650; box-shadow:none; }
+.project-card-actions { align-items:center; gap:8px; }
+.project-card-actions .compact-action { min-height:32px; padding:5px 10px; background:#fff; font-size:.72rem; box-shadow:none; }
+.project-card-actions .project-details-action { min-height:36px; padding:7px 13px; }
+
+.creator-verified { display:inline-flex; align-items:center; width:max-content; margin-left:6px; padding:2px 6px; border:1px solid #a9d6c0; border-radius:99px; background:#e1f0e8; color:#176a50; font-size:.68rem; font-weight:750; line-height:1.2; white-space:nowrap; }
+.profile-hero div>p:last-child { color:#51675d; }
+.direct-message-entry>h2 { margin-top:0; }
+
+.listing-capture-fallback { min-height:330px; display:grid; place-content:center; gap:8px; padding:28px; border:1px dashed #b8a5cd; border-radius:16px; background:#faf8fc; color:#51675d; text-align:center; }
+.listing-capture-fallback strong { color:#17332a; font-size:1rem; }
+.listing-capture-fallback span { max-width:48ch; font-size:.85rem; line-height:1.55; }
+
+@media(max-width:620px) {
+  .discovery-categories { overflow-x:auto; flex-wrap:nowrap; }
+  .discovery-categories details>div { position:fixed; inset:auto 18px auto auto; width:min(260px,calc(100vw - 36px)); }
+  .future-card-foot { display:grid; grid-template-columns:auto auto; gap:10px 16px; padding:10px 14px; }
+  .future-card-foot .future-overview { min-height:34px; }
+  .future-card-foot .card-try-actions { grid-column:1/-1; width:100%; margin:0; }
+  .future-card-foot .card-try-actions .external-destination { max-width:100%; }
+  .listing-capture-fallback { min-height:240px; }
+}
+
 /* Quiet attribution keeps the app title first in the hierarchy. */
 .detail-creator { margin: -6px 0 22px; }
 .detail-creator .creator-byline { display: inline-flex; align-items: center; gap: 5px; padding: 0; border: 0; background: none; box-shadow: none; color: #68616e; font: 400 .78rem/1.5 "DM Sans",sans-serif; text-decoration: none; }

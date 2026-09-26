@@ -25,7 +25,7 @@ test('app confirmation suggests a short editable name from the submitted link',(
  assert.equal(ctx.listingNameFromUrl('https://www.my-useful-app.com/welcome'),'My Useful App');
  assert.equal(ctx.listingNameFromUrl('javascript:alert(1)'),'');
 });
-function scope(){const ctx=vm.createContext({document:{addEventListener(){}},state:{session:null},listingDraft:{},esc:String,homeView:'find',homeViewTabs:()=>'<nav>Tabs</nav>'});vm.runInContext(entry,ctx);vm.runInContext(app.slice(app.indexOf('function homeHowItWorks()'),app.indexOf('function catalogSearchWords(')),ctx);return ctx;}
+function scope(){const ctx=vm.createContext({document:{addEventListener(){}},state:{session:null},listingDraft:{},esc:String,homeView:'find',homeViewTabs:()=>'<nav>Tabs</nav>',discoveryHero:()=>'<form data-discovery-entry>Search</form>'});vm.runInContext(entry,ctx);vm.runInContext(app.slice(app.indexOf('function homeHowItWorks()'),app.indexOf('function catalogSearchWords(')),ctx);return ctx;}
 test('sharing choices use a private default and preserve explicit intent',()=>{
  const ctx=scope();assert.match(ctx.sharingPreferenceFields(),/value="not_sure" checked/);
  assert.equal((ctx.sharingPreferenceFields().match(/type="radio"/g)||[]).length,3);

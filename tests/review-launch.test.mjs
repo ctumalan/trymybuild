@@ -74,12 +74,14 @@ test('creator filters compose without treating companies as verified builders',(
  assert.equal(context.match({type:'company',verified:true},'all',true),false);
  assert.equal(context.match({type:'independent',verified:true},'company',false),false);
 });
-test('discovery keeps categories inside filters above a responsive compact app grid',()=>{
- const app=read('app.js'),css=read('launch-refinements.css');
- assert.match(app,/<nav class="category-strip" aria-label="Filter apps by category">/);
- assert.match(app,/class="category-strip-scroll"/);
+test('discovery keeps primary categories visible and the remaining filters compact',()=>{
+ const app=read('app.js'),css=read('launch-refinements.css'),future=read('future-design.css');
+ assert.match(app,/<nav class="discovery-categories" aria-label="Browse apps by category">/);
+ assert.match(app,/More categories/);
  assert.doesNotMatch(app,/<aside class="filter-panel">/);
- assert.match(app,/<div class="catalog-results"><div class="results-heading">[\s\S]*<div class="catalog-controls">[\s\S]*<nav class="category-strip"/);
+ assert.match(app,/\$\{discoveryHero\(\)\}\$\{catalogCategoryNavigation\(\)\}<div id="home-panel"/);
+ assert.doesNotMatch(app,/<div class="catalog-filter-options">[\s\S]*class="category-strip"/);
+ assert.match(future,/\.discovery-categories \{[^}]*border-block/);
  assert.match(css,/\.discover-page \.catalog-list,.profile-work \.catalog-list\{display:grid;grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/);
  assert.match(css,/@media\(max-width:1050px\)\{\.discover-page \.catalog-list,.profile-work \.catalog-list\{grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
  assert.match(css,/@media\(max-width:680px\)[\s\S]*\.discover-page \.catalog-list,.profile-work \.catalog-list\{grid-template-columns:minmax\(0,1fr\)/);

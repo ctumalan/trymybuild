@@ -45,5 +45,5 @@ test('listing UI exposes Other search without adding drafts to homepage filters'
   assert.match(source, /data-listing-category-custom/);
   assert.match(source, /creatorworks-category-catalog/);
   assert.match(source, /Drafts never create public filters/);
-  assert.match(source, /publishedCategories\(\)\.map/);
+  assert.match(source, /const categories=publishedCategories\(\)/);
 });

@@ -20,7 +20,7 @@
  active();persist();
  const touch=()=>{if(active()){pause.lastSeen=Date.now();persist();}};
  const suppressed=kind=>kind!=='detailed'&&active();
- const option=()=>'<label class="return-prompt-preference"><input type="checkbox" data-hide-short-return-prompts'+(active()?' checked':'')+'> Don’t ask again this session</label>';
+ const option=()=>'<label class="return-prompt-preference"><input type="checkbox" data-hide-short-return-prompts'+(active()?' checked':'')+'> Do not ask again for this session</label>';
  window.CWReturnPrompts={suppressed,option};
  document.addEventListener('change',event=>{
   if(!event.target.matches('[data-hide-short-return-prompts]'))return;

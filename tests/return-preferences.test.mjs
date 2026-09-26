@@ -16,7 +16,7 @@ function page({session=new Map(),local=new Map(),at=new Date(2026,8,26,12).getTi
 }
 test('session opt-out survives refresh/navigation but not a fresh tab session',()=>{
  const p=page();p.opt(true);
- assert.match(p.api.option(),/Don’t ask again this session/);
+ assert.match(p.api.option(),/Do not ask again for this session/);
  for(const kind of ['quick','comment'])assert.equal(p.api.suppressed(kind),true);
  assert.equal(p.api.suppressed('detailed'),false);
  const refresh=page({session:p.session,local:p.local});assert.equal(refresh.api.suppressed('quick'),true);

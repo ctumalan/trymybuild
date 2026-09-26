@@ -9,6 +9,16 @@ export async function prepareNotifications(db:any,id:string,admin:boolean){
  const pending:any[]=[];const add=(key:string,kind:string,title:string,href:string)=>pending.push({id:stableId(id+':'+key),user_id:id,kind,title,href});
  const check=(r:any)=>{if(r.error)throw r.error;return r.data||[];};
  if(pref.review_opportunities){
+  if(typeof db.rpc==='function'){
+   const [profile,badge]=await Promise.all([db.from('profiles').select('creator_type').eq('user_id',id).maybeSingle(),db.rpc('cw_badge_progress',{p_user:id})]);
+   if(profile.error||badge.error)throw profile.error||badge.error;
+   const progress=badge.data?.[0],reviews=Number(progress?.reviews||0);
+   if(profile.data?.creator_type!=='company'&&progress?.has_published&&!progress?.verified){
+    const milestone=reviews>=3?3:reviews>=1?1:0;
+    const title=milestone?`Verified progress: ${milestone} of 5 qualifying reviews. Keep helping other creators →`:'Work toward your Verified badge: give five qualifying reviews across three other creators and confirm ownership. Find an app to review →';
+    add('verified-progress:'+milestone,'verification',title,'/?view=discover');
+   }
+  }
   const prior=check(await db.from('creator_feedback').select('project_slug').eq('author_user_id',id));
   const candidates=check(await db.from('projects').select('slug,title,owner_user_id').eq('listing_status','published').order('published_at',{ascending:false}).limit(100));
   const eligible=candidates.filter((p:any)=>p.owner_user_id&&p.owner_user_id!==id&&!prior.some((f:any)=>f.project_slug===p.slug));

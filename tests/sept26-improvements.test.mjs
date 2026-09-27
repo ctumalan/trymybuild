@@ -31,6 +31,14 @@ test('visual fixes cover navigation contrast, compact actions, badges and failed
  assert.match(app,/Preview unavailable/);
 });
 
+test('catalog cards place the description under the title and price beside category',()=>{
+ const app=read('app.js'),css=read('future-design.css');
+ assert.match(app,/class="future-card-copy"><button class="row-title"[^>]*>\$\{esc\(product\.name\)\}<\/button><p class="future-card-summary">\$\{esc\(product\.summary\)\}<\/p>/);
+ assert.match(app,/class="future-card-meta"><span class="future-card-category">\$\{esc\(product\.category\)\}<\/span><span class="price-badge">\$\{esc\(product\.price\)\}<\/span>/);
+ assert.match(css,/\.future-card-meta \{[^}]*display: flex;[^}]*gap: 5px/);
+ assert.doesNotMatch(app,/class="row-copy"><p>\$\{esc\(product\.summary\)\}/);
+});
+
 test('creator profile messaging is expanded and verification uses the compact label',()=>{
  const profile=read('src/server/profile-view.ts');
  assert.match(profile,/<section class="cw-panel direct-message-entry"><h2>Message this creator<\/h2>/);

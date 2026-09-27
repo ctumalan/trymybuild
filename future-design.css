@@ -147,21 +147,19 @@ body:has(.future-discover) .site-footer .brand-name-works { color: #7545ad; }
 .future-app-icon.teal,.future-app-icon.green { background: linear-gradient(135deg,#68ceae,#28997e); }
 .future-app-icon.gold { background: linear-gradient(135deg,#ffc259,#e69337); }
 .future-app-icon.blue { background: linear-gradient(135deg,#7dacf5,#4772c7); }
-.future-card-heading > div { min-width: 0; flex: 1; }
+.future-card-copy { min-width: 0; flex: 1; }
 .catalog-row.future-card .row-title { color: var(--ink); font: 700 1.06rem/1.2 "DM Sans",sans-serif; letter-spacing: -.025em; padding: 0; text-align: left; }
+.future-card-summary { max-width: 48ch; margin: 5px 0 0; color: var(--muted); font-size: .72rem; line-height: 1.42; }
 .future-card-heading .creator-link { margin: 5px 0 0; gap: 0; }
 .future-card-heading .creator-link .person-avatar,.future-card-heading .creator-link .creator-verified,.future-card-heading .creator-link small { display: none; }
 .future-card-heading .creator-link.is-compact strong { font-weight: 400; color: var(--muted); font-size: .64rem; }
-.future-card-category { max-width: 31%; border: 1px solid var(--line); border-radius: 99px; padding: 5px 9px; color: var(--muted); text-align: center; font-size: .6rem; line-height: 1.35; }
+.future-card-meta { max-width: 42%; display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 5px; }
+.future-card-meta > span { border: 1px solid var(--line); border-radius: 99px; padding: 5px 9px; color: var(--muted); text-align: center; font-size: .6rem; line-height: 1.35; }
 .catalog-row.future-card .row-media { margin: 0 12px; border-radius: 8px; aspect-ratio: 1.8; background: var(--white); }
 .catalog-row.future-card .row-preview { padding: 0; border: 0; width: 100%; height: 100%; border-radius: 8px; }
 .catalog-row.future-card .row-preview img { object-fit: cover; object-position: top; width: 100%; height: 100%; }
 .catalog-row.future-card .card-secondary-actions { top: 8px; right: 8px; opacity: 1; }
 .catalog-row.future-card .card-secondary-actions .save-button-row { color: #5e6f68; font-size: .68rem; min-height: 30px; padding: 0 9px; border-radius: 8px; }
-.catalog-row.future-card .row-copy { padding: 10px 16px; display: block; flex: 1; }
-.catalog-row.future-card .row-copy > p { color: var(--muted); min-height: 2.8em; font-size: .78rem; line-height: 1.45; margin: 0 0 7px; }
-.catalog-row.future-card .product-meta { margin: 0; gap: 5px; }
-.catalog-row.future-card .product-meta span { font-size: .6rem; background: transparent; border: 1px solid var(--line); color: var(--muted); padding: 3px 7px; }
 .future-card-foot { display: flex; align-items: center; gap: 14px; min-height: 54px; border-top: 1px solid var(--line); padding: 0 14px; }
 .future-overview { align-self: stretch; border: 0; border-bottom: 2px solid #ded3eb; background: none; color: var(--ink); padding: 0; font-size: .75rem; font-weight: 600; cursor: pointer; }
 .future-card-foot .feedback-primary { font-size: .75rem; font-weight: 400; color: var(--muted); text-decoration: none; }
@@ -564,6 +562,9 @@ a.secondary-button,.cw-main a.secondary-button { background: #f2edf8; color: #5e
   .future-card-foot { grid-template-columns:auto auto minmax(0,1fr); gap:8px 10px; }
   .future-card-foot .future-overview { min-height:34px; }
   .future-card-foot .card-try-actions .primary-button { justify-self:end; }
+  .future-card-heading { align-items:flex-start; flex-wrap:wrap; }
+  .future-card-copy { flex:1 1 calc(100% - 54px); }
+  .future-card-meta { max-width:none; flex:1 1 100%; justify-content:flex-start; padding-left:51px; }
   .listing-capture-fallback { min-height:240px; }
 }
 
@@ -595,11 +596,13 @@ a.secondary-button,.cw-main a.secondary-button { background: #f2edf8; color: #5e
 
 .discovery-entry-row .primary-button { min-width: 154px; }
 
-/* A short rolling introduction, without replacing the input or its accessible label. */
-.entry-intro { position: absolute; inset: 1px 16px; overflow: hidden; pointer-events: none; color: #7545ad; font: 500 clamp(13px,2.8vw,15px)/1.5 "DM Sans",sans-serif; }
-.entry-intro>span { position: absolute; top: 50%; left: 0; white-space: nowrap; animation: entry-intro-first 6200ms ease both; }
+/* The opening slogan rolls beside the wordmark; search instructions remain visible. */
+.brand-intro { position: relative; flex: 1 1 0; min-width: 0; height: 44px; pointer-events: none; }
+.site-header:has(.brand-intro) .brand,.site-header:has(.brand-intro) .site-nav { flex-shrink: 0; }
+@media(max-width:620px) { .brand-intro { height: 64px; } }
+.brand-intro .entry-intro { position: absolute; inset: 0; overflow: hidden; pointer-events: none; color: #7545ad; font: 500 clamp(11px,2.4vw,15px)/1.35 "DM Sans",sans-serif; }
+.entry-intro>span { position: absolute; top: 50%; left: 0; max-width: 100%; white-space: normal; animation: entry-intro-first 6200ms ease both; }
 .entry-intro>span+span { animation-name: entry-intro-second; }
-.is-introducing input::placeholder { color: transparent; }
 @keyframes entry-intro-first {
   0% { opacity: 0; transform: translateY(calc(-50% + 12px)); filter: blur(3px); }
   8%,36% { opacity: 1; transform: translateY(-50%); filter: blur(0); }
@@ -612,7 +615,6 @@ a.secondary-button,.cw-main a.secondary-button { background: #f2edf8; color: #5e
 }
 @media(prefers-reduced-motion:reduce) {
   .entry-intro { display: none; }
-  .is-introducing input::placeholder { color: #68616e; }
 }
 
 .discovery-hero.discovery-hero-minimal { display: block; padding: 32px 0; }
@@ -657,9 +659,7 @@ a.secondary-button,.cw-main a.secondary-button { background: #f2edf8; color: #5e
 .entry-placeholder.is-scrolling .entry-placeholder-track { animation: entry-teleprompter var(--entry-duration,20s) linear infinite; }
 .discovery-entry-field:hover .entry-placeholder-track { animation-play-state: paused; }
 .discovery-entry-field input:not(:placeholder-shown) + .entry-placeholder,
-.discovery-entry-field input:focus + .entry-placeholder,
-.discovery-entry-field.is-introducing .entry-placeholder { visibility: hidden; }
-.discovery-entry-field.is-introducing .entry-placeholder-track,
+.discovery-entry-field input:focus + .entry-placeholder { visibility: hidden; }
 .discovery-entry-field input:focus + .entry-placeholder .entry-placeholder-track,
 .discovery-entry-field input:not(:placeholder-shown) + .entry-placeholder .entry-placeholder-track { animation: none; }
 .entry-resume { margin-top: 10px; }

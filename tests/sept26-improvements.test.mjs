@@ -34,8 +34,9 @@ test('visual fixes cover navigation contrast, compact actions, badges and failed
 test('catalog cards place the description under the title and price beside category',()=>{
  const app=read('app.js'),css=read('future-design.css');
  assert.match(app,/class="future-card-copy"><button class="row-title"[^>]*>\$\{esc\(product\.name\)\}<\/button><p class="future-card-summary">\$\{esc\(product\.summary\)\}<\/p>/);
- assert.match(app,/class="future-card-meta"><span class="future-card-category">\$\{esc\(product\.category\)\}<\/span><span class="price-badge">\$\{esc\(product\.price\)\}<\/span>/);
- assert.match(css,/\.future-card-meta \{[^}]*display: flex;[^}]*gap: 5px/);
+ assert.match(app,/class="future-card-meta">\$\{creatorLink\(product, true\)\}<span class="future-card-category">\$\{esc\(product\.category\)\}<\/span><span class="price-badge">\$\{esc\(product\.price\)\}<\/span>/);
+ assert.match(css,/\.future-card-meta \{[^}]*display: flex;[^}]*gap: 4px 7px/);
+ assert.match(css,/\.future-card-meta > :not\(:first-child\)::before \{ content: "·"/);
  assert.doesNotMatch(app,/class="row-copy"><p>\$\{esc\(product\.summary\)\}/);
 });
 

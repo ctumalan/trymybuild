@@ -7,7 +7,7 @@ test('All eleven projects use the approved presentation with their own action ta
   const source = readFileSync(new URL('../app.js', import.meta.url), 'utf8');
   const firstListener = Math.min(...["document.addEventListener('input'", "document.addEventListener('submit'"].map(marker=>source.indexOf(marker)).filter(index=>index>0));
   const functions = source.slice(source.indexOf('const projectPresentation ='), firstListener);
-  const context = vm.createContext({ window:{addEventListener(){}},document:{addEventListener(){}},detailProjectHistory:[],videoPlayer: () => '', similarSection: () => '', projectDestination: url => /^https?:\/\//i.test(url) ? 'Opens example.com' : 'Opens here on TryMyBuild', state: { saved: new Set(), communityPosts: [], session: null }, esc: value => String(value ?? ''), avatar: () => '<span class="person-avatar"></span>', creatorLink: () => 'TryMyBuild Studio', creatorFor: () => ({ slug: 'creatorworks-studio', name: 'TryMyBuild Studio' }) });
+  const context = vm.createContext({ openedCatalogApps:new Set(), window:{addEventListener(){}},document:{addEventListener(){}},detailProjectHistory:[],videoPlayer: () => '', similarSection: () => '', projectDestination: url => /^https?:\/\//i.test(url) ? 'Opens example.com' : 'Opens here on TryMyBuild', state: { saved: new Set(), communityPosts: [], session: null }, esc: value => String(value ?? ''), avatar: () => '<span class="person-avatar"></span>', creatorLink: () => 'TryMyBuild Studio', creatorFor: () => ({ slug: 'creatorworks-studio', name: 'TryMyBuild Studio' }) });
   context.URL=URL;
   context.location={origin:'https://trymybuild.com'};
   vm.runInContext(source.slice(source.indexOf('function safeProjectUrl'),source.indexOf('function ',source.indexOf('function safeProjectUrl')+9)),context);
@@ -18,18 +18,20 @@ test('All eleven projects use the approved presentation with their own action ta
   assert.match(markup, /How it helps/);
   assert.match(markup, /One thing to try first/);
   assert.doesNotMatch(markup, /Illustrative plan|mealmap-screenshot|mealmap-lead/);
-  assert.doesNotMatch(markup, /data-project-comment="mealmap"/);
+  assert.match(markup, /data-project-comment="mealmap"/);
   assert.match(markup, /class="detail-description-notes"/);
-  assert.match(markup, /href="\/tell\/mealmap" data-guided-open="mealmap">Give feedback/);
+  assert.match(markup, /data-inline-feedback data-feedback-slug="mealmap"/);
   assert.doesNotMatch(markup, /<summary>Leave a public comment<\/summary>/);
   assert.match(markup, /data-save="mealmap"/);
   assert.ok(markup.includes(product.url));
+  assert.match(markup,/class="project-conversation"/);
+  assert.doesNotMatch(markup,/Had a chance to try it/);
   const slugs = vm.runInContext('Object.keys(projectPresentation)', context);
   assert.equal(slugs.length, 11);
   for (const slug of slugs) {
     const explanation = vm.runInContext(`projectPresentation[${JSON.stringify(slug)}][2]`, context);
     const html = context.detailDrawer({ ...product, slug, name: slug, preview: `assets/previews/${slug}.png`, url: `https://example.com/${slug}` });
-    assert.ok(html.includes(`data-guided-open="${slug}"`));
+    assert.ok(html.includes(`data-feedback-slug="${slug}"`));
     assert.ok(html.includes(`>${explanation}</h2>`));
     assert.doesNotMatch(html, /What does it do\?/);
     assert.ok(html.includes(`data-save="${slug}"`));

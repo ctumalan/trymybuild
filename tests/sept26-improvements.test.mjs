@@ -6,11 +6,10 @@ const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 test('discovery language, navigation and destinations use the requested public wording',()=>{
  const app=read('app.js');
  assert.match(app,/Search apps, or paste your app’s URL to share it/);
- assert.match(app,/>App details<\/button>/);
- assert.match(app,/>Give feedback<\/a>/);
+ assert.match(app,/aria-label="View \$\{esc\(product\.name\)\} details"/);
+ assert.match(app,/data-conversation-tab="feedback">Your feedback<\/button>/);
  assert.match(app,/class="discovery-categories"/);
  assert.match(app,/return parsed\.href/);
- assert.match(app,/Had a chance to try it\? <a href="\/tell\/\$\{esc\(product\.slug\)\}" data-guided-open/);
 });
 
 test('feedback prompts keep session-only suppression and close after successful submissions',()=>{
@@ -34,9 +33,9 @@ test('visual fixes cover navigation contrast, compact actions, badges and failed
 test('catalog cards place the description under the title and price beside category',()=>{
  const app=read('app.js'),css=read('future-design.css');
  assert.match(app,/class="future-card-copy"><button class="row-title"[^>]*>\$\{esc\(product\.name\)\}<\/button><p class="future-card-summary">\$\{esc\(product\.summary\)\}<\/p>/);
- assert.match(app,/class="future-card-meta">\$\{creatorLink\(product, true\)\}<span class="future-card-category">\$\{esc\(product\.category\)\}<\/span><span class="price-badge">\$\{esc\(product\.price\)\}<\/span>/);
+ assert.match(app,/class="future-card-creator"><span>By<\/span>\$\{creatorLink\(product, true\)\}<\/div><div class="future-card-meta"><span class="future-card-category">\$\{esc\(product\.category\)\}<\/span><span class="price-badge">\$\{esc\(product\.price\)\}<\/span>/);
  assert.match(css,/\.future-card-meta \{[^}]*display: flex;[^}]*gap: 4px 7px/);
- assert.match(css,/\.future-card-meta > :not\(:first-child\)::before \{ content: "·"/);
+ assert.match(css,/\.future-card-meta \{[^}]*justify-content: space-between/);
  assert.doesNotMatch(app,/class="row-copy"><p>\$\{esc\(product\.summary\)\}/);
 });
 

@@ -361,6 +361,7 @@ function discoveryHero(listing = false) {
   const prompt = 'Search apps, or paste your app’s URL to share it';
   return `<header class="discovery-hero discovery-hero-minimal${listing ? ' listing-entry-header' : ''}" aria-label="Share or find an app">
     <div class="discovery-hero-copy">
+      ${listing ? '' : '<h1 class="discovery-promise"><span>Where makers share early apps and get honest feedback.</span></h1>'}
       ${listing ? '<button type="button" class="text-button" data-entry-mode="search">← Back to apps</button>' : `<form class="discovery-entry" data-discovery-entry>
         <label class="visually-hidden" for="discovery-input">${prompt}</label>
         <div class="discovery-entry-row"><div class="discovery-entry-field"><input id="discovery-input" data-catalog-search value="${esc(value)}" type="text" maxlength="2048" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="${prompt}" /><span class="entry-placeholder" aria-hidden="true"><span class="entry-placeholder-track">${prompt}</span></span></div><button type="submit" class="primary-button" data-entry-submit>${intent.label}</button></div>
@@ -444,13 +445,10 @@ function homeCommunity() {
 }
 const openedCatalogApps = new Set();
 function catalogRow(product) {
-  const saved = state.saved.has(product.slug);
-  const posts = state.communityPosts.filter(post=>post.projectSlug===product.slug).slice(0,2);
   return `<article class="catalog-row future-card">
-    <div class="future-card-heading"><span class="future-app-icon ${esc(product.color || 'violet')}" aria-hidden="true">${esc(product.icon || product.name.slice(0,1))}</span><div class="future-card-copy"><button class="row-title" data-product="${esc(product.slug)}">${esc(product.name)}</button><p class="future-card-summary">${esc(product.summary)}</p><div class="future-card-meta">${creatorLink(product, true)}<span class="future-card-category">${esc(product.category)}</span><span class="price-badge">${esc(product.price)}</span>${product.stage && product.stage !== 'New' ? `<span>${esc(product.stage)}</span>` : ''}${Number(product.recentCommentCount)>=3?`<span class="activity-badge" title="Published comments and public reviews in the past 30 days">Active discussion · ${Number(product.recentCommentCount)}</span>`:''}</div></div></div>
-    <div class="row-media"><button class="row-preview" data-product="${esc(product.slug)}" aria-label="View ${esc(product.name)} details"><img src="${esc(product.preview)}" alt="Preview of the ${esc(product.name)} website" loading="lazy" /></button><div class="card-secondary-actions"><button class="save-button-row ${saved ? 'is-saved' : ''}" data-save="${esc(product.slug)}" aria-label="${saved ? 'Remove' : 'Save'} ${esc(product.name)}">${saved ? '♥ Saved' : '♡ Save'}</button><button type="button" class="save-button-row" data-share-product="${esc(product.slug)}" aria-label="Share ${esc(product.name)}">Share</button></div></div>
-    <div class="future-card-foot"><button type="button" class="future-overview" data-product="${esc(product.slug)}">App details</button><a class="feedback-primary" href="/tell/${esc(product.slug)}" data-guided-open="${esc(product.slug)}" aria-label="Give feedback on ${esc(product.name)}">Give feedback</a><div class="card-try-actions"><a class="primary-button" href="${esc(safeProjectUrl(product.url))}" target="_blank" rel="noopener noreferrer" data-try-app="${esc(product.slug)}" aria-label="Try ${esc(product.name)} (opens in a new tab)">Try app <span aria-hidden="true">↗</span></a><small class="external-destination">${esc(projectDestination(product.url))}</small></div></div>
-    <section class="card-comments" aria-label="Comments on ${esc(product.name)}" ${posts.length || openedCatalogApps.has(product.slug) ? '' : 'hidden'}>${posts.map(post=>experienceCard(post)).join('')}<p class="card-return-prompt" data-return-prompt="${esc(product.slug)}" ${openedCatalogApps.has(product.slug)?'':'hidden'}>Had a chance to try it? <a href="/tell/${esc(product.slug)}" data-guided-open="${esc(product.slug)}">Tell the maker what you think.</a></p></section>
+    <div class="row-media"><button class="row-preview" data-product="${esc(product.slug)}" aria-label="View ${esc(product.name)} details"><img src="${esc(product.preview)}" alt="Preview of the ${esc(product.name)} website" loading="lazy" /></button></div>
+    <div class="future-card-heading"><div class="future-card-copy"><button class="row-title" data-product="${esc(product.slug)}">${esc(product.name)}</button><p class="future-card-summary">${esc(product.summary)}</p><div class="future-card-creator"><span>By</span>${creatorLink(product, true)}</div><div class="future-card-meta"><span class="future-card-category">${esc(product.category)}</span><span class="price-badge">${esc(product.price)}</span></div></div></div>
+    <div class="future-card-foot"><div class="card-try-actions"><button type="button" class="primary-button" data-product="${esc(product.slug)}" aria-label="Explore ${esc(product.name)}">Explore app</button></div></div>
   </article>`;
 }
 
@@ -547,8 +545,10 @@ function projectCommentComposer(product, compact = false, context = '') {
   const count = commentWordCount(draft);
   const id = (context || (compact ? 'card-' : 'detail-')) + product.slug;
   const empty = !state.communityPosts.some(post=>post.projectSlug===product.slug);
-  const placeholder = compact && empty ? 'Be the first to leave a public comment' : 'What is the first thing you liked? Was the price right? What was confusing? Mention one or two improvements.';
-  return `<form class="detail-comment-form compact-comment" data-project-comment="${esc(product.slug)}"><div class="comment-input-wrap"><label class="visually-hidden" for="comment-${esc(id)}">Leave a public comment</label><textarea id="comment-${esc(id)}" name="comment" maxlength="800" rows="2" required aria-describedby="comment-count-${esc(id)}" data-project-comment-field placeholder="${placeholder}">${esc(draft)}</textarea><button class="comment-send" type="submit" aria-label="Send comment" ${draft.trim()?'':'hidden'}>➤</button></div><details class="inline-help"><summary aria-label="Comment guidelines">?</summary><p><strong>Be thoughtful. Be respectful.</strong> Discuss the app, not the person. Use clear, considerate language. <a href="/community-guidelines">Guidelines</a>. Write 7–150 words. Guests appear as Guest.</p></details><small id="comment-count-${esc(id)}" data-project-comment-count class="${draft.trim()?'word-counter':'visually-hidden'}">${count} / 7–150 words</small><small class="comment-public-note">Public after review. One comment per app; sign in to update yours.</small><p data-comment-status role="status" aria-live="polite"></p></form>`;
+  const conversation = context === 'conversation-';
+  const placeholder = conversation ? 'Ask the maker a question, share an idea, or tell us what you tried…' : compact && empty ? 'Be the first to leave a public comment' : 'What is the first thing you liked? Was the price right? What was confusing? Mention one or two improvements.';
+  if (conversation) return `<form class="detail-comment-form conversation-composer" data-project-comment="${esc(product.slug)}"><label class="visually-hidden" for="comment-${esc(id)}">Leave a public comment</label><textarea id="comment-${esc(id)}" name="comment" maxlength="800" rows="2" required aria-describedby="comment-count-${esc(id)}" data-project-comment-field placeholder="Ask a question or share a thought…">${esc(draft)}</textarea><div class="conversation-compose-meta"><small>Public after review.</small><details class="conversation-guidelines"><summary>Guidelines</summary><p>Write 7–150 words. Discuss the app, not the person. One comment per app; sign in to update yours. Guests appear as Guest. <a href="/community-guidelines">Community guidelines</a></p></details><button class="comment-send" type="submit" aria-label="Post comment" ${draft.trim()?'':'hidden'}>Post comment</button></div><small id="comment-count-${esc(id)}" data-project-comment-count class="${draft.trim()?'word-counter':'visually-hidden'}">${count} / 7–150 words</small><p data-comment-status role="status" aria-live="polite"></p></form>`;
+  return `<form class="detail-comment-form compact-comment${conversation ? ' conversation-composer' : ''}" data-project-comment="${esc(product.slug)}"><div class="comment-input-wrap"><label class="visually-hidden" for="comment-${esc(id)}">Leave a public comment</label><textarea id="comment-${esc(id)}" name="comment" maxlength="800" rows="2" required aria-describedby="comment-count-${esc(id)}" data-project-comment-field placeholder="${placeholder}">${esc(draft)}</textarea><button class="comment-send" type="submit" aria-label="${conversation?'Post comment':'Send comment'}" ${draft.trim()?'':'hidden'}>${conversation?'Post comment':'➤'}</button></div><details class="inline-help"><summary aria-label="Comment guidelines">?</summary><p><strong>Be thoughtful. Be respectful.</strong> Discuss the app, not the person. Use clear, considerate language. <a href="/community-guidelines">Guidelines</a>. Write 7–150 words. Guests appear as Guest.</p></details><small id="comment-count-${esc(id)}" data-project-comment-count class="${draft.trim()?'word-counter':'visually-hidden'}">${count} / 7–150 words</small><small class="comment-public-note">Public after review. One comment per app; sign in to update yours.</small><p data-comment-status role="status" aria-live="polite"></p></form>`;
 }
 
 // A return is an invitation to comment, never proof that an app was used.
@@ -639,6 +639,65 @@ function projectDetailContent(product, preview = false) {
   return `<div class="detail-creator">${creator}</div><section class="recipient-hero"><div class="recipient-copy"><h2 ${preview?'':`id="detail-title-${esc(product.slug)}"`}>${esc(presentation.headline||product.name)}</h2><div class="detail-description-notes"><div><h3>How it helps</h3><p>${esc(presentation.help)}</p></div><div><h3>One thing to try first</h3><p>${esc(presentation.firstTry)}</p></div></div></div><div class="recipient-preview-column"><div class="recipient-art">${product.preview?`<img ${preview?'data-listing-screenshot':''} src="${esc(product.preview)}" alt="Preview of ${esc(product.name)}" referrerpolicy="no-referrer">`:''}<span>Made by a person. Ready for your perspective.</span></div>${product.url?`<a class="primary-button" href="${esc(safeProjectUrl(product.url))}" target="_blank" rel="noopener noreferrer" ${preview?'':`data-try-app="${esc(product.slug)}"`}>Try this app ↗</a><small class="external-destination">${esc(projectDestination(product.url))}</small>`:''}</div></section>`;
 }
 
+function conversationPost(post) {
+  const when = new Date(post.createdAt);
+  const dated = Number.isFinite(when.getTime());
+  return `<article class="conversation-post">${avatar({avatar:post.avatar,initials:post.initials || 'G'},'small')}<div class="conversation-post-body"><div class="conversation-bubble"><header><strong>${esc(post.author || 'Guest')}</strong>${post.isCreator === true ? '<span class="conversation-creator">Creator</span>' : ''}</header><p>${esc(post.response)}</p></div>${dated ? `<time datetime="${esc(when.toISOString())}" title="${esc(when.toLocaleString())}">${esc(when.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}))}</time>` : ''}</div></article>`;
+}
+function conversationFeed(posts) {
+  if (!posts.length) return '<p class="conversation-empty">Start the conversation. What would you like to ask the maker?</p>';
+  const sorted = [...posts].sort((a,b)=>(Date.parse(b.createdAt)||0)-(Date.parse(a.createdAt)||0));
+  return sorted.slice(0,3).map(conversationPost).join('') + (sorted.length>3 ? `<details class="conversation-more"><summary>View all ${sorted.length} comments</summary>${sorted.slice(3).map(conversationPost).join('')}</details>` : '');
+}
+function projectConversation(product) {
+  const posts = state.communityPosts.filter(post=>post.projectSlug===product.slug);
+  const id = esc(product.slug);
+  return `<section class="project-conversation" data-conversation="${id}" aria-label="Comments and feedback"><div class="conversation-tabs" role="tablist" aria-label="Join in"><button type="button" role="tab" id="conversation-tab-${id}" aria-controls="conversation-panel-${id}" aria-selected="true" tabindex="0" data-conversation-tab="comments">Conversation <span data-conversation-count>${posts.length || ''}</span></button><button type="button" role="tab" id="feedback-tab-${id}" aria-controls="feedback-panel-${id}" aria-selected="false" tabindex="-1" data-conversation-tab="feedback">Your feedback</button></div><div role="tabpanel" id="conversation-panel-${id}" aria-labelledby="conversation-tab-${id}" data-conversation-panel="comments"><div class="conversation-feed" data-conversation-feed aria-live="polite">${window.CW_SERVER ? '<p class="conversation-empty">Loading conversation…</p>' : conversationFeed(posts)}</div>${projectCommentComposer(product,false,'conversation-')}</div><div role="tabpanel" id="feedback-panel-${id}" aria-labelledby="feedback-tab-${id}" data-conversation-panel="feedback" hidden><p class="feedback-tab-intro">Tried the app? Tell the creator what worked and what could improve.</p><div data-inline-feedback data-feedback-slug="${id}"><p role="status">Loading feedback form…</p></div><details class="conversation-badge-help"><summary>How feedback counts toward your badge</summary><p>For independent creators: five approved qualifying reviews across at least three other creators, plus confirmed ownership of a published app. Helpful criticism counts equally. Ordinary comments do not count.</p></details></div></section>`;
+}
+function selectConversationTab(tab) {
+  const region = tab.closest('[data-conversation]');
+  const selected = tab.dataset.conversationTab;
+  region.querySelectorAll('[data-conversation-tab]').forEach(button => {
+    const active = button === tab;
+    button.setAttribute('aria-selected', String(active));
+    button.tabIndex = active ? 0 : -1;
+  });
+  region.querySelectorAll('[data-conversation-panel]').forEach(panel => { panel.hidden = panel.dataset.conversationPanel !== selected; });
+  if (selected === 'feedback') window.CWGuidedFeedback?.mountInline(region.querySelector('[data-inline-feedback]'));
+}
+document.addEventListener('click', event => {
+  const tab = event.target.closest('[data-conversation-tab]');
+  if (tab) selectConversationTab(tab);
+});
+document.addEventListener('keydown', event => {
+  const tab = event.target.closest('[data-conversation-tab]');
+  if (!tab || !['ArrowLeft','ArrowRight','Home','End'].includes(event.key)) return;
+  event.preventDefault();
+  const tabs = [...tab.closest('[role="tablist"]').querySelectorAll('[role="tab"]')];
+  const next = event.key === 'Home' ? tabs[0] : event.key === 'End' ? tabs.at(-1) : tabs[(tabs.indexOf(tab)+1)%tabs.length];
+  selectConversationTab(next);next.focus({preventScroll:true});
+});
+
+async function loadProjectConversation() {
+  const region = document.querySelector('[data-conversation]');
+  if (!region || !window.CW_SERVER) return;
+  const slug = region.dataset.conversation;
+  const feed = region.querySelector('[data-conversation-feed]');
+  const request = {}; region.conversationRequest = request;
+  feed.innerHTML = '<p class="conversation-empty">Loading conversation…</p>';
+  try {
+    const response = await fetch('/api/experiences?project='+encodeURIComponent(slug));
+    const data = await response.json();
+    if (!response.ok || data.connected === false || !Array.isArray(data.posts)) throw Error();
+    if (!region.isConnected || region.conversationRequest !== request) return;
+    const posts = data.posts.filter(post=>post.projectSlug===slug);
+    state.communityPosts = [...state.communityPosts.filter(post=>post.projectSlug!==slug),...posts];
+    feed.innerHTML = conversationFeed(posts);
+    region.querySelector('[data-conversation-count]').textContent = posts.length || '';
+  } catch {
+    if (region.isConnected && region.conversationRequest === request) feed.innerHTML = '<p class="conversation-empty">Comments couldn’t load. <button type="button" class="text-button" data-conversation-retry>Try again</button></p>';
+  }
+}
 function detailDrawer(product) {
   const saved = state.saved.has(product.slug);
   return `<div class="detail-overlay" data-detail-overlay>
@@ -646,7 +705,7 @@ function detailDrawer(product) {
     <section class="detail-dialog mealmap-detail invitation-detail" data-showcase-theme="${product.slug === 'stackscout' ? 'stackscout' : ['coral','teal','blue','gold','green','violet'].includes(product.color) ? product.color : 'teal'}" role="dialog" aria-modal="true" aria-labelledby="detail-title-${esc(product.slug)}" tabindex="-1">
       <div class="detail-scroll">
         <header class="project-panel-bar"><span>TryMyBuild</span><button class="detail-close" data-detail-close aria-label="Close ${esc(product.name)} details">×</button></header><div class="project-detail-content"><header class="public-detail-header">${detailProjectHistory.length ? `<button type="button" class="detail-back" data-detail-back aria-label="Previous project">←</button>` : ''}<div><strong>${esc(product.name)}</strong><small>${esc(product.price)} · ${esc(product.category)} · ${esc(product.stage)}</small></div><div class="invite-actions"><button class="secondary-button detail-save ${saved?'is-saved':''}" data-save="${esc(product.slug)}">${saved?'♥ Saved':'♡ Save'}</button><button class="secondary-button detail-share" data-share-product="${esc(product.slug)}">Share</button><span class="detail-share-status" data-share-status role="status"></span></div></header>${projectDetailContent(product)}
-        ${videoPlayer(product.video)}<div class="mealmap-after"><section class="mealmap-feedback"><a class="primary-button feedback-primary" href="/tell/${esc(product.slug)}" data-guided-open="${esc(product.slug)}">Give feedback</a><p class="feedback-guidance">Start a conversation with the creator.</p><div class="mealmap-comments">${state.communityPosts.filter(post => post.projectSlug === product.slug).length ? state.communityPosts.filter(post => post.projectSlug === product.slug).map(post => experienceCard(post)).join('') : '<p>No public comments yet.</p>'}</div></section></div>${similarSection(product)}</div>
+        ${videoPlayer(product.video)}<div class="mealmap-after">${projectConversation(product)}</div>${similarSection(product)}</div>
       </div>
     </section>
   </div>`;
@@ -713,6 +772,7 @@ function openProductDetail(product, trigger) {
     detailProjectHistory.push({product: state.selected, scrollTop: current.querySelector('.detail-scroll')?.scrollTop || 0});
     state.selected = product;
     current.outerHTML = detailDrawer(product);
+    void loadProjectConversation();
     document.querySelector('.detail-back')?.focus({preventScroll:true});
     return;
   }
@@ -722,6 +782,7 @@ function openProductDetail(product, trigger) {
   detailReturnFocus = trigger || document.activeElement;
   detailScrollY = window.scrollY;
   document.body.insertAdjacentHTML("beforeend", detailDrawer(product));
+  void loadProjectConversation();
   document.body.classList.add("is-dialog-open");
   document.body.style.position = "fixed";
   document.body.style.top = `-${detailScrollY}px`;
@@ -735,6 +796,7 @@ function backProductDetail() {
   if (!previous || !current) return;
   state.selected = previous.product;
   current.outerHTML = detailDrawer(previous.product);
+  void loadProjectConversation();
   document.querySelector('.detail-scroll').scrollTop = previous.scrollTop;
   (document.querySelector('.detail-back') || document.querySelector('.detail-close'))?.focus({preventScroll:true});
 }
@@ -1252,6 +1314,7 @@ document.addEventListener('keydown', event => {
   selectHomeView(event.key === 'Home' ? 'find' : event.key === 'End' ? 'test' : event.target.dataset.homeView === 'find' ? 'test' : 'find');
 });
 document.addEventListener("click", async event => {
+  if (event.target.closest('[data-conversation-retry]')) { void loadProjectConversation(); return; }
   const entryMode = event.target.closest('[data-entry-mode]');
   if (entryMode) {
     const searching = entryMode.dataset.entryMode === 'search';
@@ -1276,8 +1339,6 @@ document.addEventListener("click", async event => {
     document.querySelectorAll('[data-return-prompt]').forEach(prompt => {
       if (prompt.dataset.returnPrompt === tryApp.dataset.tryApp) {
         prompt.hidden = false;
-        if (prompt.closest('.card-comments')) prompt.closest('.card-comments').hidden = false;
-        prompt.closest('.card-comments')?.classList.add('awaiting-feedback');
       }
     });
   }
@@ -1630,7 +1691,7 @@ window.CWOpenProject = slug => { const project = projects.find(p => p.slug === s
 
 function guidedReturnComposer(product) {
  const group=(name,title,options)=>`<fieldset><legend>${title}</legend><div class="cw-choices">${Object.entries(options).map(([v,l])=>`<label class="cw-choice"><input type="radio" name="${name}" value="${v}" required>${esc(l)}</label>`).join('')}</div></fieldset>`;
- return `<form action="/api/feedback" method="post" data-guided-feedback><input type="hidden" name="slug" value="${esc(product.slug)}"><input type="hidden" name="price" value="unsure">${group('attempt','1. Were you able to complete the task?',{completed:'Yes, I completed it',stuck:'Partly—I got stuck',blocked:'No—I couldn’t get started',not_tried:'I haven’t tried it yet'})}${group('focus','2. Where did you hesitate or get stuck?',{ease:'Finding my way around',bugs:'Something went wrong',results:'The result surprised me',explanation:'I did not understand something',development:'I have an idea for what comes next'})}<label data-review-prompt>3. What did you expect, and what happened?<textarea name="message" maxlength="800" required rows="3" placeholder="Describe one specific moment. What did you expect to happen next?"></textarea></label><small>Write 7–150 words.</small>${group('helpful','4. Could this solve a real problem for you?',{yes:'Yes',somewhat:'Maybe, with improvements',not_yet:'No, not for me',unclear:'I’m not sure yet'})}${group('visibility','Who can see it?',{private:'Me and the creator',public:'The community, after review'})}<button type="submit" class="primary-button return-feedback-send">Send feedback</button><p data-guided-status role="status"></p></form>`;
+ return `<form action="/api/feedback" method="post" data-guided-feedback><input type="hidden" name="slug" value="${esc(product.slug)}"><input type="hidden" name="price" value="unsure">${group('attempt','1. Were you able to complete the task?',{completed:'Yes, I completed it',stuck:'Partly—I got stuck',blocked:'No—I couldn’t get started',not_tried:'I haven’t tried it yet'})}${group('focus','2. Where did you hesitate or get stuck?',{ease:'Finding my way around',bugs:'Something went wrong',results:'The result surprised me',explanation:'I did not understand something',development:'I have an idea for what comes next'})}<label><span data-review-prompt>3. What did you expect, and what happened?</span><textarea name="message" maxlength="800" required rows="3" placeholder="Describe one specific moment. What did you expect to happen next?"></textarea></label><small>Write 7–150 words.</small>${group('helpful','4. Could this solve a real problem for you?',{yes:'Yes',somewhat:'Maybe, with improvements',not_yet:'No, not for me',unclear:'I’m not sure yet'})}${group('visibility','Who can see it?',{private:'Me and the creator',public:'The community, after review'})}<button type="submit" class="primary-button return-feedback-send">Send feedback</button><p data-guided-status role="status"></p></form>`;
 }
 
 

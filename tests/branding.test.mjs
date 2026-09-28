@@ -8,9 +8,9 @@ const read = path => readFileSync(new URL('../' + path, import.meta.url), 'utf8'
 
 test('discovery introduces both project discovery and creator participation', () => {
   assert.doesNotMatch(read('index.html'), /class="brand-promise"/);
-  assert.match(read('entry-intro.js'), /Share what you are building\./);
-  assert.match(read('entry-intro.js'), /Find apps that make life easier\./);
-  assert.match(read('index.html'), /<title>TryMyBuild — Share your app. Discover apps to try.<\/title>/);
+  assert.doesNotMatch(read('index.html'), /Find apps that make life easier|class="brand-intro"/);
+  assert.match(read('app.js'), /Where makers share early apps and get honest feedback\./);
+  assert.match(read('index.html'), /<title>TryMyBuild — Share early apps. Get honest feedback.<\/title>/);
   const app = read('app.js');
   assert.match(app, /Share your app/);
   assert.match(app, /Explore apps/);

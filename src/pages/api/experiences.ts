@@ -9,7 +9,7 @@ import {guestToken} from '../../server/guest-comments';
 
 export const GET: APIRoute = async context => {
   if (!databaseReady()) return json({ posts: [], connected: false });
-  let query=database().from('project_experiences').select('id,project_slug,response,created_at,author_user_id,projects!inner(listing_status)').eq('projects.listing_status','published').eq('moderation_status','published');
+  let query=database().from('project_experiences').select('id,project_slug,response,created_at,author_user_id,projects!inner(listing_status,owner_user_id)').eq('projects.listing_status','published').eq('moderation_status','published');
   const slug=context.url.searchParams.get('project');if(slug)query=query.eq('project_slug',slug);
   const result = await query.order('created_at', { ascending: false }).limit(100);
   if (result.error) return json({ error: 'Community is temporarily unavailable.' }, 503);
@@ -18,8 +18,10 @@ export const GET: APIRoute = async context => {
   if (profiles.error) return json({ error: 'Community is temporarily unavailable.' }, 503);
   return json({ connected: true, posts: result.data.map(row => {
     const profile = profiles.data?.find(item => item.user_id === row.author_user_id);
+    const project = Array.isArray(row.projects) ? row.projects[0] : row.projects;
+    const isCreator = Boolean(row.author_user_id && row.author_user_id === project?.owner_user_id);
     const author: string = row.author_user_id ? profile?.display_name || 'Member' : 'Guest';
-    return { id: row.id, projectSlug: row.project_slug, response: row.response, author, avatar: profile?.avatar_path || '', label: row.author_user_id ? profile?.identity_label || 'TryMyBuild member' : 'Guest participant', initials: author.split(/\s+/).slice(0, 2).map(word => word[0]).join(''), createdAt: row.created_at, source: 'community', signals: [] };
+    return { id: row.id, projectSlug: row.project_slug, response: row.response, author, isCreator, avatar: profile?.avatar_path || '', label: row.author_user_id ? profile?.identity_label || 'TryMyBuild member' : 'Guest participant', initials: author.split(/\s+/).slice(0, 2).map(word => word[0]).join(''), createdAt: row.created_at, source: 'community', signals: [] };
   }) });
 };
 

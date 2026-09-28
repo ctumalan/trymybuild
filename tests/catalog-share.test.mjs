@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 const source=readFileSync(new URL('../app.js',import.meta.url),'utf8');
-test('account and catalog cards offer Share while preserving detail and save actions',()=>{
+test('catalog cards focus on discovery while account and detail views retain sharing',()=>{
  const ctx=vm.createContext({state:{saved:new Set(),communityPosts:[]},openedCatalogApps:new Set(),safeProjectUrl:String,projectDestination:()=> 'Opens example.com',projectCommentDraft:()=>'',projectCommentComposer:()=>'<form></form>',experienceCount:()=>0,creatorLink:()=>'',categoryIcon:()=>'',esc:String,projectFirstStep:()=> 'Try a feature.'});
  vm.runInContext(source.slice(source.indexOf('function productCard('),source.indexOf('function discover('))+source.slice(source.indexOf('function catalogRow('),source.indexOf('const projectPresentation =')),ctx);
  const products=vm.runInNewContext(source.match(/^const projects = (\[[\s\S]*?\n\]);/)[1]);
@@ -11,10 +11,14 @@ test('account and catalog cards offer Share while preserving detail and save act
   const compact=ctx.productCard(p,true),catalog=ctx.catalogRow(p);
   assert.ok(compact.includes(`data-share-product="${p.slug}"`));
   assert.ok(compact.includes(`aria-label="Share ${p.name}"`));
-  assert.ok(catalog.includes(`data-share-product="${p.slug}"`));
-  assert.ok(catalog.includes(`data-try-app="${p.slug}"`));
+  assert.ok(!catalog.includes(`data-share-product="${p.slug}"`));
+  assert.ok(!catalog.includes(`data-try-app="${p.slug}"`));
+  assert.doesNotMatch(catalog,/target="_blank"/);
   assert.ok(catalog.includes(`data-product="${p.slug}"`));
-  assert.ok(catalog.includes(`data-save="${p.slug}"`));
+  assert.ok(!catalog.includes(`data-save="${p.slug}"`));
+  assert.doesNotMatch(catalog,/Give feedback|card-comments|card-return-prompt|external-destination|future-app-icon|App details/);
+  assert.ok(catalog.indexOf('class="row-media"') < catalog.indexOf('class="future-card-heading"'));
+  assert.ok(catalog.includes(`class="primary-button" data-product="${p.slug}" aria-label="Explore ${p.name}">Explore app</button>`));
  }
  assert.match(source,/class="secondary-button detail-share" data-share-product=/);
 });

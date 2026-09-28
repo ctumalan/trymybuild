@@ -28,7 +28,7 @@ test('an open feedback request becomes a focused trial brief and removes the pri
 });
 test('catalog loads the handlers needed by guided and native project overlays',()=>{
  const html=read('index.html');for(const file of ['community-input.js','public-comments.js','project-actions.js'])assert.match(html,new RegExp('src="'+file.replaceAll('.','\\.')+'" defer'));
- const app=read('app.js');assert.match(app,/data-guided-open="\$\{esc\(product.slug\)\}"/);assert.match(app,/window.CWBrowseContext/);
+ const app=read('app.js');assert.match(app,/data-inline-feedback data-feedback-slug=/);assert.match(app,/window.CWBrowseContext/);
 });
 test('guided submission requires membership and creates a replyable review rather than a public comment',async()=>{
  const f=workspaceFixtures(),writes=[];
@@ -74,4 +74,16 @@ test('feedback load failures expose a working full-page fallback and invalid slu
 test('an open modal prevents duplicate loads and modified clicks retain normal link behavior',async()=>{
  const f=modalFixture();await f.api.open('sample-0');await f.api.open('sample-0');assert.equal(f.dialogs.length,1);
  let prevented=false;f.listeners.get('click')({target:{closest:()=>({dataset:{guidedOpen:'sample-1'}})},button:0,ctrlKey:true,preventDefault(){prevented=true;}});assert.equal(prevented,false);assert.equal(f.dialogs.length,1);
+});
+
+test('inline feedback uses the authoritative form once and preserves its unique labels',async()=>{
+ const f=modalFixture();const root={dataset:{feedbackSlug:'sample-0'},isConnected:true,replaceChildren(...children){this.children=children;},querySelectorAll:()=>[]};
+ await f.api.mountInline(root);assert.equal(root.dataset.loaded,'true');assert.equal(f.dialogs.length,0);assert.equal(f.label.data.for,f.input.id);assert.match(f.input.id,/^guided-inline-/);
+ await f.api.mountInline(root);assert.equal(f.calls.filter(c=>c[0]==='fetch').length,1);
+});
+test('inline form failures allow retry and discard responses after the app closes',async()=>{
+ const failed=modalFixture({ok:false}),root={dataset:{feedbackSlug:'sample-0'},isConnected:true,querySelectorAll:()=>[]};
+ await failed.api.mountInline(root);assert.match(root.innerHTML,/data-inline-feedback-retry/);assert.equal(root.dataset.loading,undefined);
+ const delayed=modalFixture({deferred:true}),closed={dataset:{feedbackSlug:'sample-0'},isConnected:true,querySelectorAll:()=>[],replaceChildren(){throw Error('closed view replaced');}};
+ const pending=delayed.api.mountInline(closed);closed.isConnected=false;delayed.release();await pending;assert.equal(closed.dataset.loaded,undefined);
 });

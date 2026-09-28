@@ -14,7 +14,7 @@ document.querySelectorAll('[data-mark-thread-read]').forEach(form=>{
 });
 document.addEventListener('change',event=>{
  if(event.target.name!=='attempt')return;
- const prompt=document.querySelector('[data-review-prompt]');
+ const prompt=event.target.closest('form')?.querySelector('[data-review-prompt]');
  if(prompt)prompt.textContent=event.target.value==='not_tried'?'3. What would you like to ask the maker?':['stuck','blocked'].includes(event.target.value)?'3. What did you expect to happen, and what stopped you?':'3. What did you expect, and what happened?';
 });
 
@@ -46,16 +46,34 @@ document.addEventListener('change',event=>{
    if(!dialog.isConnected)return;const region=dialog.querySelector('[data-feedback-body]'),notice=document.createElement('p'),link=document.createElement('a');notice.setAttribute('role','alert');notice.textContent='The feedback form could not load. Please try the feedback page.';link.href='/tell/'+encodeURIComponent(slug);link.textContent='Open feedback page';region.replaceChildren(notice,link);
   }
  }
- window.CWGuidedFeedback={hydrate,open};hydrate(document);window.addEventListener('cw-panel-ready',()=>hydrate(document));
+ let inlineId=0;
+ async function mountInline(region){
+  if(!region || region.dataset.loaded || region.dataset.loading)return;
+  const slug=region.dataset.feedbackSlug;if(!/^[a-z0-9-]+$/.test(slug))return;
+  region.dataset.loading='true';region.innerHTML='<p class="feedback-inline-status" role="status">Loading feedback form…</p>';
+  try{
+   const response=await fetch('/tell/'+encodeURIComponent(slug),{credentials:'same-origin'});if(!response.ok)throw Error();
+   const doc=new DOMParser().parseFromString(await response.text(),'text/html'),panel=doc.querySelector('[data-guided-panel]');if(!panel)throw Error();if(!region.isConnected)return;
+   panel.querySelectorAll('script,iframe,object,embed,base').forEach(el=>el.remove());panel.className='guided-feedback-content';
+   // Owner and existing-conversation panels retain their explanation; forms use the tab introduction.
+   if(panel.querySelector('[data-guided-feedback]')){panel.querySelector('h1,h2')?.remove();const intro=panel.querySelector(':scope>p');if(intro&&!intro.className)intro.remove();}
+   const ids=new Map(),prefix='guided-inline-'+(++inlineId)+'-';panel.querySelectorAll('[id]').forEach(el=>{ids.set(el.id,prefix+el.id);el.id=prefix+el.id;});
+   panel.querySelectorAll('[for],[aria-describedby],[data-counter-id]').forEach(el=>{for(const attr of ['for','aria-describedby','data-counter-id'])if(el.hasAttribute(attr))el.setAttribute(attr,el.getAttribute(attr).split(' ').map(id=>ids.get(id)||id).join(' '));});
+   region.replaceChildren(panel);region.dataset.loaded='true';hydrate(region);
+  }catch{if(region.isConnected)region.innerHTML='<p class="feedback-inline-status" role="status">The feedback form couldn’t load. <button type="button" class="text-button" data-inline-feedback-retry>Retry</button></p>';}
+  finally{delete region.dataset.loading;}
+ }
+ document.addEventListener('click',event=>{const retry=event.target.closest('[data-inline-feedback-retry]');if(retry)mountInline(retry.closest('[data-inline-feedback]'));});
+ window.CWGuidedFeedback={hydrate,open,mountInline};hydrate(document);window.addEventListener('cw-panel-ready',()=>hydrate(document));
  document.addEventListener('click',event=>{const link=event.target.closest('a[data-guided-open]');if(!link||event.defaultPrevented||event.button!==0||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;event.preventDefault();open(link.dataset.guidedOpen);});
- window.addEventListener('cw-feedback-resume',event=>{if(!location.pathname.startsWith('/tell/'))open(event.detail);});
+ window.addEventListener('cw-feedback-resume',event=>{if(location.pathname.startsWith('/tell/'))return;const region=[...document.querySelectorAll('[data-conversation]')].find(el=>el.dataset.conversation===event.detail);if(region){region.querySelector('[data-conversation-tab=feedback]')?.click();}else open(event.detail);});
  document.addEventListener('input',event=>{const form=event.target.closest('[data-guided-feedback]');if(form)save(form);});document.addEventListener('change',event=>{const form=event.target.closest('[data-guided-feedback]');if(form)save(form);});
  document.addEventListener('submit',async event=>{
   const form=event.target.closest('[data-guided-feedback]');if(!form)return;event.preventDefault();const status=form.querySelector('[data-guided-status]'),count=(form.elements.message.value.match(/[\p{L}\p{N}]+(?:['’\-][\p{L}\p{N}]+)*/gu)||[]).length;
   if(count<7||count>150){status.textContent='Write 7–150 words about your experience.';form.elements.message.focus();return;}
   if(!save(form)){status.textContent='Your browser cannot keep this draft. Enable site storage before joining.';return;}
   const button=form.querySelector('[type="submit"]');button.disabled=true;
-  try{const me=await fetch('/api/me').then(r=>{if(!r.ok)throw Error('Unable to check your account. Please try again.');return r.json();});if(!me.authenticated){window.CWJoin.offer({action:'feedback',slug:form.elements.slug.value,project:form.closest('.return-feedback-dialog')?form.elements.slug.value:undefined,browse:window.CWBrowseContext?.()});return;}
+  try{const me=await fetch('/api/me').then(r=>{if(!r.ok)throw Error('Unable to check your account. Please try again.');return r.json();});if(!me.authenticated){window.CWJoin.offer({action:'feedback',slug:form.elements.slug.value,project:form.closest('.return-feedback-dialog,.project-conversation')?form.elements.slug.value:undefined,browse:window.CWBrowseContext?.()});return;}
    const r=await fetch('/api/feedback',{method:'POST',headers:{Accept:'application/json'},body:new URLSearchParams(new FormData(form))}),data=await r.json();if(!r.ok)throw Error(data.error);localStorage.removeItem(key(form.elements.slug.value));form.reset();status.textContent=data.duplicate?'You already started a conversation on this app.':data.message||'Your feedback was sent.';const a=document.createElement('a');a.href=data.href;a.textContent=' Open the conversation';status.append(a);const dialog=form.closest('.return-feedback-dialog');if(dialog)setTimeout(()=>dialog.dispatchEvent(new Event('cw-feedback-complete')),350);
   }catch(error){status.textContent=error.message||'Unable to send. Your draft is kept.';}finally{button.disabled=false;}
  });

@@ -56,17 +56,25 @@ function route(path,stubs) {
 }
 const json=(body,status=200)=>new Response(JSON.stringify(body),{status});
 const request=body=>({request:new Request('https://trymybuild.com/api/test',{method:'POST',headers:{origin:'https://trymybuild.com'},body:JSON.stringify(body)})});
-test('automatic capture rejects guests, unverified accounts and exhausted or unavailable shared limits',async()=>{
- for(const mode of ['guest','unverified','limited','unavailable','allowed']){
+test('automatic capture allows guests and uses shared limits for each trust level',async()=>{
+ for(const mode of ['guest','unverified','allowed','limited','guest-limited','unavailable','guest-unavailable','no-address','foreign-origin','invalid-url']){
   let captured=0;const limits=[];
-  const api=route('src/pages/api/listing-preview.ts',{json,origin:()=>'',sameOrigin:()=>true,previewUrl,currentUser:async()=>mode==='guest'?null:{id:'account',emailVerified:mode!=='unverified'},allowRequest:async(...args)=>{limits.push(args);if(mode==='unavailable')throw Error();return mode!=='limited';},capturePreview:async()=>{captured++;return {image:'test'};}});
-  const response=await api.POST(request({url:'https://example.com'}));
-  assert.equal(captured,mode==='allowed'?1:0);
-  if(mode==='guest')assert.equal(response.status,401);
-  if(mode==='unverified')assert.equal(response.status,403);
-  if(mode==='limited')assert.equal(response.status,429);
-  if(mode==='allowed'){assert.equal(response.status,200);assert.deepEqual(limits.map(x=>x.slice(1)),[['listing-preview',3,60],['listing-preview-day',20,86400]]);}
+  const guest=mode.startsWith('guest')||['no-address','foreign-origin','invalid-url'].includes(mode);
+  const api=route('src/pages/api/listing-preview.ts',{json,origin:()=>'',sameOrigin:()=>mode!=='foreign-origin',previewUrl,currentUser:async()=>guest?null:{id:'account',emailVerified:mode!=='unverified'},allowRequest:async(...args)=>{limits.push(args);if(mode.endsWith('unavailable'))throw Error();return !mode.endsWith('limited');},capturePreview:async()=>{captured++;return {image:'test'};}});
+  const response=await api.POST({...request({url:mode==='invalid-url'?'http://127.0.0.1':'https://example.com'}),clientAddress:mode==='no-address'?'':'198.51.100.8'});
+  const allowed=['guest','unverified','allowed'].includes(mode);
+  assert.equal(captured,allowed?1:0,mode);
+  if(allowed){
+   assert.equal(response.status,200);
+   assert.deepEqual(limits,mode==='allowed'?[['account','listing-preview',3,60],['account','listing-preview-day',20,86400]]:[['198.51.100.8','listing-preview-guest',2,60],['198.51.100.8','listing-preview-guest-day',6,86400]]);
+  }else assert.equal(response.status,mode==='no-address'?503:mode==='foreign-origin'?403:mode==='invalid-url'?400:mode.endsWith('limited')?429:422,mode);
  }
+});
+test('guest daily screenshot limit blocks capture even when the minute limit allows it',async()=>{
+ let captured=0;
+ const api=route('src/pages/api/listing-preview.ts',{json,origin:()=>'',sameOrigin:()=>true,previewUrl,currentUser:async()=>null,allowRequest:async(_id,action)=>!action.endsWith('-day'),capturePreview:async()=>{captured++;return {};}});
+ const response=await api.POST({...request({url:'https://example.com'}),clientAddress:'198.51.100.8'});
+ assert.equal(response.status,429);assert.equal(captured,0);
 });
 test('wish feed filters published only and submissions use the atomic capped procedure',async()=>{
  const filters=[];let rpcCall;

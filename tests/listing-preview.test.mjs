@@ -68,12 +68,13 @@ test('late automatic results cannot overwrite a changed URL or manually chosen i
  const pending=context.ensureListingScreenshot();context.invalidateListingCapture();context.listingDraft.imageData='chosen-image';
  finish({ok:true,json:async()=>({image:'data:image/jpeg;base64,AAAA'})});await pending;assert.equal(context.listingDraft.imageData,'chosen-image');
 });
-test('guest preview renders its sign-in note once without a refresh loop and resumes after sign-in',async()=>{
+test('guest preview captures before sign-in without refresh loops or repeat captures',async()=>{
  const source=readFileSync(new URL('../app.js',import.meta.url),'utf8');let refreshes=0,captures=0;
  const context=vm.createContext({window:{CW_SERVER:true},state:{session:{authenticated:false}},CWPreviewUtils:utils,listingDraft:{url:'https://public.site',image:'',imageSourceUrl:'',imageData:''},listingUrl:v=>v,document:{querySelector:()=>null},saveListingDraft:()=>true,fetch:async()=>{captures++;return {ok:true,json:async()=>({image:'data:image/jpeg;base64,AAAA'})};},AbortController,setTimeout,clearTimeout});
  vm.runInContext(source.slice(source.indexOf('let listingCapture ='),source.indexOf('async function useListingScreenshot')),context);
  context.refreshListingPreview=()=>{refreshes++;if(refreshes>5)throw Error('Recursive preview refresh');void context.ensureListingScreenshot();};
- await context.ensureListingScreenshot();assert.equal(refreshes,1);assert.equal(captures,0);
+ await context.ensureListingScreenshot();assert.equal(refreshes,2);assert.equal(captures,1);
+ await context.ensureListingScreenshot();
  context.state.session.authenticated=true;await context.ensureListingScreenshot();
  assert.equal(captures,1);assert.equal(context.listingDraft.imageData,'data:image/jpeg;base64,AAAA');
 });

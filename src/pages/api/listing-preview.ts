@@ -9,10 +9,14 @@ export const POST:APIRoute=async context=>{
  if(!sameOrigin(context.request,origin(context)))return json({error:'Request not allowed.'},403);
  try{
   const user=await currentUser(context);
-  if(!user)return json({error:'Sign in for automatic screenshots, or upload your own image.'},401);
-  if(!user.emailVerified)return json({error:'Verify your email to use automatic screenshots.'},403);
+  // Guests can preview public sites before creating an account. Use the adapter's
+  // client address (never a caller-supplied forwarding header) for shared limits.
+  const verified=!!user?.emailVerified;
+  const identifier=verified?user!.id:context.clientAddress;
+  if(!identifier)return json({error:'Automatic preview is temporarily unavailable. Upload a screenshot or try again later.'},503);
+  const action=verified?'listing-preview':'listing-preview-guest';
   // Database-backed counters work across concurrent serverless instances; fail closed.
-  if(!await allowRequest(user.id,'listing-preview',3,60)||!await allowRequest(user.id,'listing-preview-day',20,86400))return json({error:'Screenshot limit reached. Upload an image or try again later.'},429);
+  if(!await allowRequest(identifier,action,verified?3:2,60)||!await allowRequest(identifier,action+'-day',verified?20:6,86400))return json({error:'Screenshot limit reached. Upload an image or try again later.'},429);
   const raw=await context.request.text();if(raw.length>5000)return json({error:'Link is too long.'},413);
   let url;try{url=previewUrl(JSON.parse(raw).url).href;}catch{return json({error:'Enter a public http or https website link.'},400);}
   return json(await capturePreview(url));

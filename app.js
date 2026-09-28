@@ -829,6 +829,8 @@ function listingImage() {
   return listingDraft.imageSourceUrl === listingUrl(listingDraft.url) ? CWPreviewUtils.imageData(listingDraft.imageData) || stored : stored;
 }
 function refreshListingPreview() {
+  const identity = document.querySelector('.listing-identity-confirmation');
+  if (identity) identity.outerHTML = listingIdentityConfirmation();
   const region = document.querySelector('[data-listing-preview-region]');
   if (region) region.outerHTML = listingPreview();
   const video = document.querySelector('[data-listing-video-preview]');
@@ -844,12 +846,6 @@ function invalidateListingCapture() {
 async function ensureListingScreenshot(force = false) {
   const url = listingUrl(listingDraft.url);
   if (!url || (!force && (listingImage() || listingCapture.attempted === url)) || listingCapture.state === 'loading') return;
-  if (window.CW_SERVER && !state.session?.authenticated) {
-    if(listingCapture.state==='sign-in-required')return;
-    listingCapture.state='sign-in-required';
-    listingCapture.message = 'Automatic screenshots are available after sign-in. You can upload your own screenshot or continue without one.';
-    refreshListingPreview(); return;
-  }
   const revision = ++listingCapture.revision;
   listingCapture.attempted = url; listingCapture.state = 'loading'; listingCapture.message = 'Capturing your website… You can keep going while it loads.';
   listingCapture.controller?.abort(); const controller = new AbortController(); listingCapture.controller = controller;
@@ -902,8 +898,7 @@ async function useListingScreenshot(file) {
 }
 function listingImageControls() {
   const busy = ['loading','uploading'].includes(listingCapture.state);
-  const guest = window.CW_SERVER && !state.session?.authenticated;
-  return `<section class="listing-image-tools" aria-label="Website screenshot"><p role="status" aria-live="polite">${esc(listingCapture.message || (listingImage() ? 'Your website preview is ready.' : 'Add a screenshot of the page people will try.'))}</p><div class="listing-image-drop" data-listing-image-drop><label> ${listingImage() ? 'Replace screenshot' : 'Upload a screenshot'}<input type="file" data-listing-image-upload accept="image/png,image/jpeg,image/webp"></label><span>Or drop it here · PNG, JPG, WebP · up to 5 MB</span></div><button type="button" class="secondary-button" data-listing-capture ${guest?'hidden':''} ${busy?'disabled':''}>${busy?'Preparing image…':listingImage()?'Recapture website':'Retry website capture'}</button><p class="listing-image-note">Automatic capture reads only the public website, never a page signed in to your app. If it shows a login screen or misses interactive content, upload your own screenshot. Your draft stays on this device.</p></section>`;
+  return `<section class="listing-image-tools" aria-label="Website screenshot"><p role="status" aria-live="polite">${esc(listingCapture.message || (listingImage() ? 'Your website preview is ready.' : 'Add a screenshot of the page people will try.'))}</p><div class="listing-image-drop" data-listing-image-drop><label> ${listingImage() ? 'Replace screenshot' : 'Upload a screenshot'}<input type="file" data-listing-image-upload accept="image/png,image/jpeg,image/webp"></label><span>Or drop it here · PNG, JPG, WebP · up to 5 MB</span></div><button type="button" class="secondary-button" data-listing-capture ${busy?'disabled':''}>${busy?'Preparing image…':listingImage()?'Recapture website':'Retry website capture'}</button><p class="listing-image-note">Automatic capture reads only the public website, never a page signed in to your app. If it shows a login screen or misses interactive content, upload your own screenshot. Your draft stays on this device.</p></section>`;
 }
 document.addEventListener('click', event => { if(event.target.closest('[data-listing-capture]')) void ensureListingScreenshot(true); });
 document.addEventListener('change', event => { if(event.target.matches('[data-listing-image-upload]')) void useListingScreenshot(event.target.files?.[0]); });
@@ -941,11 +936,11 @@ function listingPreview() {
 }
 function listingIdentityConfirmation() {
   const image = listingImage();
-  const busy = ['loading','uploading'].includes(listingCapture.state), guest = window.CW_SERVER && !state.session?.authenticated;
+  const busy = ['loading','uploading'].includes(listingCapture.state);
   const message = listingCapture.message || (image ? 'Your website preview is ready.' : 'We’ll capture the public page. You can replace the image.');
   queueMicrotask(() => { void ensureListingScreenshot(); });
   const visual=image?`<img data-listing-screenshot src="${esc(image)}" alt="Screenshot captured from your app" referrerpolicy="no-referrer" />`:busy?`<div class="listing-capture-placeholder" aria-label="Website preview is loading"><span></span><span></span><span></span></div>`:`<div class="listing-capture-fallback" role="img" aria-label="Website preview unavailable"><strong>Preview unavailable</strong><span>${esc(message)}</span></div>`;
-  return `<div class="listing-identity-confirmation">${visual}<div class="listing-identity-tools"><p role="status" aria-live="polite">${esc(message)}</p><div><label class="secondary-button">${image?'Replace image':'Upload screenshot'}<input class="sr-only" type="file" data-listing-image-upload accept="image/png,image/jpeg,image/webp"></label><button type="button" class="secondary-button" data-listing-capture ${guest?'hidden':''} ${busy?'disabled':''}>${busy?'Preparing…':'Retry capture'}</button></div></div></div>`;
+  return `<div class="listing-identity-confirmation">${visual}<div class="listing-identity-tools"><p role="status" aria-live="polite">${esc(message)}</p><div><label class="secondary-button">${image?'Replace image':'Upload screenshot'}<input class="sr-only" type="file" data-listing-image-upload accept="image/png,image/jpeg,image/webp"></label><button type="button" class="secondary-button" data-listing-capture ${busy?'disabled':''}>${busy?'Preparing…':'Retry capture'}</button></div></div></div>`;
 }
 function listingSettingsPage() {
   if (!window.CW_SERVER && !state.session) return listingAccountPage();

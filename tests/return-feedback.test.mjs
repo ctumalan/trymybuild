@@ -5,7 +5,7 @@ import vm from 'node:vm';
 const source=readFileSync(new URL('../app.js',import.meta.url),'utf8');
 test('project detail try links retain the return-feedback hook',()=>{
  for(const [start,end] of [['function projectDetailContent(', "document.addEventListener('input'"]]){
-  const section=source.slice(source.indexOf(start),source.indexOf(end,source.indexOf(start)));
+  const section=readFileSync(new URL('../project-view.js',import.meta.url),'utf8');
   assert.match(section,/data-try-app="\$\{esc\(product.slug\)\}"/);
   assert.match(section,/data-try-app="\$\{esc\(product.slug\)\}"[^>]*>Try (?:this (?:app|project) ↗|(?:this )?app <span aria-hidden="true">↗<\/span>)<\/a>/);
  }

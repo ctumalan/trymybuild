@@ -1,6 +1,9 @@
+import '../../project-view.js';
 import {e} from './feedback-ui';
-function destination(url:string){try{return new URL(url).href;}catch{return url||'Destination unavailable';}}
 export function projectDetailContent(p:any){
  const c=p.creator||{},note=c.founderException?'Founder exception—not earned through feedback. Not a product-quality guarantee.':c.verificationNote||'Qualifying contribution and app ownership confirmed';
- return `<div class="detail-creator">${c.slug?`<a class="creator-byline" href="/people/${e(encodeURIComponent(c.slug))}">`:'<span class="creator-byline">'}by ${e(c.name||'You')}${c.verified?`<span class="creator-verified" title="${e(note)}">✓ Verified</span>`:''}${c.slug?'</a>':'</span>'}</div><section class="recipient-hero"><div class="recipient-copy"><h1>${e(p.presentation.headline||p.name)}</h1><div class="detail-description-notes"><div><h3>How it helps</h3><p>${e(p.presentation.help)}</p></div><div><h3>One thing to try first</h3><p>${e(p.presentation.firstTry)}</p></div></div></div><div class="recipient-preview-column"><div class="recipient-art">${p.preview?`<img src="${e(p.preview)}" alt="Preview of ${e(p.name)}">`:''}<span>Made by a person. Ready for your perspective.</span></div>${p.url?`<a class="primary-button" href="${e(p.url)}" target="_blank" rel="noopener noreferrer" data-try-app="${e(p.slug)}">Try this app ↗</a><small class="external-destination">${e(destination(p.url))}</small>`:''}</div></section>`;
+ const creator = `${c.slug?`<a class="creator-byline" href="/people/${e(encodeURIComponent(c.slug))}">`:'<span class="creator-byline">'}by ${e(c.name||'You')}${c.verified?`<span class="creator-verified" title="${e(note)}">✓ Verified</span>`:''}${c.slug?'</a>':'</span>'}`;
+ return (globalThis as any).CWProjectView.hero(p, {creator, titleId:'detail-title-'+p.slug});
 }
+export function projectConversation(p:any){return (globalThis as any).CWProjectView.conversation(p);}
+export function projectTheme(p:any){return (globalThis as any).CWProjectView.theme(p);}

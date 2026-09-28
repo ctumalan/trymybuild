@@ -4,10 +4,11 @@ import vm from 'node:vm';
 import {workspaceFixtures,moduleFixture,read} from '../scripts/workspace-fixtures.mjs';
 
 const context=slug=>({url:new URL('https://example.invalid/tell/'+slug),params:{slug},cookies:{get(){}}});
-test('recipient feedback has one guided action with public visibility inside the form',async()=>{
+test('recipient feedback uses the shared Conversation and Your feedback tabs',async()=>{
  const f=workspaceFixtures(),html=await (await f.routes['/projects/sample-0'](context('sample-0'))).text();
- assert.match(html,/class="primary-button feedback-primary" href="\/tell\/sample-0" data-guided-open="sample-0">Give feedback/);
- assert.doesNotMatch(html,/<summary>Leave a public comment<\/summary>|data-public-comment=/);
+ assert.match(html,/data-conversation-tab="feedback">Your feedback/);
+ assert.match(html,/data-feedback-slug="sample-0"/);
+ assert.match(html,/data-public-comment="sample-0"/);
  const composer=f.scope.publicCommentComposer("sample-0");assert.match(composer,/Guests appear as Guest/);assert.match(composer,/sign in to update yours/);
  assert.doesNotMatch(html,/Join before posting/);
 });
@@ -22,13 +23,13 @@ test('guided page exposes guest form, owner guidance and existing thread without
 test('an open feedback request becomes a focused trial brief and removes the pricing detour',async()=>{
  const f=workspaceFixtures();f.tables.feedback_requests=[{id:f.id,user_id:f.owner,project_slug:'sample-0',question:'Was it clear how to save your first shared list?',status:'queued',created_at:'2026-09-12T15:00:00Z'}];
  const project=await (await f.routes['/projects/sample-0'](context('sample-0'))).text();
- assert.match(project,/A short trial with a real maker/);assert.match(project,/About 5–10 minutes/);assert.match(project,/Was it clear how to save your first shared list/);assert.match(project,/>Finish the trial</);
+ assert.match(project,/A short trial with a real maker/);assert.match(project,/About 5–10 minutes/);assert.match(project,/Was it clear how to save your first shared list/);assert.match(project,/data-conversation-tab="feedback">Your feedback/);
  const guest=moduleFixture('src/pages/tell/[slug].ts',['GET'],{...f.scope,currentUser:async()=>null}).GET,form=await (await guest(context('sample-0'))).text();
  assert.match(form,/Were you able to complete the task/);assert.match(form,/What did you expect, and what happened/);assert.match(form,/Could this solve a real problem for you/);assert.match(form,/name="price" value="unsure"/);assert.doesNotMatch(form,/How did the price feel/);
 });
 test('catalog loads the handlers needed by guided and native project overlays',()=>{
  const html=read('index.html');for(const file of ['community-input.js','public-comments.js','project-actions.js'])assert.match(html,new RegExp('src="'+file.replaceAll('.','\\.')+'" defer'));
- const app=read('app.js');assert.match(app,/data-inline-feedback data-feedback-slug=/);assert.match(app,/window.CWBrowseContext/);
+ const app=read('app.js');assert.match(read('project-view.js'),/data-inline-feedback data-feedback-slug=/);assert.match(app,/window.CWBrowseContext/);
 });
 test('guided submission requires membership and creates a replyable review rather than a public comment',async()=>{
  const f=workspaceFixtures(),writes=[];

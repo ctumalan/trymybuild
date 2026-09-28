@@ -2,6 +2,7 @@
 import {readFileSync} from 'node:fs';
 import {stripTypeScriptTypes} from 'node:module';
 import vm from 'node:vm';
+import '../project-view.js';
 import {randomUUID} from 'node:crypto';
 import {socialCopy,socialImageUrl,socialPageUrl} from '../src/server/social-share.mjs';
 import * as policy from '../src/server/feedback-policy.mjs';
@@ -24,7 +25,7 @@ export function workspaceFixtures(){
  const tables={projects,creator_feedback:[feedback],profiles:[{user_id:owner,slug:'sample-creator',display_name:'Sample Creator',is_public:true,identity_label:'Building useful everyday tools',bio:'Local visual test profile.',avatar_path:'/assets/avatars/sun.svg',website:''},{user_id:author,slug:'sample-reviewer',display_name:'Sample Reviewer',is_public:true}],saved_projects:[{user_id:owner,project_slug:'sample-guest',created_at:now}],notifications:[],support_cases:[],feedback_replies:[],feedback_qualifications:[{feedback_id:id,status:'qualified',reason:'Original firsthand review'}],feedback_ratings:[],project_experiences:Array.from({length:6},(_,i)=>({id:randomUUID(),project_slug:'sample-0',author_user_id:author,response:'The calendar was easy to understand, but finding my saved plans took a few tries.',moderation_status:'pending',created_at:now})),account_deletion_requests:[]};
  const db=mockDatabase(tables,{cw_badge_progress:()=>[{reviews:2,creators:1,has_published:true,ownership_confirmed:false,verified:false,case_id:null}],cw_project_unread:()=>projects.map(p=>({slug:p.slug,unread_count:2})),cw_combined_inbox:()=>[{id,project_slug:'sample-0',title:'Grocery planner',counterpart:'Sample Reviewer',last_message:feedback.message,last_at:now,unread:true,total_count:1}]});
  const user={id:'fixture-user',firstName:'Sample',email:'sample@example.invalid',emailVerified:true},member={id:owner};
- const scope={...policy,socialCopy,socialImageUrl,socialPageUrl,e,Response,URL,URLSearchParams,Date,randomUUID,console,sessionLabel,signInDescription,memberContext:async()=>({user,member,db,admin:true}),currentUser:async()=>user,ensureMember:async()=>member,database:()=>db,databaseReady:()=>true,env:()=>'',isFounder:()=>true,adminUser:async()=>user,creditSummary:async()=>({balance:12}),accountSession:async()=>({user,sessionId:'fixture-session',authenticationMethod:'GoogleOAuth'}),validProof:()=>false,workos:()=>({userManagement:{listSessions:async()=>({autoPagination:async()=>[1,2].map(i=>({id:i===1?'fixture-session':'other',userId:user.id,status:'active',authMethod:'GoogleOAuth',createdAt:now,userAgent:'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/153.0.0.0 Safari/537.36'}))})}})};
+ const scope={CWProjectView:globalThis.CWProjectView,...policy,socialCopy,socialImageUrl,socialPageUrl,e,Response,URL,URLSearchParams,Date,randomUUID,console,sessionLabel,signInDescription,memberContext:async()=>({user,member,db,admin:true}),currentUser:async()=>user,ensureMember:async()=>member,database:()=>db,databaseReady:()=>true,env:()=>'',isFounder:()=>true,adminUser:async()=>user,creditSummary:async()=>({balance:12}),accountSession:async()=>({user,sessionId:'fixture-session',authenticationMethod:'GoogleOAuth'}),validProof:()=>false,workos:()=>({userManagement:{listSessions:async()=>({autoPagination:async()=>[1,2].map(i=>({id:i===1?'fixture-session':'other',userId:user.id,status:'active',authMethod:'GoogleOAuth',createdAt:now,userAgent:'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/153.0.0.0 Safari/537.36'}))})}})};
  Object.assign(scope,moduleFixture('src/server/feedback-ui.ts',['surface','adminSurface','signals','feedbackCard','pages','pageNumber','signIn','unavailable'],scope));
  Object.assign(scope,moduleFixture('src/server/project-requests.ts',['activeFeedbackRequest','requestState','feedbackRequestAction','trialBrief'],scope));
  Object.assign(scope,moduleFixture('src/server/direct-messages.ts',['directComposer','directThread','directConversation'],scope));
@@ -37,7 +38,7 @@ export function workspaceFixtures(){
  Object.assign(scope,moduleFixture('src/server/community-map.ts',['communityMap'],scope));
  Object.assign(scope,moduleFixture('src/server/credit-explainer.ts',['creditExplainer'],scope));
  Object.assign(scope,moduleFixture('src/server/public-comment-ui.ts',['publicCommentComposer','projectFeedbackActions'],scope));
- Object.assign(scope,moduleFixture('src/server/project-detail-ui.ts',['projectDetailContent'],scope));
+ Object.assign(scope,moduleFixture('src/server/project-detail-ui.ts',['projectDetailContent','projectConversation','projectTheme'],scope));
  Object.assign(scope,moduleFixture('src/server/project-ui.ts',['projectCard','publicActions'],scope));
  scope.creditSummary=async()=>({balance:12,slots:3,used:2,eligible:7,towardNext:2,verification:{earned:18,hasPublished:true,verified:false,caseId:null,eligible:false},projects,requests:[],qualifications:[]});
  scope.feedbackQueue=async()=>[];

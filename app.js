@@ -636,73 +636,19 @@ function projectDetailContent(product, preview = false) {
   const copy = projectPresentation[product.slug] || ['', '',product.summary,'',''];
   const presentation = product.presentation || {headline:copy[2],help:copy[3],firstTry:copy[4]};
   const creator = preview ? `<span class="creator-byline">by ${esc(state.session?.user?.displayName||'You')}</span>` : creatorLink(product,true,true,true);
-  return `<div class="detail-creator">${creator}</div><section class="recipient-hero"><div class="recipient-copy"><h2 ${preview?'':`id="detail-title-${esc(product.slug)}"`}>${esc(presentation.headline||product.name)}</h2><div class="detail-description-notes"><div><h3>How it helps</h3><p>${esc(presentation.help)}</p></div><div><h3>One thing to try first</h3><p>${esc(presentation.firstTry)}</p></div></div></div><div class="recipient-preview-column"><div class="recipient-art">${product.preview?`<img ${preview?'data-listing-screenshot':''} src="${esc(product.preview)}" alt="Preview of ${esc(product.name)}" referrerpolicy="no-referrer">`:''}<span>Made by a person. Ready for your perspective.</span></div>${product.url?`<a class="primary-button" href="${esc(safeProjectUrl(product.url))}" target="_blank" rel="noopener noreferrer" ${preview?'':`data-try-app="${esc(product.slug)}"`}>Try this app ↗</a><small class="external-destination">${esc(projectDestination(product.url))}</small>`:''}</div></section>`;
-}
-
-function conversationPost(post) {
-  const when = new Date(post.createdAt);
-  const dated = Number.isFinite(when.getTime());
-  return `<article class="conversation-post">${avatar({avatar:post.avatar,initials:post.initials || 'G'},'small')}<div class="conversation-post-body"><div class="conversation-bubble"><header><strong>${esc(post.author || 'Guest')}</strong>${post.isCreator === true ? '<span class="conversation-creator">Creator</span>' : ''}</header><p>${esc(post.response)}</p></div>${dated ? `<time datetime="${esc(when.toISOString())}" title="${esc(when.toLocaleString())}">${esc(when.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}))}</time>` : ''}</div></article>`;
-}
-function conversationFeed(posts) {
-  if (!posts.length) return '<p class="conversation-empty">Start the conversation. What would you like to ask the maker?</p>';
-  const sorted = [...posts].sort((a,b)=>(Date.parse(b.createdAt)||0)-(Date.parse(a.createdAt)||0));
-  return sorted.slice(0,3).map(conversationPost).join('') + (sorted.length>3 ? `<details class="conversation-more"><summary>View all ${sorted.length} comments</summary>${sorted.slice(3).map(conversationPost).join('')}</details>` : '');
+  return CWProjectView.hero({...product, presentation, url:product.url ? safeProjectUrl(product.url) : ''}, {creator, preview, titleId:preview ? '' : 'detail-title-'+product.slug});
 }
 function projectConversation(product) {
-  const posts = state.communityPosts.filter(post=>post.projectSlug===product.slug);
-  const id = esc(product.slug);
-  return `<section class="project-conversation" data-conversation="${id}" aria-label="Comments and feedback"><div class="conversation-tabs" role="tablist" aria-label="Join in"><button type="button" role="tab" id="conversation-tab-${id}" aria-controls="conversation-panel-${id}" aria-selected="true" tabindex="0" data-conversation-tab="comments">Conversation <span data-conversation-count>${posts.length || ''}</span></button><button type="button" role="tab" id="feedback-tab-${id}" aria-controls="feedback-panel-${id}" aria-selected="false" tabindex="-1" data-conversation-tab="feedback">Your feedback</button></div><div role="tabpanel" id="conversation-panel-${id}" aria-labelledby="conversation-tab-${id}" data-conversation-panel="comments"><div class="conversation-feed" data-conversation-feed aria-live="polite">${window.CW_SERVER ? '<p class="conversation-empty">Loading conversation…</p>' : conversationFeed(posts)}</div>${projectCommentComposer(product,false,'conversation-')}</div><div role="tabpanel" id="feedback-panel-${id}" aria-labelledby="feedback-tab-${id}" data-conversation-panel="feedback" hidden><p class="feedback-tab-intro">Tried the app? Tell the creator what worked and what could improve.</p><div data-inline-feedback data-feedback-slug="${id}"><p role="status">Loading feedback form…</p></div><details class="conversation-badge-help"><summary>How feedback counts toward your badge</summary><p>For independent creators: five approved qualifying reviews across at least three other creators, plus confirmed ownership of a published app. Helpful criticism counts equally. Ordinary comments do not count.</p></details></div></section>`;
+  return CWProjectView.conversation(product, {posts:state.communityPosts.filter(post=>post.projectSlug===product.slug), loading:!!window.CW_SERVER, composer:projectCommentComposer(product,false,'conversation-')});
 }
-function selectConversationTab(tab) {
-  const region = tab.closest('[data-conversation]');
-  const selected = tab.dataset.conversationTab;
-  region.querySelectorAll('[data-conversation-tab]').forEach(button => {
-    const active = button === tab;
-    button.setAttribute('aria-selected', String(active));
-    button.tabIndex = active ? 0 : -1;
-  });
-  region.querySelectorAll('[data-conversation-panel]').forEach(panel => { panel.hidden = panel.dataset.conversationPanel !== selected; });
-  if (selected === 'feedback') window.CWGuidedFeedback?.mountInline(region.querySelector('[data-inline-feedback]'));
-}
-document.addEventListener('click', event => {
-  const tab = event.target.closest('[data-conversation-tab]');
-  if (tab) selectConversationTab(tab);
-});
-document.addEventListener('keydown', event => {
-  const tab = event.target.closest('[data-conversation-tab]');
-  if (!tab || !['ArrowLeft','ArrowRight','Home','End'].includes(event.key)) return;
-  event.preventDefault();
-  const tabs = [...tab.closest('[role="tablist"]').querySelectorAll('[role="tab"]')];
-  const next = event.key === 'Home' ? tabs[0] : event.key === 'End' ? tabs.at(-1) : tabs[(tabs.indexOf(tab)+1)%tabs.length];
-  selectConversationTab(next);next.focus({preventScroll:true});
-});
-
-async function loadProjectConversation() {
-  const region = document.querySelector('[data-conversation]');
-  if (!region || !window.CW_SERVER) return;
-  const slug = region.dataset.conversation;
-  const feed = region.querySelector('[data-conversation-feed]');
-  const request = {}; region.conversationRequest = request;
-  feed.innerHTML = '<p class="conversation-empty">Loading conversation…</p>';
-  try {
-    const response = await fetch('/api/experiences?project='+encodeURIComponent(slug));
-    const data = await response.json();
-    if (!response.ok || data.connected === false || !Array.isArray(data.posts)) throw Error();
-    if (!region.isConnected || region.conversationRequest !== request) return;
-    const posts = data.posts.filter(post=>post.projectSlug===slug);
-    state.communityPosts = [...state.communityPosts.filter(post=>post.projectSlug!==slug),...posts];
-    feed.innerHTML = conversationFeed(posts);
-    region.querySelector('[data-conversation-count]').textContent = posts.length || '';
-  } catch {
-    if (region.isConnected && region.conversationRequest === request) feed.innerHTML = '<p class="conversation-empty">Comments couldn’t load. <button type="button" class="text-button" data-conversation-retry>Try again</button></p>';
-  }
+function loadProjectConversation() {
+  if (window.CW_SERVER) return CWProjectView.loadProjectConversation(document.querySelector('.detail-overlay [data-conversation]'));
 }
 function detailDrawer(product) {
   const saved = state.saved.has(product.slug);
   return `<div class="detail-overlay" data-detail-overlay>
     <button class="detail-backdrop" data-detail-close aria-label="Close app details"></button>
-    <section class="detail-dialog mealmap-detail invitation-detail" data-showcase-theme="${product.slug === 'stackscout' ? 'stackscout' : ['coral','teal','blue','gold','green','violet'].includes(product.color) ? product.color : 'teal'}" role="dialog" aria-modal="true" aria-labelledby="detail-title-${esc(product.slug)}" tabindex="-1">
+    <section class="detail-dialog mealmap-detail invitation-detail" data-showcase-theme="${CWProjectView.theme(product)}" role="dialog" aria-modal="true" aria-labelledby="detail-title-${esc(product.slug)}" tabindex="-1">
       <div class="detail-scroll">
         <header class="project-panel-bar"><span>TryMyBuild</span><button class="detail-close" data-detail-close aria-label="Close ${esc(product.name)} details">×</button></header><div class="project-detail-content"><header class="public-detail-header">${detailProjectHistory.length ? `<button type="button" class="detail-back" data-detail-back aria-label="Previous project">←</button>` : ''}<div><strong>${esc(product.name)}</strong><small>${esc(product.price)} · ${esc(product.category)} · ${esc(product.stage)}</small></div><div class="invite-actions"><button class="secondary-button detail-save ${saved?'is-saved':''}" data-save="${esc(product.slug)}">${saved?'♥ Saved':'♡ Save'}</button><button class="secondary-button detail-share" data-share-product="${esc(product.slug)}">Share</button><span class="detail-share-status" data-share-status role="status"></span></div></header>${projectDetailContent(product)}
         ${videoPlayer(product.video)}<div class="mealmap-after">${projectConversation(product)}</div>${similarSection(product)}</div>
@@ -1314,7 +1260,6 @@ document.addEventListener('keydown', event => {
   selectHomeView(event.key === 'Home' ? 'find' : event.key === 'End' ? 'test' : event.target.dataset.homeView === 'find' ? 'test' : 'find');
 });
 document.addEventListener("click", async event => {
-  if (event.target.closest('[data-conversation-retry]')) { void loadProjectConversation(); return; }
   const entryMode = event.target.closest('[data-entry-mode]');
   if (entryMode) {
     const searching = entryMode.dataset.entryMode === 'search';

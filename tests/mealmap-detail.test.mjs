@@ -9,6 +9,8 @@ test('All eleven projects use the approved presentation with their own action ta
   const functions = source.slice(source.indexOf('const projectPresentation ='), firstListener);
   const context = vm.createContext({ openedCatalogApps:new Set(), window:{addEventListener(){}},document:{addEventListener(){}},detailProjectHistory:[],videoPlayer: () => '', similarSection: () => '', projectDestination: url => /^https?:\/\//i.test(url) ? 'Opens example.com' : 'Opens here on TryMyBuild', state: { saved: new Set(), communityPosts: [], session: null }, esc: value => String(value ?? ''), avatar: () => '<span class="person-avatar"></span>', creatorLink: () => 'TryMyBuild Studio', creatorFor: () => ({ slug: 'creatorworks-studio', name: 'TryMyBuild Studio' }) });
   context.URL=URL;
+  context.document.readyState='loading';
+  vm.runInContext(readFileSync(new URL('../project-view.js',import.meta.url),'utf8'),context);
   context.location={origin:'https://trymybuild.com'};
   vm.runInContext(source.slice(source.indexOf('function safeProjectUrl'),source.indexOf('function ',source.indexOf('function safeProjectUrl')+9)),context);
   vm.runInContext(functions, context);

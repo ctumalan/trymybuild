@@ -40,7 +40,7 @@ test('navigation rejects executable protocols and credentials but keeps valid UR
  for(const url of ['javascript:alert(1)','data:text/html,<script>alert(1)</script>','https://user:pass@example.com','\njavascript:alert(1)'])assert.equal(context.safeProjectUrl(url),'#');
  assert.equal(context.safeProjectUrl('/projects/demo'),'https://trymybuild.com/projects/demo');
  assert.equal(context.safeProjectUrl('https://example.com/?q="hello"'),'https://example.com/?q=%22hello%22');
- assert.ok(source.includes('href="${esc(safeProjectUrl(product.url))}"'));
+ assert.ok(source.includes("url:product.url ? safeProjectUrl(product.url) : ''"));
  context.location.origin='http://127.0.0.1:4324';
  assert.equal(context.safeProjectUrl('projects/example/index.html'),'http://127.0.0.1:4324/projects/example/index.html');
  assert.equal(context.safeProjectUrl(''),'#');

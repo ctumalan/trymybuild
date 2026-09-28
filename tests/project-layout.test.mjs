@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 const app=readFileSync(new URL('../app.js',import.meta.url),'utf8');
 const css=readFileSync(new URL('../launch-refinements.css',import.meta.url),'utf8');
-const drawer=app.slice(app.indexOf('function projectDetailContent(product'),app.indexOf("document.addEventListener('input'",app.indexOf('function detailDrawer(product)')));
+const shared=readFileSync(new URL('../project-view.js',import.meta.url),'utf8');
+const drawer=shared+app.slice(app.indexOf('function projectDetailContent(product'),app.indexOf("document.addEventListener('input'",app.indexOf('function detailDrawer(product)')));
 test('detail view uses the invitation screenshot layout and relevant information',()=>{
  assert.match(drawer,/class="recipient-art"/);
  assert.doesNotMatch(drawer,/--project-wallpaper|Good to know/);

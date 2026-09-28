@@ -41,6 +41,8 @@ http.createServer(async(req,res)=>{
   const h=handlers(role);let response;
   if(url.pathname==='/api/experiences')response=await h.comments[req.method](context);
   else if(url.pathname==='/api/feedback'&&req.method==='POST')response=await h.feedback(context);
+  else if(url.pathname.startsWith('/projects/'))response=await f.routes['/projects/sample-0'](context);
+  else if(url.pathname.startsWith('/people/'))response=await f.routes['/people/sample-creator'](context);
   else if(url.pathname.startsWith('/tell/'))response=await h.tell(context);
   else if(url.pathname==='/dashboard/messages')response=await h.messages(context);
   else if(url.pathname==='/api/catalog')response=Response.json({connected:true,projects:await f.scope.listPublished()});

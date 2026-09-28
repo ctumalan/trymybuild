@@ -1,13 +1,13 @@
 // In-place reading uses the same protected routes as full pages; no client grants access.
 (() => {
- let dialog,opener,loadVersion=0;const parents=[];
+ let dialog,opener,loadVersion=0,panelId=0;const parents=[];
  function closePanel(){const target=dialog;if(!target||target.dataset.closing)return;loadVersion++;if(matchMedia('(prefers-reduced-motion: reduce)').matches){target.close();return;}target.dataset.closing='true';target.animate([{opacity:1,transform:'translateX(0)'},{opacity:0,transform:`translateX(${target.classList.contains('profile-panel')?'-':''}65px)`}],{duration:200,easing:'ease-in',fill:'forwards'}).finished.then(()=>target.isConnected&&target.dataset.closing==='true'&&target.close(),()=>{});}
  const allowed=url=>url.origin===location.origin&&(/^\/(people|projects)\/[a-z0-9-]+$/.test(url.pathname)||['/admin/project','/dashboard/project'].includes(url.pathname));
  function show(content,kind='project'){
   if(dialog?.dataset.closing){delete dialog.dataset.closing;dialog.getAnimations().forEach(animation=>animation.cancel());}
   if(kind==='project'&&dialog?.classList.contains('profile-panel')){parents.push({dialog,opener});dialog=undefined;}
   if(!dialog){opener=document.activeElement;dialog=document.createElement('dialog');dialog.className='cw-overlay';dialog.setAttribute('aria-label','Details');dialog.innerHTML='<header class="overlay-toolbar"><span>TryMyBuild</span><button type="button" aria-label="Close detail window">×</button></header><div class="overlay-content"></div>';document.body.append(dialog);dialog.querySelector('button').onclick=closePanel;dialog.addEventListener('cancel',event=>{event.preventDefault();closePanel();});dialog.addEventListener('click',event=>{if(event.target===dialog){const r=dialog.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)closePanel();}});dialog.addEventListener('close',()=>{loadVersion++;dialog.remove();opener?.isConnected&&opener.focus({preventScroll:true});const parent=parents.pop();dialog=parent?.dialog||null;opener=parent?.opener;});dialog.showModal();}
-  dialog.classList.toggle('profile-panel',kind==='profile');dialog.querySelector('.overlay-content').replaceChildren(content);return dialog;
+  dialog.classList.toggle('profile-panel',kind==='profile');dialog.classList.toggle('public-project-panel',kind==='project'&&!!(content.matches?.('[data-public-project]')||content.querySelector?.('[data-public-project]')));dialog.querySelector('.overlay-content').replaceChildren(content);return dialog;
  }
  async function open(href,kind='project'){
   const url=new URL(href,location.origin);if(!allowed(url))return;
@@ -15,7 +15,16 @@
   try{const response=await fetch(url,{credentials:'same-origin',headers:{Accept:'text/html'}});if(!response.ok)throw Error(response.status===404?'This profile or project is not available.':'Unable to load this view. Please try again.');
    const doc=new DOMParser().parseFromString(await response.text(),'text/html'),content=doc.querySelector('[data-panel-content]')||doc.querySelector('.cw-admin-content')||doc.querySelector('main');if(!content)throw Error('This view could not be loaded.');
    content.querySelectorAll('script,iframe,object,embed,base').forEach(el=>el.remove());
-   if(content.matches('[data-public-project]')){content.querySelectorAll(':scope > .invite-actions').forEach(el=>el.remove());}
+   if(content.matches('[data-public-project]')){
+    content.querySelectorAll(':scope > .invite-actions').forEach(el=>el.remove());
+    // A creator profile may be opened above the same app's catalog drawer.
+    // Keep imported labels and tabs distinct from that still-open view.
+    const ids=new Map(),prefix='project-panel-'+(++panelId)+'-';
+    content.querySelectorAll('[id]').forEach(el=>{ids.set(el.id,prefix+el.id);el.id=prefix+el.id;});
+    content.querySelectorAll('[for],[aria-controls],[aria-labelledby],[aria-describedby]').forEach(el=>{
+     for(const attr of ['for','aria-controls','aria-labelledby','aria-describedby'])if(el.hasAttribute(attr))el.setAttribute(attr,el.getAttribute(attr).split(' ').map(id=>ids.get(id)||id).join(' '));
+    });
+   }
    if(version!==loadVersion||!dialog)return;show(content,kind);dialog.querySelector('.overlay-toolbar button').focus({preventScroll:true});window.dispatchEvent(new Event('cw-panel-ready'));
   }catch(error){if(version!==loadVersion||!dialog)return;const p=document.createElement('p');p.setAttribute('role','alert');p.textContent=error.message;show(p,kind);}
  }

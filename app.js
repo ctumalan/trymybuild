@@ -1307,7 +1307,7 @@ document.addEventListener("click", async event => {
   if (profile) { state.profileSlug = profile.dataset.profile; if(window.CW_SERVER && !state.profileSlug.startsWith("creator-"))window.CWPanels.open("/people/"+encodeURIComponent(state.profileSlug),"profile"); else window.CWPanels.show(profilePage(),"profile"); return; }
   const route = event.target.closest("[data-route]");
   if (route?.dataset.route === 'account' && window.CW_SERVER && state.session?.authenticated) { location.assign('/dashboard'); return; }
-  if (route) { event.preventDefault(); state.route = route.dataset.route; if (state.route === 'share') homeView = 'test'; if (state.route === 'discover') homeView = 'find'; render(); app.focus({preventScroll:true}); return; }
+  if (route) { event.preventDefault(); state.route = route.dataset.route; if (state.route === 'share') homeView = 'test'; if (state.route === 'discover') homeView = 'find'; render(); const heading=app.querySelector('h1'); if(heading)heading.tabIndex=-1; (heading || app).focus({preventScroll:true}); return; }
   const productButton = event.target.closest("[data-product]");
   if (productButton) {
     const product = projects.find(item => item.slug === productButton.dataset.product);

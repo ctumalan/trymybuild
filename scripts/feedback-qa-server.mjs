@@ -56,7 +56,7 @@ http.createServer(async(req,res)=>{
    if(path==='index.html')content=content.toString().replace('<script src="app.js">','<script src="server-mode.js"></script><script src="app.js">');
    response=new Response(content,{headers:{'Content-Type':type}});
   }
-  if(response.headers.get('Content-Type')?.includes('text/html')){const html=(await response.text()).replace('<body>','<body><aside style="padding:10px;background:#fff3cd;color:#382b46">ISOLATED QA — simulated accounts and temporary data only. <a href="/qa/reviewer">Reviewer</a> · <a href="/qa/creator">Creator inbox</a></aside>');response=new Response(html,{status:response.status,headers:response.headers});}
+  if(response.headers.get('Content-Type')?.includes('text/html')){const html=(await response.text()).replace(/<body(?:\s[^>]*)?>/,'$&<aside style="padding:10px;background:#fff3cd;color:#382b46">ISOLATED QA — simulated accounts and temporary data only. <a href="/qa/reviewer">Reviewer</a> · <a href="/qa/creator">Creator inbox</a></aside>');response=new Response(html,{status:response.status,headers:response.headers});}
   res.writeHead(response.status,{...Object.fromEntries(response.headers),'Content-Security-Policy':contentSecurityPolicy,'Cache-Control':'no-store'});res.end(Buffer.from(await response.arrayBuffer()));
  }catch(error){console.error(error.message);res.writeHead(500);res.end('Isolated QA request failed');}
 }).listen(port,'127.0.0.1',()=>console.log(`Isolated feedback QA: http://127.0.0.1:${port}`));

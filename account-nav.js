@@ -3,7 +3,7 @@ window.CWAccountMenu = {
   document.querySelectorAll('[data-account-nav], .profile-button').forEach(anchor => {
    if (!session.authenticated) {
     const root=document.createElement('details');root.className='account-menu';
-    root.innerHTML='<summary class="account-avatar" aria-label="Open account menu">T</summary><div class="account-menu-panel"><a href="/?welcome=1" data-route="account">Create my account</a><a href="/auth/sign-in">Sign in</a><a href="/?page=contact" data-route="contact">Contact</a><a href="/?page=about" data-route="about">About</a></div>';
+    root.innerHTML='<summary class="account-avatar" aria-label="Open account menu">T</summary><div class="account-menu-panel"><a href="/?welcome=1" data-route="account">Create my account</a><a href="/auth/sign-in">Sign in</a></div>';
     anchor.replaceWith(root);return;
    }
    let root=anchor.closest('.account-menu');

@@ -54,7 +54,8 @@ test('guest information is available without account creation',()=>{
  assert.doesNotMatch(ctx.aboutPage(),/class="home-how"|Small contributions\. Better projects\./);
  assert.doesNotMatch(app.slice(app.indexOf('function discover('),app.indexOf('function discussionDraftKey(')),/homeHowItWorks\(/);
  assert.match(read('index.html'),/data-route="contact">Contact/);
- const menu=read('account-nav.js').split('let root=anchor.closest')[0];assert.match(menu,/data-route="contact"/);
+ const menu=read('account-nav.js').split('let root=anchor.closest')[0];assert.doesNotMatch(menu,/data-route="(?:contact|about)"/);
+ assert.match(read('index.html'),/data-route="about">About/);
 });
 test('signup interests stay visible and retain multiple saved choices',()=>{
  const ctx=scope();ctx.categoryCatalog=[{name:'Music & audio'},{name:'Technology'},{name:'Family life'}];

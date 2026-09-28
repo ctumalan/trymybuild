@@ -585,7 +585,7 @@ a.secondary-button,.cw-main a.secondary-button { background: #f2edf8; color: #5e
 .discovery-entry { margin: 0; }
 .discovery-entry-row { display: flex; flex-wrap: wrap; gap: 10px; }
 .discovery-entry-field { position: relative; flex: 1 1 260px; min-width: 0; }
-.discovery-entry-field input { display: block; box-sizing: border-box; height: 100%; }
+.discovery-entry-field input { display: block; box-sizing: border-box; min-height: 50px; height: 100%; }
 .discovery-entry-row input { flex: 1 1 260px; min-width: 0; width: 100%; padding: 15px 16px; background: #fff; color: #382b46; border: 1px solid #d7c9e7; border-radius: 12px; font: inherit; font-size: .9rem; }
 .discovery-entry-row input::placeholder { color: #68616e; }
 .discovery-entry-row .primary-button { flex: 0 0 auto; min-height: 50px; padding: 12px 20px; font-size: .9rem; white-space: nowrap; }
@@ -671,7 +671,6 @@ a.secondary-button,.cw-main a.secondary-button { background: #f2edf8; color: #5e
 @media(prefers-reduced-motion:reduce) {
   .entry-placeholder.is-scrolling .entry-placeholder-track { animation: none; }
   .entry-placeholder-track { width: 100%; white-space: normal; }
-  .discovery-entry-field input { min-height: 110px; }
   .discovery-entry-field input::placeholder { color: transparent; }
 }
 

@@ -964,7 +964,7 @@ function listingSettingsPage() {
 }
 function listingAccountPage() {
   if (state.session?.authenticated) return listingSettingsPage();
-  return `<section class="page-shell listing-review"><p class="eyebrow">Keep your project yours</p><h1>Create your creator account.</h1><p>Your draft is ready. Sign up or sign in to continue to project settings.</p><form method="get" action="/auth/sign-in" class="legal-signup"><input type="hidden" name="signup" value="1"><input type="hidden" name="next" value="listing"><label class="legal-agreement"><input type="checkbox" required> <span>I agree to the <a href="/terms" target="_blank" rel="noopener">Terms of Service</a> and <a href="/privacy" target="_blank" rel="noopener">Privacy Policy</a>.</span></label><button class="primary-button" type="submit">Create my account</button></form><div class="form-actions share-start-actions"><a class="share-browse-link" href="/auth/sign-in?next=listing">Already have an account? Sign in</a><button class="share-browse-link" data-listing-review>Back</button></div><p class="privacy-note">Your draft stays on this device through sign-in. Nothing is public yet.</p></section>`;
+  return `<section class="page-shell listing-review"><p class="eyebrow">Keep your project yours</p><h1>Create your creator account.</h1><p>Your draft is ready. Sign up or sign in to continue to project settings.</p><div class="legal-signup"><label class="legal-agreement"><input type="checkbox" data-listing-terms> <span>I agree to the <a href="/terms" target="_blank" rel="noopener">Terms of Service</a> and <a href="/privacy" target="_blank" rel="noopener">Privacy Policy</a>.</span></label><button class="primary-button" type="button" data-listing-create-account>Create my account</button><p data-listing-account-status role="status" aria-live="polite"></p></div><div class="form-actions share-start-actions"><a class="share-browse-link" href="/auth/sign-in?next=listing">Already have an account? Sign in</a><button class="share-browse-link" data-listing-review>Back</button></div><p class="privacy-note">Your draft stays on this device through sign-in. Nothing is public yet.</p></section>`;
 }
 function sharePage() {
   return discover(true);
@@ -1255,6 +1255,18 @@ document.addEventListener('keydown', event => {
   selectHomeView(event.key === 'Home' ? 'find' : event.key === 'End' ? 'test' : event.target.dataset.homeView === 'find' ? 'test' : 'find');
 });
 document.addEventListener("click", async event => {
+  const createAccount = event.target.closest('[data-listing-create-account]');
+  if (createAccount) {
+    const terms = document.querySelector('[data-listing-terms]');
+    const status = document.querySelector('[data-listing-account-status]');
+    if (!terms?.checked) { status.textContent = 'Agree to the Terms of Service and Privacy Policy to continue.'; terms?.focus(); return; }
+    if (!saveListingDraft()) { status.textContent = 'Your browser could not save this draft. Please enable site storage before continuing.'; return; }
+    createAccount.disabled = true;
+    createAccount.textContent = state.session?.authenticated ? 'Opening project settings…' : 'Opening secure sign-up…';
+    if (state.session?.authenticated) { listingSettings = true; history.replaceState({}, '', '/?listing=settings'); render(); }
+    else location.assign('/auth/sign-in?signup=1&next=listing');
+    return;
+  }
   const entryMode = event.target.closest('[data-entry-mode]');
   if (entryMode) {
     const searching = entryMode.dataset.entryMode === 'search';

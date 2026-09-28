@@ -6,6 +6,9 @@ const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 test('signup and global navigation expose the legal agreement',()=>{
  const app=read('app.js'),index=read('index.html'),terms=read('src/pages/terms.ts'),privacy=read('src/pages/privacy.ts');
  assert.match(app,/legal-agreement/);assert.match(app,/Terms of Service/);assert.match(app,/Privacy Policy/);
+ assert.match(app,/data-listing-create-account/);assert.match(app,/location\.assign\('\/auth\/sign-in\?signup=1&next=listing'\)/);
+ assert.match(app,/Agree to the Terms of Service and Privacy Policy to continue\./);
+ assert.match(app,/state\.session\?\.authenticated\) \{ listingSettings = true/);
  assert.match(index,/href="\/terms"/);assert.match(index,/href="\/privacy"/);
  assert.match(terms,/Your projects and content/);assert.match(privacy,/categories you open or select/);
 });

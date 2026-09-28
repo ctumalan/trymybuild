@@ -5,7 +5,7 @@ import { isFounder } from './admin-policy.mjs';
 import { surface, e } from './feedback-ui';
 export async function memberContext(context:APIContext) {
  const user=await currentUser(context); if(!user)return null;
- return {user,member:await ensureMember(user),db:database(),admin:isFounder(user.id,env('FOUNDER_WORKOS_USER_ID'))};
+ return {user,member:await ensureMember(user),db:database(),admin:isFounder(user.id,env('FOUNDER_WORKOS_USER_ID'),user.email,env('FOUNDER_EMAIL'),user.emailVerified)};
 }
 export function notice(context:APIContext) {
  const error=context.url.searchParams.get('error');

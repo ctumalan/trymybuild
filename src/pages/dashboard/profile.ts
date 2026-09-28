@@ -7,7 +7,7 @@ import { surface, signIn, e } from '../../server/feedback-ui';
 export const GET: APIRoute = async context => {
  const user = await currentUser(context);
  if (!user) return signIn('/dashboard/profile');
- const admin = isFounder(user.id, env('FOUNDER_WORKOS_USER_ID'));
+ const admin = isFounder(user.id, env('FOUNDER_WORKOS_USER_ID'), user.email, env('FOUNDER_EMAIL'), user.emailVerified);
  try {
   const member = await ensureMember(user);
   const {data:p,error} = await database().from('profiles').select('display_name,identity_label,bio,is_public,avatar_path,website,slug,creator_type,location,location_public').eq('user_id',member.id).single();

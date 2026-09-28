@@ -52,7 +52,7 @@ export const POST: APIRoute = async context => {
    return context.redirect('/auth/sign-in?next=%2Fdashboard%2Fsecurity',303);
   }
   if(action==='request-deletion'||action==='cancel-deletion') {
-   if(isFounder(session.user.id,env('FOUNDER_WORKOS_USER_ID')))return back('founder');
+   if(isFounder(session.user.id,env('FOUNDER_WORKOS_USER_ID'),session.user.email,env('FOUNDER_EMAIL'),session.user.emailVerified))return back('founder');
    if(!validProof(context.cookies.get('cw_security_fresh')?.value,session.user.id,'fresh',env('WORKOS_COOKIE_PASSWORD')))return back('reauth');
    if(action==='request-deletion'&&(form.get('confirmation')!=='DELETE'||form.get('confirm')!=='yes'))return back('confirm');
    const member=await ensureMember(session.user), db=database();

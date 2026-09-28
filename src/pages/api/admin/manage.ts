@@ -30,13 +30,13 @@ export const POST:APIRoute=async context=>{
   if(!/^[0-9a-f-]{36}$/.test(f.id))return back(false);const {db,member}=m;let r;
   if(f.action==='transfer'){
    if(f.confirm!=='yes'||! /^[0-9a-f-]{36}$/.test(f.owner)||! /^\d{1,9}$/.test(f.version))return back(false);
-   r=await db.rpc('cw_transfer_project',{p_actor:member.id,p_project:f.id,p_owner:f.owner,p_version:Number(f.version),p_founder:env('FOUNDER_WORKOS_USER_ID'),p_reason:f.reason});
+   r=await db.rpc('cw_transfer_project',{p_actor:member.id,p_project:f.id,p_owner:f.owner,p_version:Number(f.version),p_founder:m.user.id,p_reason:f.reason});
   }else if(f.action==='member'){
    if(f.confirm!=='yes')return back(false);
-   r=await db.rpc('cw_manage_member',{p_actor:member.id,p_target:f.id,p_founder:env('FOUNDER_WORKOS_USER_ID'),p_action:f.decision,p_expected:f.expected,p_reason:f.reason});
+   r=await db.rpc('cw_manage_member',{p_actor:member.id,p_target:f.id,p_founder:m.user.id,p_action:f.decision,p_expected:f.expected,p_reason:f.reason});
   }else if(f.action==='reply'){
    if(!/^[0-9a-f-]{36}$/.test(f.request)||!/^\d{1,9}$/.test(f.revision))return back(false);caseId=f.id;
-   r=await db.rpc('cw_case_reply',{p_actor:member.id,p_case:f.id,p_request:f.request,p_message:f.message,p_staff:true,p_founder:env('FOUNDER_WORKOS_USER_ID'),p_revision:Number(f.revision),p_status:f.status});
+   r=await db.rpc('cw_case_reply',{p_actor:member.id,p_case:f.id,p_request:f.request,p_message:f.message,p_staff:true,p_founder:m.user.id,p_revision:Number(f.revision),p_status:f.status});
   }else if(f.action==='erase'||f.action==='retry-erasure'){
    if(!validProof(context.cookies.get('cw_security_fresh')?.value,m.user.id,'fresh',env('WORKOS_COOKIE_PASSWORD'))){failure='reauth';return back(false);}
    if(f.action==='retry-erasure'){
@@ -46,13 +46,13 @@ export const POST:APIRoute=async context=>{
     failure='cleanup';await finishErasure(db,f.id);return back(true);
    }
    if(f.confirmation!=='DELETE'||!validProof(context.cookies.get('cw_security_fresh')?.value,m.user.id,'fresh',env('WORKOS_COOKIE_PASSWORD')))return back(false);
-   r=await db.rpc('cw_erase_account',{p_actor:member.id,p_user:f.id,p_founder:env('FOUNDER_WORKOS_USER_ID')});if(r.error)return back(false);
+   r=await db.rpc('cw_erase_account',{p_actor:member.id,p_user:f.id,p_founder:m.user.id});if(r.error)return back(false);
    failure='cleanup';await finishErasure(db,f.id);
    r=await db.from('account_deletion_requests').update({status:'complete',updated_at:new Date().toISOString()}).eq('user_id',f.id);
   }else if(f.action==='admin-erase'){
    if(!validProof(context.cookies.get('cw_security_fresh')?.value,m.user.id,'fresh',env('WORKOS_COOKIE_PASSWORD'))){failure='reauth';return back(false);}
    if(f.confirmation!=='DELETE'||String(f.reason||'').trim().length<10||!validProof(context.cookies.get('cw_security_fresh')?.value,m.user.id,'fresh',env('WORKOS_COOKIE_PASSWORD')))return back(false);
-   r=await db.rpc('cw_admin_erase_account',{p_actor:member.id,p_user:f.id,p_founder:env('FOUNDER_WORKOS_USER_ID'),p_reason:f.reason});if(r.error)return back(false);
+   r=await db.rpc('cw_admin_erase_account',{p_actor:member.id,p_user:f.id,p_founder:m.user.id,p_reason:f.reason});if(r.error)return back(false);
    failure='cleanup';await finishErasure(db,f.id);r={error:null};
   }else return back(false);
   return back(!r?.error);

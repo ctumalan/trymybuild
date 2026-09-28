@@ -51,7 +51,7 @@ export const GET: APIRoute = async context => {
     if (error || !row || !row.preview_path) return new Response('Not found', { status: 404 });
     let viewerId: string | null = null, isAdmin = false;
     const user = await currentUser(context);
-    if (user) { isAdmin = isFounder(user.id, env('FOUNDER_WORKOS_USER_ID')); try { viewerId = (await ensureMember(user)).id; } catch { viewerId = null; } }
+    if (user) { isAdmin = isFounder(user.id, env('FOUNDER_WORKOS_USER_ID'), user.email, env('FOUNDER_EMAIL'), user.emailVerified); try { viewerId = (await ensureMember(user)).id; } catch { viewerId = null; } }
     if (!canViewProject(row, viewerId, isAdmin)) return new Response('Not found', { status: 404 });
     if (row.preview_path.startsWith('/assets/')) return context.redirect(row.preview_path, 302);
     const dl = await db.storage.from(BUCKET).download(row.preview_path);

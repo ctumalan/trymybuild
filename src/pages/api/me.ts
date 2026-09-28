@@ -17,7 +17,7 @@ export const GET: APIRoute = async context => {
     if (result.error) throw result.error;
     const preferences = await database().from('account_preferences').select('interests,selected_interests,tips,personalization').eq('user_id',member.id).maybeSingle();
     if(preferences.error) throw preferences.error;
-    return json({ authenticated: true, databaseReady: true, preferences: {...(preferences.data || {tips:true,personalization:true}),interests:recommendationInterests(preferences.data)}, isAdmin: isFounder(user.id, env('FOUNDER_WORKOS_USER_ID')), user: { id: member.id, avatar: result.data.avatar_path || '', displayName: result.data.display_name, label: result.data.identity_label, bio: result.data.bio, slug: result.data.slug, isPublic: result.data.is_public } });
+    return json({ authenticated: true, databaseReady: true, preferences: {...(preferences.data || {tips:true,personalization:true}),interests:recommendationInterests(preferences.data)}, isAdmin: isFounder(user.id, env('FOUNDER_WORKOS_USER_ID'), user.email, env('FOUNDER_EMAIL'), user.emailVerified), user: { id: member.id, avatar: result.data.avatar_path || '', displayName: result.data.display_name, label: result.data.identity_label, bio: result.data.bio, slug: result.data.slug, isPublic: result.data.is_public } });
   } catch { return json({ error: 'Your profile could not be loaded. Please try again.' }, 503); }
 };
 

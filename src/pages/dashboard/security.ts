@@ -10,7 +10,7 @@ export const GET:APIRoute=async context=>{
  try {
   const session=await accountSession(context);
   if(!session)return signIn('/dashboard/security');
-  const admin=isFounder(session.user.id,env('FOUNDER_WORKOS_USER_ID'));
+  const admin=isFounder(session.user.id,env('FOUNDER_WORKOS_USER_ID'),session.user.email,env('FOUNDER_EMAIL'),session.user.emailVerified);
   let deletionReady=false,pending=false,consented=false;
   try{const member=await ensureMember(session.user);const r=await database().from('account_deletion_requests').select('status,erasure_consent').eq('user_id',member.id).maybeSingle();deletionReady=!r.error;pending=r.data?.status==='pending';consented=r.data?.erasure_consent===true;}catch{}
   const fresh=validProof(context.cookies.get('cw_security_fresh')?.value,session.user.id,'fresh',env('WORKOS_COOKIE_PASSWORD'));

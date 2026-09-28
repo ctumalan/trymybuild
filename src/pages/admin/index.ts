@@ -23,7 +23,7 @@ export const GET: APIRoute = async context => {
   const db = database();
   let body = `<h1>${labels[sections.indexOf(section)]}</h1>`;
   const notice = context.url.searchParams.get('notice');
-  if (notice) body += `<p class="admin-note" role="status">${notice === 'saved' ? 'Decision saved and recorded in the activity history.' : 'Nothing was confirmed. Reload and try again: the comment may have changed, or the review database setup may be incomplete.'}</p>`;
+  if (notice) body += `<p class="admin-note" role="status">${notice === 'approval-email-failed' ? 'The project was published, but its confirmation email could not be sent. Check the email service configuration. Do not approve it again just to retry the email.' : notice === 'saved' ? 'Decision saved and recorded in the activity history.' : 'Nothing was confirmed. Reload and try again: the comment may have changed, or the review database setup may be incomplete.'}</p>`;
   try {
     if (section === 'overview') {
       const results = await Promise.all([db.from('users').select('id',{count:'exact',head:true}),db.from('projects').select('id',{count:'exact',head:true}),db.from('project_experiences').select('id',{count:'exact',head:true}).eq('moderation_status','pending'),db.from('projects').select('id',{count:'exact',head:true}).eq('listing_status','in_review')]);

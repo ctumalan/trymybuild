@@ -249,7 +249,11 @@ body.public-site .site-footer .brand-name-works { color: #7545ad; }
   .discovery-categories { overflow-x: auto; padding: 2px 0 5px; flex-basis: 100%; scrollbar-width: thin; }
   .discovery-categories button { font-size: .7rem; min-height: 36px; padding: 0 14px; }
   .future-discover .catalog-filter-menu > summary { min-height: 34px; }
-  .future-discover .catalog-filter-options { right: auto; left: 0; width: min(340px, calc(100vw - 36px)); }
+  /* Anchor the menu to the full results header, not the narrow trigger. */
+  .future-discover .results-heading { position: relative; }
+  .future-discover .catalog-filter-menu { position: static; }
+  .future-discover .catalog-filter-options { right: 0; left: auto; width: min(340px, 100%); box-sizing: border-box; }
+  .future-discover .catalog-filter-options select { min-width: 0; max-width: 100%; }
   .future-discover .results-heading h2 { font-size: 1.75rem; }
   .future-discover .results-heading > div > span { font-size: .64rem; }
   .future-discover .catalog-list { grid-template-columns: minmax(0,1fr); gap: 18px; }

@@ -786,3 +786,14 @@ body.public-site #app h1[tabindex="-1"]:focus { outline:none; }
 .dashboard-discovery-grid > .future-card .card-try-actions .primary-button { color:#7545ad !important; font-size:.9rem; text-decoration:none; }
 .dashboard-discovery-grid > .future-card .card-try-actions .primary-button:hover { color:#623694 !important; }
 @media(max-width:620px) { .dashboard-discovery-grid { grid-template-columns:1fr; } .dashboard-discovery-grid > .future-card { max-width:none; } }
+
+/* Keep screenshot status and replacement tools together. */
+.listing-image-tools { padding:20px; border:1px solid #ded3eb; border-radius:18px; background:#fff; }
+.listing-image-heading { display:flex; align-items:center; justify-content:space-between; gap:16px; }
+.listing-image-heading h3 { margin:0; font-size:1.05rem; color:#382b46; }
+.listing-image-help { position:relative; flex:none; }
+.listing-image-help summary { display:flex; align-items:center; justify-content:center; width:30px; height:30px; border:1px solid #ded3eb; border-radius:50%; color:#7545ad; background:#f2edf8; font-weight:700; cursor:pointer; list-style:none; }
+.listing-image-help summary::-webkit-details-marker { display:none; }
+.listing-image-help summary:focus-visible { outline:2px solid #7545ad; outline-offset:3px; }
+.listing-image-help .listing-image-note { position:absolute; z-index:5; top:calc(100% + 8px); right:0; box-sizing:border-box; width:min(330px,calc(100vw - 88px)); margin:0; padding:16px; border:1px solid #ded3eb; border-radius:12px; background:#fff; box-shadow:0 10px 30px #382b4620; color:#5e6f68; }
+@media(max-width:480px) { .listing-image-tools { padding:16px; } }

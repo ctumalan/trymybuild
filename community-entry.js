@@ -10,12 +10,12 @@ let wishesLoading = false;
 let wishesHaveMore = false;
 let wishLoadVersion = 0;
 function sharingPreferenceFields() {
- if(['published','in_review'].includes(listingDraft.serverStatus))return `<fieldset class="sharing-preference"><legend>Listing visibility</legend><p>${listingDraft.serverStatus==='published'?'Your listing is public.':'Your listing is awaiting public review.'} To change this, use ${listingDraft.serverStatus==='published'?'Unpublish':'Withdraw from review'} in project settings below.</p></fieldset>`;
+ if(['published','in_review'].includes(listingDraft.serverStatus))return `<fieldset class="sharing-preference"><legend>Listing visibility</legend><p>${listingDraft.serverStatus==='published'?'Your listing is public.':'Your listing is awaiting public review.'} To change this, use ${listingDraft.serverStatus==='published'?'Unpublish':'Withdraw from review'} ${listingDraft.serverStatus==='published'?'in project settings below':'in the My projects dashboard’s ⋯ menu'}.</p></fieldset>`;
  const preference=listingDraft.sharingPreference || 'not_sure';
  return `<fieldset class="sharing-preference"><legend>How would you like to share your app?</legend><div>${[['private','Privately'],['public','Publicly'],['not_sure','Not sure yet']].map(([value,label])=>`<label><input type="radio" name="sharingPreference" data-sharing-preference value="${value}" ${preference===value?'checked':''}>${label}</label>`).join('')}</div><p data-sharing-note>${sharingPreferenceNote(preference)}</p></fieldset>`;
 }
 function sharingPreferenceNote(preference) {
- if(['published','in_review'].includes(listingDraft.serverStatus))return 'This preference does not change your existing publication status. Use Unpublish or Withdraw from review in project settings to take the listing out of public review or discovery.';
+ if(['published','in_review'].includes(listingDraft.serverStatus))return 'This preference does not change your existing publication status. Use Unpublish in project settings, or Withdraw from review in the My projects dashboard’s ⋯ menu.';
  return preference==='public'?'When you’re ready, submit your listing for public review. This choice does not publish it.':preference==='private'?'Keep your listing out of the public catalog. You can share your own app link with people you choose; its access settings are controlled by your app.':'Keep a private draft and decide later.';
 }
 function membershipPromo() {

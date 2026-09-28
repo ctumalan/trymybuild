@@ -25,3 +25,12 @@ edit the source project, run its checks, and copy the rebuilt file across.
 
 A listing appearing here is a working local entry in this prototype catalog. It is not a
 public deployment.
+
+## Project review email
+
+When a creator submits a project for review, the production app can email the founder a
+direct review link. Set `RESEND_API_KEY` after verifying `trymybuild.com` with Resend.
+The recipient defaults to `FOUNDER_EMAIL`; `PROJECT_REVIEW_EMAIL` can override it, and
+`PROJECT_REVIEW_FROM` can override the default sender
+`TryMyBuild <notifications@trymybuild.com>`. A delivery failure never blocks the project
+submission, and retries use the project revision to prevent duplicate messages.

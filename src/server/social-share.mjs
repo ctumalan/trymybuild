@@ -32,7 +32,7 @@ export function socialImageUrl(project,base,format='facebook',overrides={}) {
 }
 export function socialPageUrl(project,base,overrides={}) {
  const url=new URL(`/projects/${encodeURIComponent(project.slug)}`,base);
- url.search=new URLSearchParams({social:'1',...socialCopy(project,overrides)}).toString();return url.href;
+ url.search=new URLSearchParams({...socialCopy(project,overrides),social:'1'}).toString();return url.href;
 }
 const bold=sans.getVariation({wght:700});
 function measure(value,font,size){return font.layout(value).positions.reduce((n,p)=>n+p.xAdvance,0)*size/font.unitsPerEm;}

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import sharp from 'sharp';
-import {suggestedSocialPost} from '../social-share.js';
+import {suggestedSocialPost,socialShareUrl} from '../social-share.js';
 import {socialCopy,socialFormats,socialPageUrl,socialImageUrl,renderSocialImage} from '../src/server/social-share.mjs';
 import {moduleFixture,workspaceFixtures} from '../scripts/workspace-fixtures.mjs';
 const project={slug:'afterschooltogether',name:'AfterSchool Together',category:'Family life',summary:'Check the day’s activities against your travel times.',preview:'/assets/previews/afterschooltogether.png'};
@@ -69,4 +69,14 @@ test('suggested posts distinguish the maker from someone recommending the app',(
  assert.match(maker,/I’m building AfterSchool Together/);assert.match(maker,/Try this: Add a day of activities/);
  assert.match(maker,/What would make this more useful to you/);
  assert.doesNotMatch(maker,/link in bio|100%|guaranteed/i);
+});
+
+test('share links end safely and preserve punctuation in preview copy',()=>{
+ for(const ending of ['.', '...', '!', '?', ')']) {
+  const copy={headline:'Try this!',description:'A useful app'+ending};
+  const client=socialShareUrl('https://trymybuild.com/projects/safe?social=1',copy);
+  assert.ok(client.endsWith('&social=1'));
+  assert.equal(new URL(client).searchParams.get('description'),copy.description);
+  assert.equal(client,socialPageUrl({slug:'safe'},'https://trymybuild.com',copy));
+ }
 });

@@ -1,5 +1,11 @@
 const escape=value=>String(value||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const formats={facebook:{label:'Facebook',size:'1200 × 630',help:'Copy your post, then open Facebook and choose your group. Paste and review before posting. Facebook may crop or cache link previews.'},instagram:{label:'Instagram post',size:'1080 × 1350',help:'Download this portrait, upload it to Instagram, and paste your caption. Add your app link to your profile if you want to direct people there.'},story:{label:'Story',size:'1080 × 1920',help:'Download the vertical artwork and upload it to your Story. Copy the app link and add it with a link sticker in Instagram.'}};
+export function socialShareUrl(base,copy) {
+ const u=new URL(base);u.hash='';u.searchParams.delete('social');
+ for(const [key,value] of Object.entries(copy))u.searchParams.set(key,value);
+ // End with a fixed value so sentence punctuation cannot become the URL's final character.
+ u.searchParams.set('social','1');return u.href;
+}
 export function suggestedSocialPost(p,copy){
  return `${copy.headline}\n\n${p.isOwner?'I’m building':'Found'} ${p.name}. ${copy.description}\n\n${p.firstTry?'Try this: '+p.firstTry+'\n':''}What would make this more useful to you?`;
 }
@@ -8,7 +14,7 @@ export function mountSocialShare(panel,p,signal){
  panel.innerHTML=`<p class="social-intro">Start with the need. Invite someone to try a solution.</p><div class="social-formats" role="group" aria-label="Social format">${Object.entries(formats).map(([key,f])=>`<button type="button" data-social-format="${key}" aria-pressed="${key===format}">${f.label}</button>`).join('')}</div><div class="social-layout"><div class="social-art-column"><figure class="social-art" data-art-format="facebook"><img data-social-image hidden alt=""><span data-art-status role="status">Preparing artwork…</span></figure><p class="social-spec"><span data-social-size>1200 × 630</span> · TryMyBuild original template</p><button type="button" class="text-button" data-social-retry hidden>Retry preview</button></div><div class="social-editor"><label for="social-headline">Say in a few words how this app will make someone’s life easier</label><input id="social-headline" maxlength="110" value="${escape(p.social.headline)}"><label for="social-description">What can I do with your app?</label><textarea id="social-description" rows="2" maxlength="160">${escape(p.social.description)}</textarea><label for="social-caption">Suggested post <span>· edit to make it yours</span></label><textarea id="social-caption" rows="6" maxlength="1800"></textarea><p class="social-note">These edits apply to this share only. Your app listing stays unchanged.</p></div></div><div class="social-actions"><button type="button" class="primary-button" data-social-copy>Copy post + link</button><button type="button" class="secondary-button" data-social-download disabled>Download image</button><a class="secondary-button" data-social-open target="_blank" rel="noopener noreferrer">Open Facebook ↗</a><button type="button" class="text-button" data-social-link>Copy app link</button><button type="button" class="text-button" data-social-native ${navigator.share?'':'hidden'}>Share image…</button></div><p class="social-help" data-social-help></p><p class="social-note" data-social-edit-note>Edited headlines are included in your Facebook link preview. The downloaded image is ready to upload as a photo instead.</p><p data-social-status role="status" aria-live="polite"></p>`;
  const $=s=>panel.querySelector(s),headline=$('#social-headline'),description=$('#social-description'),caption=$('#social-caption'),status=$('[data-social-status]');
  const copy=()=>({headline:headline.value.trim()||p.social.headline,description:description.value.trim()||p.social.description});
- const url=()=>{const u=new URL(p.url);u.searchParams.set('social','1');for(const [k,v] of Object.entries(copy()))u.searchParams.set(k,v);return u.href;};
+ const url=()=>socialShareUrl(p.url,copy());
  const suggested=()=>suggestedSocialPost(p,copy());
  const updateLinks=()=>{$('[data-social-open]').href='https://www.facebook.com/sharer/sharer.php?'+new URLSearchParams({u:url()});};
  const revoke=()=>{if(imageUrl)URL.revokeObjectURL(imageUrl);imageUrl=undefined;file=undefined;};
@@ -32,10 +38,10 @@ export function mountSocialShare(panel,p,signal){
   const target=event.target.closest('button');if(!target)return;
   if(target.dataset.socialFormat){selectFormat(target.dataset.socialFormat);return;}
   if(target.matches('[data-social-retry]')){invalidate();void preview();return;}
-  if(target.matches('[data-social-copy]')){await clipboard(caption.value.trim()+'\n\n'+(format==='facebook'?url():p.url),'Copied. Paste and review it in your chosen app.');return;}
-  if(target.matches('[data-social-link]')){await clipboard(format==='facebook'?url():p.url,'App link copied.');return;}
+  if(target.matches('[data-social-copy]')){await clipboard(caption.value.trim()+'\n\n'+url(),'Copied. Paste and review it in your chosen app.');return;}
+  if(target.matches('[data-social-link]')){await clipboard(url(),'App link copied.');return;}
   if(target.matches('[data-social-download]')&&file){const a=document.createElement('a');a.href=imageUrl;a.download=file.name;document.body.append(a);a.click();a.remove();status.textContent='Image download started. Upload it in your chosen app.';return;}
-  if(target.matches('[data-social-native]')&&file){try{if(!navigator.canShare?.({files:[file]}))throw Error('Your browser cannot share image files directly. Download the image and copy the caption instead.');await navigator.share({files:[file],title:p.name,text:caption.value.trim()+'\n\n'+p.url});}catch(error){if(error.name!=='AbortError')status.textContent=error.message;}}
+  if(target.matches('[data-social-native]')&&file){try{if(!navigator.canShare?.({files:[file]}))throw Error('Your browser cannot share image files directly. Download the image and copy the caption instead.');await navigator.share({files:[file],title:p.name,text:caption.value.trim()+'\n\n'+url()});}catch(error){if(error.name!=='AbortError')status.textContent=error.message;}}
  });
  selectFormat(format);
  const dispose=()=>{disposed=true;revision++;clearTimeout(timer);request?.abort();revoke();signal.removeEventListener('abort',dispose);};

@@ -270,3 +270,6 @@
 .listing-field:has([aria-invalid="true"]) .word-rules {
   color: #b42318;
 }
+.listing-journey-step .journey-progress.journey-dots { display:flex; justify-content:center; gap:9px; height:auto; overflow:visible; background:transparent; }
+.listing-journey-step .journey-progress.journey-dots>span { flex:0 0 6px; width:6px; height:6px; border-radius:50%; background:#e2e4e3; }
+.listing-journey-step .journey-progress.journey-dots>span.is-current { background:#7b8581; }

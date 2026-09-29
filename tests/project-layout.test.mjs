@@ -4,6 +4,7 @@ import {readFileSync} from 'node:fs';
 const app=readFileSync(new URL('../app.js',import.meta.url),'utf8');
 const css=readFileSync(new URL('../launch-refinements.css',import.meta.url),'utf8');
 const shared=readFileSync(new URL('../project-view.js',import.meta.url),'utf8');
+const serverDetail=readFileSync(new URL('../src/pages/projects/[slug].ts',import.meta.url),'utf8');
 const drawer=shared+app.slice(app.indexOf('function projectDetailContent(product'),app.indexOf("document.addEventListener('input'",app.indexOf('function detailDrawer(product)')));
 test('detail view uses the invitation screenshot layout and relevant information',()=>{
  assert.match(drawer,/class="recipient-art"/);
@@ -12,6 +13,7 @@ test('detail view uses the invitation screenshot layout and relevant information
  assert.match(drawer,/Try this app ↗/);
  assert.match(drawer,/Ask the maker a question or share a thought/);
  assert.match(drawer,/videoPlayer\(product.video\)/);
+ assert.doesNotMatch(drawer+serverDetail,/Connects to the video provider|project-video-note/);
  assert.match(css,/\.mealmap-detail \.project-screenshot\{[^}]*object-fit:contain/);
  assert.match(css,/\.listing-preview-card \.listing-preview-hero>img\{[^}]*object-fit:contain/);
 });

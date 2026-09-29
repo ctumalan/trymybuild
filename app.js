@@ -1586,7 +1586,7 @@ function videoField() {
 }
 function videoPlayer(value) {
   const url = CWMedia.videoUrl(value);
-  return url ? `<section class="project-video project-video-compact"><button type="button" class="project-video-trigger" data-load-video="${esc(url)}"><span class="project-video-play" aria-hidden="true"><svg viewBox="0 0 20 20" width="16" height="16" fill="currentColor"><path d="M6 3.8a.8.8 0 0 1 1.2-.7l9 6.2a.8.8 0 0 1 0 1.4l-9 6.2a.8.8 0 0 1-1.2-.7z"/></svg></span><span>Watch demo</span></button><p class="project-video-note">Connects to the video provider</p></section>` : '';
+  return url ? `<section class="project-video project-video-compact"><button type="button" class="project-video-trigger" data-load-video="${esc(url)}"><span class="project-video-play" aria-hidden="true"><svg viewBox="0 0 20 20" width="16" height="16" fill="currentColor"><path d="M6 3.8a.8.8 0 0 1 1.2-.7l9 6.2a.8.8 0 0 1 0 1.4l-9 6.2a.8.8 0 0 1-1.2-.7z"/></svg></span><span>Watch demo</span></button></section>` : '';
 }
 function similarSection(product) {
   const suggestions = CWMedia.similarProjects(product, projects, state.saved, state.interests);

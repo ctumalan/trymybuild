@@ -814,6 +814,4 @@ body.public-site #app h1[tabindex="-1"]:focus { outline:none; }
 .project-video-compact .project-video-trigger:focus-visible { outline:2px solid #7545ad; outline-offset:3px; }
 .project-video-play { display:grid; place-items:center; width:28px; height:28px; border-radius:50%; background:#eee7f6; }
 .project-video-trigger:hover .project-video-play { background:#e5daf0; }
-.project-video-compact .project-video-note { margin:0; color:#807887; font:400 .72rem/1.4 "DM Sans",sans-serif; }
 .project-video.project-video-compact:has(iframe) { display:block; padding:0; border:0; background:transparent; }
-@container(max-width:420px) { .project-video-compact .project-video-note { flex:1; max-width:15ch; text-align:right; } }

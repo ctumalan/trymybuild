@@ -32,7 +32,8 @@ if(location.pathname.startsWith('/projects/')&&document.querySelector('.recipien
 // The app catalog has its own return prompts. Other public views keep the same timing.
 if(!document.getElementById('app')){
  let visit;const prompted=new Set();
- document.addEventListener('click',event=>{const link=event.target.closest('[data-try-app]');if(link)visit={slug:link.dataset.tryApp,awayAt:null};});
+ const markReady=slug=>{try{localStorage.setItem('trymybuild-feedback-ready:'+slug,String(Date.now()));}catch{}const region=[...document.querySelectorAll('[data-conversation]')].find(el=>el.dataset.conversation===slug);if(region){region.dataset.feedbackReady='true';const label=region.querySelector('[data-feedback-tab-label]');if(label)label.textContent='Give feedback';}};
+ document.addEventListener('click',event=>{const link=event.target.closest('[data-try-app]');if(link){visit={slug:link.dataset.tryApp,awayAt:null};markReady(link.dataset.tryApp);}});
  const depart=()=>{if(visit&&visit.awayAt===null)visit.awayAt=Date.now();};
  async function returned(){
   if(!visit||visit.awayAt===null||document.visibilityState!=='visible'||!document.hasFocus())return;

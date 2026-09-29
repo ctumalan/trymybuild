@@ -9,7 +9,7 @@ function hero(product, options = {}) {
 }
 function composer(slug) {
  const id = 'public-conversation-' + slug, draft = '', count = 0;
-  return `<form class="detail-comment-form conversation-composer" data-public-comment="${esc(slug)}"><label class="visually-hidden" for="comment-${esc(id)}">Leave a public comment</label><textarea id="comment-${esc(id)}" name="comment" maxlength="800" rows="2" required aria-describedby="comment-count-${esc(id)}" placeholder="Ask a question or share a thought…">${esc(draft)}</textarea><div class="conversation-compose-meta"><small>Public after review.</small><details class="conversation-guidelines"><summary>Guidelines</summary><p>Write 7–150 words. Discuss the app, not the person. One comment per app; sign in to update yours. Guests appear as Guest. <a href="/community-guidelines">Community guidelines</a></p></details><button class="comment-send" type="submit" aria-label="Post comment" ${draft.trim()?'':'hidden'}>Post comment</button></div><small id="comment-count-${esc(id)}" data-project-comment-count class="${draft.trim()?'word-counter':'visually-hidden'}">${count} / 7–150 words</small><p data-comment-status role="status" aria-live="polite"></p></form>`;
+  return `<form class="detail-comment-form conversation-composer" data-public-comment="${esc(slug)}"><label class="visually-hidden" for="comment-${esc(id)}">Leave a public comment</label><textarea id="comment-${esc(id)}" name="comment" maxlength="800" rows="2" required aria-describedby="comment-count-${esc(id)}" placeholder="Ask the maker a question or share a thought.">${esc(draft)}</textarea><div class="conversation-compose-meta"><small>Public after review.</small><details class="conversation-guidelines"><summary>Guidelines</summary><p>Write 7–150 words. Discuss the app, not the person. One comment per app; sign in to update yours. Guests appear as Guest. <a href="/community-guidelines">Community guidelines</a></p></details><button class="comment-send" type="submit" aria-label="Post comment" ${draft.trim()?'':'hidden'}>Post comment</button></div><small id="comment-count-${esc(id)}" data-project-comment-count class="${draft.trim()?'word-counter':'visually-hidden'}">${count} / 7–150 words</small><p data-comment-status role="status" aria-live="polite"></p></form>`;
 }
 function conversationPost(post) {
   const when = new Date(post.createdAt);
@@ -17,13 +17,13 @@ function conversationPost(post) {
   return `<article class="conversation-post"><span class="person-avatar small" aria-hidden="true">${post.avatar ? `<img src="${esc(post.avatar)}" alt="">` : esc(post.initials || 'G')}</span><div class="conversation-post-body"><div class="conversation-bubble"><header><strong>${esc(post.author || 'Guest')}</strong>${post.isCreator === true ? '<span class="conversation-creator">Creator</span>' : ''}</header><p>${esc(post.response)}</p></div>${dated ? `<time datetime="${esc(when.toISOString())}" title="${esc(when.toLocaleString())}">${esc(when.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}))}</time>` : ''}</div></article>`;
 }
 function conversationFeed(posts) {
-  if (!posts.length) return '<p class="conversation-empty">Start the conversation. What would you like to ask the maker?</p>';
+  if (!posts.length) return '';
   const sorted = [...posts].sort((a,b)=>(Date.parse(b.createdAt)||0)-(Date.parse(a.createdAt)||0));
   return sorted.slice(0,3).map(conversationPost).join('') + (sorted.length>3 ? `<details class="conversation-more"><summary>View all ${sorted.length} comments</summary>${sorted.slice(3).map(conversationPost).join('')}</details>` : '');
 }
 function conversation(product, options = {}) {
  const posts = options.posts || [], id = esc(product.slug);
-  return `<section class="project-conversation" data-conversation="${id}" aria-label="Comments and feedback"><div class="conversation-tabs" role="tablist" aria-label="Join in"><button type="button" role="tab" id="conversation-tab-${id}" aria-controls="conversation-panel-${id}" aria-selected="true" tabindex="0" data-conversation-tab="comments">Conversation <span data-conversation-count>${posts.length || ''}</span></button><button type="button" role="tab" id="feedback-tab-${id}" aria-controls="feedback-panel-${id}" aria-selected="false" tabindex="-1" data-conversation-tab="feedback">Your feedback</button></div><div role="tabpanel" id="conversation-panel-${id}" aria-labelledby="conversation-tab-${id}" data-conversation-panel="comments"><div class="conversation-feed" data-conversation-feed aria-live="polite">${options.loading !== false ? '<p class="conversation-empty">Loading conversation…</p>' : conversationFeed(posts)}</div>${options.composer || composer(product.slug)}</div><div role="tabpanel" id="feedback-panel-${id}" aria-labelledby="feedback-tab-${id}" data-conversation-panel="feedback" hidden><p class="feedback-tab-intro">Tried the app? Tell the creator what worked and what could improve.</p><div data-inline-feedback data-feedback-slug="${id}"><p role="status">Loading feedback form…</p></div><details class="conversation-badge-help"><summary>How feedback counts toward your badge</summary><p>For independent creators: five approved qualifying reviews across at least three other creators, plus confirmed ownership of a published app. Helpful criticism counts equally. Ordinary comments do not count.</p></details></div></section>`;
+  return `<section class="project-conversation" data-conversation="${id}" aria-label="Comments and feedback"><div class="conversation-tabs" role="tablist" aria-label="Join in"><button type="button" role="tab" id="conversation-tab-${id}" aria-controls="conversation-panel-${id}" aria-selected="true" tabindex="0" data-conversation-tab="comments">Conversation <span data-conversation-count>${posts.length || ''}</span></button><button type="button" role="tab" id="feedback-tab-${id}" aria-controls="feedback-panel-${id}" aria-selected="false" tabindex="-1" data-conversation-tab="feedback"><span data-feedback-tab-label>Feedback</span></button></div><div role="tabpanel" id="conversation-panel-${id}" aria-labelledby="conversation-tab-${id}" data-conversation-panel="comments"><div class="conversation-feed" data-conversation-feed aria-live="polite">${options.loading !== false ? '<p class="conversation-empty">Loading conversation…</p>' : conversationFeed(posts)}</div>${options.composer || composer(product.slug)}</div><div role="tabpanel" id="feedback-panel-${id}" aria-labelledby="feedback-tab-${id}" data-conversation-panel="feedback" hidden><div class="feedback-tab-intro"><h2>Share your experience</h2><p>Try the app, then share what worked and what could improve.</p></div><div data-inline-feedback data-feedback-slug="${id}"><p role="status">Loading feedback options…</p></div></div></section>`;
 }
 function selectConversationTab(tab) {
   const region = tab.closest('[data-conversation]');
@@ -79,6 +79,12 @@ function hydrate() {
  document.querySelectorAll('[data-public-project] [data-conversation]').forEach(region => {
   if (region.dataset.conversationReady) return;
   region.dataset.conversationReady = 'true';
+  try {
+   if (localStorage.getItem('trymybuild-feedback-ready:'+region.dataset.conversation)) {
+    region.dataset.feedbackReady='true';
+    const label=region.querySelector('[data-feedback-tab-label]');if(label)label.textContent='Give feedback';
+   }
+  } catch {}
   void loadProjectConversation(region);
  });
 }

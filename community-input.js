@@ -34,7 +34,8 @@ document.addEventListener('change',event=>{
   dialog.addEventListener('cw-feedback-complete',close,{once:true});
   document.body.append(dialog);dialog.showModal();
   try{
-   const response=await fetch('/tell/'+encodeURIComponent(slug),{credentials:'same-origin'});if(!response.ok)throw Error();
+   const invited=typeof location!=='undefined'&&/(?:^|[?&])invite=1(?:&|$)/.test(location.search||'');
+   const response=await fetch('/tell/'+encodeURIComponent(slug)+(invited?'?invite=1':''),{credentials:'same-origin'});if(!response.ok)throw Error();
    const doc=new DOMParser().parseFromString(await response.text(),'text/html'),panel=doc.querySelector('[data-guided-panel]');if(!panel)throw Error();if(!dialog.isConnected)return;
    panel.querySelectorAll('script,iframe,object,embed,base').forEach(el=>el.remove());panel.className='guided-feedback-content';panel.querySelector('h1,h2')?.remove();
    // The underlying page can contain another feedback form. Keep imported labels unique.
@@ -52,7 +53,8 @@ document.addEventListener('change',event=>{
   const slug=region.dataset.feedbackSlug;if(!/^[a-z0-9-]+$/.test(slug))return;
   region.dataset.loading='true';region.innerHTML='<p class="feedback-inline-status" role="status">Loading feedback form…</p>';
   try{
-   const response=await fetch('/tell/'+encodeURIComponent(slug),{credentials:'same-origin'});if(!response.ok)throw Error();
+   const invited=typeof location!=='undefined'&&/(?:^|[?&])invite=1(?:&|$)/.test(location.search||'');
+   const response=await fetch('/tell/'+encodeURIComponent(slug)+(invited?'?invite=1':''),{credentials:'same-origin'});if(!response.ok)throw Error();
    const doc=new DOMParser().parseFromString(await response.text(),'text/html'),panel=doc.querySelector('[data-guided-panel]');if(!panel)throw Error();if(!region.isConnected)return;
    panel.querySelectorAll('script,iframe,object,embed,base').forEach(el=>el.remove());panel.className='guided-feedback-content';
    // Owner and existing-conversation panels retain their explanation; forms use the tab introduction.
@@ -60,6 +62,9 @@ document.addEventListener('change',event=>{
    const ids=new Map(),prefix='guided-inline-'+(++inlineId)+'-';panel.querySelectorAll('[id]').forEach(el=>{ids.set(el.id,prefix+el.id);el.id=prefix+el.id;});
    panel.querySelectorAll('[for],[aria-describedby],[data-counter-id]').forEach(el=>{for(const attr of ['for','aria-describedby','data-counter-id'])if(el.hasAttribute(attr))el.setAttribute(attr,el.getAttribute(attr).split(' ').map(id=>ids.get(id)||id).join(' '));});
    region.replaceChildren(panel);region.dataset.loaded='true';hydrate(region);
+   const conversation=region.closest?.('[data-conversation]'),intro=conversation?.querySelector('.feedback-tab-intro'),tabLabel=conversation?.querySelector('[data-feedback-tab-label]'),feedbackForm=panel.querySelector('[data-guided-feedback]');
+   if(feedbackForm){if(tabLabel)tabLabel.textContent='Give feedback';if(invited&&intro){const heading=intro.querySelector('h2'),copy=intro.querySelector('p');if(heading)heading.textContent='You’re invited to test this app';if(copy)copy.textContent='Open the app, then return here to share what felt useful, confusing, or missing.';}}
+   else{if(intro)intro.hidden=true;if(tabLabel)tabLabel.textContent=panel.classList.contains('owner-feedback-panel')?(panel.textContent.includes('Feedback received')?'Feedback received':'Get feedback'):'Feedback sent';}
   }catch{if(region.isConnected)region.innerHTML='<p class="feedback-inline-status" role="status">The feedback form couldn’t load. <button type="button" class="text-button" data-inline-feedback-retry>Retry</button></p>';}
   finally{delete region.dataset.loading;}
  }

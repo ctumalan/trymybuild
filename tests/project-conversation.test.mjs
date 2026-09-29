@@ -17,14 +17,14 @@ test('long conversations show three recent comments and expand the rest',()=>{
  const html=c.CWProjectView.conversationFeed(posts);
  assert.equal((html.split('<details')[0].match(/class="conversation-post"/g)||[]).length,3);
  assert.match(html,/View all 5 comments/);assert.ok(html.indexOf('Comment 4')<html.indexOf('Comment 3'));
- assert.match(c.CWProjectView.conversationFeed([]),/What would you like to ask/);
+ assert.equal(c.CWProjectView.conversationFeed([]),'');
 });
-test('each app gets accessible conversation and feedback panels with badge guidance',()=>{
+test('each app gets accessible conversation and feedback panels without owner-only badge assumptions',()=>{
  const c=setup();vm.runInContext(source,c);const html=c.CWProjectView.conversation({slug:'example'});
- assert.equal((html.match(/role="tab"/g)||[]).length,2);assert.match(html,/data-conversation-tab="feedback">Your feedback/);
+ assert.equal((html.match(/role="tab"/g)||[]).length,2);assert.match(html,/data-conversation-tab="feedback"><span data-feedback-tab-label>Feedback/);
  assert.match(html,/data-conversation-panel="feedback" hidden/);assert.match(html,/data-inline-feedback/);
  assert.doesNotMatch(html,/conversation-header|conversation-feedback/);
- assert.match(html,/five approved qualifying reviews/);assert.match(html,/Ordinary comments do not count/);
+ assert.doesNotMatch(html,/five approved qualifying reviews|Ordinary comments do not count/);
  assert.doesNotMatch(html,/Had a chance|No public comments yet|Give feedback/);
 });
 test('a response for a closed app does not overwrite the next app or its draft',async()=>{

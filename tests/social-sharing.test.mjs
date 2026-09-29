@@ -56,11 +56,11 @@ test('private app invitation remains personal, while public invitations provide 
  const f=workspaceFixtures(),scope={...f.scope,socialCopy,socialImageUrl,json:(body,status=200)=>Response.json(body,{status})};
  const context=slug=>({url:new URL('https://example.invalid/api/invitation/'+slug),params:{slug},cookies:{get(){}}});
  const get=moduleFixture('src/pages/api/invitation/[slug].ts',['GET'],scope).GET;
- const pub=await(await get(context('sample-0'))).json();assert.ok(pub.social);assert.equal(pub.isOwner,true);
+ const pub=await(await get(context('sample-0'))).json();assert.ok(pub.social);assert.equal(pub.isOwner,true);assert.equal(pub.feedbackUrl,'https://example.invalid/projects/sample-0?invite=1');
  f.tables.projects.find(p=>p.slug==='sample-1').external_url='https://private.example';
  const priv=await(await get(context('sample-1'))).json();assert.equal(priv.privateListing,true);assert.equal(priv.social,undefined);
  const guest=moduleFixture('src/pages/api/invitation/[slug].ts',['GET'],{...scope,currentUser:async()=>null}).GET;
- assert.equal((await guest(context('sample-1'))).status,404);
+ assert.equal((await guest(context('sample-1'))).status,404);const shared=await(await guest(context('sample-0'))).json();assert.equal(shared.feedbackUrl,'');
 });
 
 test('suggested posts distinguish the maker from someone recommending the app',()=>{

@@ -3,6 +3,7 @@ import {readFileSync} from 'node:fs';
 import {stripTypeScriptTypes} from 'node:module';
 import vm from 'node:vm';
 import '../project-view.js';
+import '../project-media.js';
 import {randomUUID} from 'node:crypto';
 import {socialCopy,socialImageUrl,socialPageUrl} from '../src/server/social-share.mjs';
 import * as policy from '../src/server/feedback-policy.mjs';

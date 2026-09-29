@@ -3,9 +3,13 @@
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const categoryThemes = {"Family life": "coral", "Technology": "teal", "Sports & teams": "blue", "Teaching & learning": "gold", "Shopping": "coral", "Money": "green", "Personal planning": "violet", "Food & home": "gold", "Travel": "blue", "Creative work": "teal", "AI & automation": "violet", "Business & operations": "blue", "Developer tools": "teal", "Design": "coral", "Communication": "blue", "Data & analytics": "violet", "Customer support": "green", "Health & wellness": "green", "Marketing & sales": "coral", "Music & audio": "violet", "Productivity": "teal", "Social & community": "gold", "Security & privacy": "blue", "HR & recruiting": "coral", "Legal": "blue", "Real estate": "green", "Events": "gold", "Gaming": "violet", "Media & entertainment": "coral", "Science & research": "teal", "Sustainability": "green", "Accessibility": "blue", "Utilities": "teal"};
 function theme(product) { return product.slug === "stackscout" ? "stackscout" : categoryThemes[product.category] || "teal"; }
+function video(value) {
+ const url = globalThis.CWMedia?.videoUrl(value);
+ return url ? `<div class="project-video project-video-compact"><button type="button" class="project-video-trigger" data-load-video="${esc(url)}"><span class="project-video-play" aria-hidden="true"><svg viewBox="0 0 20 20" width="16" height="16" fill="currentColor"><path d="M6 3.8a.8.8 0 0 1 1.2-.7l9 6.2a.8.8 0 0 1 0 1.4l-9 6.2a.8.8 0 0 1-1.2-.7z"/></svg></span><span>Watch demo</span></button></div>` : '';
+}
 function hero(product, options = {}) {
  const presentation = product.presentation || {};
-  return `<div class="detail-creator">${options.creator || ""}</div><section class="recipient-hero"><div class="recipient-copy"><h2 ${options.titleId ? `id="${esc(options.titleId)}"` : ""}>${esc(presentation.headline||product.name)}</h2><div class="detail-description-notes"><div><h3>How it helps</h3><p>${esc(presentation.help)}</p></div><div><h3>One thing to try first</h3><p>${esc(presentation.firstTry)}</p></div></div></div><div class="recipient-preview-column"><div class="recipient-art">${product.preview?`<img ${options.preview?'data-listing-screenshot':''} src="${esc(product.preview)}" alt="Preview of ${esc(product.name)}" referrerpolicy="no-referrer">`:''}<span>Made by a person. Ready for your perspective.</span></div>${product.url?`<a class="primary-button" href="${esc(product.url)}" target="_blank" rel="noopener noreferrer" ${options.preview?'':`data-try-app="${esc(product.slug)}"`}>Try this app ↗</a><small class="external-destination">${esc(product.url)}</small>`:''}</div></section>`;
+  return `<div class="detail-creator">${options.creator || ""}</div><section class="recipient-hero"><div class="recipient-copy"><h2 ${options.titleId ? `id="${esc(options.titleId)}"` : ""}>${esc(presentation.headline||product.name)}</h2><div class="detail-description-notes"><div><h3>How it helps</h3><p>${esc(presentation.help)}</p></div><div><h3>One thing to try first</h3><p>${esc(presentation.firstTry)}</p></div></div></div><div class="recipient-preview-column"><div class="recipient-art">${product.preview?`<img ${options.preview?'data-listing-screenshot':''} src="${esc(product.preview)}" alt="Preview of ${esc(product.name)}" referrerpolicy="no-referrer">`:''}<span>Made by a person. Ready for your perspective.</span></div>${product.url?`<a class="primary-button" href="${esc(product.url)}" target="_blank" rel="noopener noreferrer" ${options.preview?'':`data-try-app="${esc(product.slug)}"`}>Try this app ↗</a><small class="external-destination">${esc(product.url)}</small>`:''}${video(product.video)}</div></section>`;
 }
 function composer(slug) {
  const id = 'public-conversation-' + slug, draft = '', count = 0;
@@ -55,7 +59,7 @@ async function loadProjectConversation(region) {
     if (region.isConnected && region.conversationRequest === request) feed.innerHTML = '<p class="conversation-empty">Comments couldn’t load. <button type="button" class="text-button" data-conversation-retry>Try again</button></p>';
   }
 }
-globalThis.CWProjectView = {theme,hero, conversation, conversationFeed, selectConversationTab, loadProjectConversation};
+globalThis.CWProjectView = {theme,hero,video, conversation, conversationFeed, selectConversationTab, loadProjectConversation};
 if (typeof document === 'undefined') return;
 document.addEventListener('click', event => {
   const tab = event.target.closest('[data-conversation-tab]');

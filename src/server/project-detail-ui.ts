@@ -1,4 +1,5 @@
 import '../../project-view.js';
+import '../../project-media.js';
 import {e} from './feedback-ui';
 export function projectDetailContent(p:any){
  const c=p.creator||{},note=c.founderException?'Founder exception—not earned through feedback. Not a product-quality guarantee.':c.verificationNote||'Qualifying contribution and app ownership confirmed';

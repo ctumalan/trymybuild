@@ -815,3 +815,5 @@ body.public-site #app h1[tabindex="-1"]:focus { outline:none; }
 .project-video-play { display:grid; place-items:center; width:28px; height:28px; border-radius:50%; background:#eee7f6; }
 .project-video-trigger:hover .project-video-play { background:#e5daf0; }
 .project-video.project-video-compact:has(iframe) { display:block; padding:0; border:0; background:transparent; }
+.recipient-preview-column>.project-video.project-video-compact { display:flex; justify-content:center; width:100%; margin:0; padding:0; border:0; border-radius:0; background:transparent; }
+.recipient-preview-column>.project-video.project-video-compact:has(iframe) { display:block; }

@@ -12,6 +12,8 @@ const scope={...workspaceFixtures().scope,json:(body,status=200)=>Response.json(
 const invitation=moduleFixture('src/pages/api/invitation/[slug].ts',['GET'],scope).GET;
 const socialImage=moduleFixture('src/pages/api/social-image/[slug].png.ts',['GET'],scope).GET;
 const projectPage=moduleFixture('src/pages/projects/[slug].ts',['GET'],scope).GET;
+// Opt-in fixture for checking the in-card demo without changing production listings.
+if(process.env.TRYMYBUILD_QA_VIDEO)projects[0].video=process.env.TRYMYBUILD_QA_VIDEO;
 const port=Number(process.argv[2]||4326);
 http.createServer(async(req,res)=>{try{
  const url=new URL(req.url,`http://127.0.0.1:${port}`),slug=url.pathname.split('/').at(-1).replace(/\.png$/,''),context={url,params:{slug},cookies:{get(){}}};let response;

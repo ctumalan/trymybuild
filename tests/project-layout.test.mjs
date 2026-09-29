@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
+import '../project-media.js';
+import '../project-view.js';
 const app=readFileSync(new URL('../app.js',import.meta.url),'utf8');
 const css=readFileSync(new URL('../launch-refinements.css',import.meta.url),'utf8');
 const shared=readFileSync(new URL('../project-view.js',import.meta.url),'utf8');
@@ -12,10 +14,21 @@ test('detail view uses the invitation screenshot layout and relevant information
  assert.doesNotMatch(drawer,/What saving does|About opening this app/);
  assert.match(drawer,/Try this app ↗/);
  assert.match(drawer,/Ask the maker a question or share a thought/);
- assert.match(drawer,/videoPlayer\(product.video\)/);
+ assert.match(shared,/\$\{video\(product.video\)\}<\/div><\/section>/);
  assert.doesNotMatch(drawer+serverDetail,/Connects to the video provider|project-video-note/);
  assert.match(css,/\.mealmap-detail \.project-screenshot\{[^}]*object-fit:contain/);
  assert.match(css,/\.listing-preview-card \.listing-preview-hero>img\{[^}]*object-fit:contain/);
+});
+test('demo belongs inside the app card after the app link, with no player loaded until clicked',()=>{
+ const product={slug:'demo',name:'Demo app',url:'https://example.com',video:'https://youtu.be/dQw4w9WgXcQ'};
+ const html=globalThis.CWProjectView.hero(product);
+ assert.equal((html.match(/Watch demo/g)||[]).length,1);
+ assert.match(html,/external-destination[\s\S]*project-video[\s\S]*Watch demo[\s\S]*<\/div><\/div><\/section>$/);
+ assert.match(html,/data-load-video="https:\/\/www.youtube-nocookie.com\/embed\/dQw4w9WgXcQ"/);
+ assert.doesNotMatch(html,/<iframe/);
+ for(const video of ['', 'javascript:alert(1)', 'https://unapproved.example/video'])assert.doesNotMatch(globalThis.CWProjectView.hero({...product,video}),/Watch demo|project-video/);
+ assert.doesNotMatch(serverDetail,/class="project-video/);
+ assert.doesNotMatch(app,/\$\{videoPlayer\(product.video\)\}/);
 });
 test('project destination shows the exact destination URL',()=>{
  const source=app.slice(app.indexOf('function projectDestination'),app.indexOf('function categoryIcon'));

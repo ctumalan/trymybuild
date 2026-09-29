@@ -651,7 +651,7 @@ function detailDrawer(product) {
     <section class="detail-dialog mealmap-detail invitation-detail" data-showcase-theme="${CWProjectView.theme(product)}" role="dialog" aria-modal="true" aria-labelledby="detail-title-${esc(product.slug)}" tabindex="-1">
       <div class="detail-scroll">
         <header class="project-panel-bar"><span>TryMyBuild</span><button class="detail-close" data-detail-close aria-label="Close ${esc(product.name)} details">×</button></header><div class="project-detail-content"><header class="public-detail-header">${detailProjectHistory.length ? `<button type="button" class="detail-back" data-detail-back aria-label="Previous project">←</button>` : ''}<div><strong>${esc(product.name)}</strong><small>${esc(product.price)} · ${esc(product.category)} · ${esc(product.stage)}</small></div><div class="invite-actions"><button class="secondary-button detail-save ${saved?'is-saved':''}" data-save="${esc(product.slug)}">${saved?'♥ Saved':'♡ Save'}</button><button class="secondary-button detail-share" data-share-product="${esc(product.slug)}">Share</button><span class="detail-share-status" data-share-status role="status"></span></div></header>${projectDetailContent(product)}
-        ${videoPlayer(product.video)}<div class="mealmap-after">${projectConversation(product)}</div>${similarSection(product)}</div>
+        <div class="mealmap-after">${projectConversation(product)}</div>${similarSection(product)}</div>
       </div>
     </section>
   </div>`;
@@ -1585,8 +1585,7 @@ function videoField() {
   return `<label class="listing-field">Video link or embed code<textarea data-listing-field="video" placeholder="Paste a YouTube, Vimeo, or Loom URL or iframe embed code" maxlength="5000" aria-describedby="video-help">${esc(listingDraft.video)}</textarea></label><p class="share-name-hint" id="video-help">YouTube, Vimeo, and Loom links or iframe embed codes are supported.</p><div data-listing-video-preview>${videoPlayer(listingDraft.video)}</div>`;
 }
 function videoPlayer(value) {
-  const url = CWMedia.videoUrl(value);
-  return url ? `<section class="project-video project-video-compact"><button type="button" class="project-video-trigger" data-load-video="${esc(url)}"><span class="project-video-play" aria-hidden="true"><svg viewBox="0 0 20 20" width="16" height="16" fill="currentColor"><path d="M6 3.8a.8.8 0 0 1 1.2-.7l9 6.2a.8.8 0 0 1 0 1.4l-9 6.2a.8.8 0 0 1-1.2-.7z"/></svg></span><span>Watch demo</span></button></section>` : '';
+  return CWProjectView.video(value);
 }
 function similarSection(product) {
   const suggestions = CWMedia.similarProjects(product, projects, state.saved, state.interests);

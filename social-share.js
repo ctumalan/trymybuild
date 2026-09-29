@@ -21,7 +21,7 @@ export function mountSocialShare(panel,p,signal){
  fallback.innerHTML='<label for="social-manual-copy">Select and copy below</label><textarea id="social-manual-copy" rows="3" readonly></textarea>';
  status.after(fallback);
  const linkButton=$('[data-social-link]'),toggle=$('[data-social-toggle]'),options=$('#social-share-options');
- const setOpen=(open,focus=false)=>{options.hidden=!open;toggle.setAttribute('aria-expanded',String(open));if(focus)toggle.focus();};
+ const setOpen=(open,focus=false)=>{options.hidden=!open;toggle.setAttribute('aria-expanded',String(open));if(open)options.scrollIntoView({block:'nearest'});if(focus)toggle.focus();};
  const outside=event=>{if(!panel.contains(event.target))setOpen(false);else if(!event.target.closest('.social-actions'))setOpen(false);};
  const keydown=event=>{if(event.key==='Escape'&&!options.hidden){event.preventDefault();event.stopPropagation();setOpen(false,true);}};
  document.addEventListener('click',outside);

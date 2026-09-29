@@ -10,7 +10,7 @@ function harness(navigator={}) {
   if(!controls.has(selector))controls.set(selector,{
    selector,value:'',textContent:'',hidden:selector==='#social-share-options',disabled:false,dataset:{},attributes:{},events:{},
    setAttribute(k,v){this.attributes[k]=v;},addEventListener(k,fn){this.events[k]=fn;},
-   after(){},focus(){focused=this;},select(){this.selected=true;},setSelectionRange(a,b){this.selection=[a,b];},
+   after(){},scrollIntoView(){this.scrolled=true;},focus(){focused=this;},select(){this.selected=true;},setSelectionRange(a,b){this.selection=[a,b];},
    matches(s){return s===selector;},closest(s){return s==='button'?this:s===selector?this:null;}
   });return controls.get(selector);
  };
@@ -52,7 +52,7 @@ test('missing clipboard API preserves the whole post and link in manual fallback
  assert.match(h.control('#social-manual-copy').value,/^My custom post\n\nhttps:/);h.controller.abort();
 });
 test('share disclosure closes on Escape without dismissing the surrounding dialog',async()=>{
- const h=harness();await h.click('[data-social-toggle]');assert.equal(h.control('[data-social-toggle]').attributes['aria-expanded'],'true');
+ const h=harness();await h.click('[data-social-toggle]');assert.equal(h.control('[data-social-toggle]').attributes['aria-expanded'],'true');assert.equal(h.control('#social-share-options').scrolled,true);
  let prevented=false,stopped=false;h.events.keydown({key:'Escape',preventDefault(){prevented=true;},stopPropagation(){stopped=true;}});
  assert.ok(prevented&&stopped);assert.equal(h.control('#social-share-options').hidden,true);assert.equal(h.focused,h.control('[data-social-toggle]'));
  await h.click('[data-social-toggle]');h.documentEvents.click({target:{}});assert.equal(h.control('#social-share-options').hidden,true);h.controller.abort();

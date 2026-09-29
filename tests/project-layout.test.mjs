@@ -10,7 +10,7 @@ test('detail view uses the invitation screenshot layout and relevant information
  assert.doesNotMatch(drawer,/--project-wallpaper|Good to know/);
  assert.doesNotMatch(drawer,/What saving does|About opening this app/);
  assert.match(drawer,/Try this app ↗/);
- assert.match(drawer,/Start the conversation/);
+ assert.match(drawer,/Ask the maker a question or share a thought/);
  assert.match(drawer,/videoPlayer\(product.video\)/);
  assert.match(css,/\.mealmap-detail \.project-screenshot\{[^}]*object-fit:contain/);
  assert.match(css,/\.listing-preview-card \.listing-preview-hero>img\{[^}]*object-fit:contain/);

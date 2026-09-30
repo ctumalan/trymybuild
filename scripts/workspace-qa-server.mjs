@@ -1,10 +1,11 @@
 // Run manually on localhost; synthetic data, no secrets, no production writes.
 import http from 'node:http';
 import {readFile} from 'node:fs/promises';
-import {workspaceFixtures} from './workspace-fixtures.mjs';
+import {workspaceFixtures,adminPeopleFixture} from './workspace-fixtures.mjs';
 import {renderInvitationImage} from '../src/server/invitation-image.mjs';
 import {contentSecurityPolicy} from '../src/server/content-security-policy.mjs';
 const {routes,scope,id}=workspaceFixtures(),root=new URL('../',import.meta.url);
+routes['/admin/workspace']=adminPeopleFixture().GET;
 if(process.argv[3]==='guest')scope.currentUser=async()=>null;
 const port=Number(process.argv[2]||4325);if(!Number.isInteger(port)||port<1024||port>65535)throw Error('Invalid preview port');
 http.createServer(async(req,res)=>{

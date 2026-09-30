@@ -32,9 +32,9 @@
  document.addEventListener('click',event=>{
   const link=event.target.closest('a[data-panel],a[href^="/projects/"],a[href^="/people/"],a[href^="/admin/project?"],a[href^="/dashboard/project?"]');
   if(link&&!event.metaKey&&!event.ctrlKey&&!event.shiftKey&&!event.altKey&&event.button===0){const url=new URL(link.href);if(allowed(url)){event.preventDefault();event.stopPropagation();const menu=link.closest('.account-menu');if(menu){menu.open=false;menu.querySelector('summary').focus();}open(url.href,url.pathname.startsWith('/people/')?'profile':'project');}}
-  document.querySelectorAll('.inline-help[open],.project-actions[open]').forEach(el=>{if(!el.contains(event.target))el.open=false;});
+  document.querySelectorAll('.inline-help[open],.project-actions[open],.cw-member-menu[open]').forEach(el=>{if(!el.contains(event.target))el.open=false;});
  });
- document.addEventListener('keydown',event=>{if(event.key==='Escape'){const opened=[...document.querySelectorAll('.inline-help[open],.project-actions[open]')];if(opened.length){event.preventDefault();opened.forEach(el=>el.open=false);opened.at(-1).querySelector('summary').focus();}}});
+ document.addEventListener('keydown',event=>{if(event.key==='Escape'){const opened=[...document.querySelectorAll('.inline-help[open],.project-actions[open],.cw-member-menu[open]')];if(opened.length){event.preventDefault();opened.forEach(el=>el.open=false);opened.at(-1).querySelector('summary').focus();}}});
  function composer(form){const field=form.querySelector('textarea[name="message"]');if(!field)return;const count=(field.value.match(/[\p{L}\p{N}]+(?:['’\-][\p{L}\p{N}]+)*/gu)||[]).length;form.querySelector('.send-arrow').hidden=!field.value.trim();const output=form.querySelector('[data-inline-count]');if(output){output.textContent=`${count} / 7–150 words`;output.hidden=!field.value.trim();}field.setCustomValidity(count>=7&&count<=150?'':'Write 7–150 words.');}
  document.addEventListener('input',event=>{const form=event.target.closest('[data-inline-compose]');if(form)composer(form);});
  document.addEventListener('input',event=>{const form=event.target.closest('[data-direct-compose]');if(form)form.querySelector('.send-arrow').hidden=!form.elements.message.value.trim();});

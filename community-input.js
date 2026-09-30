@@ -1,7 +1,7 @@
 document.addEventListener('input',event=>{
  const field=event.target.closest('[data-community-field]');if(!field)return;
  const count=(field.value.match(/[\p{L}\p{N}]+(?:['’\-][\p{L}\p{N}]+)*/gu)||[]).length;
- const output=document.getElementById(field.dataset.counterId);if(output){output.textContent=`Word count: ${count}`;output.classList.toggle('invalid',count>0&&(count<7||count>150));if(!output.nextElementSibling?.classList.contains('word-rules')){const rules=document.createElement('small');rules.className='word-rules';rules.textContent='Minimum: 7 words · Maximum: 150 words';output.after(rules);}}
+ const output=document.getElementById(field.dataset.counterId);if(output){const compact=field.hasAttribute('data-compact-counter');output.textContent=compact?`${count} / 150 words${count>0&&count<7?' · At least 7 words':''}`:`Word count: ${count}`;output.classList.toggle('invalid',count>0&&(count<7||count>150));if(!compact&&!output.nextElementSibling?.classList.contains('word-rules')){const rules=document.createElement('small');rules.className='word-rules';rules.textContent='Minimum: 7 words · Maximum: 150 words';output.after(rules);}}
  field.setCustomValidity(count>=7&&count<=150?'':'Write 7–150 words.');
 });
 document.querySelectorAll('[data-community-field]').forEach(field=>field.dispatchEvent(new Event('input',{bubbles:true})));
@@ -20,9 +20,12 @@ document.addEventListener('change',event=>{
 
 // Keep completed feedback locally through joining. Posting always requires a member.
 (()=>{
+ const updateVisibility=form=>{const note=form?.querySelector('[data-feedback-visibility-note]');if(note)note.textContent=form.elements.visibility.value==='private'?'Visible to you and the creator. Admins may access it for safety and support.':form.elements.visibility.value==='public'?'Shown with your display name after review.':'Choose who can see your feedback.';};
+ document.addEventListener('change',event=>{if(event.target.name==='visibility')updateVisibility(event.target.closest('[data-guided-feedback]'));});
+ document.addEventListener('reset',event=>{if(event.target.matches('[data-guided-feedback]'))setTimeout(()=>{updateVisibility(event.target);event.target.querySelectorAll('[data-community-field]').forEach(field=>field.dispatchEvent(new Event('input',{bubbles:true})));},0);});
  const key=slug=>'trymybuild-guided-feedback:'+slug;
  const save=form=>{try{localStorage.setItem(key(form.elements.slug.value),JSON.stringify(Object.fromEntries(new FormData(form))));return true;}catch{return false;}};
- const hydrate=root=>root.querySelectorAll('[data-guided-feedback]').forEach(form=>{let draft;try{draft=JSON.parse(localStorage.getItem(key(form.elements.slug.value))||'null');}catch{}if(draft)for(const [name,value] of Object.entries(draft)){const field=form.elements.namedItem(name);if(!field)continue;if(field instanceof RadioNodeList){for(const input of field)input.checked=input.value===value;}else if(name!=='slug')field.value=value;}form.querySelectorAll('[data-community-field]').forEach(field=>field.dispatchEvent(new Event('input',{bubbles:true})));});
+ const hydrate=root=>root.querySelectorAll('[data-guided-feedback]').forEach(form=>{updateVisibility(form);let draft;try{draft=JSON.parse(localStorage.getItem(key(form.elements.slug.value))||'null');}catch{}if(draft)for(const [name,value] of Object.entries(draft)){const field=form.elements.namedItem(name);if(!field)continue;if(field instanceof RadioNodeList){for(const input of field)input.checked=input.value===value;}else if(name!=='slug')field.value=value;}updateVisibility(form);form.querySelectorAll('[data-community-field]').forEach(field=>field.dispatchEvent(new Event('input',{bubbles:true})));});
  let feedbackDialog=null,modalId=0;
  async function open(slug){
   if(!/^[a-z0-9-]+$/.test(slug)||feedbackDialog?.isConnected)return;

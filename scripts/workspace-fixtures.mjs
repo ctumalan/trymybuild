@@ -59,3 +59,10 @@ export function workspaceFixtures(){
  routes['/tell/sample-0']=moduleFixture('src/pages/tell/[slug].ts',['GET'],scope).GET;
  return {scope,tables,db,id,owner,author,routes};
 }
+export function adminPeopleFixture(){
+ const f=workspaceFixtures();
+ const profiles=Array.from({length:15},(_,i)=>({user_id:`member-${i}`,display_name:i===3?'A creator with a longer public name':`Sample Member ${i+1}`,verified:i===2,users:{account_status:i===1?'suspended':'active',workos_user_id:i===0?'fixture-user':`user-${i}`,system_role:i===4?'admin':'member'}}));
+ const db=mockDatabase({profiles});
+ const scope={...f.scope,...moduleFixture('src/server/feedback-ui.ts',['adminNavigation'],f.scope),memberContext:async()=>({user:{id:'fixture-user'},db,admin:true})};
+ return {GET:moduleFixture('src/pages/admin/workspace.ts',['GET'],scope).GET,profiles};
+}

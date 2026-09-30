@@ -33,7 +33,7 @@ export function normalizeCategory(value) {
 // Human labels for the publication lifecycle, shown in the creator dashboard.
 export const PROJECT_STATUS_LABELS = {
   draft: 'Draft — only you can see it',
-  in_review: 'Submitted — waiting for review',
+  in_review: 'Ready to publish — open publishing options',
   published: 'Published — publicly discoverable',
   unpublished: 'Unpublished — hidden from the catalog',
 };

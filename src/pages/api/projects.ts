@@ -9,7 +9,6 @@ import { saveDraft, submit, unpublish } from '../../server/listing-service.mjs';
 import { projectStore } from '../../server/listing-store';
 import { PROJECT_FIELDS } from '../../server/catalog-db';
 import { publicationAccess } from '../../server/community-credits';
-import { sendProjectSubmissionEmail } from '../../server/project-submission-email.mjs';
 
 function ownedView(row: any) {
   return {
@@ -80,10 +79,6 @@ export const POST: APIRoute = async context => {
       const access=await publicationAccess(database(),member.id,String(body.id||''));
       if(!access.allowed)return json({error:`You are using ${access.used} of ${access.slots} active project places. Unpublish a project or contact support; reviewing is not required.`,href:'/dashboard/help'},403);
       const result=await submit(store, { ownerId: member.id, id: body.id });
-      if(!result.error&&!result.idempotent){
-        try{await sendProjectSubmissionEmail({project:result.project,submitter:user});}
-        catch(error){console.warn('Project review email was not sent',error instanceof Error?error.message:'unknown error');}
-      }
       return reply(result);
     }
     if (body.action === 'unpublish') return reply(await unpublish(store, { ownerId: member.id, id: body.id }));

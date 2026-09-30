@@ -39,6 +39,30 @@ const draft = (title, over = {}) => ({ title, external_url: 'https://x.app/', ca
 const deps = (() => { let n = 0; return { slugify: s => String(s).toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'project', randomSuffix: () => 's' + (n++) }; })();
 const reencode = async () => ({ bytes: Buffer.from('reencoded'), contentType: 'image/jpeg' });
 
+test('launch publishing is immediate, idempotent and does not grant verified ownership',async()=>{
+ const store=makeStore();
+ const created=await saveDraft(store,{ownerId:'A',clientToken:'launch',input:draft('Launch',{sharing_preference:'public'})},deps);
+ store.rows.get(created.project.id).preview_path='previews/A/launch.jpg';
+ const result=await submit(store,{ownerId:'A',id:created.project.id});
+ assert.equal(result.status,200);
+ assert.equal(result.project.listing_status,'published');
+ assert.equal(result.project.visibility,'public');
+ assert.ok(result.project.published_at);
+ assert.equal(result.project.ownership_status,'unverified');
+ const again=await submit(store,{ownerId:'A',id:created.project.id});
+ assert.equal(again.idempotent,true);
+ assert.equal(again.project.lock_version,result.project.lock_version);
+});
+test('private drafts and incomplete projects cannot publish; queued owners can publish',async()=>{
+ const store=makeStore();
+ const created=await saveDraft(store,{ownerId:'A',clientToken:'private',input:draft('Private',{sharing_preference:'private'})},deps);
+ assert.equal((await submit(store,{ownerId:'A',id:created.project.id})).status,400);
+ const row=store.rows.get(created.project.id);row.sharing_preference='public';row.headline='';
+ assert.equal((await submit(store,{ownerId:'A',id:row.id})).status,400);
+ Object.assign(row,draft('Ready'),{listing_status:'in_review',preview_path:'previews/A/ready.jpg'});
+ assert.equal((await submit(store,{ownerId:'A',id:row.id})).project.listing_status,'published');
+});
+
 test('two independent drafts under one account do not overwrite each other', async () => {
   const store = makeStore();
   const a = await saveDraft(store, { ownerId: 'A', clientToken: 't1', input: draft('One') }, deps);
@@ -130,7 +154,7 @@ test('admin approval is bound to the reviewed revision: a stale approval after w
   // Approval from the STALE review screen (old status+version) must be rejected.
   const stale = await store.updateOwnedGuarded(row.id, 'A', { status: reviewedStatus, lockVersion: reviewedVersion }, { listing_status: 'published', visibility: 'public' });
   assert.equal(stale, null, 'stale approval rejected');
-  assert.equal(store.rows.get(row.id).listing_status, 'in_review', 'still awaiting a fresh decision');
+  assert.equal(store.rows.get(row.id).listing_status, 'published', 'owner republished without waiting for review');
   // A fresh approval bound to the current revision succeeds.
   const cur = store.rows.get(row.id);
   const fresh = await store.updateOwnedGuarded(row.id, 'A', { status: cur.listing_status, lockVersion: cur.lock_version }, { listing_status: 'published', visibility: 'public' });

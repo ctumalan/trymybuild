@@ -50,9 +50,8 @@ test('email delivery uses the founder address and a revision-specific duplicate 
   assert.equal(body.from, 'TryMyBuild <review@example.com>');
 });
 
-test('the project route emails only a newly completed submission transition', () => {
+test('instant owner publishing does not send an obsolete approval request email', () => {
   const source = readFileSync(new URL('../src/pages/api/projects.ts', import.meta.url), 'utf8');
-  assert.match(source, /if\(!result\.error&&!result\.idempotent\)/);
-  assert.match(source, /await sendProjectSubmissionEmail\(\{project:result\.project,submitter:user\}\)/);
+  assert.doesNotMatch(source, /sendProjectSubmissionEmail/);
+  assert.match(source, /await submit\(store, \{ ownerId: member.id, id: body.id \}\)/);
 });
-

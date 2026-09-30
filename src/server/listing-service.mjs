@@ -4,7 +4,7 @@
 import { publishReadiness, pricingKind } from './listing-policy.mjs';
 
 // Fields whose change is "material" — a change to any editable public-facing field on a public/in-review
-// listing must return it to a nonpublic draft so it cannot silently bypass founder review. This must
+// listing returns it to a private draft until the owner explicitly publishes the changes. This must
 // cover EVERY field normalizeDraft accepts and shows publicly (summary and stage included).
 const MATERIAL_FIELDS = ['price_label', 'is_free', 'video_url', 'title', 'external_url', 'category', 'stage', 'summary', 'headline', 'help_text', 'first_try'];
 
@@ -61,15 +61,17 @@ export async function saveDraft(store, { ownerId, id, clientToken, input }, deps
   return { status: 503, error: 'Could not create the listing. Please try again.' };
 }
 
-// Submit a draft/unpublished listing for founder review. Idempotent if already in review or published.
+// Launch policy: an authenticated owner explicitly publishes a ready public listing.
+// Existing review-queue entries can use the same action; no bulk publication is implied.
 export async function submit(store, { ownerId, id }) {
   const row = await store.findOwnedById(ownerId, id);
   if (!row) return { status: 404, error: 'That project was not found in your account.' };
-  if (row.listing_status === 'in_review' || row.listing_status === 'published') return { status: 200, project: row, idempotent: true };
+  if (row.listing_status === 'published') return { status: 200, project: row, idempotent: true };
   const readiness = publishReadiness(row);
-  if(row.sharing_preference && row.sharing_preference!=='public')return {status:400,error:'Choose Publicly in sharing preferences before submitting for public review.'};
+  if(row.sharing_preference && row.sharing_preference!=='public')return {status:400,error:'Choose Publicly in sharing preferences before publishing.'};
   if (!readiness.ready) return { status: 400, error: `Add ${readiness.missing.join(', ')} before publishing.`, missing: readiness.missing };
-  const updated = await store.updateOwnedGuarded(id, ownerId, { status: row.listing_status, lockVersion: row.lock_version }, { listing_status: 'in_review', submitted_at: new Date().toISOString() });
+  const now = new Date().toISOString();
+  const updated = await store.updateOwnedGuarded(id, ownerId, { status: row.listing_status, lockVersion: row.lock_version }, { listing_status: 'published', visibility: 'public', submitted_at: now, published_at: row.published_at || now });
   if (!updated) return { status: 409, error: 'This listing changed. Reload and try again.' };
   return { status: 200, project: updated };
 }

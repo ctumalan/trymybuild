@@ -950,16 +950,14 @@ function listingSettingsPage() {
   const hasServer = !!listingDraft.serverId;
   const status = listingDraft.serverStatus;
   const statusNote = !hasServer ? 'Your answers are saved on this device only.'
-    : status === 'in_review' ? 'Submitted for review. It appears in the catalog once an administrator approves it.'
+    : status === 'in_review' ? 'Ready to publish. Choose Publish my app to appear in the catalog.'
     : status === 'published' ? 'Published and publicly discoverable.'
     : status === 'unpublished' ? 'Unpublished. Hidden from the catalog until you submit it again.'
     : 'Saved to your account as a private draft. Only you can see it.';
   const importCard = hasServer ? `<section class="cw-panel"><h2>Builds & updates</h2><p>Add release notes and choose which build is active. Announce improvements to people who saved your project.</p><a class="secondary-button" href="/dashboard/builds?project=${encodeURIComponent(listingDraft.serverSlug)}">Manage builds</a></section>` : `<div class="cw-panel listing-import"><h2>Save this draft to your account</h2><p>Your draft is currently on this device only. Save it to your account (${name}) so you can publish it and reach it from any device.</p><button class="primary-button" data-listing-save-server>Save to my account</button><p class="privacy-note">🔒 Nothing is published yet. Your on-device draft is kept until the save is confirmed.</p></div>`;
   const publishControls = !hasServer ? '' : `<div class="cw-panel"><p role="status" data-listing-server-status>${esc(statusNote)}</p><div class="form-actions">${status === 'published'
       ? `<a class="primary-button" href="/?category=${encodeURIComponent(listingDraft.category)}&highlight=${encodeURIComponent(listingDraft.serverSlug)}">View my project in catalog</a><button class="secondary-button" data-listing-unpublish>Unpublish</button>`
-      : status === 'in_review'
-        ? ''
-        : '<button class="primary-button" data-listing-publish>Publish — submit for review</button>'}<a class="share-browse-link" href="/dashboard?view=creator">Go to My projects →</a></div><p class="privacy-note">Publishing sends your listing for a quick founder review before it appears publicly. You can unpublish anytime.</p></div>`;
+      : '<button class="primary-button" data-listing-publish>Publish my app</button>'}<a class="share-browse-link" href="/dashboard?view=creator">Go to My projects →</a></div><p class="privacy-note">Publish instantly to the public catalog. No admin approval needed. You can unpublish anytime.</p></div>`;
   return `<section class="page-shell listing-review"><p class="eyebrow">Your project · Settings</p><h1>Make it yours.</h1><p>Signed in as ${name}.</p><form data-listing-settings>${sharingPreferenceFields()}${listingField('title', 'Project name', 'Your project name')}${listingField('url', 'Project link', 'https://your-project.com')}${listingCategoryPicker()}${listingPricingField()}${listingField('does','What does your project do?','Describe your project in 4–10 words.',true)}${listingField('helps','How does it help people?','Explain the benefit in 4–10 words.',true)}${listingField('firstTry','What should someone try first?','Suggest one action in 4–10 words.',true)}${videoField()}<p class="share-name-hint">Each answer needs 4–10 words. Edit your screenshot in the preview below. Categories appear in homepage filters only when a listing is published. Drafts never create public filters.</p><p data-video-status class="video-status" role="status"></p><div class="form-actions share-start-actions"><button class="primary-button" type="submit">${hasServer ? 'Save changes' : 'Save draft'}</button><button class="secondary-button" type="button" data-listing-review>Back</button><button type="button" class="secondary-button listing-reset-button" data-listing-reset>Start over</button></div><p data-listing-status role="status"></p></form>${importCard}${listingPreview()}${publishControls}</section>`;
 }
 function listingAccountPage() {
@@ -1058,13 +1056,13 @@ document.addEventListener('submit', event => {
   if (!saveListingDraft()) { status.textContent = 'Your browser could not save this draft. Please enable site storage before continuing.'; return; }
   if (form.hasAttribute('data-listing-settings')) {
     if (window.CW_SERVER && state.session?.authenticated) {
-      // Material changes to a public/in-review listing send it back for review — warn first.
+      // Material changes return a live listing to a private draft — warn first.
       if ((listingDraft.serverStatus === 'published' || listingDraft.serverStatus === 'in_review') &&
-          !confirm('Saving changes takes this listing out of the public catalog and sends it back for review before it’s public again. Continue?')) {
+          !confirm('Saving changes takes this listing out of the public catalog. Choose Publish my app afterward to make the update public immediately. Continue?')) {
         status.textContent = 'No changes saved.'; return;
       }
       status.textContent = 'Saving to your account…';
-      saveServerListing(status).then(() => { status.textContent = 'Saved to your account. This listing is a private draft; publish it for review when you’re ready.'; render(); })
+      saveServerListing(status).then(() => { status.textContent = 'Saved to your account. This listing is a private draft; publish it when you’re ready.'; render(); })
         .catch(error => { status.textContent = error.message || 'Could not save to your account. Your on-device draft is kept.'; });
     } else {
       status.textContent = 'Draft settings saved on this device. Your project has not been published.';
@@ -1113,7 +1111,7 @@ document.addEventListener('click', async event => {
   button.disabled = true;
   try {
     if (saveBtn) { await saveServerListing(statusEl); }
-    else if (publishBtn) { if(listingDraft.sharingPreference && listingDraft.sharingPreference!=='public')throw new Error('Choose Publicly in sharing preferences before submitting for public review.'); await saveServerListing(statusEl); const res = await fetch('/api/projects', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'submit', id: listingDraft.serverId }) }); const data = await res.json(); if (!res.ok) throw new Error(data.error || 'Could not submit for review.'); listingDraft.serverStatus = data.project.status; saveListingDraft(); }
+    else if (publishBtn) { if(listingDraft.sharingPreference && listingDraft.sharingPreference!=='public')throw new Error('Choose Publicly in sharing preferences before publishing.'); await saveServerListing(statusEl); const res = await fetch('/api/projects', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'submit', id: listingDraft.serverId }) }); const data = await res.json(); if (!res.ok) throw new Error(data.error || 'Could not publish your app.'); listingDraft.serverStatus = data.project.status; saveListingDraft(); }
     else if (unpublishBtn) { const res = await fetch('/api/projects', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'unpublish', id: listingDraft.serverId }) }); const data = await res.json(); if (!res.ok) throw new Error(data.error || 'Could not update.'); listingDraft.serverStatus = data.project.status; saveListingDraft(); }
     render();void loadDailyComments();
   } catch (error) { if (statusEl) statusEl.textContent = error.message || 'That did not work. Your draft is safe; please try again.'; button.disabled = false; }

@@ -10,20 +10,20 @@ function setup(value,prior='',approve=true){
  let submit,saves=0,renders=0,scrolled=0;const status={textContent:''};
  const c=vm.createContext({URL,listingDraft:{url:prior,title:''},state:{route:'discover'},listingSettings:false,listingStep:0,document:{addEventListener:(_,fn)=>submit=fn,getElementById:()=>({scrollIntoView(){scrolled++;},focus(){}})},matchMedia:()=>({matches:true}),confirm:()=>approve,listingUrl:v=>v,listingNameFromUrl:()=> 'Example',invalidateListingCapture(){},resetListingDraft(){c.listingDraft.url='';},saveListingDraft:()=>{saves++;return true;},ensureListingScreenshot(){},render(){renders++;}});
  vm.runInContext(urlCode+handlerCode,c);
- return {c,run:()=>submit({preventDefault(){},target:{closest:()=>({querySelector:s=>s==='[data-catalog-search]'?{value}:status})}}),counts:()=>({saves,renders,scrolled})};
+ return {c,status,run:()=>submit({preventDefault(){},target:{closest:()=>({querySelector:s=>s==='[data-app-link-entry]'?{value}:status})}}),counts:()=>({saves,renders,scrolled})};
 }
-test('combined entry recognizes web URLs and keeps ordinary searches as searches',()=>{
+test('share-only entry recognizes web URLs and rejects keywords',()=>{
  const {c}=setup('');
  for(const input of ['finalprompt.ai','https://finalprompt.ai/path?q=1','www.example.com'])assert.ok(c.homepageAppUrl(input));
  for(const input of ['meal planner','hello','javascript:alert(1)','https://','https://user:pass@example.com','ftp://example.com'])assert.equal(c.homepageAppUrl(input),'');
  assert.equal(c.homepageAppUrl(' finalprompt.ai '),'https://finalprompt.ai/');
 });
-test('search submission only moves to the catalog',()=>{const x=setup('meal planner');x.c.state.entryMode='search';x.run();assert.deepEqual(x.counts(),{saves:0,renders:1,scrolled:1});assert.equal(x.c.state.route,'discover');});
+test('keywords show a link hint without changing the catalog',()=>{const x=setup('meal planner');x.c.state.entryMode='search';x.run();assert.deepEqual(x.counts(),{saves:0,renders:0,scrolled:0});assert.equal(x.c.state.route,'discover');});
 test('URL submission saves the URL and advances past the URL question',()=>{const x=setup('finalprompt.ai');x.run();assert.equal(x.c.listingDraft.url,'https://finalprompt.ai/');assert.equal(x.c.listingStep,1);assert.equal(x.c.state.route,'share');assert.equal(x.counts().saves,1);});
 test('declining a draft replacement preserves the existing draft',()=>{const x=setup('finalprompt.ai','https://existing.example/',false);x.run();assert.equal(x.c.listingDraft.url,'https://existing.example/');assert.deepEqual(x.counts(),{saves:0,renders:0,scrolled:0});});
 
 test('a URL starts a draft regardless of the previous search mode',()=>{const x=setup('finalprompt.ai');x.c.state.entryMode='search';x.run();assert.equal(x.c.state.route,'share');assert.equal(x.counts().saves,1);});
-test('keywords search regardless of previous URL mode',()=>{const x=setup('meal planner');x.c.state.entryMode='list';x.run();assert.deepEqual(x.counts(),{saves:0,renders:1,scrolled:1});assert.equal(x.c.state.query,'meal planner');});
+test('keywords never become a hidden search',()=>{const x=setup('meal planner');x.c.state.entryMode='list';x.run();assert.deepEqual(x.counts(),{saves:0,renders:0,scrolled:0});assert.equal(x.c.state.query,undefined);assert.match(x.status.textContent,/web address, or browse/);});
 
 test('listing questions, preview, account and settings retain the same navigation',()=>{
  const fn=name=>{const start=source.indexOf('function '+name+'(');return source.slice(start,source.indexOf('\n}',start)+2);};
@@ -58,20 +58,20 @@ test('browsing mid-listing and returning preserves the draft and current questio
 });
 
 
-test('empty and ambiguous inputs remain searches and do not create drafts',()=>{
+test('empty and ambiguous inputs do not search or create drafts',()=>{
  for (const value of ['', '   ', 'meal planner', 'Technology', 'https://', 'example']) {
   const x=setup(value);x.run();
   assert.equal(x.counts().saves,0);
   assert.equal(x.c.state.route,'discover');
  }
 });
-test('the action describes the detected intent as input changes',()=>{
+test('the action stays share-only and preserves catalog state while typing',()=>{
  const {c}=setup('');
- for (const [value,label,sharing] of [['','Continue',false],['planning','Search apps →',false],['finalprompt.ai','Share your app →',true],['family life','Search apps →',false],['','Continue',false]]) {
+ for (const [value,label,sharing] of [['','Share my app',true],['planning','Share my app',true],['finalprompt.ai','Share my app',true],['family life','Share my app',true],['','Share my app',true]]) {
   const input={value},button={},reassurance={},status={};
-  c.updateHomepageEntry({querySelector:s=>({'[data-catalog-search]':input,'[data-entry-submit]':button,'[data-entry-reassurance]':reassurance,'[data-entry-status]':status}[s])});
+  c.updateHomepageEntry({querySelector:s=>({'[data-app-link-entry]':input,'[data-entry-submit]':button,'[data-entry-reassurance]':reassurance,'[data-entry-status]':status}[s])});
   assert.equal(button.textContent,label);
   assert.equal(reassurance.hidden,!sharing);
-  assert.equal(c.state.query,sharing?'':value);
+  assert.equal(c.state.query,undefined);assert.equal(c.state.entryUrl,value);
  }
 });

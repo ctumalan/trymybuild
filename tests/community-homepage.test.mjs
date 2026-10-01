@@ -43,7 +43,7 @@ test('listing navigation stays in the homepage frame and preserves search',()=>{
  const ctx=vm.createContext({matchMedia:()=>({matches:true}),CWPricing:{kind:value=>value==='Free'?'free':'paid'},wishListSection:()=>'',listingJourney:()=>'<form>Listing form</form>',window:{CW_SERVER:false},catalogState:'ready',document:{addEventListener(){},getElementById(){return null;}},render(){},state:{category:'All',price:'all',creatorType:'all',query:'',sort:'recent'},projects:Array.from({length:5},(_,i)=>({name:`App ${i}`,price:'Free',category:'Tools'})),esc:String,creatorFor:()=>({}),creatorMatchesFilters:()=>true,compareCatalogProjects:()=>0,publishedCategories:()=>[],catalogSortLabel:()=>'',catalogRow:p=>`<article>${p.name}</article>`,membershipPromo:()=>'<section>COMMUNITY CONTENT</section>',communityRail:()=>'',catalogStatusPanel:()=>'<p>CATALOG UNAVAILABLE</p>'});
  vm.runInContext(app.slice(app.indexOf("let homeView = 'find'"),app.indexOf('function discussionDraftKey(')),ctx);
  let html=ctx.discover();
- assert.match(html,/data-catalog-search/);
+ assert.match(html,/data-app-link-entry/);
  assert.equal((html.match(/<article>/g)||[]).length,5);
  assert.doesNotMatch(html,/COMMUNITY CONTENT|Small contributions/);
  ctx.state.query='App 2';
@@ -52,7 +52,7 @@ test('listing navigation stays in the homepage frame and preserves search',()=>{
  assert.match(html,/Listing form/);
  assert.doesNotMatch(html,/COMMUNITY CONTENT/);
  assert.doesNotMatch(html,/Small contributions\. Better projects/);
- assert.doesNotMatch(html,/data-catalog-search/);
+ assert.doesNotMatch(html,/data-app-link-entry/);
  assert.doesNotMatch(html,/discovery-entry-modes/);
  assert.match(html,/data-entry-mode="search"[^>]*>← Back to apps<\/button>/);
  ctx.selectHomeView('find');

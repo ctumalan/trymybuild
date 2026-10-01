@@ -332,7 +332,7 @@ function rankCatalogSearch(candidates,query) {
   const relevant=ranked.filter(result=>result.score>0);
   return {items:(relevant.length?relevant:ranked.slice(0,6)).map(result=>result.product),suggestions:!relevant.length};
 }
-// Only complete HTTP(S) web addresses start a listing; other text searches the catalog.
+// The launch hero accepts app links only; catalog search remains available internally.
 function homepageAppUrl(value) {
   const raw = String(value || '').trim();
   if (!raw || /\s/.test(raw)) return '';
@@ -342,30 +342,28 @@ function homepageAppUrl(value) {
 }
 function homepageEntryIntent(value) {
   const url = homepageAppUrl(value);
-  return { url, label: url ? 'Share your app →' : String(value || '').trim() ? 'Search apps →' : 'Continue' };
+  return { url, label: 'Share my app' };
 }
 function updateHomepageEntry(form) {
-  const value = form.querySelector('[data-catalog-search]').value;
+  const value = form.querySelector('[data-app-link-entry]').value;
   const intent = homepageEntryIntent(value);
-  state.entryMode = intent.url ? 'list' : 'search';
-  state.entryUrl = intent.url ? value : '';
-  state.query = intent.url ? '' : value;
+  state.entryUrl = value;
   form.querySelector('[data-entry-submit]').textContent = intent.label;
-  form.querySelector('[data-entry-reassurance]').hidden = !intent.url;
+  form.querySelector('[data-entry-reassurance]').hidden = false;
   form.querySelector('[data-entry-status]').textContent = '';
   return intent;
 }
 function discoveryHero(listing = false) {
-  const value = state.entryMode === 'search' ? state.query || '' : state.entryUrl || '';
+  const value = state.entryUrl || '';
   const intent = homepageEntryIntent(value);
-  const prompt = 'Search apps, or paste your app’s URL to share it';
-  return `<header class="discovery-hero discovery-hero-minimal${listing ? ' listing-entry-header' : ''}" aria-label="Share or find an app">
+  const prompt = 'Paste your app’s link to share it';
+  return `<header class="discovery-hero discovery-hero-minimal${listing ? ' listing-entry-header' : ''}" aria-label="Share your app">
     <div class="discovery-hero-copy">
       ${listing ? '' : '<h1 class="discovery-promise"><span>Where makers share early apps and get honest feedback.</span></h1>'}
       ${listing ? '<button type="button" class="text-button" data-entry-mode="search">← Back to apps</button>' : `<form class="discovery-entry" data-discovery-entry>
         <label class="visually-hidden" for="discovery-input">${prompt}</label>
-        <div class="discovery-entry-row"><div class="discovery-entry-field"><input id="discovery-input" data-catalog-search value="${esc(value)}" type="text" maxlength="2048" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="${prompt}" /><span class="entry-placeholder" aria-hidden="true"><span class="entry-placeholder-track">${prompt}</span></span></div><button type="submit" class="primary-button" data-entry-submit>${intent.label}</button></div>
-        <p class="discovery-entry-reassurance" id="entry-sharing-choice" data-entry-reassurance ${intent.url ? '' : 'hidden'}>Share privately or submit to the public catalog. You choose.</p>
+        <div class="discovery-entry-row"><div class="discovery-entry-field"><input id="discovery-input" data-app-link-entry value="${esc(value)}" type="text" maxlength="2048" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="${prompt}" /><span class="entry-placeholder" aria-hidden="true"><span class="entry-placeholder-track">${prompt}</span></span></div><button type="submit" class="primary-button" data-entry-submit>${intent.label}</button></div>
+        <p class="discovery-entry-reassurance" id="entry-sharing-choice" data-entry-reassurance>Preview first. Sign in to publish.</p>
         <p class="discovery-entry-status" data-entry-status role="status"></p>
       </form>${state.listingInProgress ? '<button type="button" class="text-button entry-resume" data-entry-mode="list">Continue your draft →</button>' : ''}`}
     </div>
@@ -1022,10 +1020,7 @@ document.addEventListener('submit', event => {
   event.preventDefault();
   const { url } = updateHomepageEntry(form);
   if (!url) {
-    render(true);
-    const panel = document.getElementById('home-panel');
-    panel?.scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block:'start'});
-    panel?.focus({preventScroll:true});
+    form.querySelector('[data-entry-status]').textContent = 'Enter your app’s web address, or browse the apps below.';
     return;
   }
   const different = listingDraft.url && listingUrl(listingDraft.url) !== url;
@@ -1214,7 +1209,7 @@ function renderMenuChange(selector) {
   window.scrollTo({left:scrollX, top:after && top !== undefined ? window.scrollY + delta : scrollY, behavior:'instant'});
 }
 function render(preserveScroll = false) {
-  const focusedSearch = document.activeElement?.matches('[data-catalog-search]') ? { start: document.activeElement.selectionStart, end: document.activeElement.selectionEnd } : null;
+  const focusedSearch = document.activeElement?.matches('[data-app-link-entry]') ? { start: document.activeElement.selectionStart, end: document.activeElement.selectionEnd } : null;
   closeProductDetail(false);
   const routes = { discover, community: communityPage, profile: profilePage, feedback: feedbackPage, share: sharePage, account: accountPage, about: aboutPage, contact: contactPage };
   const content = (routes[state.route] || discover)();
@@ -1241,7 +1236,7 @@ function render(preserveScroll = false) {
   }
   const guestControls=document.querySelector('[data-guest-discovery]');
   if(guestControls){guestControls.hidden=!!state.session?.authenticated;guestControls.querySelector('input').checked=state.personalization;}
-  if (focusedSearch) { const input = document.querySelector('[data-catalog-search]'); input?.focus({preventScroll:true}); input?.setSelectionRange(focusedSearch.start, focusedSearch.end); }
+  if (focusedSearch) { const input = document.querySelector('[data-app-link-entry]'); input?.focus({preventScroll:true}); input?.setSelectionRange(focusedSearch.start, focusedSearch.end); }
   else if (!preserveScroll) window.scrollTo({ top: 0, behavior: "smooth" });
   window.CWEntryIntro?.mount(app);
 }
@@ -1272,7 +1267,7 @@ document.addEventListener("click", async event => {
     state.entryMode = searching ? 'search' : 'list';
     state.route = searching ? 'discover' : 'share';
     homeView = searching ? 'find' : 'test';
-    renderMenuChange(searching ? '[data-catalog-search]' : '[data-entry-mode="search"]');
+    renderMenuChange(searching ? '[data-app-link-entry]' : '[data-entry-mode="search"]');
     return;
   }
   const browseApps = event.target.closest('[data-browse-apps]');
@@ -1413,11 +1408,8 @@ document.addEventListener("keydown", event => {
 });
 
 document.addEventListener("input", event => {
-  if (event.target.matches("[data-catalog-search]")) {
+  if (event.target.matches("[data-app-link-entry]")) {
     updateHomepageEntry(event.target.closest('[data-discovery-entry]'));
-    const template = document.createElement('template'); template.innerHTML = discover();
-    const results = document.querySelector('.catalog-results');
-    if (results) results.replaceWith(template.content.querySelector('.catalog-results'));
   }
   if (event.target.matches("[data-creator-field]")) state.creator[event.target.dataset.creatorField] = event.target.value;
 });

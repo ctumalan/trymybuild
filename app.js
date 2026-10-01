@@ -363,7 +363,7 @@ function discoveryHero(listing = false) {
       ${listing ? '<button type="button" class="text-button" data-entry-mode="search">← Back to apps</button>' : `<form class="discovery-entry" data-discovery-entry>
         <label class="visually-hidden" for="discovery-input">${prompt}</label>
         <div class="discovery-entry-row"><div class="discovery-entry-field"><input id="discovery-input" data-app-link-entry value="${esc(value)}" type="text" maxlength="2048" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="${prompt}" /><span class="entry-placeholder" aria-hidden="true"><span class="entry-placeholder-track">${prompt}</span></span></div><button type="submit" class="primary-button" data-entry-submit>${intent.label}</button></div>
-        <p class="discovery-entry-reassurance" id="entry-sharing-choice" data-entry-reassurance>Preview first. Sign in to publish.</p>
+        <p class="discovery-entry-reassurance" id="entry-sharing-choice" data-entry-reassurance>Preview before publishing.</p>
         <p class="discovery-entry-status" data-entry-status role="status"></p>
       </form>${state.listingInProgress ? '<button type="button" class="text-button entry-resume" data-entry-mode="list">Continue your draft →</button>' : ''}`}
     </div>

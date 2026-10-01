@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import sharp from 'sharp';
+import {readFileSync} from 'node:fs';
 import { invitationImageUrl, renderInvitationImage } from '../src/server/invitation-image.mjs';
 
 const project = {slug:'sample', name:'A useful project', category:'Utilities', preview:'/assets/sample.png', creator:{name:'A creator'}};
@@ -27,4 +28,9 @@ test('a project screenshot is included in the invitation graphic', async () => {
  const image = await renderInvitationImage(project, screenshot);
  const pixel = await sharp(image).extract({left:800,top:300,width:1,height:1}).removeAlpha().raw().toBuffer();
  assert.deepEqual([...pixel], [255,0,0]);
+});
+test('illustrated invitation preview uses a compact caption instead of repeating the description', () => {
+ const source=readFileSync(new URL('../share-invitation.js',import.meta.url),'utf8');
+ assert.match(source,/invitation-preview-graphic/);
+ assert.match(source,/<figcaption><strong>\$\{escape\(p\.name\)\}<\/strong><span>\$\{escape\(p\.category\)\} · Built by/);
 });

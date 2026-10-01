@@ -9,7 +9,7 @@ import { fetchPreviewAsset } from './preview-network.mjs';
 const xml = value => String(value || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[c])).replace(/[\x00-\x08\x0b\x0c\x0e-\x1f]/g, '');
 const shorten = (value, max) => Array.from(String(value || '')).length > max ? Array.from(String(value)).slice(0, max - 1).join('') + '…' : String(value || '');
 export function invitationImageUrl(project, base) {
- const version = createHash('sha256').update(JSON.stringify(['glyph-v2', project.name, project.presentation?.headline, project.summary, project.category, project.preview, project.creator.name])).digest('hex').slice(0, 12);
+ const version = createHash('sha256').update(JSON.stringify(['glyph-v3', project.name, project.presentation?.headline, project.summary, project.category, project.preview, project.creator.name])).digest('hex').slice(0, 12);
  return new URL(`/api/invitation-image/${encodeURIComponent(project.slug)}.png?v=${version}`, base).href;
 }
 
@@ -17,7 +17,7 @@ export function invitationImageUrl(project, base) {
 export async function renderInvitationImage(project, screenshot) {
  let artwork;
  if (screenshot) {
-  try { artwork = await sharp(screenshot, {limitInputPixels: 25_000_000}).rotate().resize(576, 438, {fit:'contain', background:'#eee8f4'}).png().toBuffer(); } catch {}
+  try { artwork = await sharp(screenshot, {limitInputPixels: 25_000_000}).rotate().resize(632, 482, {fit:'contain', background:'#eee8f4'}).png().toBuffer(); } catch {}
  }
  const regular = invitationFont;
  const bold = invitationFont.getVariation({wght:700});
@@ -34,20 +34,21 @@ export async function renderInvitationImage(project, screenshot) {
   let cursor=x;const scale=size/font.unitsPerEm,run=font.layout(String(value));
   return run.glyphs.map((glyph,i)=>{const p=run.positions[i],path=`<path d="${glyph.path.toSVG()}" transform="translate(${cursor+p.xOffset*scale} ${y-p.yOffset*scale}) scale(${scale} ${-scale})" fill="${color}"/>`;cursor+=p.xAdvance*scale;return path;}).join('');
  };
- const names=wrap(project.name||'Your next discovery',bold,46,475,3);
- const description=wrap(project.presentation?.headline||project.summary||project.category,regular,24,475,3);
+ const names=wrap(project.name||'Your next discovery',bold,46,410,2);
+ const description=wrap(project.presentation?.headline||project.summary||project.category,regular,23,410,3);
+ const nameY=202,descriptionY=nameY+(names.length-1)*55+62,buttonY=descriptionY+(description.length-1)*30+42;
  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
- <rect width="1200" height="630" fill="#f7f3fc"/><circle cx="1130" cy="20" r="320" fill="#e6dcf7"/>
- <rect x="48" y="45" width="40" height="40" rx="12" fill="#6035aa"/><path d="m59 65 7 7 13-16" fill="none" stroke="white" stroke-width="4" stroke-linecap="round"/>
- ${text('TryMyBuild',102,75,28,'#362449',bold)}
- ${text('YOU’RE INVITED TO TRY',48,142,18,'#6035aa')}
- ${names.map((line,i)=>text(line,48,205+i*57,46,'#292032',bold)).join('')}
- ${description.map((line,i)=>text(line,48,369+i*31,24,'#675975')).join('')}
- <rect x="48" y="477" width="264" height="58" rx="29" fill="#6035aa"/>${text('Take a look →',77,514,22,'#ffffff',bold)}
- <rect x="576" y="106" width="576" height="438" rx="22" fill="#eee8f4"/>
- ${!artwork ? `<circle cx="864" cy="298" r="100" fill="#8056bd"/><path d="m812 300 35 35 72-82" fill="none" stroke="#ffb07e" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>${text('Discover something new',715,464,25,'#6035aa')}` : ''}
- ${text(shorten('Built by '+project.creator.name,56),48,592,20,'#675975')}${text('trymybuild.com',990,592,20,'#6035aa')}</svg>`;
- return sharp(Buffer.from(svg)).composite(artwork ? [{input:artwork,left:576,top:106}] : []).png().toBuffer();
+ <rect width="1200" height="630" fill="#f7f3fc"/><circle cx="1150" cy="-30" r="270" fill="#e6dcf7"/>
+ <rect x="48" y="42" width="40" height="40" rx="12" fill="#6035aa"/><path d="m59 62 7 7 13-16" fill="none" stroke="white" stroke-width="4" stroke-linecap="round"/>
+ ${text('TryMyBuild',102,72,28,'#362449',bold)}
+ ${text('YOU’RE INVITED TO TRY',48,132,17,'#6035aa')}
+ ${names.map((line,i)=>text(line,48,nameY+i*55,46,'#292032',bold)).join('')}
+ ${description.map((line,i)=>text(line,48,descriptionY+i*30,23,'#675975')).join('')}
+ <rect x="48" y="${buttonY}" width="238" height="56" rx="28" fill="#6035aa"/>${text('Explore app →',76,buttonY+36,21,'#ffffff',bold)}
+ <rect x="520" y="74" width="632" height="482" rx="22" fill="#eee8f4"/>
+ ${!artwork ? `<circle cx="836" cy="288" r="96" fill="#8056bd"/><path d="m786 290 34 34 69-79" fill="none" stroke="#ffb07e" stroke-width="19" stroke-linecap="round" stroke-linejoin="round"/>${text('Discover something new',690,452,25,'#6035aa')}` : ''}
+ ${text(shorten('Built by '+project.creator.name,52),48,584,19,'#675975')}${text('trymybuild.com',1002,584,19,'#6035aa')}</svg>`;
+ return sharp(Buffer.from(svg)).composite(artwork ? [{input:artwork,left:520,top:74}] : []).png().toBuffer();
 }
 
 export async function loadInvitationScreenshot(project, base) {

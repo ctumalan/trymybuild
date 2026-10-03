@@ -6,7 +6,7 @@ const ctx=path=>({url:new URL(path,'https://example.invalid'),params:{},cookies:
 test('feedback request form is owner-only, published-only, and asks a bounded public question',async()=>{
  const f=workspaceFixtures(),route=moduleFixture('src/pages/dashboard/request-feedback.ts',['GET'],f.scope).GET;
  const html=await (await route(ctx('/dashboard/request-feedback?project=sample-0'))).text();
- assert.match(html,/name="question" minlength="10" maxlength="300" required/);assert.match(html,/name="responseCommitment" required/);assert.match(html,/reply to each tester within two days/);assert.match(html,/Don’t include private information/);
+ assert.match(html,/name="question" minlength="10" maxlength="300" required/);assert.match(html,/name="responseCommitment" required/);assert.match(html,/reply to each tester/);assert.doesNotMatch(html,/within two days/);assert.match(html,/Don’t include private information/);
  for(const slug of ['sample-1','sample-guest','unknown'])assert.equal((await route(ctx('/dashboard/request-feedback?project='+slug))).status,404);
  f.tables.projects[0].title='<script>bad</script>';
  assert.match(await (await route(ctx('/dashboard/request-feedback?project=sample-0'))).text(),/&lt;script&gt;bad&lt;\/script&gt;/);

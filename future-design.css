@@ -837,3 +837,502 @@ body.public-site #app h1[tabindex="-1"]:focus { outline:none; }
 .cw-member-actions label:not(.cw-choice) { display:grid; gap:5px; margin-block:12px; }
 .cw-member-actions input:not([type=checkbox]),.cw-member-actions select { width:100%; min-width:0; box-sizing:border-box; }
 @media(max-width:600px) { .cw-member-row { grid-template-columns:minmax(0,1fr) 40px; gap:2px 10px; } .cw-member-name { grid-column:1; } .cw-member-status { grid-column:1; } .cw-member-menu { grid-column:2; grid-row:1 / span 2; } }
+
+/* Early-app feedback positioning and the invitation handoff. */
+.future-discover .discovery-hero .discovery-promise { font-size:clamp(1.6rem,3.2vw,2.6rem); line-height:1.15; margin-bottom:14px; }
+.discovery-instrument-copy { max-width:720px; margin:0 0 22px; color:#60546c; line-height:1.65; }
+.discovery-explore { display:inline-block; margin:8px 0 16px; }
+.feedback-example { max-width:720px; border-top:1px solid #ded5e5; padding:14px 0; text-align:left; color:#60546c; }
+.feedback-example summary { cursor:pointer; font-weight:600; color:#382b46; }
+.feedback-example dt { font-weight:700; margin-top:12px; }
+.feedback-example dd { margin:4px 0 12px; line-height:1.55; }
+.tester-handoff .form-actions { flex-wrap:wrap; }
+.tester-guide li { padding:8px 0; }
+@media(max-width:620px) { .discovery-entry-row .primary-button { min-width:0; white-space:normal; } }
+
+/* Programmatic page focus must not frame the whole homepage. */
+body.public-site #app[tabindex="-1"]:focus { outline:none; }
+
+/* Illustrative project and conversation preview. */
+.sample-conversation { margin-top:18px; border:1px solid #e8e1ed; border-radius:24px; background:#fff; overflow:hidden; box-shadow:0 12px 36px #382b4609; }
+.sample-project-header { display:flex; gap:14px; align-items:center; padding:24px; background:linear-gradient(120deg,#fff3e5,#f5effb 72%,#edf4ef); position:relative; flex-wrap:wrap; }
+.sample-project-icon { width:58px; height:58px; flex:none; border-radius:16px; background:#8b61b8; box-shadow:0 6px 16px #7545ad24; transform:rotate(-5deg); }
+.sample-project-icon svg { width:100%; height:100%; }
+.sample-project-kicker { margin:0 0 6px; color:#7545ad; font-size:.65rem; font-weight:800; letter-spacing:.18em; }
+.sample-project-header h3 { margin:0; color:#382b46; font-size:1.28rem; letter-spacing:-.035em; }
+.sample-project-header h3+p { margin:5px 0 0; color:#756681; font-size:.78rem; }
+.sample-example-badge { margin-left:auto; align-self:flex-start; padding:6px 10px; border:1px solid #ffffff; border-radius:20px; background:#ffffffa6; font-size:.64rem; color:#756681; }
+.sample-conversation-body { padding:22px 24px 20px; }
+.sample-task { display:flex; gap:12px; align-items:center; padding:12px 14px; background:#f7f6f3; border-radius:12px; margin-bottom:24px; }
+.sample-task-icon { display:grid; place-items:center; width:30px; height:30px; flex:none; border-radius:9px; background:#eae4f2; color:#7545ad; font-size:.7rem; font-weight:800; }
+.sample-label { display:block; font-size:.76rem; font-weight:700; color:#382b46; }
+.sample-label span { color:#8b7d94; font-weight:400; }
+.sample-task p,.sample-bubble p { margin:7px 0 0; line-height:1.6; color:#382b46; }
+.sample-task p { font-size:.88rem; }
+.sample-message { display:flex; gap:12px; align-items:flex-start; margin:18px 0; max-width:94%; }
+.sample-avatar { display:block; width:44px; height:44px; flex:none; border-radius:50%; object-fit:cover; border:3px solid #fff; box-shadow:0 2px 10px #382b461a; }
+.sample-bubble { min-width:0; padding:16px 18px; border-radius:4px 18px 18px; background:#f0f5f1; border:1px solid #e3ece5; }
+.sample-message-signal { display:block; margin-top:12px; font-size:.7rem; color:#55735f; }
+.sample-message-creator { margin-left:auto; flex-direction:row-reverse; }
+.sample-message-creator .sample-bubble { background:#f4eefb; border-color:#e8def2; border-radius:18px 4px 18px 18px; }
+.sample-conversation-note { display:flex; gap:10px; align-items:center; margin:24px 0 0; padding-top:16px; border-top:1px solid #eee9f1; color:#60546c; }
+.sample-note-icon { display:grid; place-items:center; width:30px; height:30px; border-radius:50%; background:#fff0dc; color:#9b7138; font-size:1.1rem; flex:none; }
+.sample-conversation-note strong { font-size:.8rem; font-weight:600; }
+.sample-conversation-note small { display:block; margin-top:4px; color:#817489; font-size:.66rem; }
+@media(max-width:620px) { .sample-project-header { padding:20px 16px; gap:12px; } .sample-project-icon { width:46px; height:46px; } .sample-project-header h3 { font-size:1.13rem; } .sample-example-badge { margin-left:58px; align-self:auto; } .sample-conversation-body { padding:16px 12px; } .sample-message { max-width:100%; gap:8px; } .sample-bubble { padding:14px 12px; } .sample-avatar { width:36px; height:36px; } }
+
+/* Task context belongs to the card header; the body holds the exchange. */
+.sample-project-header .sample-task { flex:1 0 100%; box-sizing:border-box; margin:0; padding:0 0 0 60px; background:none; border-radius:0; }
+.sample-project-header .sample-task p { margin-top:3px; }
+@media(max-width:620px) { .sample-project-header .sample-task { padding-left:58px; } }
+.sample-conversation-body .sample-message:first-child { margin-top:0; }
+
+/* Named founder presence in the homepage hero. */
+.founder-signal { display:flex; align-items:center; gap:10px; margin-bottom:16px; color:#65576e; font-size:.78rem; }
+.founder-signal img { width:40px; height:40px; border-radius:50%; object-fit:cover; object-position:50% 35%; flex:none; }
+.founder-signal .text-button { font-size:inherit; padding:0; }
+.hero-founder-note { margin-top:20px; max-width:650px; padding-left:14px; border-left:2px solid #ded0ed; color:#65576e; font-size:.88rem; line-height:1.6; }
+.hero-founder-note strong { color:#382b46; }
+.hero-founder-note p { margin:4px 0 0; }
+.hero-founder-note .text-button { padding:0; font-size:inherit; }
+
+.founder-signal { margin-bottom:8px; }
+.hero-founder-note { margin:0 0 24px 50px; padding-left:0; border-left:0; }
+@media(max-width:620px) { .hero-founder-note { margin-left:50px; } }
+
+/* Founder card supports the hero without preceding its heading. */
+.discovery-hero.discovery-hero-minimal { display:grid; grid-template-columns:minmax(0,1fr) 260px; align-items:start; gap:32px; }
+.discovery-hero-minimal.listing-entry-header { grid-template-columns:1fr; }
+.hero-founder-card { padding:20px; border:1px solid #e6deed; border-radius:18px; background:#fff9; margin-top:8px; }
+.hero-founder-card .founder-signal { align-items:flex-start; margin-bottom:12px; }
+.hero-founder-card .founder-signal>span { line-height:1.6; }
+.hero-founder-card .founder-signal .text-button { display:block; }
+.hero-founder-card .hero-founder-note { margin:0; max-width:none; font-size:.8rem; }
+@media(max-width:1000px) { .discovery-hero.discovery-hero-minimal { grid-template-columns:minmax(0,1fr); gap:18px; } .hero-founder-card { max-width:600px; margin-top:0; padding:16px; } }
+
+.discovery-hero-minimal .discovery-hero-copy { width:100%; min-width:0; margin-inline:0; }
+.hero-founder-card { box-sizing:border-box; }
+
+.discovery-hero.discovery-hero-minimal { max-width:1100px; margin-inline:auto; }
+
+/* Founder introduction opens on demand, like the feedback example. */
+.hero-founder-card summary.founder-signal { cursor:pointer; list-style:none; margin-bottom:0; align-items:center; }
+.hero-founder-card summary::-webkit-details-marker { display:none; }
+.founder-summary-name,.founder-summary-action { display:block; }
+.founder-summary-action { color:#7545ad; font-weight:700; }
+.founder-summary-action::before { content:"▸ "; }
+.hero-founder-card[open] .founder-summary-action::before { content:"▾ "; }
+.hero-founder-card[open] .hero-founder-note { margin-top:14px; }
+.hero-founder-card summary:focus-visible { outline:2px solid #7545ad; outline-offset:5px; border-radius:6px; }
+
+/* Action-first hero: centered typography and one clear preview control. */
+.discovery-hero.discovery-hero-action { display:block; max-width:1100px; padding:56px 0 32px; position:relative; background:radial-gradient(ellipse at 50% 34%,#eee2fa99 0%,#f3ebfb44 35%,transparent 68%); }
+.discovery-hero-action .discovery-hero-copy { max-width:900px; margin-inline:auto; text-align:center; }
+.future-discover .discovery-hero.discovery-hero-action .discovery-promise { margin:0; font-size:clamp(2.2rem,4.6vw,4.5rem); line-height:1.14; letter-spacing:-.055em; font-weight:800; }
+.discovery-hero-action .discovery-promise>span { display:block; }
+.discovery-hero-action .discovery-promise em { display:inline-block; color:#7545ad; font-style:normal; position:relative; white-space:nowrap; }
+.feedback-hand-underline { position:absolute; left:0; bottom:-.09em; width:100%; height:.2em; overflow:visible; pointer-events:none; fill:#ffbca8; }
+.discovery-hero-action .discovery-instrument-copy { max-width:720px; margin:26px auto 0; font-size:clamp(1rem,1.6vw,1.2rem); line-height:1.65; }
+.discovery-hero-action .discovery-entry { max-width:780px; margin:32px auto 0; }
+.discovery-hero-action .discovery-entry-row { display:flex; align-items:center; gap:8px; padding:7px; background:#fff; border:1px solid #e9e0f0; border-radius:20px; box-shadow:0 12px 36px #7545ad12; }
+.discovery-hero-action .discovery-entry-field { flex:1; min-width:0; }
+.discovery-hero-action .discovery-entry-field input { border:0; background:transparent; box-shadow:none; border-radius:12px; height:58px; padding-left:20px; }
+.discovery-hero-action .discovery-entry-row .primary-button { min-width:150px; height:58px; border-radius:14px; font-size:1.05rem; }
+.discovery-hero-action .discovery-explore { display:inline-block; margin-top:20px; }
+.hero-steps { display:flex; justify-content:center; align-items:center; gap:28px; color:#7c6d89; font-size:.86rem; margin:32px auto; }
+.hero-steps span+span::before { content:""; display:inline-block; width:34px; height:1px; background:#d4c5df; vertical-align:middle; margin-right:28px; }
+.discovery-hero-action .feedback-example { max-width:720px; margin:24px auto 0; text-align:left; }
+.discovery-hero-action .hero-founder-card { max-width:720px; margin:14px auto 0; padding:14px 18px; background:#ffffff80; }
+.discovery-hero-action.listing-entry-header { padding:20px 0; background:#fbfaf6; }
+@media(max-width:620px) {
+ .discovery-hero.discovery-hero-action { padding-top:32px; }
+ .future-discover .discovery-hero.discovery-hero-action .discovery-promise { font-size:clamp(1.85rem,7.5vw,2.8rem); }
+ .discovery-hero-action .discovery-instrument-copy { margin-top:22px; font-size:.95rem; }
+ .discovery-hero-action .discovery-entry-row { gap:4px; padding:5px; border-radius:16px; }
+ .discovery-hero-action .discovery-entry-row .primary-button { min-width:88px; padding:0 12px; font-size:.9rem; height:52px; }
+ .discovery-hero-action .discovery-entry-field input { height:52px; padding-left:10px; font-size:.75rem; }
+ .hero-steps { gap:10px; font-size:.68rem; line-height:1.5; }
+ .hero-steps span { flex:1; }
+ .hero-steps span+span::before { display:none; }
+}
+
+.hero-founder-card .hero-founder-note { margin-top:12px; }
+
+/* Keep the two exploration choices beside one another. */
+.hero-discovery-links { display:grid; grid-template-columns:auto auto; justify-content:center; align-items:center; gap:18px 28px; margin:24px auto 0; max-width:720px; text-align:left; }
+.discovery-hero-action .hero-discovery-links .feedback-example { display:contents; }
+.hero-discovery-links .feedback-example summary { grid-column:1; grid-row:1; cursor:pointer; font-size:.85rem; }
+.discovery-hero-action .hero-discovery-links .discovery-explore { grid-column:2; grid-row:1; margin:0; font-size:.85rem; }
+.hero-discovery-links .sample-conversation { grid-column:1 / -1; grid-row:2; }
+@media(max-width:620px) { .hero-discovery-links { gap:12px; grid-template-columns:minmax(0,1fr) minmax(0,1fr); } .hero-discovery-links .feedback-example summary,.discovery-hero-action .hero-discovery-links .discovery-explore { font-size:.75rem; line-height:1.5; } }
+
+/* Compact founder identity and story into one aligned block. */
+.discovery-hero-action .hero-founder-card { display:grid; grid-template-columns:40px minmax(0,1fr); column-gap:10px; row-gap:3px; padding:12px 16px; }
+.hero-founder-card .founder-signal { display:contents; }
+.hero-founder-card .founder-signal img { grid-column:1; grid-row:1 / 3; }
+.hero-founder-card .founder-signal>span { grid-column:2; grid-row:1; font-size:.76rem; line-height:1.4; }
+.hero-founder-card .hero-founder-note { grid-column:2; grid-row:2; margin:0; }
+.hero-founder-card .hero-founder-note p { margin:0; line-height:1.5; }
+
+/* Clear page-creation outcome, with preview reassurance beneath. */
+.hero-preview-reassurance { margin:9px 0 0; color:#7c6d89; font-size:.76rem; }
+.discovery-hero-action .discovery-entry-row .primary-button { min-width:220px; padding-inline:20px; font-size:.9rem; }
+@media(max-width:620px) {
+ .discovery-hero-action .discovery-entry-row { flex-direction:column; align-items:stretch; }
+ .discovery-hero-action .discovery-entry-field { width:100%; }
+ .discovery-hero-action .discovery-entry-row .primary-button { min-width:0; width:100%; height:48px; }
+}
+
+/* A quiet contributor invitation above the catalog. */
+.early-contributor-invitation { margin:12px 0 24px; color:#65576e; font-size:.88rem; line-height:1.6; }
+.early-contributor-invitation>strong { color:#382b46; font-weight:700; }
+.early-contributor-invitation>p { display:inline; margin:0 8px; }
+.early-contributor-details { display:inline; }
+.early-contributor-details>summary { display:inline; list-style:none; color:#7545ad; font-weight:700; cursor:pointer; }
+.early-contributor-details>summary::-webkit-details-marker { display:none; }
+.early-contributor-details>summary:focus-visible { outline:2px solid #7545ad; outline-offset:4px; }
+.early-contributor-details>div { max-width:650px; padding-top:8px; }
+.early-contributor-details p { margin:8px 0; }
+.early-contributor-details .text-button { padding:0; font-size:inherit; }
+@media(max-width:620px) { .early-contributor-invitation>p { display:block; margin:3px 0; } }
+
+.early-contributor-invitation>.catalog-launch-note { display:block; margin:0 0 8px; }
+
+.hero-loop-visual { margin:24px auto; max-width:440px; }
+.hero-loop-visual img { display:block; width:100%; height:auto; }
+
+.discovery-hero-action .hero-founder-card { max-width:440px; width:100%; margin-inline:auto; }
+
+/* A personal invitation, spoken from the founder rather than a separate banner. */
+.founder-conversation { display:grid; grid-template-columns:44px minmax(0,1fr); gap:12px; max-width:440px; margin:24px auto 0; text-align:left; }
+.founder-conversation-avatar { width:44px; height:44px; border-radius:50%; object-fit:cover; object-position:50% 35%; margin-top:24px; }
+.founder-conversation-name { display:block; color:#766681; font-size:.7rem; margin:0 0 7px 4px; }
+.founder-speech { position:relative; padding:12px 14px; background:#fffafeee; border:1px solid #e6dcef; border-radius:14px; margin-bottom:10px; color:#65576e; font-size:.8rem; line-height:1.55; }
+.founder-speech::before { content:""; position:absolute; left:-6px; top:17px; width:10px; height:10px; background:#fffafe; border-left:1px solid #e6dcef; border-bottom:1px solid #e6dcef; transform:rotate(45deg); }
+.founder-speech p { margin:0 0 5px; }
+.founder-speech strong { color:#382b46; }
+.founder-speech .text-button { padding:0; font-size:inherit; }
+.founder-speech .early-contributor-details>div { padding-top:8px; }
+.founder-speech .early-contributor-details>div p { margin:0 0 10px; }
+
+/* Keep both founder navigation choices visibly distinct. */
+.founder-speech>button.text-button,.founder-speech>.early-contributor-details>summary { display:inline-block; margin-top:5px; color:#7545ad; font-weight:750; font-size:.8rem; text-decoration:underline; text-decoration-color:#d6c2e8; text-underline-offset:4px; }
+
+/* Discovery invitations are spoken from the founder bubble. */
+.founder-speech .hero-discovery-links { margin-top:12px; gap:10px; grid-template-columns:1fr; }
+.founder-speech .hero-discovery-links .feedback-example summary { grid-column:1; grid-row:1; font-size:.75rem; }
+.discovery-hero-action .founder-speech .hero-discovery-links .discovery-explore { grid-column:1; grid-row:3; font-size:.75rem; }
+.founder-speech .hero-discovery-links .sample-conversation { grid-row:2; min-width:0; }
+.founder-speech .sample-project-header { padding:14px 10px; gap:8px; }
+.founder-speech .sample-project-header h3 { font-size:1rem; }
+.founder-speech .sample-example-badge { margin-left:0; }
+.founder-speech .sample-project-header .sample-task { padding-left:0; }
+.founder-speech .sample-conversation-body { padding:14px 8px; }
+.founder-speech .sample-message { max-width:100%; gap:6px; }
+.founder-speech .sample-avatar { width:28px; height:28px; }
+.founder-speech .sample-bubble { padding:10px; }
+.founder-speech .sample-bubble p { font-size:.8rem; }
+
+/* Consistent navigation styling within the founder bubble. */
+.founder-speech>button.text-button,
+.founder-speech .hero-discovery-links .feedback-example summary,
+.discovery-hero-action .founder-speech .hero-discovery-links .discovery-explore {
+  color:#7545ad;
+  font-size:.8rem;
+  font-weight:750;
+  line-height:1.5;
+  text-decoration:underline;
+  text-decoration-color:#d6c2e8;
+  text-underline-offset:4px;
+}
+.founder-speech .feedback-example summary:focus { outline:none; }
+.founder-speech .feedback-example summary:focus-visible { outline:2px solid #7545ad; outline-offset:4px; border-radius:4px; }
+
+.founder-speech .feedback-example summary { list-style:none; }
+.founder-speech .feedback-example summary::-webkit-details-marker { display:none; }
+.founder-speech .feedback-example summary::marker { content:""; }
+
+.founder-about-link { border:0; padding:0; background:none; color:#7545ad; font:inherit; text-decoration:underline; text-underline-offset:3px; cursor:pointer; }
+.founder-about-dialog { width:min(720px,calc(100vw - 40px)); max-height:85vh; overflow:auto; box-sizing:border-box; padding:28px; border:1px solid #e6dcef; border-radius:22px; background:#fffdfa; color:#382b46; box-shadow:0 24px 80px #382b4626; }
+.founder-about-dialog::backdrop { background:#30233d66; backdrop-filter:blur(4px); }
+.founder-dialog-close { display:block; margin-left:auto; width:34px; height:34px; border:0; border-radius:50%; background:#f0e8f8; color:#7545ad; font-size:24px; cursor:pointer; }
+.founder-about-dialog .founder-info { padding:0; border:0; margin:0; background:none; }
+.founder-about-dialog h1 { font-size:1.7rem; }
+@media(max-width:620px) { .founder-about-dialog { padding:18px; } .founder-about-dialog .founder-story { display:block; } .founder-about-dialog .founder-photo { max-width:180px; margin-bottom:14px; } }
+
+/* The illustrative exchange has its own visible space outside the founder note. */
+.discovery-hero-action>.sample-conversation { max-width:600px; margin:28px auto 0; text-align:left; }
+.founder-speech>.discovery-explore { display:inline-block; margin-top:10px; }
+
+/* Compact example: preserve the exchange, reduce its vertical footprint. */
+.discovery-hero-action>.sample-conversation .sample-project-header { padding:12px 16px; gap:8px 12px; }
+.discovery-hero-action>.sample-conversation .sample-project-icon { width:36px; height:36px; }
+.discovery-hero-action>.sample-conversation .sample-project-header h3 { font-size:1rem; }
+.discovery-hero-action>.sample-conversation .sample-task { padding-left:48px; margin:0; }
+.discovery-hero-action>.sample-conversation .sample-task .sample-label { display:inline; }
+.discovery-hero-action>.sample-conversation .sample-task p { display:inline; margin:0 0 0 6px; font-size:.78rem; }
+.discovery-hero-action>.sample-conversation .sample-conversation-body { padding:12px 16px; }
+.discovery-hero-action>.sample-conversation .sample-message { margin:0 0 10px; gap:8px; max-width:94%; }
+.discovery-hero-action>.sample-conversation .sample-message:last-child { margin-bottom:0; }
+.discovery-hero-action>.sample-conversation .sample-avatar { width:30px; height:30px; }
+.discovery-hero-action>.sample-conversation .sample-bubble { padding:9px 12px; }
+.discovery-hero-action>.sample-conversation .sample-bubble p { margin-top:3px; font-size:.82rem; line-height:1.45; }
+.discovery-hero-action>.sample-conversation .sample-label { font-size:.65rem; }
+@media(max-width:620px) { .discovery-hero-action>.sample-conversation .sample-example-badge { margin-left:0; } .discovery-hero-action>.sample-conversation .sample-task { padding-left:0; } }
+
+/* A small founder greeting arriving from the right. */
+.founder-popout-close { position:absolute; right:2px; top:-7px; width:24px; height:24px; border:0; border-radius:50%; background:#eee5f5; color:#7545ad; cursor:pointer; font-size:18px; }
+.founder-popout { position:relative; }
+.founder-popout[hidden] { display:none; }
+@media(min-width:1100px) {
+ .founder-popout { position:fixed; z-index:20; right:24px; bottom:24px; width:340px; margin:0; animation:founder-slide-in .5s ease-out both; }
+ .founder-popout .founder-speech { box-shadow:0 8px 28px #382b4614; background:#fffafe; }
+}
+@keyframes founder-slide-in { from { opacity:0; visibility:hidden; transform:translateX(45px); } to { opacity:1; visibility:visible; transform:translateX(0); } }
+@media(prefers-reduced-motion:reduce) { .founder-popout { animation:none; } }
+
+/* Keep the founder greeting as a right-side popout at every window size. */
+.founder-conversation.founder-popout {
+  position:fixed;
+  z-index:40;
+  right:20px;
+  bottom:24px;
+  width:min(340px,calc(100vw - 40px));
+  max-width:340px;
+  margin:0;
+  animation:founder-slide-in .5s ease-out both;
+}
+.founder-popout .founder-speech { background:#fffafe; box-shadow:0 8px 28px #382b4614; }
+@media(prefers-reduced-motion:reduce) { .founder-conversation.founder-popout { animation:none; } }
+
+.founder-conversation.founder-popout { top:110px; bottom:auto; }
+@media(max-width:620px) { .founder-conversation.founder-popout { top:90px; } }
+
+.founder-conversation.founder-popout { top:30vh; bottom:auto; animation:founder-slide-in .5s ease-out 6s both; }
+@media(prefers-reduced-motion:reduce) { .founder-conversation.founder-popout { animation:founder-reveal 1ms step-end 6s both; } }
+@keyframes founder-reveal { from { opacity:0; visibility:hidden; } to { opacity:1; visibility:visible; } }
+
+/* A short, staged text-message demonstration. */
+.conversation-staged .sample-project-icon,
+.conversation-staged .sample-project-header h3,
+.conversation-staged .sample-example-badge { opacity:0; transform:translateX(22px); }
+.conversation-staged .sample-task { opacity:0; transform:translateY(6px); }
+.conversation-staged .sample-message { opacity:0; transform:translateY(8px); }
+.conversation-playing .sample-project-icon,
+.conversation-playing .sample-project-header h3,
+.conversation-playing .sample-example-badge { opacity:1; transform:none; transition:opacity .45s ease,transform .45s ease; }
+.conversation-staged.task-visible .sample-task { opacity:1; transform:none; transition:opacity .35s ease,transform .35s ease; }
+.conversation-staged .sample-message.message-visible { opacity:1; transform:none; transition:opacity .25s ease,transform .25s ease; }
+.message-typing::after { content:"▎"; color:#7545ad; animation:message-cursor .65s steps(1) infinite; }
+@keyframes message-cursor { 50% { opacity:0; } }
+@media(prefers-reduced-motion:reduce) {
+ .conversation-staged .sample-project-icon,.conversation-staged .sample-project-header h3,.conversation-staged .sample-example-badge,.conversation-staged .sample-task,.conversation-staged .sample-message { opacity:1; transform:none; transition:none; }
+ .message-typing::after { display:none; }
+}
+
+.founder-speech .founder-conversation-name { margin:7px 0 4px; }
+.founder-conversation-avatar { margin-top:12px; }
+
+/* Founder introduction spans the content width beneath the header divider. */
+.founder-conversation.founder-banner { position:relative; display:grid; grid-template-columns:40px minmax(0,1fr); width:100%; max-width:none; margin:14px 0 0; gap:12px; animation:none; }
+.founder-banner .founder-conversation-avatar { width:40px; height:40px; margin-top:10px; }
+.founder-banner .founder-speech { display:flex; flex-wrap:wrap; align-items:center; gap:8px 18px; padding:12px 16px; margin:0; }
+.founder-banner .founder-speech>p { flex:1 1 480px; margin:0; }
+.founder-banner .founder-conversation-name { margin:0; white-space:nowrap; }
+.founder-banner .founder-speech>.discovery-explore { margin:0; font-size:.8rem; }
+.founder-banner .founder-speech::before { top:20px; }
+@media(max-width:620px) { .founder-banner .founder-speech { gap:6px 14px; padding:10px 12px; } .founder-banner .founder-speech>p { flex-basis:100%; } }
+
+/* One spacing and width system for the hero composition. */
+.discovery-hero.discovery-hero-action { padding-top:36px; padding-bottom:28px; }
+.discovery-hero-action .discovery-promise { margin-bottom:0; }
+.discovery-hero-action .hero-loop-visual { max-width:360px; margin:20px auto 0; }
+.discovery-hero-action .discovery-instrument-copy { margin:20px auto 0; }
+.discovery-hero-action .discovery-entry { max-width:640px; margin:24px auto 0; }
+.discovery-hero-action>.sample-conversation { max-width:640px; width:100%; box-sizing:border-box; margin:24px auto 0; }
+.discovery-hero-action>.sample-conversation .sample-project-header { display:grid; grid-template-columns:36px minmax(0,1fr) auto; align-items:center; gap:8px 10px; padding:12px; }
+.discovery-hero-action>.sample-conversation .sample-project-header .sample-project-icon { grid-column:1; grid-row:1 / 3; }
+.discovery-hero-action>.sample-conversation .sample-project-header>div:not(.sample-project-icon):not(.sample-task) { grid-column:2; grid-row:1; }
+.discovery-hero-action>.sample-conversation .sample-example-badge { grid-column:3; grid-row:1; margin:0; align-self:center; }
+.discovery-hero-action>.sample-conversation .sample-project-header .sample-task { grid-column:2 / -1; grid-row:2; padding:0; margin:0; }
+.discovery-hero-action>.sample-conversation .sample-task .sample-label { font-size:.72rem; }
+.discovery-hero-action>.sample-conversation .sample-task p { font-size:.82rem; }
+.discovery-hero-action>.sample-conversation .sample-conversation-body { padding:12px; }
+.discovery-hero-action>.sample-conversation .sample-bubble { padding:12px; }
+.discovery-hero-action>.sample-conversation .sample-bubble p { font-size:.92rem; line-height:1.5; }
+.discovery-hero-action>.sample-conversation .sample-bubble .sample-label { font-size:.72rem; }
+@media(max-width:620px) {
+ .discovery-hero-action>.sample-conversation .sample-project-header { grid-template-columns:30px minmax(0,1fr); }
+ .discovery-hero-action>.sample-conversation .sample-project-header .sample-project-icon { width:30px; height:30px; grid-row:1; }
+ .discovery-hero-action>.sample-conversation .sample-example-badge { grid-column:2; grid-row:2; justify-self:start; }
+ .discovery-hero-action>.sample-conversation .sample-project-header .sample-task { grid-column:1 / -1; grid-row:3; }
+ .discovery-hero-action>.sample-conversation .sample-bubble p { font-size:.86rem; }
+}
+
+.founder-banner .founder-speech>p .founder-conversation-name { display:inline; margin-left:6px; white-space:nowrap; }
+
+.founder-conversation.founder-banner { animation:founder-banner-reveal .55s ease-out both; }
+.founder-conversation.founder-banner[hidden] { display:none; }
+.founder-banner-close { flex:none; width:24px; height:24px; padding:0; border:0; border-radius:50%; background:#efe7f6; color:#7545ad; font-size:18px; line-height:1; cursor:pointer; }
+.founder-banner-close:focus-visible { outline:2px solid #7545ad; outline-offset:3px; }
+@keyframes founder-banner-reveal { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
+@media(prefers-reduced-motion:reduce) { .founder-conversation.founder-banner { animation:none; } }
+
+.discovery-hero-action .discovery-entry-row .primary-button { display:flex; flex-direction:column; justify-content:center; gap:3px; line-height:1.2; }
+.discovery-hero-action [data-entry-submit] small { font-size:.66rem; font-weight:400; opacity:.85; }
+
+.sample-conversation.conversation-staged { opacity:0; visibility:hidden; transform:translateY(8px); }
+.sample-conversation.conversation-staged.conversation-frame-visible { opacity:1; visibility:visible; transform:none; transition:opacity .3s ease,transform .3s ease; }
+@media(prefers-reduced-motion:reduce) { .sample-conversation.conversation-staged { opacity:1; visibility:visible; transform:none; transition:none; } }
+
+.welcome-animation-dialog { width:min(560px,calc(100vw - 40px)); box-sizing:border-box; padding:30px 24px 22px; border:1px solid #e6dcef; border-radius:24px; background:#fffdfa; text-align:center; box-shadow:0 24px 80px #382b4626; }
+.welcome-animation-dialog::backdrop { background:#f7f3fa99; backdrop-filter:blur(9px); }
+.welcome-animation-title { margin:0 0 16px; color:#382b46; font-size:1.2rem; font-weight:700; }
+.welcome-animation-dialog img { display:block; width:100%; height:auto; }
+.welcome-animation-dialog .text-button { margin-top:16px; font-size:.78rem; color:#7545ad; }
+
+.sample-conversation { position:relative; }
+.sample-conversation[hidden] { display:none; }
+.conversation-demo-close { display:block; width:24px; height:24px; margin:0 12px 10px auto; border:0; border-radius:50%; background:#eee5f5; color:#7545ad; font-size:18px; cursor:pointer; }
+.conversation-demo-close[hidden] { display:none; }
+.conversation-demo-close:focus-visible { outline:2px solid #7545ad; outline-offset:3px; }
+
+.conversation-loading { margin:24px auto 0; text-align:center; color:#7c6d89; font-size:.82rem; }
+.conversation-loading-dots { display:inline-flex; width:18px; margin-left:3px; }
+.conversation-loading-dots span { animation:conversation-dot 1.2s ease-in-out infinite; }
+.conversation-loading-dots span:nth-child(2) { animation-delay:.2s; }
+.conversation-loading-dots span:nth-child(3) { animation-delay:.4s; }
+@keyframes conversation-dot { 0%,80%,100% { opacity:.25; transform:translateY(0); } 40% { opacity:1; transform:translateY(-3px); } }
+@media(prefers-reduced-motion:reduce) { .conversation-loading-dots span { animation:none; } }
+
+.replay-introduction { display:block; margin:16px auto 0; padding:0; font-size:.72rem; color:#7c6d89; }
+
+.discovery-hero-action>.sample-conversation .sample-project-header .sample-project-icon { grid-row:1; }
+
+/* Begin the founder entrance after the welcome overlay has closed. */
+.founder-conversation.founder-banner { animation:none; }
+.founder-banner.founder-entrance-waiting { opacity:0; transform:translateY(8px); }
+.founder-banner.founder-entrance-visible { opacity:1; transform:translateY(0); transition:opacity .85s ease,transform .85s cubic-bezier(.2,.7,.2,1); }
+@media(prefers-reduced-motion:reduce) { .founder-banner.founder-entrance-waiting { opacity:1; transform:none; } .founder-banner.founder-entrance-visible { transition:none; } }
+
+/* Lead with the value and action, then the founder and example. */
+.discovery-hero-action>.founder-banner { max-width:640px; margin:20px auto 0; }
+.discovery-hero-action>.founder-banner .founder-speech>p { flex-basis:100%; }
+.catalog-early-link { font-size:.8rem; }
+
+/* Keep the founder message dismissal beside the text at every width. */
+.founder-banner .founder-speech { position:relative; padding-right:44px; }
+.founder-banner .founder-banner-close { position:absolute; top:8px; right:8px; }
+
+.welcome-animation-dialog [data-skip-welcome] {
+  border:0;
+  border-radius:0;
+  background:transparent;
+  box-shadow:none;
+  padding:4px 0;
+  color:#8a8190;
+  font-size:.75rem;
+  font-weight:400;
+}
+.welcome-animation-dialog [data-skip-welcome]:hover { color:#65576e; text-decoration:underline; }
+.welcome-animation-dialog [data-skip-welcome]:focus-visible { outline:2px solid #b6a2c7; outline-offset:4px; border-radius:3px; }
+
+.welcome-animation-title:focus { outline:none; }
+.welcome-animation-dialog [data-skip-welcome]:focus-visible { outline:none; border-radius:0; color:#65576e; text-decoration:underline; text-decoration-thickness:2px; text-underline-offset:4px; }
+
+/* Match dismissal controls across the quote and example. */
+.founder-speech { position:relative; }
+.founder-banner .founder-speech { padding-right:44px; }
+.founder-banner-close,
+.conversation-demo-close {
+  position:absolute;
+  top:10px;
+  right:10px;
+  width:24px;
+  height:24px;
+  margin:0;
+  padding:0;
+  border:0;
+  border-radius:50%;
+  background:#eee5f5;
+  color:#7545ad;
+  font-size:18px;
+  line-height:1;
+  cursor:pointer;
+  z-index:2;
+}
+.discovery-hero-action>.sample-conversation .sample-project-header { padding-right:44px; }
+
+/* Maker reading and daily prompts alongside discovery. */
+.maker-catalog-layout { display:grid; grid-template-columns:minmax(0,1fr) 260px; gap:28px; align-items:start; }
+.maker-catalog-layout .catalog-results { min-width:0; }
+.makers-sidebar { display:grid; gap:20px; padding-top:8px; }
+.maker-article-card,.maker-tip-card { display:block; padding:20px; border:1px solid #e4dce9; border-radius:16px; background:#fffdf9; color:#382b46; text-decoration:none; }
+.maker-article-card:hover { border-color:#ad8cc6; box-shadow:0 5px 20px #382b460c; }
+.maker-kicker { display:block; color:#805894; font-size:.65rem; font-weight:700; letter-spacing:.11em; text-transform:uppercase; line-height:1.6; }
+.maker-article-card img { display:block; width:100%; height:auto; margin:14px 0; border-radius:8px; }
+.maker-article-card h3,.maker-tip-card h3 { font:400 1.45rem/1.2 Georgia,serif; letter-spacing:-.02em; margin:14px 0 10px; }
+.maker-article-card p,.maker-tip-intro { font-size:.8rem; line-height:1.6; color:#766b7b; margin:0 0 14px; }
+.maker-read { color:#7545ad; font-size:.8rem; font-weight:700; }
+.maker-tip-card { background:#f5eff9; }
+.maker-tip-card blockquote { margin:16px 0; padding:0 0 0 12px; border-left:2px solid #b396c7; font-size:.8rem; line-height:1.7; color:#5a4667; user-select:text; }
+.maker-copy { border:1px solid #d6c4e3; border-radius:22px; padding:10px 16px; background:#fff; color:#7545ad; font:600 .78rem/1.2 inherit; cursor:pointer; }
+.maker-copy-status { font-size:.75rem; color:#654178; margin:8px 0; }
+.maker-tip-card small { display:block; font-size:.65rem; color:#8a7894; margin-top:10px; }
+.maker-copy:focus-visible,.maker-article-card:focus-visible { outline:3px solid #a378bf; outline-offset:4px; }
+.maker-mobile-article,.maker-mobile-tip { display:none; }
+@media(max-width:1000px) {
+ .maker-catalog-layout { display:block; }
+ .makers-sidebar { display:none; }
+ .maker-mobile-article { display:grid; grid-template-columns:90px minmax(0,1fr); gap:0 16px; margin:20px 0; padding:16px; }
+ .maker-mobile-article img { grid-column:1; grid-row:1 / span 4; align-self:center; margin:0; }
+ .maker-mobile-article .maker-kicker,.maker-mobile-article h3,.maker-mobile-article p,.maker-mobile-article .maker-read { grid-column:2; }
+ .maker-mobile-article h3 { font-size:1.15rem; margin:5px 0; }
+ .maker-mobile-article p { font-size:.75rem; margin-bottom:6px; }
+ .future-discover .catalog-list > .maker-mobile-tip { display:block; grid-column:1 / -1; width:100%; max-width:none; order:1; }
+ .maker-catalog-layout .catalog-list > .future-card { order:2 !important; }
+ .maker-catalog-layout .catalog-list > .future-card:first-child { order:0 !important; }
+}
+
+/* An editorial margin keeps the projects in the spotlight. */
+.makers-sidebar { border-left:1px solid #e5e0e7; padding:6px 0 6px 22px; gap:0; }
+.maker-notebook-title { margin:0 0 22px; color:#86768d; font:600 .65rem/1.5 Arial,sans-serif; letter-spacing:.14em; text-transform:uppercase; }
+.maker-article-card,.maker-tip-card { border:0; border-radius:0; padding:0; background:transparent; box-shadow:none; }
+.maker-article-card:hover { border-color:transparent; box-shadow:none; }
+.makers-sidebar .maker-article-card { display:grid; grid-template-columns:minmax(0,1fr) 64px; gap:0 12px; padding-bottom:22px; border-bottom:1px solid #e5e0e7; }
+.makers-sidebar .maker-article-card .maker-kicker { grid-column:1 / -1; margin-bottom:10px; }
+.makers-sidebar .maker-article-card img { grid-column:2; grid-row:2 / span 2; margin:0; border-radius:3px; }
+.makers-sidebar .maker-article-card h3 { grid-column:1; margin:0 0 8px; font-size:1.05rem; line-height:1.35; }
+.makers-sidebar .maker-article-card p { grid-column:1 / -1; font-size:.73rem; margin:8px 0 12px; }
+.makers-sidebar .maker-read { grid-column:1 / -1; font-size:.73rem; font-weight:500; }
+.makers-sidebar .maker-tip-card { padding-top:22px; }
+.maker-tip-card h3 { font-size:1.08rem; line-height:1.35; margin:10px 0 8px; }
+.maker-kicker { font-size:.6rem; font-weight:500; color:#8b7b94; }
+.maker-tip-intro { font-size:.73rem; line-height:1.6; }
+.maker-prompt-details summary { color:#7545ad; font-size:.73rem; cursor:pointer; padding:5px 0; }
+.maker-prompt-details summary:focus-visible { outline:2px solid #a378bf; outline-offset:4px; }
+.maker-prompt-details blockquote { font-size:.75rem; }
+.maker-copy { padding:8px 12px; font-size:.73rem; }
+.maker-tip-card small { font-size:.6rem; color:#9b8da2; }
+@media(max-width:1000px) {
+ .maker-mobile-article { padding:14px 0; border-top:1px solid #e5e0e7; border-bottom:1px solid #e5e0e7; grid-template-columns:64px minmax(0,1fr); border-radius:0; }
+ .maker-mobile-article h3 { font-size:1.05rem; }
+ .future-discover .catalog-list > .maker-mobile-tip { padding:18px 0; border-top:1px solid #e5e0e7; border-bottom:1px solid #e5e0e7; }
+}
+
+/* Compact notebook entries use whitespace instead of stacked rules. */
+@media(max-width:1000px) {
+ .maker-mobile-article { border:0; margin:12px 0 24px; padding:14px 0; }
+ .future-discover .catalog-list > .maker-mobile-tip { border:0; padding:18px 0; }
+}
+
+/* The category bar already supplies the boundary above discovery. */
+.future-discover .discovery-categories + #home-panel { border-top:0; }
+
+/* Category pills and spacing provide separation without a bottom rule. */
+.future-discover .discovery-categories { border-bottom:0; }
+
+/* Give the example app name room to read at mobile sizes. */
+.discovery-hero-action>.sample-conversation .sample-project-header { grid-template-columns:64px minmax(0,1fr) auto; }
+.discovery-hero-action>.sample-conversation .sample-project-header .sample-project-domain { display:grid; place-items:center; width:64px; height:40px; border-radius:12px; color:#fff; font-size:12px; font-weight:800; letter-spacing:-.03em; }
+@media(max-width:620px) { .discovery-hero-action>.sample-conversation .sample-project-header { grid-template-columns:64px minmax(0,1fr); } }

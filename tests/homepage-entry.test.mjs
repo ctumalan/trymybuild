@@ -67,11 +67,11 @@ test('empty and ambiguous inputs do not search or create drafts',()=>{
 });
 test('the action stays share-only and preserves catalog state while typing',()=>{
  const {c}=setup('');
- for (const [value,label,sharing] of [['','Share my app',true],['planning','Share my app',true],['finalprompt.ai','Share my app',true],['family life','Share my app',true],['','Share my app',true]]) {
-  const input={value},button={},reassurance={},status={};
-  c.updateHomepageEntry({querySelector:s=>({'[data-app-link-entry]':input,'[data-entry-submit]':button,'[data-entry-reassurance]':reassurance,'[data-entry-status]':status}[s])});
+ for (const [value,label,sharing] of [['','Create your free page',true],['planning','Create your free page',true],['finalprompt.ai','Create your free page',true],['family life','Create your free page',true],['','Create your free page',true]]) {
+  const input={value},button={},status={};
+  c.updateHomepageEntry({querySelector:s=>({'[data-app-link-entry]':input,'[data-entry-submit-label]':button,'[data-entry-status]':status}[s])});
   assert.equal(button.textContent,label);
-  assert.equal(reassurance.hidden,!sharing);
+  assert.equal(status.textContent,'');
   assert.equal(c.state.query,undefined);assert.equal(c.state.entryUrl,value);
  }
 });

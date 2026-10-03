@@ -13,6 +13,6 @@ export const GET:APIRoute=async context=>{
   return json({name:draft.title,description:draft.headline||draft.summary,category:draft.category,builder:'you',image:'',url:draft.external_url,privateListing:true,isOwner:true});
  }
  const user=await currentUser(context),member=user?await ensureMember(user):null,row=member?await getProjectRow(p.slug):null,request=await activeFeedbackRequest(database(),p.slug);
- const base=origin(context),isOwner=!!member&&row?.owner_user_id===member.id;return json({isOwner,social:{...socialCopy(p),image:socialImageUrl(p,origin(context))},name:p.name,description:p.presentation.headline,category:p.category,builder:p.creator.name,image:invitationImageUrl(p,base),url:new URL('/projects/'+encodeURIComponent(p.slug),base).href,feedbackUrl:isOwner?new URL('/projects/'+encodeURIComponent(p.slug)+'?invite=1',base).href:'',firstTry:p.presentation.firstTry,trialQuestion:request?.question||''});
+ const base=origin(context),isOwner=!!member&&row?.owner_user_id===member.id;return json({isOwner,social:{...socialCopy(p),image:socialImageUrl(p,origin(context))},name:p.name,description:p.presentation.headline,category:p.category,builder:p.creator.name,image:invitationImageUrl(p,base),url:new URL('/projects/'+encodeURIComponent(p.slug),base).href,feedbackUrl:isOwner?new URL('/projects/'+encodeURIComponent(p.slug)+'?invite=1',base).href:'',firstTry:p.presentation.firstTry,trialQuestion:request?.question||'What did you expect to happen, and where did you hesitate or get stuck?'});
  }catch{return json({error:'Preview unavailable'},503);}
 };

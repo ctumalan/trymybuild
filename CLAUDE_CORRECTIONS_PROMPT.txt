@@ -1,0 +1,76 @@
+Please make three focused corrections to the current CreatorWorks documentation.
+
+Before editing, read these files completely:
+
+- PRODUCT_PLAN.md
+- PHASE_0_VALIDATION.md
+- MUSIC_TRANSCRIBER_VALIDATION.md
+- CODEX_STUDIO_VALIDATION.md
+
+Preserve all current uncommitted work. Do not rewrite unrelated sections or discard changes made outside your session.
+
+## Correction 1: Remove the Phase 1 / Phase 1.5 duplication
+
+PRODUCT_PLAN.md currently includes universal return links in Phase 1, but Phase 1.5 also says the Connection Kit begins with a universal return link.
+
+Keep universal return links in Phase 1 as the minimum reliable return mechanism.
+
+Revise Phase 1.5 so it begins with the first in-application CreatorWorks component and minimal connected-session events. Phase 1.5 should add, only after Phase 1 proves the need:
+
+- A small visible CreatorWorks return component inside a connected application.
+- Minimal signed session communication.
+- The events: experience started, meaningful point reached, and participant returned.
+- A fallback to the Phase 1 universal return link when the connection fails.
+- No private application content transmitted by default.
+
+Make clear that Phase 1.5 extends the universal return link; it does not introduce it for the first time.
+
+## Correction 2: Qualify the information-removal promise
+
+In PRODUCT_PLAN.md, the Connected Experience section currently says participants must be free to "remove their information at any time."
+
+This is too absolute because CreatorWorks may eventually need to retain limited information for safety, legal compliance, fraud prevention, dispute handling, or transaction obligations.
+
+Revise the sentence in plain language so it preserves participant control while acknowledging necessary limits. Use wording equivalent to:
+
+> CreatorWorks should control the continuity and quality of its own experience and the handoff—not control or trap the participant. Participants must remain free to leave, decline feedback, dismiss reminders, and request export or removal of their information, subject to clearly explained safety, legal, fraud-prevention, and future transaction obligations.
+
+Also ensure this wording does not imply that CreatorWorks controls or guarantees the quality of an externally hosted application.
+
+## Correction 3: Do not overstate Codex Studio file formats
+
+CODEX_STUDIO_VALIDATION.md currently says Codex Studio accepts "TXT and CODEX files."
+
+The visible interface identifies TXT and uses "CODEX files" as product language, but it has not been confirmed whether `.codex` is a separate supported file extension.
+
+Until this is confirmed, revise the document to state only what is known:
+
+> What it accepts today: TXT files described within the application as CODEX files.
+
+Add the exact supported file extensions to the unresolved decisions that must be confirmed before inviting the first participant.
+
+Update any other sentence in CODEX_STUDIO_VALIDATION.md that implies `.codex` is already a confirmed separate file format. Do not claim support for DOCX, PDF, Markdown, exported AI conversations, or any other format.
+
+## Boundaries
+
+Do not:
+
+- Install anything.
+- Write application code.
+- Add a framework.
+- Build the CreatorWorks Connection Kit.
+- Modify Producer Studio or Codex Studio.
+- Modify any notation-stage repository.
+- Add payments, hosting, marketplace, or public-discovery features.
+- Commit or push.
+
+After editing:
+
+1. Read the changed sections again.
+2. Confirm that Phase 1 and Phase 1.5 now have distinct responsibilities.
+3. Confirm that participant information rights are strong but not legally absolute.
+4. Confirm that Codex Studio claims only verified TXT support.
+5. Run formatting and Git-diff checks.
+6. Report the exact files and lines changed.
+7. Show Git status.
+8. Stop without committing or pushing.

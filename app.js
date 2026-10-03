@@ -12,6 +12,16 @@ const projects = [
   { slug: "briefbuilder", name: "BriefBuilder", category: "Creative work", icon: "B", color: "teal", summary: "Turn a loose idea into a brief another person can understand.", purpose: "Guides creative thoughts into a clear purpose, audience, and direction.", audience: "Creators, freelancers, and small teams", stage: "New", price: "Free", url: "https://brief-builder-app.vercel.app", linkNote: "Opens the creator's website", accessNote: "No sign-in needed to try it", outcome: "Create a focused creative brief", note: "This is a new TryMyBuild listing. Community evidence has not been collected yet." },
 ];
 
+// Reset only when the server received a cache-bypass document reload.
+// A normal reload has the same navigation type, but no hard-refresh marker.
+if (document.documentElement.dataset.hardRefresh === 'true' &&
+    performance.getEntriesByType('navigation')[0]?.type === 'reload') {
+  try {
+    ['tmb-welcome-seen', 'tmb-founder-dismissed', 'tmb-conversation-dismissed'].forEach(key => localStorage.removeItem(key));
+    sessionStorage.removeItem('tmb-conversation-seen');
+  } catch {}
+}
+
 const creators = [
   {
     slug: "christian-tumalan",
@@ -342,32 +352,44 @@ function homepageAppUrl(value) {
 }
 function homepageEntryIntent(value) {
   const url = homepageAppUrl(value);
-  return { url, label: 'Share my app' };
+  return { url, label: 'Create your free page' };
 }
 function updateHomepageEntry(form) {
   const value = form.querySelector('[data-app-link-entry]').value;
   const intent = homepageEntryIntent(value);
   state.entryUrl = value;
-  form.querySelector('[data-entry-submit]').textContent = intent.label;
-  form.querySelector('[data-entry-reassurance]').hidden = false;
+  form.querySelector('[data-entry-submit-label]').textContent = intent.label;
   form.querySelector('[data-entry-status]').textContent = '';
   return intent;
 }
 function discoveryHero(listing = false) {
   const value = state.entryUrl || '';
   const intent = homepageEntryIntent(value);
-  const prompt = 'Paste your app’s link to share it';
-  return `<header class="discovery-hero discovery-hero-minimal${listing ? ' listing-entry-header' : ''}" aria-label="Share your app">
+  const prompt = 'Paste your app’s link';
+  return `<header class="discovery-hero discovery-hero-minimal discovery-hero-action${listing ? ' listing-entry-header' : ''}" aria-label="Share your app">
     <div class="discovery-hero-copy">
-      ${listing ? '' : '<h1 class="discovery-promise"><span>Where makers share early apps and get honest feedback.</span></h1>'}
+      ${listing ? '' : '<h1 class="discovery-promise"><span>Stop guessing. Get <em>human feedback<svg class="feedback-hand-underline" viewBox="0 0 420 16" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path d="M3 10C42 5 72 9 111 7S181 9 218 6S288 7 321 5S383 5 417 2L411 5C377 9 351 7 320 10S252 9 218 11S146 10 111 12S41 10 3 13Z" /></svg></em>.</span><span>On your early app.</span></h1><p class="discovery-instrument-copy">Invite people to try your app, find out what’s confusing, and talk it through honestly.</p>'}
       ${listing ? '<button type="button" class="text-button" data-entry-mode="search">← Back to apps</button>' : `<form class="discovery-entry" data-discovery-entry>
         <label class="visually-hidden" for="discovery-input">${prompt}</label>
-        <div class="discovery-entry-row"><div class="discovery-entry-field"><input id="discovery-input" data-app-link-entry value="${esc(value)}" type="text" maxlength="2048" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="${prompt}" /><span class="entry-placeholder" aria-hidden="true"><span class="entry-placeholder-track">${prompt}</span></span></div><button type="submit" class="primary-button" data-entry-submit>${intent.label}</button></div>
-        <p class="discovery-entry-reassurance" id="entry-sharing-choice" data-entry-reassurance>Preview before publishing.</p>
+        <div class="discovery-entry-row"><div class="discovery-entry-field"><input id="discovery-input" data-app-link-entry value="${esc(value)}" type="text" maxlength="2048" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="${prompt}" /><span class="entry-placeholder" aria-hidden="true"><span class="entry-placeholder-track">${prompt}</span></span></div><button type="submit" class="primary-button" data-entry-submit><span data-entry-submit-label>${intent.label}</span><small>Share privately first. Publish when ready.</small></button></div>
         <p class="discovery-entry-status" data-entry-status role="status"></p>
       </form>${state.listingInProgress ? '<button type="button" class="text-button entry-resume" data-entry-mode="list">Continue your draft →</button>' : ''}`}
     </div>
+    ${listing ? '' : founderConversation() + feedbackConversationExample()}
   </header>`;
+}
+function feedbackConversationExample() {
+  return `<section class="sample-conversation" aria-label="Illustrative feedback conversation"><header class="sample-project-header"><div class="sample-project-icon sample-project-domain" aria-hidden="true">You.com</div><div><h3>Your app, getting better 😊</h3></div><span class="sample-example-badge">Illustrative example</span></header><div class="sample-conversation-body"><div class="sample-message sample-message-creator"><img class="sample-avatar" src="/assets/avatars/example-maker-selfie.jpg" alt="Illustrative creator portrait" width="192" height="192" loading="lazy"><div class="sample-bubble"><span class="sample-label">You <span>· Creator</span></span><p>“I added a save feature. Was it easy to use?”</p></div></div><div class="sample-message sample-message-tester"><img class="sample-avatar" src="/assets/avatars/example-visitor-selfie.jpg" alt="Illustrative tester portrait" width="192" height="192" loading="lazy"><div class="sample-bubble"><span class="sample-label">Your tester <span>· First impression</span></span><p>“Saving was easy. I just couldn’t find my work afterward.”</p></div></div><div class="sample-message sample-message-creator"><img class="sample-avatar" src="/assets/avatars/example-maker-selfie.jpg" alt="Illustrative creator portrait" width="192" height="192" loading="lazy"><div class="sample-bubble"><span class="sample-label">You <span>· Creator</span></span><p>“Oh, I hadn’t thought of that. I’ll make it easier to find.”</p></div></div></div></section>`;
+}
+function displayPreference(key) {
+  try { return localStorage.getItem(key) === 'true'; } catch { return false; }
+}
+function rememberDisplayDismissal(key) {
+  try { localStorage.setItem(key, 'true'); } catch {}
+}
+function founderConversation() {
+  if (displayPreference('tmb-founder-dismissed')) return '';
+  return `<section class="founder-conversation founder-banner" aria-label="A note from Christian Tumalan"><img class="founder-conversation-avatar" src="/assets/avatars/chris-nava-founder.jpg" alt="Christian Tumalan" width="48" height="48"><div class="founder-conversation-messages"><div class="founder-speech"><p>“I built my apps with AI — but AI can’t tell me what confuses a <em>real person.</em> That’s why I made TryMyBuild. I’m opening it to the first makers now — and I read every message.” <span class="founder-conversation-name">Christian · <button type="button" class="founder-about-link" data-founder-about>Founder</button></span></p><button type="button" class="founder-banner-close" data-close-founder-quote aria-label="Close founder quote">×</button></div></div></section>`;
 }
 function catalogCategoryNavigation() {
   const categories=publishedCategories(),preferred=['Family life','Technology','Food & home','Personal planning','Creative work'];
@@ -378,6 +400,31 @@ function catalogCategoryNavigation() {
   const button=category=>`<button type="button" data-category-filter="${esc(category.name)}" aria-pressed="${state.category===category.name}">${categoryIcon(category.name)}<span>${esc(category.name==='Personal planning'?'Productivity':category.name)}</span></button>`;
   const more=overflow.filter(category=>!visible.some(item=>item.name===category.name));
   return `<nav class="discovery-categories" aria-label="Browse apps by category"><button type="button" data-category-filter="All" aria-pressed="${state.category==='All'}">All apps</button>${visible.map(button).join('')}${more.length?`<details><summary>More categories</summary><div>${more.map(button).join('')}</div></details>`:''}</nav>`;
+}
+const makerPromptTips = [
+  { title: 'Fix one thing at a time', prompt: 'When I [action], I expected [result], but [actual result] happened. Find the cause, make the smallest fix, and explain how to verify it. Preserve unrelated behavior.' },
+  { title: 'Turn feedback into a clear task', prompt: 'A tester reported: [feedback]. Separate observations from assumptions. Suggest one focused improvement, explain why it helps, and describe how I can check it with the tester.' },
+  { title: 'Make the first step obvious', prompt: 'Review this first-use flow: [steps or screenshot]. Identify where a new user might hesitate. Suggest three concrete changes, prioritize the smallest useful one, and explain your reasoning.' },
+  { title: 'Ask before making assumptions', prompt: 'Help me build [feature] for [user]. First identify the missing details that could change the implementation. Ask the three most important questions before proposing a solution.' },
+  { title: 'Test the awkward cases', prompt: 'For this feature: [description], list realistic edge cases, including empty inputs, failed requests, and repeat actions. Prioritize the cases that could lose user work and give me a short manual testing checklist.' },
+  { title: 'Write copy people understand', prompt: 'Rewrite this interface text: [copy]. Use plain language for [audience], explain the next action, and keep button labels specific. Give me three concise alternatives without promising unsupported results.' },
+  { title: 'Protect what already works', prompt: 'Before changing [feature], identify the existing behaviors and dependencies it affects. Propose the smallest change, preserve unrelated flows, and describe the checks needed to catch regressions.' }
+];
+function dailyMakerTip() {
+  const parts = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Los_Angeles', year: 'numeric', month: 'numeric', day: 'numeric' }).formatToParts(new Date());
+  const part = type => Number(parts.find(p => p.type === type).value);
+  const day = Math.floor(Date.UTC(part('year'), part('month') - 1, part('day')) / 86400000);
+  return makerPromptTips[day % makerPromptTips.length];
+}
+function makerArticleCard(extraClass = '') {
+  return `<a class="maker-article-card ${extraClass}" href="/article"><span class="maker-kicker">For makers · Article</span><img src="/assets/articles/find-beta-users.webp" alt="An illustrated guide to finding beta users" width="1536" height="1024" loading="lazy"><h3>You built the app. Now find your people.</h3><p>Find beta testers without an existing audience.</p><span class="maker-read">Read the article →</span></a>`;
+}
+function makerTipCard(extraClass = '') {
+  const tip = dailyMakerTip();
+  return `<section class="maker-tip-card ${extraClass}" aria-label="AI prompt tip of the day"><span class="maker-kicker">AI prompt tip of the day</span><h3>${esc(tip.title)}</h3><p class="maker-tip-intro">Use real feedback to guide your next improvement.</p><details class="maker-prompt-details"><summary>View &amp; copy prompt</summary><blockquote>${esc(tip.prompt)}</blockquote><button type="button" class="maker-copy" data-copy-maker-prompt="${esc(tip.prompt)}">Copy prompt</button><p class="maker-copy-status" role="status"></p></details><small>A new tip each day · Pacific time</small></section>`;
+}
+function makersSidebar() {
+  return `<aside class="makers-sidebar" aria-label="Maker’s notebook"><h2 class="maker-notebook-title">Maker’s notebook</h2>${makerArticleCard()}${makerTipCard()}</aside>`;
 }
 function discover(communityFocused = false) {
   // Never fall back to the built-in catalog on the server; show loading/unavailable instead.
@@ -396,12 +443,12 @@ function discover(communityFocused = false) {
   const filtered=searchResults.items;
   return `<section class="page-shell discover-page future-discover">
     ${discoveryHero()}${catalogCategoryNavigation()}<div id="home-panel" tabindex="-1" aria-label="Discover apps">
-    <div class="catalog-results"><div class="results-heading"><div><h2>${query.trim()?'Closest matches':state.category !== 'All'?esc(state.category):'Fresh builds'}</h2><span>${filtered.length} ${filtered.length === 1 ? 'app' : 'apps'} · ${query.trim()&&!searchResults.suggestions?'Most relevant first.':catalogSortLabel()}</span></div><div class="catalog-controls">${!query.trim()?'<button type="button" class="text-button" data-wish-focus>Submit a wish</button>':''}<details class="catalog-filter-menu" ${state.filterOpen?'open':''}><summary>Filter &amp; sort${state.category !== 'All' ? ` · ${esc(state.category)}` : ''}${state.creatorType !== 'all' || state.verifiedOnly || state.price !== 'all' ? ' · active' : ''}</summary><div class="catalog-filter-options">
+    ${makerArticleCard('maker-mobile-article')}<div class="maker-catalog-layout"><div class="catalog-results"><div class="results-heading"><div><h2>${query.trim()?'Closest matches':state.category !== 'All'?esc(state.category):'Check Out The First Apps On TryMyBuild'}</h2><span>${filtered.length} ${filtered.length === 1 ? 'app' : 'apps'} · ${query.trim()&&!searchResults.suggestions?'Most relevant first.':catalogSortLabel()}</span></div><div class="catalog-controls">${!query.trim()?'<button type="button" class="text-button" data-wish-focus>Submit a wish</button>':''}<details class="catalog-filter-menu" ${state.filterOpen?'open':''}><summary>Filter &amp; sort${state.category !== 'All' ? ` · ${esc(state.category)}` : ''}${state.creatorType !== 'all' || state.verifiedOnly || state.price !== 'all' ? ' · active' : ''}</summary><div class="catalog-filter-options">
       <label class="sort-control">Price <select data-price-select><option value="all" ${state.price === 'all' ? 'selected' : ''}>All prices</option><option value="free" ${state.price === 'free' ? 'selected' : ''}>Free</option><option value="freemium" ${state.price === 'freemium' ? 'selected' : ''}>Free + paid options</option><option value="paid" ${state.price === 'paid' ? 'selected' : ''}>Paid</option></select></label>
       <label class="sort-control">Sort by <select data-sort-select><option value="recent" ${state.sort === "recent" ? "selected" : ""}>Most recent</option><option value="reviewed" ${state.sort === "reviewed" ? "selected" : ""}>Most reviewed</option><option value="saved" ${state.sort === "saved" ? "selected" : ""}>Most saved</option></select></label>
       <div class="sort-control creator-filter-row"><label for="creator-filter">Creators</label><select id="creator-filter" data-creator-type-select><option value="all" ${state.creatorType === 'all' ? 'selected' : ''}>All creators</option><option value="independent" ${state.creatorType === 'independent' ? 'selected' : ''}>Independent</option><option value="company" ${state.creatorType === 'company' ? 'selected' : ''}>Companies</option></select></div>
       <div class="verified-builder-option"><label for="verified-builder-filter"><input id="verified-builder-filter" type="checkbox" data-verified-select ${state.verifiedOnly ? 'checked' : ''}> <span>Verified builders only</span></label><button type="button" class="creator-filter-info" data-verification-info aria-label="About builder verification" aria-expanded="false" aria-controls="creator-verification-help">?</button></div>
-      <p id="creator-verification-help" class="creator-verification-help" hidden>Verified Builder is earned by independent creators after qualifying contributions and confirmation that they own their published app. It does not rate app quality.</p></div></details></div></div>${query.trim()?`<p class="search-guidance">${searchResults.suggestions?'Try describing a specific task. Here are some apps to explore within your filters.':'Explore these apps, or tell creators what you still need.'} <button class="text-button" data-wish-focus>Submit a wish</button></p>`:''}<div class="catalog-list">${filtered.length ? filtered.map(product => catalogRow(product)).join("") : `<div class="empty-state"><h2>${query.trim()?'Explore more possibilities':'More apps are on the way'}</h2><p>${state.verifiedOnly?'No verified creators match these filters. TryMyBuild Studio holds a disclosed founder exception.':'There are no published apps within these filters yet. Broaden your filters or share what you need.'}</p><button class="secondary-button" data-clear-search>Browse all apps</button><button class="primary-button" data-wish-focus>Submit a wish</button></div>`}</div></div>
+      <p id="creator-verification-help" class="creator-verification-help" hidden>Verified Builder is earned by independent creators after qualifying contributions and confirmation that they own their published app. It does not rate app quality.</p></div></details></div></div>${query.trim()?`<p class="search-guidance">${searchResults.suggestions?'Try describing a specific task. Here are some apps to explore within your filters.':'Explore these apps, or tell creators what you still need.'} <button class="text-button" data-wish-focus>Submit a wish</button></p>`:''}<div class="catalog-list">${filtered.length ? filtered.map(product => catalogRow(product)).join("") : `<div class="empty-state"><h2>${query.trim()?'Explore more possibilities':'More apps are on the way'}</h2><p>${state.verifiedOnly?'No verified creators match these filters. TryMyBuild Studio holds a disclosed founder exception.':'There are no published apps within these filters yet. Broaden your filters or share what you need.'}</p><button class="secondary-button" data-clear-search>Browse all apps</button><button class="primary-button" data-wish-focus>Submit a wish</button></div>`}${makerTipCard('maker-mobile-tip')}</div></div>${makersSidebar()}</div>
   </div></section>`;
 }
 
@@ -956,7 +1003,7 @@ function listingSettingsPage() {
   const publishControls = !hasServer ? '' : `<div class="cw-panel"><p role="status" data-listing-server-status>${esc(statusNote)}</p><div class="form-actions">${status === 'published'
       ? `<a class="primary-button" href="/?category=${encodeURIComponent(listingDraft.category)}&highlight=${encodeURIComponent(listingDraft.serverSlug)}">View my project in catalog</a><button class="secondary-button" data-listing-unpublish>Unpublish</button>`
       : '<button class="primary-button" data-listing-publish>Publish my app</button>'}<a class="share-browse-link" href="/dashboard?view=creator">Go to My projects →</a></div><p class="privacy-note">Publish instantly to the public catalog. No admin approval needed. You can unpublish anytime.</p></div>`;
-  return `<section class="page-shell listing-review"><p class="eyebrow">Your project · Settings</p><h1>Make it yours.</h1><p>Signed in as ${name}.</p><form data-listing-settings>${sharingPreferenceFields()}${listingField('title', 'Project name', 'Your project name')}${listingField('url', 'Project link', 'https://your-project.com')}${listingCategoryPicker()}${listingPricingField()}${listingField('does','What does your project do?','Describe your project in 4–10 words.',true)}${listingField('helps','How does it help people?','Explain the benefit in 4–10 words.',true)}${listingField('firstTry','What should someone try first?','Suggest one action in 4–10 words.',true)}${videoField()}<p class="share-name-hint">Each answer needs 4–10 words. Edit your screenshot in the preview below. Categories appear in homepage filters only when a listing is published. Drafts never create public filters.</p><p data-video-status class="video-status" role="status"></p><div class="form-actions share-start-actions"><button class="primary-button" type="submit">${hasServer ? 'Save changes' : 'Save draft'}</button><button class="secondary-button" type="button" data-listing-review>Back</button><button type="button" class="secondary-button listing-reset-button" data-listing-reset>Start over</button></div><p data-listing-status role="status"></p></form>${importCard}${listingPreview()}${publishControls}</section>`;
+  return `<section class="page-shell listing-review"><p class="eyebrow">Your project · Settings</p><h1>Make it yours.</h1><p>Signed in as ${name}.</p><form data-listing-settings>${sharingPreferenceFields()}${listingField('title', 'Project name', 'Your project name')}${listingField('url', 'Project link', 'https://your-project.com')}${listingCategoryPicker()}${listingPricingField()}${listingField('does','What does your project do?','Describe your project in 4–10 words.',true)}${listingField('helps','How does it help people?','Explain the benefit in 4–10 words.',true)}${listingField('firstTry','What should someone try first?','Suggest one action in 4–10 words.',true)}${videoField()}<p class="share-name-hint">Each answer needs 4–10 words. Edit your screenshot in the preview below. Categories appear in homepage filters only when a listing is published. Drafts never create public filters.</p><p data-video-status class="video-status" role="status"></p><div class="form-actions share-start-actions"><button class="primary-button" type="submit">${hasServer ? 'Save changes' : 'Save draft'}</button><button class="secondary-button" type="button" data-listing-review>Back</button><button type="button" class="secondary-button listing-reset-button" data-listing-reset>Start over</button></div><p data-listing-status role="status"></p></form>${importCard}${listingPreview()}${publishControls}${status === 'published' ? `<section class="cw-panel tester-handoff"><p class="eyebrow">Your next step</p><h2>Invite your first testers</h2><p>Start with a few people who might use your app. Ask them to try one task and share what happened.</p><div class="form-actions"><button type="button" class="primary-button" data-invite-project="${esc(listingDraft.serverSlug)}">Prepare invitation</button><a class="secondary-button" href="/projects/${encodeURIComponent(listingDraft.serverSlug)}?invite=1">View your feedback page</a><button type="button" class="secondary-button" data-copy-feedback-link="${esc(listingDraft.serverSlug)}">Copy feedback link</button><p data-copy-feedback-status role="status"></p></div><p><a href="/guides/first-app-testers">No audience yet? Start here →</a></p></section>` : ''}</section>`;
 }
 function listingAccountPage() {
   if (state.session?.authenticated) return listingSettingsPage();
@@ -1642,3 +1689,167 @@ window.CWBrowseContext = () => ({category:state.category,query:state.query,price
 window.CWRestoreBrowse = browse => { Object.assign(state,browse); render(true); };
 
 window.CWSetDetailScroll=(y,contentY)=>{detailScrollY=y;const scroll=document.querySelector('.detail-scroll');if(scroll)scroll.scrollTop=contentY;};
+
+function openFounderAbout(trigger) {
+  if (document.querySelector('.founder-about-dialog')) return;
+  const dialog = document.createElement('dialog');
+  dialog.className = 'founder-about-dialog';
+  dialog.setAttribute('aria-label', 'About Christian Tumalan and TryMyBuild');
+  const template = document.createElement('template');
+  template.innerHTML = aboutPage();
+  const story = template.content.querySelector('.founder-info');
+  dialog.innerHTML = '<button type="button" class="founder-dialog-close" aria-label="Close founder introduction">×</button>';
+  dialog.append(story);
+  const dismiss = () => { dialog.close(); dialog.remove(); if (trigger?.isConnected) trigger.focus({preventScroll:true}); };
+  dialog.querySelector('.founder-dialog-close').onclick = dismiss;
+  dialog.addEventListener('cancel', event => {event.preventDefault(); dismiss();});
+  dialog.addEventListener('click', event => {
+    if(event.target === dialog) {
+      const r=dialog.getBoundingClientRect();
+      if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom) dismiss();
+    }
+    if(event.target.closest('[data-route]')) dismiss();
+  });
+  document.body.append(dialog);
+  dialog.showModal();
+  dialog.querySelector('.founder-dialog-close').focus();
+}
+document.addEventListener('click', event => {
+  const trigger=event.target.closest('[data-founder-about]');
+  if(trigger) openFounderAbout(trigger);
+});
+
+document.addEventListener('click', event => {
+  const close=event.target.closest('.founder-popout-close');
+  if(close) close.closest('.founder-popout').hidden=true;
+});
+
+// Only a visitor's close choice hides the conversation on later visits.
+let conversationDemoDismissed = displayPreference('tmb-conversation-dismissed');
+// Play the illustrative conversation once per rendered card when it enters view.
+let welcomeAnimationFinished;
+function showWelcomeAnimation(replay = false) {
+  if (replay) welcomeAnimationFinished = null;
+  if (welcomeAnimationFinished) return welcomeAnimationFinished;
+  welcomeAnimationFinished = new Promise(resolve => {
+    let seen = false;
+    try { seen = localStorage.getItem('tmb-welcome-seen') === 'true'; } catch {}
+    if ((!replay && seen) || window.matchMedia('(prefers-reduced-motion: reduce)').matches) { resolve(); return; }
+    const intro = document.createElement('dialog');
+    intro.className = 'welcome-animation-dialog';
+    intro.setAttribute('aria-label', 'Welcome to TryMyBuild');
+    intro.innerHTML = '<p class="welcome-animation-title" tabindex="-1">Welcome to <span class="brand-name">TryMy<span class="brand-name-works">Build</span></span></p><img src="/assets/illustrations/feedback-loop.svg" width="600" height="112" alt="Invite, learn, improve"><a href="#" class="text-button" data-skip-welcome>Don’t show this again</a>';
+    const previousFocus = document.activeElement;
+    let timer;
+    const finish = () => {
+      clearTimeout(timer);
+      if (!intro.isConnected) return;
+      intro.close(); intro.remove();
+      if (previousFocus?.isConnected) previousFocus.focus({preventScroll:true});
+      resolve();
+    };
+    const dismiss = () => { rememberDisplayDismissal('tmb-welcome-seen'); finish(); };
+    intro.querySelector('[data-skip-welcome]').onclick = event => { event.preventDefault(); dismiss(); };
+    intro.addEventListener('cancel', event => {event.preventDefault(); dismiss();});
+    const image = intro.querySelector('img');
+    image.addEventListener('load', () => { clearTimeout(timer); timer = setTimeout(finish, 5500); }, {once:true});
+    image.addEventListener('error', finish, {once:true});
+    document.body.append(intro);
+    intro.showModal();
+    intro.querySelector('.welcome-animation-title').focus({preventScroll:true});
+    timer = setTimeout(finish, 8000);
+  });
+  return welcomeAnimationFinished;
+}
+function prepareConversationAnimations() {
+  if (document.querySelector('.discovery-hero-action:not(.listing-entry-header)')) showWelcomeAnimation();
+  const banner = document.querySelector('.founder-banner:not([data-entrance-ready])');
+  if (banner) {
+    banner.dataset.entranceReady = 'true';
+    banner.classList.add('founder-entrance-waiting');
+    showWelcomeAnimation().then(() => {
+      setTimeout(() => {
+        if (banner.isConnected) banner.classList.add('founder-entrance-visible');
+      }, 2000);
+    });
+  }
+  document.querySelectorAll('.discovery-hero-action>.sample-conversation:not([data-animation-ready])').forEach(card => {
+    card.dataset.animationReady = 'true';
+    if (conversationDemoDismissed) { card.hidden = true; return; }
+    const close = document.createElement('button');
+    close.type = 'button'; close.className = 'conversation-demo-close';
+    close.setAttribute('aria-label', 'Close feedback example'); close.textContent = '×'; close.hidden = true;
+    close.onclick = () => { conversationDemoDismissed = true; rememberDisplayDismissal('tmb-conversation-dismissed'); card.hidden = true; };
+    card.append(close);
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { close.hidden = false; return; }
+    card.classList.add('conversation-staged');
+    const loading = document.createElement('div');
+    loading.className = 'conversation-loading';
+    loading.setAttribute('role', 'status');
+    loading.innerHTML = 'Loading sample conversation<span class="conversation-loading-dots" aria-hidden="true"><span>.</span><span>.</span><span>.</span></span>';
+    card.before(loading);
+    const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
+    const loopFinished = showWelcomeAnimation();
+    const typeMessage = async message => {
+      const paragraph = message.querySelector('.sample-bubble p');
+      const text = paragraph.textContent;
+      paragraph.setAttribute('aria-label', text);
+      paragraph.style.minHeight = paragraph.getBoundingClientRect().height + 'px';
+      paragraph.textContent = '';
+      message.classList.add('message-visible');
+      paragraph.classList.add('message-typing');
+      for (const letter of text) {
+        if (!card.isConnected) return;
+        paragraph.textContent += letter;
+        await pause(24);
+      }
+      paragraph.classList.remove('message-typing');
+    };
+    const observer = new IntersectionObserver(async entries => {
+      if (!entries.some(entry => entry.isIntersecting)) return;
+      observer.disconnect();
+      await loopFinished;
+      await pause(6000);
+      if (!card.isConnected) return;
+      loading.remove();
+      const sequenceStarted = performance.now();
+      card.classList.add('conversation-frame-visible');
+      await pause(300);
+      if (!card.isConnected) return;
+      card.classList.add('conversation-playing');
+      await pause(650);
+      if (!card.isConnected) return;
+      card.classList.add('task-visible');
+      await pause(700);
+      for (const message of card.querySelectorAll('.sample-message')) {
+        if (!card.isConnected) return;
+        await typeMessage(message);
+        await pause(600);
+      }
+      await pause(Math.max(0, 6000 - (performance.now() - sequenceStarted)));
+      if (card.isConnected) close.hidden = false;
+    }, {threshold:.35});
+    observer.observe(card);
+  });
+}
+new MutationObserver(prepareConversationAnimations).observe(document.getElementById('app'), {childList:true,subtree:true});
+prepareConversationAnimations();
+
+
+document.addEventListener('click', event => {
+ const close=event.target.closest('[data-close-founder-quote]');
+ if(close) { rememberDisplayDismissal('tmb-founder-dismissed'); close.closest('.founder-banner').hidden=true; }
+});
+
+// Delegation keeps copying available after catalog filtering and navigation.
+document.addEventListener('click', async event => {
+  const button = event.target.closest('[data-copy-maker-prompt]');
+  if (!button) return;
+  const status = button.closest('.maker-tip-card').querySelector('.maker-copy-status');
+  try {
+    await navigator.clipboard.writeText(button.dataset.copyMakerPrompt);
+    status.textContent = 'Prompt copied.';
+  } catch {
+    status.textContent = 'Copy unavailable. Select the prompt text above to copy it.';
+  }
+});

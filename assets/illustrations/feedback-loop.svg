@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="112" viewBox="0 0 600 112" role="img" aria-labelledby="title desc"><title id="title">Invite, learn, improve</title><desc id="desc">Invite friends or early users, learn where they get stuck, then use the conversation to improve your app.</desc><style>
+.step { animation:appear .4s ease-out both; }
+.step-one { animation-delay:.15s; }
+.step-two { animation-delay:1.1s; }
+.step-three { animation-delay:2.1s; }
+.arrow { stroke-dasharray:1; stroke-dashoffset:1; animation:draw .5s ease-out forwards; }
+.arrow-one { animation-delay:.6s; }
+.arrow-two { animation-delay:1.6s; }
+.arrowhead { animation:appear .15s ease-out both; }
+.head-one { animation-delay:1s; }
+.head-two { animation-delay:2s; }
+@keyframes appear { from { opacity:0; } to { opacity:1; } }
+@keyframes draw { to { stroke-dashoffset:0; } }
+@media(prefers-reduced-motion:reduce) { .step,.arrowhead { animation:none; opacity:1; } .arrow { animation:none; stroke-dashoffset:0; } }
+</style><g fill="none" stroke="#7545ad" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g class="step step-one"><circle cx="110" cy="34" r="8"/><path d="M94 58v-5c0-13 32-13 32 0v5M132 32h16m-8-8v16"/></g><g class="step step-two"><path d="M275 26h42v28h-15l-10 8v-8h-17zM285 36h22m-22 9h13"/></g><path class="arrow arrow-one" pathLength="1" d="M180 45h43" stroke="#d2bedf"/><path class="arrowhead head-one" d="m217 40 6 5-6 5" stroke="#d2bedf"/><path class="arrow arrow-two" pathLength="1" d="M380 45h43" stroke="#d2bedf"/><path class="arrowhead head-two" d="m417 40 6 5-6 5" stroke="#d2bedf"/></g><g class="step step-three"><g transform="translate(478 23) scale(.172)">  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <g stroke="#FF8C49" stroke-width="10">
+      <path d="M128 22v20M63 43l13 15M193 43l-13 15M35 94h20M201 94h20"/>
+      <path d="M79 113a50 50 0 1 1 98 0"/>
+    </g>
+    <g stroke="#6035AA" stroke-width="12">
+      <path d="M35 140c13 44 53 69 95 69 43 0 77-22 91-57"/>
+      <path d="M105 185h35v-31l29-17"/>
+    </g>
+    <circle cx="170" cy="136" r="7" fill="#6035AA"/>
+    <circle cx="222" cy="151" r="7" fill="#6035AA"/>
+  </g>
+</g></g><g font-family="Arial,sans-serif" font-size="15" font-weight="600" fill="#5b456c" text-anchor="middle"><text class="step step-one" x="120" y="88">Invite</text><text class="step step-two" x="300" y="88">Learn</text><text class="step step-three" x="500" y="88">Improve</text></g></svg>

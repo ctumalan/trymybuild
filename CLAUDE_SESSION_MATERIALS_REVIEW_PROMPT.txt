@@ -1,0 +1,190 @@
+Please review and refine the newly prepared CreatorWorks Phase 0 session materials for Codex Studio.
+
+These files were created outside your session and are currently untracked. Treat them as drafts to inspect carefully, not as automatically approved content.
+
+## Read first — approved sources of truth
+
+Read these files completely before editing:
+
+- PRODUCT_PLAN.md
+- PHASE_0_VALIDATION.md
+- CODEX_STUDIO_VALIDATION.md
+- MUSIC_TRANSCRIBER_VALIDATION.md
+
+The approved documents above are the source of truth for this review. Do not modify them during this task. If you find a genuine contradiction, report it instead of changing the approved file.
+
+## Draft materials to review and refine
+
+Read these files completely:
+
+- CODEX_STUDIO_SESSION_MATERIALS.md
+- codex-studio-test-prompts/01_purpose.txt
+- codex-studio-test-prompts/02_people_and_language.txt
+- codex-studio-test-prompts/03_first_release.txt
+- codex-studio-test-prompts/04_feedback_after_value.txt
+- codex-studio-test-prompts/05_future_support.txt
+- codex-studio-test-prompts/06_late_conflicting_instructions.txt
+- codex-studio-test-prompts/EXPECTED_REVIEW.md
+
+You may edit only these draft session-material and fictional-test files.
+
+Do not read, modify, move, or delete:
+
+- CLAUDE_CORRECTIONS_PROMPT.txt
+- PRODUCT_PLAN.md
+- PHASE_0_VALIDATION.md
+- CODEX_STUDIO_VALIDATION.md
+- MUSIC_TRANSCRIBER_VALIDATION.md
+- Producer Studio
+- Codex Studio application files
+- Any notation-stage repository
+- Any other repository
+
+## Review goals
+
+### 1. Alignment with the approved CreatorWorks model
+
+Confirm that the session packet follows:
+
+- Creator courage through evidence
+- Sharing as a complete handoff
+- Present → Share → Experience → Respond → Recognize
+- The manual CreatorWorks Experience Session
+- Guided external link for Phase 0
+- Trust before access
+- Minimal session states rather than surveillance
+- One main feedback question
+- Creator acknowledgment and outcome
+- Optional support only after value
+- No payments, hosting, marketplace, public discovery, accounts, or Connection Kit implementation
+
+Remove or revise any draft wording that contradicts those principles.
+
+### 2. Participant clarity and warmth
+
+Review the materials from the perspective of a conventional person who uses AI but is not a software developer.
+
+The invitation, introduction, instructions, trust summary, return, feedback, and acknowledgment should be:
+
+- Plain
+- Warm
+- Trustworthy
+- Specific
+- Free of marketing pressure
+- Free of unexplained technical language
+- Short enough to use in a real session
+
+Do not remove necessary safety or privacy information merely to make the packet shorter.
+
+### 3. Honest unknowns
+
+Preserve clear **Confirm before session** markers for facts that are not yet verified:
+
+- First participant
+- Session date
+- Exact supported file extensions
+- Whether imported files leave the device
+- Where and how long files are stored
+- Who can see imported files
+- How files can be deleted
+- Whether AI reads or processes the material
+- Exact registration requirement
+- Exact manual return method
+
+Do not invent answers.
+
+Do not claim support for DOCX, PDF, Markdown, exported AI conversations, `.codex`, or any other format beyond observed TXT support.
+
+### 4. Fairness of the fictional prompt test
+
+Confirm that the fictional Encore Notes TXT collection is a fair test of Codex Studio rather than a trick.
+
+The collection should contain:
+
+- A clear purpose
+- A clear intended person
+- First-release instructions
+- Intentional but natural repetition
+- Ordering dependencies
+- A future-stage idea
+- Explicit contradictions requiring human review
+
+The test must not assume Codex Studio can magically determine which conflicting instruction is correct. A good result may identify the conflict, keep both versions visible, or request a human decision.
+
+Confirm that the test does not require Codex Studio to build software, execute commands, access private information, or contact external services.
+
+### 5. Expected-review separation
+
+EXPECTED_REVIEW.md must state clearly that it is for the facilitator only and must not be shown to the participant before their independent response.
+
+Check that it provides a fair ground truth:
+
+- Important instructions that should remain
+- Deliberate repetition
+- Deliberate conflicts
+- Useful ordering dependencies
+- No single mandatory wording for the generated result
+
+### 6. Session practicality
+
+Check that the packet provides a complete usable path:
+
+1. Readiness check
+2. Personal invitation
+3. CreatorWorks introduction
+4. Trust summary
+5. Participant instructions
+6. External Codex Studio experience
+7. Meaningful point
+8. Manual return
+9. Main feedback question
+10. Privacy choice
+11. Observation record
+12. Creator acknowledgment
+13. Outcome update
+14. Nonfunctional optional-support concept
+15. Continue, revise, or pause decision
+
+The participant should not need Christian standing beside them. The facilitator may intervene only if the participant becomes genuinely stuck, and every intervention should be recorded.
+
+### 7. Avoid overclaiming
+
+Pay particular attention to claims that Codex Studio:
+
+- Rewrites instructions
+- Detects contradictions
+- Reorders commands
+- Produces a better AI result
+
+These are outcomes to test, not facts to promise, unless the approved validation document clearly establishes them. Phrase uncertain capabilities as questions or intended outcomes.
+
+Generating a Master Codex proves only that the process completed. It does not prove that the result is complete, accurate, correctly ordered, or useful.
+
+## Boundaries
+
+Do not:
+
+- Install anything
+- Run Codex Studio
+- Upload the fictional files anywhere
+- Inspect Producer Studio
+- Write application code
+- Add a framework
+- Build the CreatorWorks Connection Kit
+- Create accounts
+- Process payments
+- Create hosting, marketplace, or public-discovery features
+- Modify approved planning or validation documents
+- Commit
+- Push
+
+## After editing
+
+1. Re-read every draft file you changed.
+2. Run formatting and Git-diff checks.
+3. Report exactly which draft files changed and why.
+4. Report any contradiction found with the approved documents.
+5. List every fact still requiring confirmation before a participant can be invited.
+6. Confirm whether the fictional test is fair and non-sensitive.
+7. Show Git status.
+8. Stop without committing or pushing.

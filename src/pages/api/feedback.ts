@@ -29,7 +29,7 @@ export const POST:APIRoute=async context=>{
    return context.redirect(`/dashboard/messages?thread=${existing.data.id}`,303);
   }
   if(result.error)throw result.error;
-  if(context.request.headers.get('accept')?.includes('application/json'))return json({ok:true,message:trial?'Your feedback is with the maker. They committed to replying within two days.':'Your feedback was sent to the maker.',href:`/dashboard/messages?thread=${result.data.id}${trial?'&trial=1':''}`});
+  if(context.request.headers.get('accept')?.includes('application/json'))return json({ok:true,message:trial?'Your feedback is with the maker. They committed to replying.':'Your feedback was sent to the maker.',href:`/dashboard/messages?thread=${result.data.id}${trial?'&trial=1':''}`});
   return context.redirect(`/dashboard/messages?thread=${result.data.id}&${trial?'trial=1':'feedback=sent'}`,303);
  }catch{if(context.request.headers.get('accept')?.includes('application/json'))return json({error:'Your review could not be confirmed. Your text is still here; check Messages before retrying.'},503);return context.redirect(slug?`/tell/${slug}?error=1`:'/dashboard?error=1',303);}
 };

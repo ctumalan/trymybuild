@@ -1278,7 +1278,7 @@ body.public-site #app[tabindex="-1"]:focus { outline:none; }
 .discovery-hero-action>.founder-banner {
   width:min(680px,88%);
   max-width:680px;
-  margin:28px auto 0 0;
+  margin:52px auto 0 0;
 }
 .discovery-hero-action>.sample-conversation {
   width:min(740px,88%);
@@ -1297,6 +1297,7 @@ body.public-site #app[tabindex="-1"]:focus { outline:none; }
 @media(max-width:620px) {
   .discovery-hero-action>.founder-banner,
   .discovery-hero-action>.sample-conversation { width:96%; }
+  .discovery-hero-action>.founder-banner { margin-top:40px; }
   .founder-banner .founder-speech>p { font-size:.86rem; line-height:1.5; }
   .welcome-animation-dialog { padding-inline:14px; }
   .welcome-animation-dialog img { width:120%; margin-inline:-10%; }

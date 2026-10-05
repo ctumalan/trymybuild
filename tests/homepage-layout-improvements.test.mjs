@@ -13,7 +13,7 @@ test('editorial cards leave the catalog and the article remains available in the
 test('homepage conversation enters from opposite sides with readable founder copy',()=>{
  const app=read('app.js'),css=read('future-design.css');
  assert.match(app,/>yourURL\.com<\/div>/);
- assert.match(css,/\.discovery-hero-action>\.founder-banner[\s\S]*?margin:28px auto 0 0/);
+ assert.match(css,/\.discovery-hero-action>\.founder-banner[\s\S]*?margin:52px auto 0 0/);
  assert.match(css,/\.discovery-hero-action>\.sample-conversation[\s\S]*?margin:28px 0 0 auto/);
  assert.match(css,/\.founder-banner \.founder-speech>p[\s\S]*?font-size:\.92rem/);
 });

@@ -9,12 +9,12 @@ test('exchange page distinguishes waiting, one response and both responses witho
  const rpc=f.db.rpc;f.db.rpc=async(name,args)=>name==='cw_maker_exchange_state'?{data:state,error:null}:rpc(name,args);
  const route=moduleFixture('src/pages/dashboard/exchange.ts',['GET'],f.scope).GET;
  const html=async()=> (await route(ctx('/dashboard/exchange'))).text();
- assert.match(await html(),/Join the maker feedback exchange/);
+ assert.match(await html(),/You try their app. They try yours./);
  state={...paired,state:'waiting',partner:null};
- assert.match(await html(),/Waiting for another maker/);assert.doesNotMatch(await html(),/name="action" value="join"/);
- state=paired;assert.match(await html(),/Was it clear how to save your first drawing/);assert.match(await html(),/hasn’t shared qualifying feedback/);
+ assert.match(await html(),/Waiting for a feedback partner/);assert.doesNotMatch(await html(),/name="action" value="join"/);
+ state=paired;assert.match(await html(),/Was it clear how to save your first drawing/);assert.match(await html(),/still waiting for feedback from your partner/);
  state={...paired,given:f.id};assert.match(await html(),/Feedback shared/);assert.doesNotMatch(await html(),/You both shared feedback/);
- state={...paired,given:f.id,received:f.id,complete:true};assert.match(await html(),/You both shared feedback/);assert.match(await html(),/Join the maker feedback exchange/);
+ state={...paired,given:f.id,received:f.id,complete:true};assert.match(await html(),/You both shared feedback/);assert.match(await html(),/You try their app. They try yours./);
 });
 test('exchange forms escape creator content and only offer owned published public apps',async()=>{
  const f=workspaceFixtures();f.db.rpc=async()=>({data:null,error:null});

@@ -13,6 +13,6 @@ export const GET:APIRoute=async context=>{
   ]);
   if(state.error||projects.error||request.error)throw Error('Exchange unavailable');
   const entry=state.data,canJoin=!entry||entry.complete||!['waiting','matched'].includes(entry.state);
-  return workspace('Maker feedback exchange',`${notice(context)}<p>Share one useful observation with another maker, and invite them to do the same for your app.</p>${exchangeStatus(entry)}${canJoin?exchangeJoinForm(projects.data,request.data,randomUUID()):''}<p><a href="/community-guidelines">Feedback guidelines</a> · <a href="/dashboard/messages">Your conversations</a></p>`,'exchange',m.admin);
+  return workspace('Swap app feedback',`${notice(context)}<p>Two app creators help each other by trying each other’s apps and sharing feedback.</p>${exchangeStatus(entry)}${canJoin?exchangeJoinForm(projects.data,request.data,randomUUID()):''}<p><a href="/community-guidelines">Feedback guidelines</a> · <a href="/dashboard/messages">Your conversations</a></p>`,'exchange',m.admin);
  }catch{return unavailable();}
 };

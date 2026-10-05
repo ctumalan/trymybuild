@@ -5,6 +5,7 @@ import '../project-media.js';
 import '../project-view.js';
 const app=readFileSync(new URL('../app.js',import.meta.url),'utf8');
 const css=readFileSync(new URL('../launch-refinements.css',import.meta.url),'utf8');
+const themeCss=readFileSync(new URL('../future-design.css',import.meta.url),'utf8');
 const shared=readFileSync(new URL('../project-view.js',import.meta.url),'utf8');
 const serverDetail=readFileSync(new URL('../src/pages/projects/[slug].ts',import.meta.url),'utf8');
 const drawer=shared+app.slice(app.indexOf('function projectDetailContent(product'),app.indexOf("document.addEventListener('input'",app.indexOf('function detailDrawer(product)')));
@@ -42,4 +43,10 @@ test('categories wrap and violet accents apply to navigation and illustration pa
  assert.match(css,/\.category-strip-scroll\{flex-wrap:wrap;overflow:visible/);
  assert.match(css,/\.site-header nav button:hover/);
  assert.match(css,/\.share-visual,\.share-visual-intro\{background:#493064/);
+});
+test('app detail background drifts slowly and respects reduced motion',()=>{
+ assert.match(themeCss,/\.detail-dialog\.invitation-detail\[data-showcase-theme\] \.recipient-hero \{[\s\S]*animation:app-showcase-wash 8s ease-in-out infinite alternate/);
+ assert.match(themeCss,/animation:app-showcase-glow 6s ease-in-out infinite alternate/);
+ assert.match(themeCss,/@keyframes app-showcase-glow/);
+ assert.match(themeCss,/@media\(prefers-reduced-motion:reduce\)[\s\S]*\.detail-dialog\.invitation-detail\[data-showcase-theme\] \.recipient-hero[\s\S]*animation:none/);
 });

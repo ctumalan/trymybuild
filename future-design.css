@@ -1302,3 +1302,30 @@ body.public-site #app[tabindex="-1"]:focus { outline:none; }
   .welcome-animation-dialog { padding-inline:14px; }
   .welcome-animation-dialog img { width:120%; margin-inline:-10%; }
 }
+
+/* A slow wash gives app detail views a living backdrop without moving content. */
+.detail-dialog.invitation-detail[data-showcase-theme] .recipient-hero {
+  background:
+    radial-gradient(circle at 18% 22%,color-mix(in srgb,var(--showcase-glow,#e7d5f7) 34%,transparent),transparent 42%),
+    linear-gradient(125deg,#fbfaf6 24%,color-mix(in srgb,var(--showcase-wash,#ded2ec) 30%,#fbfaf6));
+  background-size:160% 160%,180% 180%;
+  animation:app-showcase-wash 8s ease-in-out infinite alternate;
+}
+.detail-dialog.invitation-detail[data-showcase-theme] .recipient-hero::before {
+  animation:app-showcase-glow 6s ease-in-out infinite alternate;
+  will-change:transform;
+}
+@keyframes app-showcase-wash {
+  from { background-position:0% 20%,0% 50%; }
+  to { background-position:100% 78%,100% 50%; }
+}
+@keyframes app-showcase-glow {
+  from { transform:translate3d(-12%,-7%,0) scale(1); opacity:.68; }
+  to { transform:translate3d(15%,10%,0) scale(1.18); opacity:1; }
+}
+@media(prefers-reduced-motion:reduce) {
+  .detail-dialog.invitation-detail[data-showcase-theme] .recipient-hero,
+  .detail-dialog.invitation-detail[data-showcase-theme] .recipient-hero::before {
+    animation:none;
+  }
+}

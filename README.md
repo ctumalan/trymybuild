@@ -34,3 +34,43 @@ The recipient defaults to `FOUNDER_EMAIL`; `PROJECT_REVIEW_EMAIL` can override i
 `PROJECT_REVIEW_FROM` can override the default sender
 `TryMyBuild <notifications@trymybuild.com>`. A delivery failure never blocks the project
 submission, and retries use the project revision to prevent duplicate messages.
+
+## Maker feedback exchange
+
+The optional exchange at `/dashboard/exchange` pairs two active makers with
+published public apps. Each asks one specific question and agrees to personally
+try the other app. The existing guided feedback and Messages flows deliver the
+responses; neither listing nor ordinary feedback requests require an exchange.
+
+Apply `database/028_maker_exchange.sql` after migration 027 before publishing the
+exchange UI. The migration is transactional and additive. Take a current database
+backup and verify the existing migration level before applying it. Until this
+migration is installed, the exchange page fails closed and other requests retain
+their current behavior. No production migration or deployment is performed by the
+test scripts.
+
+Matching is automatic, oldest eligible participant first, with one active exchange
+per maker. Self-matches and pairs with an existing per-app review are excluded.
+Qualifying firsthand feedback marks each side separately; a completed exchange
+means both responses were delivered, not that their usefulness was confirmed.
+Hidden or revoked feedback removes that progress. Leaving, cancelling a request,
+unpublishing a project, or disabling an account ends the exchange, preserves
+existing conversations, and notifies the other participant. Match notifications
+use the existing feedback alert and email settings. Matches and responses are not
+guaranteed. Christian has no personal-review commitment.
+
+Validation uses synthetic data only:
+
+```sh
+npm test
+npm run check
+npm run build
+node scripts/test-maker-exchange-database.mjs /private/tmp/trymybuild-exchange-tests
+node scripts/test-maker-exchange-concurrency.mjs /private/tmp/trymybuild-exchange-tests
+```
+
+The last two checks use temporary PGlite, `pg`, and embedded PostgreSQL dependencies,
+not the application dependencies or live database. The concurrency check starts
+PostgreSQL on a private Unix socket with TCP disabled and cleans up after success.
+`scripts/maker-exchange-qa-server.mjs` previews synthetic join, waiting, matched,
+given, completed and cancelled screens with all sending disabled.

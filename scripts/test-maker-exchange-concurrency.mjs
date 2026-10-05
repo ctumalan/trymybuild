@@ -24,7 +24,7 @@ try{
  if(!admin)throw Error('Disposable database did not start: '+logs);
  const f=await testMakerExchange({query:(sql,args)=>admin.query(sql,args),exec:sql=>admin.query(sql)});
  const a=await connect(),b=await connect();for(const client of [a,b])await client.query('set role service_role');
- const members=await Promise.all(['h','i','j','k'].map(f.member));
+ const members=[];for(const label of ['h','i','j','k'])members.push(await f.member(label));
  for(let i=0;i<members.length;i++)await f.project(members[i],'race-'+i);
  const ids=members.map(()=>randomUUID());
  const joinExchange=(client,i)=>client.query('select cw_join_maker_exchange($1,$2,$3,$4)',[members[i],ids[i],'race-'+i,f.question]);

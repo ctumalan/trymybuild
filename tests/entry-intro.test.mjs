@@ -18,8 +18,8 @@ function setup({seen=false,reduced=false,storageBlocked=false}={}) {
  return {brand,classes,timers,track,prompt,mount:()=>context.window.CWEntryIntro.mount(document),resize:()=>resize(),event:t=>events[t]({target:{closest:()=>true}})};
 }
 test('the persistent promise is above the search form, not beside the logo',()=>{
- assert.match(read('app.js'),/class="discovery-promise"><span>Get <em>human feedback[\s\S]*?<\/em> on your early app\.<\/span><\/h1>/);
- assert.match(read('app.js'),/Stop Guessing\. Invite people to try your app/);
+ assert.match(read('app.js'),/class="discovery-promise"><span>Stop guessing\. Get <em>human feedback[\s\S]*?<\/em> on your early app<\/span><\/h1>/);
+ assert.match(read('app.js'),/class="discovery-instrument-copy">Invite people to try your app, find out what’s confusing, and talk it through honestly\.<\/p>/);
  assert.doesNotMatch(read('index.html'),/class="brand-intro"/);
  assert.ok(read('app.js').indexOf('class="discovery-promise"')<read('app.js').indexOf('class="discovery-entry"'));
 });

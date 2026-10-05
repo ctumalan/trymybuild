@@ -11,6 +11,9 @@ export const POST:APIRoute=async context=>{
   const back=f.returnTo==='projects'?'/dashboard?view=creator&':'/dashboard/community?';
   const question=(f.question||'').trim();if(f.action==='create'&&(question.length<10||question.length>300))return new Response('Ask one specific question of 10–300 characters.',{status:400});
   if(f.action==='create'&&f.responseCommitment!=='on')return new Response('Commit to replying to each tester.',{status:400});
-  const r=await m.db.rpc('cw_launch_feedback_request',{p_user:m.member.id,p_id:f.id,p_slug:f.slug,p_action:f.action,p_question:question});return context.redirect(back+(r.error?'error':'saved')+'=1',303);
+  const exchange=f.action==='create'&&f.exchangeCommitment==='on';
+  const args={p_user:m.member.id,p_id:f.id,p_slug:f.slug,p_question:question};
+  const r=await m.db.rpc(exchange?'cw_join_maker_exchange':'cw_launch_feedback_request',exchange?args:{...args,p_action:f.action});
+  return context.redirect((exchange?'/dashboard/exchange?':back)+(r.error?'error':'saved')+'=1',303);
  }catch{return context.redirect('/dashboard/community?error=1',303);}
 };

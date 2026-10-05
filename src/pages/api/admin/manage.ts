@@ -12,7 +12,7 @@ async function finishErasure(db:any,id:string){
  const erasedProjects=await db.from('projects').select('id').eq('owner_user_id',id);if(erasedProjects.error)throw erasedProjects.error;
  if(erasedProjects.data.length){const builds=await db.from('site_settings').delete().in('key',erasedProjects.data.map((p:any)=>'project-builds:'+p.id));if(builds.error)throw builds.error;}
  const daily=await db.from('daily_discussion_comments').update({message:'[Removed by account deletion]',moderation_status:'hidden'}).eq('user_id',id);if(daily.error)throw daily.error;
- for(const table of ['credit_ledger','feedback_requests','feedback_qualifications','project_slot_assignments','project_slot_grants','category_engagement']){const removed=await db.from(table).delete().eq('user_id',id);if(removed.error)throw removed.error;}
+ for(const table of ['maker_exchange_entries','credit_ledger','feedback_requests','feedback_qualifications','project_slot_assignments','project_slot_grants','category_engagement']){const removed=await db.from(table).delete().eq('user_id',id);if(removed.error)throw removed.error;}
  const job=await db.from('erasure_jobs').select('*').eq('user_id',id).single();if(job.error)throw job.error;
  if(job.data.status!=='complete'){
   if(job.data.paths.length){const removed=await db.storage.from('project-previews').remove(job.data.paths);if(removed.error)throw removed.error;}

@@ -44,9 +44,12 @@ test('categories wrap and violet accents apply to navigation and illustration pa
  assert.match(css,/\.site-header nav button:hover/);
  assert.match(css,/\.share-visual,\.share-visual-intro\{background:#493064/);
 });
-test('app detail background drifts slowly and respects reduced motion',()=>{
- assert.match(themeCss,/\.detail-dialog\.invitation-detail\[data-showcase-theme\] \.recipient-hero \{[\s\S]*animation:app-showcase-wash 8s ease-in-out infinite alternate/);
- assert.match(themeCss,/animation:app-showcase-glow 6s ease-in-out infinite alternate/);
+test('app detail background animates and respects reduced motion',()=>{
+ assert.match(themeCss,/\.project-detail-content \.recipient-hero,[\s\S]*animation:app-showcase-wash 4s linear infinite alternate/);
+ assert.match(themeCss,/--showcase-glow,#e7d5f7\) 18%/);
+ assert.match(themeCss,/--showcase-wash,#ded2ec\) 12%/);
+ assert.match(themeCss,/--showcase-glow,#e7d5f7\) 20%/);
+ assert.match(themeCss,/animation:app-showcase-glow 3s ease-in-out infinite alternate/);
  assert.match(themeCss,/@keyframes app-showcase-glow/);
  assert.match(themeCss,/@media\(prefers-reduced-motion:reduce\)[\s\S]*\.detail-dialog\.invitation-detail\[data-showcase-theme\] \.recipient-hero[\s\S]*animation:none/);
 });

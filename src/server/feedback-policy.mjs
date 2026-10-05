@@ -29,7 +29,7 @@ export function feedbackDestination(value) {
       return '/?category=' + encodeURIComponent(category) + '#category-community';
     }
   }
-  if (['/','/dashboard/community','/dashboard/security','/dashboard/overview','/dashboard/preferences','/dashboard/notifications','/dashboard/privacy','/dashboard/help'].includes(value)) return value;
+  if (['/','/dashboard/community','/dashboard/exchange','/dashboard/security','/dashboard/overview','/dashboard/preferences','/dashboard/notifications','/dashboard/privacy','/dashboard/help'].includes(value)) return value;
   if (value === '/?welcome=1' || value === '/?wish=1#wish-list') return value;
   if (value === 'listing' || value === '/?listing=settings') return '/?listing=settings';
   if (value === '/dashboard' || value === '/dashboard?view=creator' || value === '/dashboard/profile') return value;

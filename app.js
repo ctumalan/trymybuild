@@ -368,18 +368,18 @@ function discoveryHero(listing = false) {
   const prompt = 'Paste your app’s link';
   return `<header class="discovery-hero discovery-hero-minimal discovery-hero-action${listing ? ' listing-entry-header' : ''}" aria-label="Share your app">
     <div class="discovery-hero-copy">
-      ${listing ? '' : '<h1 class="discovery-promise"><span>Get <em>human feedback<svg class="feedback-hand-underline" viewBox="0 0 420 16" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path d="M3 10C42 5 72 9 111 7S181 9 218 6S288 7 321 5S383 5 417 2L411 5C377 9 351 7 320 10S252 9 218 11S146 10 111 12S41 10 3 13Z" /></svg></em> on your early app.</span></h1><p class="discovery-instrument-copy">Stop Guessing. Invite people to try your app, find out what’s confusing, and talk it through honestly.</p>'}
+      ${listing ? '' : `<div class="discovery-title-row"><div class="discovery-title-copy"><h1 class="discovery-promise"><span>Stop guessing. Get <em>human feedback<svg class="feedback-hand-underline" viewBox="0 0 420 16" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path d="M3 10C42 5 72 9 111 7S181 9 218 6S288 7 321 5S383 5 417 2L411 5C377 9 351 7 320 10S252 9 218 11S146 10 111 12S41 10 3 13Z" /></svg></em> on your early app</span></h1><p class="discovery-instrument-copy">Invite people to try your app, find out what’s confusing, and talk it through honestly.</p></div>${founderConversation()}</div>`}
       ${listing ? '<button type="button" class="text-button" data-entry-mode="search">← Back to apps</button>' : `<form class="discovery-entry" data-discovery-entry>
         <label class="visually-hidden" for="discovery-input">${prompt}</label>
         <div class="discovery-entry-row"><div class="discovery-entry-field"><input id="discovery-input" data-app-link-entry value="${esc(value)}" type="text" maxlength="2048" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="${prompt}" /><span class="entry-placeholder" aria-hidden="true"><span class="entry-placeholder-track">${prompt}</span></span></div><button type="submit" class="primary-button" data-entry-submit><span data-entry-submit-label>${intent.label}</span><small>Share privately first. Publish when ready.</small></button></div>
         <p class="discovery-entry-status" data-entry-status role="status"></p>
       </form>${state.listingInProgress ? '<button type="button" class="text-button entry-resume" data-entry-mode="list">Continue your draft →</button>' : ''}`}
     </div>
-    ${listing ? '' : founderConversation() + feedbackConversationExample()}
+    ${listing ? '' : feedbackConversationExample()}
   </header>`;
 }
 function feedbackConversationExample() {
-  return `<section class="sample-conversation" aria-label="Illustrative feedback conversation"><header class="sample-project-header"><div class="sample-project-icon sample-project-domain" aria-hidden="true">yourURL.com</div><div><h3>Your app, getting better 😊</h3></div><span class="sample-example-badge">Illustrative example</span></header><div class="sample-conversation-body"><div class="sample-message sample-message-creator"><img class="sample-avatar" src="/assets/avatars/example-maker-selfie.jpg" alt="Illustrative creator portrait" width="192" height="192" loading="lazy"><div class="sample-bubble"><span class="sample-label">You <span>· Creator</span></span><p>“I added a save feature. Was it easy to use?”</p></div></div><div class="sample-message sample-message-tester"><img class="sample-avatar" src="/assets/avatars/example-visitor-selfie.jpg" alt="Illustrative tester portrait" width="192" height="192" loading="lazy"><div class="sample-bubble"><span class="sample-label">Your tester <span>· First impression</span></span><p>“Saving was easy. I just couldn’t find my work afterward.”</p></div></div><div class="sample-message sample-message-creator"><img class="sample-avatar" src="/assets/avatars/example-maker-selfie.jpg" alt="Illustrative creator portrait" width="192" height="192" loading="lazy"><div class="sample-bubble"><span class="sample-label">You <span>· Creator</span></span><p>“Oh, I hadn’t thought of that. I’ll make it easier to find.”</p></div></div></div></section>`;
+  return `<section id="feedback-sample" class="sample-conversation" aria-label="Illustrative feedback conversation" hidden><header class="sample-project-header"><div class="sample-project-icon sample-project-domain" aria-hidden="true">yourURL.com</div><div><h3>Your app, getting better 😊</h3></div><span class="sample-example-badge">Illustrative example</span></header><div class="sample-conversation-body"><div class="sample-message sample-message-creator"><img class="sample-avatar" src="/assets/avatars/example-maker-selfie.jpg" alt="Illustrative creator portrait" width="192" height="192" loading="lazy"><div class="sample-bubble"><span class="sample-label">You <span>· Creator</span></span><p>“I added a save feature. Was it easy to use?”</p></div></div><div class="sample-message sample-message-tester"><img class="sample-avatar" src="/assets/avatars/example-visitor-selfie.jpg" alt="Illustrative tester portrait" width="192" height="192" loading="lazy"><div class="sample-bubble"><span class="sample-label">Your tester <span>· First impression</span></span><p>“Saving was easy. I just couldn’t find my work afterward.”</p></div></div><div class="sample-message sample-message-creator"><img class="sample-avatar" src="/assets/avatars/example-maker-selfie.jpg" alt="Illustrative creator portrait" width="192" height="192" loading="lazy"><div class="sample-bubble"><span class="sample-label">You <span>· Creator</span></span><p>“Oh, I hadn’t thought of that. I’ll make it easier to find.”</p></div></div></div></section>`;
 }
 function displayPreference(key) {
   try { return localStorage.getItem(key) === 'true'; } catch { return false; }
@@ -389,7 +389,7 @@ function rememberDisplayDismissal(key) {
 }
 function founderConversation() {
   if (displayPreference('tmb-founder-dismissed')) return '';
-  return `<section class="founder-conversation founder-banner" aria-label="A note from Christian Tumalan"><img class="founder-conversation-avatar" src="/assets/avatars/chris-nava-founder.jpg" alt="Christian Tumalan" width="48" height="48"><div class="founder-conversation-messages"><div class="founder-speech"><p>“I built my apps with AI — but AI can’t tell me what confuses a <em>real person.</em> That’s why I made TryMyBuild. I’m opening it to the first makers now — and I read every message.” <span class="founder-conversation-name">Christian · <button type="button" class="founder-about-link" data-founder-about>Founder</button></span></p><button type="button" class="founder-banner-close" data-close-founder-quote aria-label="Close founder quote">×</button></div></div></section>`;
+  return `<section class="founder-conversation founder-banner" aria-label="A note from Christian Tumalan"><div class="founder-identity"><img class="founder-conversation-avatar" src="/assets/avatars/chris-nava-founder.jpg" alt="Christian Tumalan" width="48" height="48"><span class="founder-conversation-name"><strong>Christian Tumalan</strong><button type="button" class="founder-about-link" data-founder-about>Founder</button></span></div><div class="founder-conversation-messages"><div class="founder-speech"><p class="founder-quote">“I built my apps with AI—but AI can’t tell me what confuses a <em>real person.</em> I read every message.”</p><button type="button" class="founder-banner-close" data-close-founder-quote aria-label="Close founder quote">×</button></div></div></section>`;
 }
 function catalogCategoryNavigation() {
   const categories=publishedCategories(),preferred=['Family life','Technology','Food & home','Personal planning','Creative work'];
@@ -1699,10 +1699,9 @@ document.addEventListener('click', event => {
   if(close) close.closest('.founder-popout').hidden=true;
 });
 
-// Only a visitor's close choice hides the conversation on later visits.
-let conversationDemoDismissed = displayPreference('tmb-conversation-dismissed');
-// Play the illustrative conversation once per rendered card when it enters view.
+// Prepare the illustrative conversation once per rendered card.
 let welcomeAnimationFinished;
+let underlineTracePlayed = false;
 function showWelcomeAnimation(replay = false) {
   if (replay) welcomeAnimationFinished = null;
   if (welcomeAnimationFinished) return welcomeAnimationFinished;
@@ -1738,6 +1737,15 @@ function showWelcomeAnimation(replay = false) {
 }
 function prepareConversationAnimations() {
   if (document.querySelector('.discovery-hero-action:not(.listing-entry-header)')) showWelcomeAnimation();
+  const underline = document.querySelector('.feedback-hand-underline:not([data-trace-ready])');
+  if (underline && !underlineTracePlayed && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    underline.dataset.traceReady = 'true';
+    showWelcomeAnimation().then(() => {
+      if (!underline.isConnected) return;
+      underlineTracePlayed = true;
+      requestAnimationFrame(() => underline.classList.add('is-tracing'));
+    });
+  }
   const banner = document.querySelector('.founder-banner:not([data-entrance-ready])');
   if (banner) {
     banner.dataset.entranceReady = 'true';
@@ -1750,61 +1758,81 @@ function prepareConversationAnimations() {
   }
   document.querySelectorAll('.discovery-hero-action>.sample-conversation:not([data-animation-ready])').forEach(card => {
     card.dataset.animationReady = 'true';
-    if (conversationDemoDismissed) { card.hidden = true; return; }
+    let runId = 0;
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
+    const messages = [...card.querySelectorAll('.sample-message')];
+    messages.forEach(message => {
+      const paragraph = message.querySelector('.sample-bubble p');
+      paragraph.dataset.sampleText = paragraph.textContent;
+      paragraph.setAttribute('aria-label', paragraph.textContent);
+    });
+    const trigger = document.createElement('button');
+    trigger.type = 'button'; trigger.className = 'conversation-sample-trigger text-button';
+    trigger.textContent = 'See sample'; trigger.setAttribute('aria-controls', card.id); trigger.setAttribute('aria-expanded', 'false');
+    card.before(trigger);
     const close = document.createElement('button');
     close.type = 'button'; close.className = 'conversation-demo-close';
-    close.setAttribute('aria-label', 'Close feedback example'); close.textContent = '×'; close.hidden = true;
-    close.onclick = () => { conversationDemoDismissed = true; rememberDisplayDismissal('tmb-conversation-dismissed'); card.hidden = true; };
+    close.setAttribute('aria-label', 'Close feedback example'); close.textContent = '×';
+    close.onclick = () => {
+      runId += 1;
+      card.hidden = true;
+      card.classList.remove('conversation-staged','conversation-frame-visible','conversation-playing','task-visible');
+      messages.forEach(message => {
+        message.classList.remove('message-visible');
+        const paragraph = message.querySelector('.sample-bubble p');
+        paragraph.classList.remove('message-typing');
+        paragraph.textContent = paragraph.dataset.sampleText;
+        paragraph.style.minHeight = '';
+      });
+      trigger.hidden = false;
+      trigger.setAttribute('aria-expanded', 'false');
+      trigger.focus({preventScroll:true});
+    };
     card.append(close);
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { close.hidden = false; return; }
-    card.classList.add('conversation-staged');
-    const loading = document.createElement('div');
-    loading.className = 'conversation-loading';
-    loading.setAttribute('role', 'status');
-    loading.innerHTML = 'Loading sample conversation<span class="conversation-loading-dots" aria-hidden="true"><span>.</span><span>.</span><span>.</span></span>';
-    card.before(loading);
-    const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
-    const loopFinished = showWelcomeAnimation();
-    const typeMessage = async message => {
+    const typeMessage = async (message, currentRun) => {
       const paragraph = message.querySelector('.sample-bubble p');
-      const text = paragraph.textContent;
-      paragraph.setAttribute('aria-label', text);
+      const text = paragraph.dataset.sampleText;
       paragraph.style.minHeight = paragraph.getBoundingClientRect().height + 'px';
       paragraph.textContent = '';
       message.classList.add('message-visible');
       paragraph.classList.add('message-typing');
       for (const letter of text) {
-        if (!card.isConnected) return;
+        if (!card.isConnected || currentRun !== runId) return;
         paragraph.textContent += letter;
         await pause(24);
       }
       paragraph.classList.remove('message-typing');
     };
-    const observer = new IntersectionObserver(async entries => {
-      if (!entries.some(entry => entry.isIntersecting)) return;
-      observer.disconnect();
-      await loopFinished;
-      await pause(6000);
-      if (!card.isConnected) return;
+    trigger.onclick = async () => {
+      const currentRun = ++runId;
+      trigger.hidden = true;
+      trigger.setAttribute('aria-expanded', 'true');
+      const loading = document.createElement('div');
+      loading.className = 'conversation-loading';
+      loading.setAttribute('role', 'status');
+      loading.innerHTML = 'Loading sample conversation<span class="conversation-loading-dots" aria-hidden="true"><span>.</span><span>.</span><span>.</span></span>';
+      card.before(loading);
+      await pause(2000);
+      if (!card.isConnected || currentRun !== runId) { loading.remove(); return; }
       loading.remove();
-      const sequenceStarted = performance.now();
-      card.classList.add('conversation-frame-visible');
+      if (!reducedMotion) card.classList.add('conversation-staged');
+      card.hidden = false;
+      if (reducedMotion) return;
+      await new Promise(resolve => requestAnimationFrame(() => { card.classList.add('conversation-frame-visible'); resolve(); }));
       await pause(300);
-      if (!card.isConnected) return;
+      if (!card.isConnected || currentRun !== runId) return;
       card.classList.add('conversation-playing');
       await pause(650);
-      if (!card.isConnected) return;
+      if (!card.isConnected || currentRun !== runId) return;
       card.classList.add('task-visible');
       await pause(700);
-      for (const message of card.querySelectorAll('.sample-message')) {
-        if (!card.isConnected) return;
-        await typeMessage(message);
+      for (const message of messages) {
+        if (!card.isConnected || currentRun !== runId) return;
+        await typeMessage(message, currentRun);
         await pause(600);
       }
-      await pause(Math.max(0, 6000 - (performance.now() - sequenceStarted)));
-      if (card.isConnected) close.hidden = false;
-    }, {threshold:.35});
-    observer.observe(card);
+    };
   });
 }
 new MutationObserver(prepareConversationAnimations).observe(document.getElementById('app'), {childList:true,subtree:true});

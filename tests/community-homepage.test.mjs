@@ -22,6 +22,23 @@ test('homepage offers functioning paths for visitors and makers',()=>{
  assert.match(app,/data-route="share">Share my app/);
  assert.doesNotMatch(app,/el.hidden = !!state.session\?\.authenticated/);
 });
+
+test('about page links to Christian and TryMyBuild social profiles',()=>{
+ const source=read('community-entry.js'),css=read('future-design.css');
+ assert.match(source,/https:\/\/www\.facebook\.com\/christian\.tumalan/);
+ assert.match(source,/https:\/\/www\.reddit\.com\/user\/Abject_Height_322\//);
+ assert.match(source,/https:\/\/www\.facebook\.com\/profile\.php\?id=61594750508539/);
+ assert.match(source,/aria-label="Christian Tumalan on Facebook"/);
+ assert.match(source,/aria-label="Christian Tumalan on Reddit"/);
+ assert.match(source,/aria-label="TryMyBuild on Facebook"/);
+ assert.match(source,/<h3 class="founder-contact-heading">Get in touch<\/h3>/);
+ assert.match(source,/href="mailto:hello@trymybuild\.com" aria-label="Email Christian Tumalan"/);
+ assert.doesNotMatch(source,/<button class="text-button" data-route="contact">Get in touch/);
+ assert.match(css,/\.founder-social-links/);
+ assert.match(css,/\.founder-social-facebook \{ background:#1877f2/);
+ assert.match(css,/\.founder-social-reddit \{ background:#ff4500/);
+ assert.match(css,/\.founder-social-email \{ background:#7545ad/);
+});
 test('community suggestions use actual first-step content and handle an empty catalog',()=>{
  const ctx=vm.createContext({projects:[{slug:'real-project',name:'Real project'}],projectPresentation:{'real-project':['','','','','Test the search filters.']},creatorFor:()=>({type:'independent'}),creatorLink:()=>'<span>Actual creator</span>',esc:s=>String(s).replaceAll('<','&lt;')});
  vm.runInContext(app.slice(app.indexOf('function projectFirstStep('),app.indexOf('function catalogRow(')),ctx);

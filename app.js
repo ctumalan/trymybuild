@@ -379,7 +379,7 @@ function discoveryHero(listing = false) {
   </header>`;
 }
 function feedbackConversationExample() {
-  return `<section class="sample-conversation" aria-label="Illustrative feedback conversation"><header class="sample-project-header"><div class="sample-project-icon sample-project-domain" aria-hidden="true">You.com</div><div><h3>Your app, getting better 😊</h3></div><span class="sample-example-badge">Illustrative example</span></header><div class="sample-conversation-body"><div class="sample-message sample-message-creator"><img class="sample-avatar" src="/assets/avatars/example-maker-selfie.jpg" alt="Illustrative creator portrait" width="192" height="192" loading="lazy"><div class="sample-bubble"><span class="sample-label">You <span>· Creator</span></span><p>“I added a save feature. Was it easy to use?”</p></div></div><div class="sample-message sample-message-tester"><img class="sample-avatar" src="/assets/avatars/example-visitor-selfie.jpg" alt="Illustrative tester portrait" width="192" height="192" loading="lazy"><div class="sample-bubble"><span class="sample-label">Your tester <span>· First impression</span></span><p>“Saving was easy. I just couldn’t find my work afterward.”</p></div></div><div class="sample-message sample-message-creator"><img class="sample-avatar" src="/assets/avatars/example-maker-selfie.jpg" alt="Illustrative creator portrait" width="192" height="192" loading="lazy"><div class="sample-bubble"><span class="sample-label">You <span>· Creator</span></span><p>“Oh, I hadn’t thought of that. I’ll make it easier to find.”</p></div></div></div></section>`;
+  return `<section class="sample-conversation" aria-label="Illustrative feedback conversation"><header class="sample-project-header"><div class="sample-project-icon sample-project-domain" aria-hidden="true">yourURL.com</div><div><h3>Your app, getting better 😊</h3></div><span class="sample-example-badge">Illustrative example</span></header><div class="sample-conversation-body"><div class="sample-message sample-message-creator"><img class="sample-avatar" src="/assets/avatars/example-maker-selfie.jpg" alt="Illustrative creator portrait" width="192" height="192" loading="lazy"><div class="sample-bubble"><span class="sample-label">You <span>· Creator</span></span><p>“I added a save feature. Was it easy to use?”</p></div></div><div class="sample-message sample-message-tester"><img class="sample-avatar" src="/assets/avatars/example-visitor-selfie.jpg" alt="Illustrative tester portrait" width="192" height="192" loading="lazy"><div class="sample-bubble"><span class="sample-label">Your tester <span>· First impression</span></span><p>“Saving was easy. I just couldn’t find my work afterward.”</p></div></div><div class="sample-message sample-message-creator"><img class="sample-avatar" src="/assets/avatars/example-maker-selfie.jpg" alt="Illustrative creator portrait" width="192" height="192" loading="lazy"><div class="sample-bubble"><span class="sample-label">You <span>· Creator</span></span><p>“Oh, I hadn’t thought of that. I’ll make it easier to find.”</p></div></div></div></section>`;
 }
 function displayPreference(key) {
   try { return localStorage.getItem(key) === 'true'; } catch { return false; }
@@ -401,31 +401,6 @@ function catalogCategoryNavigation() {
   const more=overflow.filter(category=>!visible.some(item=>item.name===category.name));
   return `<nav class="discovery-categories" aria-label="Browse apps by category"><button type="button" data-category-filter="All" aria-pressed="${state.category==='All'}">All apps</button>${visible.map(button).join('')}${more.length?`<details><summary>More categories</summary><div>${more.map(button).join('')}</div></details>`:''}</nav>`;
 }
-const makerPromptTips = [
-  { title: 'Fix one thing at a time', prompt: 'When I [action], I expected [result], but [actual result] happened. Find the cause, make the smallest fix, and explain how to verify it. Preserve unrelated behavior.' },
-  { title: 'Turn feedback into a clear task', prompt: 'A tester reported: [feedback]. Separate observations from assumptions. Suggest one focused improvement, explain why it helps, and describe how I can check it with the tester.' },
-  { title: 'Make the first step obvious', prompt: 'Review this first-use flow: [steps or screenshot]. Identify where a new user might hesitate. Suggest three concrete changes, prioritize the smallest useful one, and explain your reasoning.' },
-  { title: 'Ask before making assumptions', prompt: 'Help me build [feature] for [user]. First identify the missing details that could change the implementation. Ask the three most important questions before proposing a solution.' },
-  { title: 'Test the awkward cases', prompt: 'For this feature: [description], list realistic edge cases, including empty inputs, failed requests, and repeat actions. Prioritize the cases that could lose user work and give me a short manual testing checklist.' },
-  { title: 'Write copy people understand', prompt: 'Rewrite this interface text: [copy]. Use plain language for [audience], explain the next action, and keep button labels specific. Give me three concise alternatives without promising unsupported results.' },
-  { title: 'Protect what already works', prompt: 'Before changing [feature], identify the existing behaviors and dependencies it affects. Propose the smallest change, preserve unrelated flows, and describe the checks needed to catch regressions.' }
-];
-function dailyMakerTip() {
-  const parts = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Los_Angeles', year: 'numeric', month: 'numeric', day: 'numeric' }).formatToParts(new Date());
-  const part = type => Number(parts.find(p => p.type === type).value);
-  const day = Math.floor(Date.UTC(part('year'), part('month') - 1, part('day')) / 86400000);
-  return makerPromptTips[day % makerPromptTips.length];
-}
-function makerArticleCard(extraClass = '') {
-  return `<a class="maker-article-card ${extraClass}" href="/article"><span class="maker-kicker">For makers · Article</span><img src="/assets/articles/find-beta-users.webp" alt="An illustrated guide to finding beta users" width="1536" height="1024" loading="lazy"><h3>You built the app. Now find your people.</h3><p>Find beta testers without an existing audience.</p><span class="maker-read">Read the article →</span></a>`;
-}
-function makerTipCard(extraClass = '') {
-  const tip = dailyMakerTip();
-  return `<section class="maker-tip-card ${extraClass}" aria-label="AI prompt tip of the day"><span class="maker-kicker">AI prompt tip of the day</span><h3>${esc(tip.title)}</h3><p class="maker-tip-intro">Use real feedback to guide your next improvement.</p><details class="maker-prompt-details"><summary>View &amp; copy prompt</summary><blockquote>${esc(tip.prompt)}</blockquote><button type="button" class="maker-copy" data-copy-maker-prompt="${esc(tip.prompt)}">Copy prompt</button><p class="maker-copy-status" role="status"></p></details><small>A new tip each day · Pacific time</small></section>`;
-}
-function makersSidebar() {
-  return `<aside class="makers-sidebar" aria-label="Maker’s notebook"><h2 class="maker-notebook-title">Maker’s notebook</h2>${makerArticleCard()}${makerTipCard()}</aside>`;
-}
 function discover(communityFocused = false) {
   // Never fall back to the built-in catalog on the server; show loading/unavailable instead.
   const activeView = communityFocused ? 'test' : homeView;
@@ -443,12 +418,12 @@ function discover(communityFocused = false) {
   const filtered=searchResults.items;
   return `<section class="page-shell discover-page future-discover">
     ${discoveryHero()}${catalogCategoryNavigation()}<div id="home-panel" tabindex="-1" aria-label="Discover apps">
-    ${makerArticleCard('maker-mobile-article')}<div class="maker-catalog-layout"><div class="catalog-results"><div class="results-heading"><div><h2>${query.trim()?'Closest matches':state.category !== 'All'?esc(state.category):'Check Out The First Apps On TryMyBuild'}</h2><span>${filtered.length} ${filtered.length === 1 ? 'app' : 'apps'} · ${query.trim()&&!searchResults.suggestions?'Most relevant first.':catalogSortLabel()}</span></div><div class="catalog-controls">${!query.trim()?'<button type="button" class="text-button" data-wish-focus>Submit a wish</button>':''}<details class="catalog-filter-menu" ${state.filterOpen?'open':''}><summary>Filter &amp; sort${state.category !== 'All' ? ` · ${esc(state.category)}` : ''}${state.creatorType !== 'all' || state.verifiedOnly || state.price !== 'all' ? ' · active' : ''}</summary><div class="catalog-filter-options">
+    <div class="catalog-results"><div class="results-heading"><div><h2>${query.trim()?'Closest matches':state.category !== 'All'?esc(state.category):'Check Out The First Apps On TryMyBuild'}</h2><span>${filtered.length} ${filtered.length === 1 ? 'app' : 'apps'} · ${query.trim()&&!searchResults.suggestions?'Most relevant first.':catalogSortLabel()}</span></div><div class="catalog-controls">${!query.trim()?'<button type="button" class="text-button" data-wish-focus>Submit a wish</button>':''}<details class="catalog-filter-menu" ${state.filterOpen?'open':''}><summary>Filter &amp; sort${state.category !== 'All' ? ` · ${esc(state.category)}` : ''}${state.creatorType !== 'all' || state.verifiedOnly || state.price !== 'all' ? ' · active' : ''}</summary><div class="catalog-filter-options">
       <label class="sort-control">Price <select data-price-select><option value="all" ${state.price === 'all' ? 'selected' : ''}>All prices</option><option value="free" ${state.price === 'free' ? 'selected' : ''}>Free</option><option value="freemium" ${state.price === 'freemium' ? 'selected' : ''}>Free + paid options</option><option value="paid" ${state.price === 'paid' ? 'selected' : ''}>Paid</option></select></label>
       <label class="sort-control">Sort by <select data-sort-select><option value="recent" ${state.sort === "recent" ? "selected" : ""}>Most recent</option><option value="reviewed" ${state.sort === "reviewed" ? "selected" : ""}>Most reviewed</option><option value="saved" ${state.sort === "saved" ? "selected" : ""}>Most saved</option></select></label>
       <div class="sort-control creator-filter-row"><label for="creator-filter">Creators</label><select id="creator-filter" data-creator-type-select><option value="all" ${state.creatorType === 'all' ? 'selected' : ''}>All creators</option><option value="independent" ${state.creatorType === 'independent' ? 'selected' : ''}>Independent</option><option value="company" ${state.creatorType === 'company' ? 'selected' : ''}>Companies</option></select></div>
       <div class="verified-builder-option"><label for="verified-builder-filter"><input id="verified-builder-filter" type="checkbox" data-verified-select ${state.verifiedOnly ? 'checked' : ''}> <span>Verified builders only</span></label><button type="button" class="creator-filter-info" data-verification-info aria-label="About builder verification" aria-expanded="false" aria-controls="creator-verification-help">?</button></div>
-      <p id="creator-verification-help" class="creator-verification-help" hidden>Verified Builder is earned by independent creators after qualifying contributions and confirmation that they own their published app. It does not rate app quality.</p></div></details></div></div>${query.trim()?`<p class="search-guidance">${searchResults.suggestions?'Try describing a specific task. Here are some apps to explore within your filters.':'Explore these apps, or tell creators what you still need.'} <button class="text-button" data-wish-focus>Submit a wish</button></p>`:''}<div class="catalog-list">${filtered.length ? filtered.map(product => catalogRow(product)).join("") : `<div class="empty-state"><h2>${query.trim()?'Explore more possibilities':'More apps are on the way'}</h2><p>${state.verifiedOnly?'No verified creators match these filters. TryMyBuild Studio holds a disclosed founder exception.':'There are no published apps within these filters yet. Broaden your filters or share what you need.'}</p><button class="secondary-button" data-clear-search>Browse all apps</button><button class="primary-button" data-wish-focus>Submit a wish</button></div>`}${makerTipCard('maker-mobile-tip')}</div></div>${makersSidebar()}</div>
+      <p id="creator-verification-help" class="creator-verification-help" hidden>Verified Builder is earned by independent creators after qualifying contributions and confirmation that they own their published app. It does not rate app quality.</p></div></details></div></div>${query.trim()?`<p class="search-guidance">${searchResults.suggestions?'Try describing a specific task. Here are some apps to explore within your filters.':'Explore these apps, or tell creators what you still need.'} <button class="text-button" data-wish-focus>Submit a wish</button></p>`:''}<div class="catalog-list">${filtered.length ? filtered.map(product => catalogRow(product)).join("") : `<div class="empty-state"><h2>${query.trim()?'Explore more possibilities':'More apps are on the way'}</h2><p>${state.verifiedOnly?'No verified creators match these filters. TryMyBuild Studio holds a disclosed founder exception.':'There are no published apps within these filters yet. Broaden your filters or share what you need.'}</p><button class="secondary-button" data-clear-search>Browse all apps</button><button class="primary-button" data-wish-focus>Submit a wish</button></div>`}</div></div>
   </div></section>`;
 }
 
@@ -1839,17 +1814,4 @@ prepareConversationAnimations();
 document.addEventListener('click', event => {
  const close=event.target.closest('[data-close-founder-quote]');
  if(close) { rememberDisplayDismissal('tmb-founder-dismissed'); close.closest('.founder-banner').hidden=true; }
-});
-
-// Delegation keeps copying available after catalog filtering and navigation.
-document.addEventListener('click', async event => {
-  const button = event.target.closest('[data-copy-maker-prompt]');
-  if (!button) return;
-  const status = button.closest('.maker-tip-card').querySelector('.maker-copy-status');
-  try {
-    await navigator.clipboard.writeText(button.dataset.copyMakerPrompt);
-    status.textContent = 'Prompt copied.';
-  } catch {
-    status.textContent = 'Copy unavailable. Select the prompt text above to copy it.';
-  }
 });

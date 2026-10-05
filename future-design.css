@@ -1263,69 +1263,6 @@ body.public-site #app[tabindex="-1"]:focus { outline:none; }
 }
 .discovery-hero-action>.sample-conversation .sample-project-header { padding-right:44px; }
 
-/* Maker reading and daily prompts alongside discovery. */
-.maker-catalog-layout { display:grid; grid-template-columns:minmax(0,1fr) 260px; gap:28px; align-items:start; }
-.maker-catalog-layout .catalog-results { min-width:0; }
-.makers-sidebar { display:grid; gap:20px; padding-top:8px; }
-.maker-article-card,.maker-tip-card { display:block; padding:20px; border:1px solid #e4dce9; border-radius:16px; background:#fffdf9; color:#382b46; text-decoration:none; }
-.maker-article-card:hover { border-color:#ad8cc6; box-shadow:0 5px 20px #382b460c; }
-.maker-kicker { display:block; color:#805894; font-size:.65rem; font-weight:700; letter-spacing:.11em; text-transform:uppercase; line-height:1.6; }
-.maker-article-card img { display:block; width:100%; height:auto; margin:14px 0; border-radius:8px; }
-.maker-article-card h3,.maker-tip-card h3 { font:400 1.45rem/1.2 Georgia,serif; letter-spacing:-.02em; margin:14px 0 10px; }
-.maker-article-card p,.maker-tip-intro { font-size:.8rem; line-height:1.6; color:#766b7b; margin:0 0 14px; }
-.maker-read { color:#7545ad; font-size:.8rem; font-weight:700; }
-.maker-tip-card { background:#f5eff9; }
-.maker-tip-card blockquote { margin:16px 0; padding:0 0 0 12px; border-left:2px solid #b396c7; font-size:.8rem; line-height:1.7; color:#5a4667; user-select:text; }
-.maker-copy { border:1px solid #d6c4e3; border-radius:22px; padding:10px 16px; background:#fff; color:#7545ad; font:600 .78rem/1.2 inherit; cursor:pointer; }
-.maker-copy-status { font-size:.75rem; color:#654178; margin:8px 0; }
-.maker-tip-card small { display:block; font-size:.65rem; color:#8a7894; margin-top:10px; }
-.maker-copy:focus-visible,.maker-article-card:focus-visible { outline:3px solid #a378bf; outline-offset:4px; }
-.maker-mobile-article,.maker-mobile-tip { display:none; }
-@media(max-width:1000px) {
- .maker-catalog-layout { display:block; }
- .makers-sidebar { display:none; }
- .maker-mobile-article { display:grid; grid-template-columns:90px minmax(0,1fr); gap:0 16px; margin:20px 0; padding:16px; }
- .maker-mobile-article img { grid-column:1; grid-row:1 / span 4; align-self:center; margin:0; }
- .maker-mobile-article .maker-kicker,.maker-mobile-article h3,.maker-mobile-article p,.maker-mobile-article .maker-read { grid-column:2; }
- .maker-mobile-article h3 { font-size:1.15rem; margin:5px 0; }
- .maker-mobile-article p { font-size:.75rem; margin-bottom:6px; }
- .future-discover .catalog-list > .maker-mobile-tip { display:block; grid-column:1 / -1; width:100%; max-width:none; order:1; }
- .maker-catalog-layout .catalog-list > .future-card { order:2 !important; }
- .maker-catalog-layout .catalog-list > .future-card:first-child { order:0 !important; }
-}
-
-/* An editorial margin keeps the projects in the spotlight. */
-.makers-sidebar { border-left:1px solid #e5e0e7; padding:6px 0 6px 22px; gap:0; }
-.maker-notebook-title { margin:0 0 22px; color:#86768d; font:600 .65rem/1.5 Arial,sans-serif; letter-spacing:.14em; text-transform:uppercase; }
-.maker-article-card,.maker-tip-card { border:0; border-radius:0; padding:0; background:transparent; box-shadow:none; }
-.maker-article-card:hover { border-color:transparent; box-shadow:none; }
-.makers-sidebar .maker-article-card { display:grid; grid-template-columns:minmax(0,1fr) 64px; gap:0 12px; padding-bottom:22px; border-bottom:1px solid #e5e0e7; }
-.makers-sidebar .maker-article-card .maker-kicker { grid-column:1 / -1; margin-bottom:10px; }
-.makers-sidebar .maker-article-card img { grid-column:2; grid-row:2 / span 2; margin:0; border-radius:3px; }
-.makers-sidebar .maker-article-card h3 { grid-column:1; margin:0 0 8px; font-size:1.05rem; line-height:1.35; }
-.makers-sidebar .maker-article-card p { grid-column:1 / -1; font-size:.73rem; margin:8px 0 12px; }
-.makers-sidebar .maker-read { grid-column:1 / -1; font-size:.73rem; font-weight:500; }
-.makers-sidebar .maker-tip-card { padding-top:22px; }
-.maker-tip-card h3 { font-size:1.08rem; line-height:1.35; margin:10px 0 8px; }
-.maker-kicker { font-size:.6rem; font-weight:500; color:#8b7b94; }
-.maker-tip-intro { font-size:.73rem; line-height:1.6; }
-.maker-prompt-details summary { color:#7545ad; font-size:.73rem; cursor:pointer; padding:5px 0; }
-.maker-prompt-details summary:focus-visible { outline:2px solid #a378bf; outline-offset:4px; }
-.maker-prompt-details blockquote { font-size:.75rem; }
-.maker-copy { padding:8px 12px; font-size:.73rem; }
-.maker-tip-card small { font-size:.6rem; color:#9b8da2; }
-@media(max-width:1000px) {
- .maker-mobile-article { padding:14px 0; border-top:1px solid #e5e0e7; border-bottom:1px solid #e5e0e7; grid-template-columns:64px minmax(0,1fr); border-radius:0; }
- .maker-mobile-article h3 { font-size:1.05rem; }
- .future-discover .catalog-list > .maker-mobile-tip { padding:18px 0; border-top:1px solid #e5e0e7; border-bottom:1px solid #e5e0e7; }
-}
-
-/* Compact notebook entries use whitespace instead of stacked rules. */
-@media(max-width:1000px) {
- .maker-mobile-article { border:0; margin:12px 0 24px; padding:14px 0; }
- .future-discover .catalog-list > .maker-mobile-tip { border:0; padding:18px 0; }
-}
-
 /* The category bar already supplies the boundary above discovery. */
 .future-discover .discovery-categories + #home-panel { border-top:0; }
 
@@ -1333,6 +1270,34 @@ body.public-site #app[tabindex="-1"]:focus { outline:none; }
 .future-discover .discovery-categories { border-bottom:0; }
 
 /* Give the example app name room to read at mobile sizes. */
-.discovery-hero-action>.sample-conversation .sample-project-header { grid-template-columns:64px minmax(0,1fr) auto; }
-.discovery-hero-action>.sample-conversation .sample-project-header .sample-project-domain { display:grid; place-items:center; width:64px; height:40px; border-radius:12px; color:#fff; font-size:12px; font-weight:800; letter-spacing:-.03em; }
-@media(max-width:620px) { .discovery-hero-action>.sample-conversation .sample-project-header { grid-template-columns:64px minmax(0,1fr); } }
+.discovery-hero-action>.sample-conversation .sample-project-header { grid-template-columns:76px minmax(0,1fr) auto; }
+.discovery-hero-action>.sample-conversation .sample-project-header .sample-project-domain { display:grid; place-items:center; width:76px; height:40px; border-radius:12px; color:#fff; font-size:10px; font-weight:800; letter-spacing:-.03em; }
+@media(max-width:620px) { .discovery-hero-action>.sample-conversation .sample-project-header { grid-template-columns:76px minmax(0,1fr); } }
+
+/* Let the page itself read like a conversation instead of centering every beat. */
+.discovery-hero-action>.founder-banner {
+  width:min(680px,88%);
+  max-width:680px;
+  margin:28px auto 0 0;
+}
+.discovery-hero-action>.sample-conversation {
+  width:min(740px,88%);
+  max-width:740px;
+  margin:28px 0 0 auto;
+}
+.founder-banner .founder-speech>p {
+  font-size:.92rem;
+  line-height:1.5;
+}
+.founder-banner .founder-conversation-name { font-size:.76rem; }
+
+/* The welcome diagram stays legible on small screens. */
+.welcome-animation-dialog { width:min(620px,calc(100vw - 32px)); overflow:hidden; }
+.welcome-animation-dialog img { width:112%; max-width:none; margin-inline:-6%; }
+@media(max-width:620px) {
+  .discovery-hero-action>.founder-banner,
+  .discovery-hero-action>.sample-conversation { width:96%; }
+  .founder-banner .founder-speech>p { font-size:.86rem; line-height:1.5; }
+  .welcome-animation-dialog { padding-inline:14px; }
+  .welcome-animation-dialog img { width:120%; margin-inline:-10%; }
+}

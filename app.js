@@ -661,8 +661,12 @@ function projectDetailContent(product, preview = false) {
 function projectConversation(product) {
   return CWProjectView.conversation(product, {posts:state.communityPosts.filter(post=>post.projectSlug===product.slug), loading:!!window.CW_SERVER, composer:projectCommentComposer(product,false,'conversation-')});
 }
-function loadProjectConversation() {
-  if (window.CW_SERVER) return CWProjectView.loadProjectConversation(document.querySelector('.detail-overlay [data-conversation]'));
+function loadProjectConversation(root = document.querySelector('.detail-overlay')) {
+  if (window.CW_SERVER) return CWProjectView.loadProjectConversation(root?.querySelector('[data-conversation]'));
+}
+function projectPanel(product) {
+  const saved = state.saved.has(product.slug);
+  return `<main class="recipient-main project-detail-content invitation-detail mealmap-detail" data-showcase-theme="${CWProjectView.theme(product)}" data-public-project="${esc(product.slug)}"><header class="public-detail-header"><div><strong>${esc(product.name)}</strong><small>${esc(product.price)} · ${esc(product.category)} · ${esc(product.stage)}</small></div><div class="invite-actions"><button class="secondary-button detail-save ${saved?'is-saved':''}" data-save="${esc(product.slug)}">${saved?'♥ Saved':'♡ Save'}</button><button class="secondary-button detail-share" data-share-product="${esc(product.slug)}">Share</button><span class="detail-share-status" data-share-status role="status"></span></div></header>${projectDetailContent(product)}<div class="mealmap-after">${projectConversation(product)}</div>${similarSection(product)}</main>`;
 }
 function detailDrawer(product) {
   const saved = state.saved.has(product.slug);
@@ -670,7 +674,7 @@ function detailDrawer(product) {
     <button class="detail-backdrop" data-detail-close aria-label="Close app details"></button>
     <section class="detail-dialog mealmap-detail invitation-detail" data-showcase-theme="${CWProjectView.theme(product)}" role="dialog" aria-modal="true" aria-labelledby="detail-title-${esc(product.slug)}" tabindex="-1">
       <div class="detail-scroll">
-        <header class="project-panel-bar"><span>TryMyBuild</span><button class="detail-close" data-detail-close aria-label="Close ${esc(product.name)} details">×</button></header><div class="project-detail-content"><header class="public-detail-header">${detailProjectHistory.length ? `<button type="button" class="detail-back" data-detail-back aria-label="Previous project">←</button>` : ''}<div><strong>${esc(product.name)}</strong><small>${esc(product.price)} · ${esc(product.category)} · ${esc(product.stage)}</small></div><div class="invite-actions"><button class="secondary-button detail-save ${saved?'is-saved':''}" data-save="${esc(product.slug)}">${saved?'♥ Saved':'♡ Save'}</button><button class="secondary-button detail-share" data-share-product="${esc(product.slug)}">Share</button><span class="detail-share-status" data-share-status role="status"></span></div></header>${projectDetailContent(product)}
+        <header class="project-panel-bar"><span class="overlay-brand" aria-label="TryMyBuild"><img class="brand-mark" src="/assets/brand/trymybuild-mark.svg" width="40" height="40" alt=""><span class="brand-name">TryMy<span class="brand-name-works">Build</span></span></span><button class="detail-close" data-detail-close aria-label="Close ${esc(product.name)} details">×</button></header><div class="project-detail-content"><header class="public-detail-header">${detailProjectHistory.length ? `<button type="button" class="detail-back" data-detail-back aria-label="Previous project">←</button>` : ''}<div><strong>${esc(product.name)}</strong><small>${esc(product.price)} · ${esc(product.category)} · ${esc(product.stage)}</small></div><div class="invite-actions"><button class="secondary-button detail-save ${saved?'is-saved':''}" data-save="${esc(product.slug)}">${saved?'♥ Saved':'♡ Save'}</button><button class="secondary-button detail-share" data-share-product="${esc(product.slug)}">Share</button><span class="detail-share-status" data-share-status role="status"></span></div></header>${projectDetailContent(product)}
         <div class="mealmap-after">${projectConversation(product)}</div>${similarSection(product)}</div>
       </div>
     </section>
@@ -1334,6 +1338,11 @@ document.addEventListener("click", async event => {
   if (productButton) {
     const product = projects.find(item => item.slug === productButton.dataset.product);
     if(product)trackCategoryInterest(product.category);
+    if (product && productButton.closest('.cw-overlay')) {
+      window.CWPanels.show(projectPanel(product), 'project');
+      void loadProjectConversation([...document.querySelectorAll('.cw-overlay [data-public-project]')].at(-1));
+      return;
+    }
     if (state.route !== "discover") { state.route = "discover"; state.category = "All"; state.query = ""; render(); }
     openProductDetail(product, productButton);
     return;

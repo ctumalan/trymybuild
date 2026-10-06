@@ -590,6 +590,8 @@ a.secondary-button,.cw-main a.secondary-button { background: #f2edf8; color: #5e
 .detail-creator button.creator-byline,.detail-creator a.creator-byline { cursor: pointer; }
 .detail-creator button.creator-byline:hover,.detail-creator a.creator-byline:hover { color: #7545ad; text-decoration: underline; }
 .detail-creator .creator-byline .creator-verified { padding: 0; border: 0; border-radius: 0; background: transparent; color: #7545ad; font-size: .78rem; }
+.recipient-preview-column>.detail-creator { width: 100%; margin: 0 0 -10px; text-align: center; }
+.recipient-preview-column>.detail-creator .creator-link,.recipient-preview-column>.detail-creator .public-builder,.recipient-preview-column>.detail-creator .creator-byline { margin-inline: auto; }
 
 /* One front-door field; filters belong to the app catalog. */
 .discovery-entry { margin: 0; }

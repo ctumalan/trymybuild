@@ -133,9 +133,9 @@ body.public-site .site-footer .brand-name-works { color: #7545ad; }
 .future-discover .catalog-filter-options select { background: #f2edf8; color: #17332a; border-color: #ded3eb; }
 .future-discover .catalog-filter-options .category-strip button { background: #f2edf8; color: #5e6f68; border-color: #ded3eb; }
 .future-discover .catalog-filter-options .category-strip .is-selected { background: #7545ad; color: #ffffff; }
-.future-discover .results-heading { display: flex; align-items: center; justify-content: space-between; margin: 0 0 18px; }
-.future-discover .results-heading h2 { color: #17332a; font-size: 2rem; line-height: 1.1; letter-spacing: -.04em; margin: 0 0 6px; }
-.future-discover .results-heading > div > span { color: #5e6f68; font-size: .7rem; }
+.future-discover .results-heading { display: flex; align-items: center; justify-content: space-between; margin: 0 0 10px; }
+.future-discover .results-heading h2 { color: #17332a; font-size: 2rem; line-height: 1.1; letter-spacing: -.04em; margin: 0; }
+.future-discover .results-heading > div > span { display: block; margin-top: 2px; color: #5e6f68; font-size: .7rem; line-height: 1.2; }
 .future-discover .results-heading .text-button { font-size: .78rem; padding: 8px 0; }
 /* Add columns as space opens up; cards keep their approved slim proportions. */
 .future-discover .catalog-list { grid-template-columns: repeat(auto-fit,minmax(260px,1fr)); justify-items: center; gap: 20px; }
@@ -516,6 +516,20 @@ a.secondary-button,.cw-main a.secondary-button { background: #f2edf8; color: #5e
   .recipient-hero,.cw-overlay .recipient-hero,.listing-preview-card .recipient-hero,
   .invitation-detail[data-showcase-theme] .recipient-hero,.mealmap-detail[data-showcase-theme] .recipient-hero { grid-template-columns: minmax(0,1fr) minmax(0,1.08fr); align-items: center; gap: 24px; }
   .recipient-copy h1,.recipient-copy h2,.invitation-detail[data-showcase-theme] .recipient-copy h2,.mealmap-detail[data-showcase-theme] .recipient-copy h2 { font-size: 2.35rem; }
+}
+@container (max-width: 599px) {
+  .recipient-copy h1,.recipient-copy h2,.cw-overlay .recipient-copy h1,
+  .invitation-detail[data-showcase-theme] .recipient-copy h2,.mealmap-detail[data-showcase-theme] .recipient-copy h2 {
+    max-width: 22ch; margin-inline: auto; text-align: center; text-wrap: balance;
+  }
+  .recipient-copy .detail-description-notes { text-align: center; }
+}
+@media(max-width:680px) {
+  .recipient-copy h1,.recipient-copy h2,.cw-overlay .recipient-copy h1,
+  .invitation-detail[data-showcase-theme] .recipient-copy h2,.mealmap-detail[data-showcase-theme] .recipient-copy h2 {
+    max-width: 22ch; margin-inline: auto; text-align: center; text-wrap: balance;
+  }
+  .recipient-copy .detail-description-notes { text-align: center; }
 }
 @media(max-width:620px) {
   .recipient-hero,.cw-overlay .recipient-hero,.listing-preview-card .recipient-hero,.invitation-detail[data-showcase-theme] .recipient-hero,.mealmap-detail[data-showcase-theme] .recipient-hero { padding: 26px 20px; }

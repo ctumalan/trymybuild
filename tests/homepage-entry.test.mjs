@@ -7,10 +7,10 @@ const urlCode=source.slice(source.indexOf('function homepageAppUrl('),source.ind
 const handlerStart=source.indexOf("document.addEventListener('submit', event => {\n  const form = event.target.closest('[data-discovery-entry]')");
 const handlerCode=source.slice(handlerStart,source.indexOf("document.addEventListener('submit'",handlerStart+1));
 function setup(value,prior='',approve=true){
- let submit,saves=0,renders=0,scrolled=0;const status={textContent:''};
- const c=vm.createContext({URL,listingDraft:{url:prior,title:''},state:{route:'discover'},listingSettings:false,listingStep:0,document:{addEventListener:(_,fn)=>submit=fn,getElementById:()=>({scrollIntoView(){scrolled++;},focus(){}})},matchMedia:()=>({matches:true}),confirm:()=>approve,listingUrl:v=>v,listingNameFromUrl:()=> 'Example',invalidateListingCapture(){},resetListingDraft(){c.listingDraft.url='';},saveListingDraft:()=>{saves++;return true;},ensureListingScreenshot(){},render(){renders++;}});
+ let submit,saves=0,renders=0,scrolled=0;const attempts=[];const status={textContent:''};
+ const c=vm.createContext({window:{CWAnalytics:{urlAttempt:value=>attempts.push(value)}},URL,listingDraft:{url:prior,title:''},state:{route:'discover'},listingSettings:false,listingStep:0,document:{addEventListener:(_,fn)=>submit=fn,getElementById:()=>({scrollIntoView(){scrolled++;},focus(){}})},matchMedia:()=>({matches:true}),confirm:()=>approve,listingUrl:v=>v,listingNameFromUrl:()=> 'Example',invalidateListingCapture(){},resetListingDraft(){c.listingDraft.url='';},saveListingDraft:()=>{saves++;return true;},ensureListingScreenshot(){},render(){renders++;}});
  vm.runInContext(urlCode+handlerCode,c);
- return {c,status,run:()=>submit({preventDefault(){},target:{closest:()=>({querySelector:s=>s==='[data-app-link-entry]'?{value}:status})}}),counts:()=>({saves,renders,scrolled})};
+ return {c,status,attempts,run:()=>submit({preventDefault(){},target:{closest:()=>({querySelector:s=>s==='[data-app-link-entry]'?{value}:status})}}),counts:()=>({saves,renders,scrolled})};
 }
 test('share-only entry recognizes web URLs and rejects keywords',()=>{
  const {c}=setup('');
@@ -75,3 +75,5 @@ test('the action stays share-only and preserves catalog state while typing',()=>
   assert.equal(c.state.query,undefined);assert.equal(c.state.entryUrl,value);
  }
 });
+
+test('hero emits one validation result per URL submission, including invalid attempts',()=>{for(const [value,valid] of [['example.com',true],['meal planner',false]]){const x=setup(value);x.run();assert.deepEqual(x.attempts,[valid]);}});

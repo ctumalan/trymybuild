@@ -85,9 +85,9 @@ function inlineListingForm() {
  const steps=[
   {title:'Type your app URL',copy:'We’ll use it to prepare your listing. Your draft stays private until you are ready to share it.',fields:listingField('url','App link','https://your-app.com'),next:'Continue'},
   {title:'Is this the right app?',copy:'Confirm the name and image people will see.',fields:`${listingIdentityConfirmation()}${listingField('title','App name','Your app name')}`,next:'Yes, continue'},
-  {title:'What does your app do?',copy:'Describe the result in 4–10 words.',fields:listingField('does','One clear sentence','For example: Turns ingredients into meal ideas.',true),next:'Continue'},
-  {title:'How does it help?',copy:'Name the practical benefit in 4–10 words.',fields:listingField('helps','The benefit','For example: Makes dinner decisions easier and reduces waste.',true),next:'Continue'},
-  {title:'What should someone try first?',copy:'Give visitors one clear starting point in 4–10 words.',fields:listingField('firstTry','First action','For example: Enter three ingredients from your fridge.',true),next:'Continue'},
+  {title:'What does your app do?',copy:'Describe the result in a short sentence.',fields:listingField('does','One clear sentence','For example: Turns ingredients into meal ideas.',true),next:'Continue'},
+  {title:'How does it help?',copy:'Name the practical benefit in a short sentence.',fields:listingField('helps','The benefit','For example: Makes dinner decisions easier and reduces waste.',true),next:'Continue'},
+  {title:'What should someone try first?',copy:'Give visitors one clear starting point in a short sentence.',fields:listingField('firstTry','First action','For example: Enter three ingredients from your fridge.',true),next:'Continue'},
   {title:'How ready is it?',copy:'Choose the closest stage. You can change it later.',fields:`<div class="choice-grid listing-stage-choices" role="group" aria-label="Project stage">${['Still taking shape','Ready for a first try','Being tested by early users','Finished and launched'].map(stage=>`<button type="button" class="choice-button ${stage===listingDraft.stage?'is-selected':''}" aria-pressed="${stage===listingDraft.stage}" data-listing-stage="${stage}"><span aria-hidden="true">${stage===listingDraft.stage?'✓':''}</span>${stage}</button>`).join('')}</div>`,next:'Continue'},
   {title:'Who should see it?',copy:'Choose how you want to begin.',fields:listingJourneyVisibility(),next:'Preview my listing'}
  ];

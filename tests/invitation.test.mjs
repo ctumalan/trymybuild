@@ -4,15 +4,15 @@ import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
 import '../listing-rules.js';
 import {normalizeDraft,publishReadiness} from '../src/server/listing-policy.mjs';
-test('word rule treats punctuation and repeated whitespace consistently at boundaries',()=>{
+test('listing answers accept short and longer sentences within character limits',()=>{
  const r=globalThis.CWListingRules;
- assert.equal(r.count('One  two\nthree — four!'),4);assert.equal(r.valid('One two three'),false);assert.equal(r.valid('One two three four'),true);
- assert.equal(r.valid('one two three four five six seven eight nine ten'),true);assert.equal(r.valid('one two three four five six seven eight nine ten eleven'),false);
+ assert.equal(r.count('One  two\nthree — four!'),4);assert.equal(r.valid('One two three'),true);assert.equal(r.valid('One two three four'),true);
+ assert.equal(r.valid('one two three four five six seven eight nine ten'),true);assert.equal(r.valid('one two three four five six seven eight nine ten eleven'),true);
  assert.equal(r.count('   … — !  '),0);
 });
-test('server rejects bypasses of word limits and incomplete publication',()=>{
- assert.match(normalizeDraft({does:'one two three'}).error,/4–10/);
- assert.match(normalizeDraft({does:Array(12).fill('abcdefghijklmno').join(' ')}).error,/4–10/);
+test('server rejects oversized answers and incomplete publication',()=>{
+ assert.equal(normalizeDraft({does:'one two three'}).error,undefined);
+ assert.match(normalizeDraft({does:Array(12).fill('abcdefghijklmno').join(' ')}).error,/140 characters/);
  assert.equal(publishReadiness({headline:'one two three'}).ready,false);
 });
 test('opening an invitation does not send, copy, or open external sharing apps',async()=>{

@@ -136,6 +136,8 @@ function publishedCategories() {
     .sort((a, b) => (categoryCatalog.findIndex(c => c.name === a.name) + 1 || 999) - (categoryCatalog.findIndex(c => c.name === b.name) + 1 || 999) || a.name.localeCompare(b.name));
 }
 
+function readLocalValue(key, fallback = '') { try { return localStorage.getItem(key) || fallback; } catch { return fallback; } }
+function readLocalArray(key) { try { const value=JSON.parse(readLocalValue(key,'[]')); return Array.isArray(value)?value:[]; } catch { return []; } }
 function readGuestPersonalization() { try { return localStorage.getItem('trymybuild-guest-personalization') !== 'off'; } catch { return false; } }
 const storedCategoryClicks = (()=>{try{const value=JSON.parse(localStorage.getItem('trymybuild-category-clicks-v1')||'{}');return value&&typeof value==='object'&&!Array.isArray(value)?value:{};}catch{return {};}})();
 const rankedStoredCategories = Object.entries(storedCategoryClicks).sort((a,b)=>b[1]-a[1]).map(([name])=>name);
@@ -150,11 +152,11 @@ const state = {
   verifiedOnly: false,
   filterOpen: false,
   query: "",
-  saved: new Set(JSON.parse(localStorage.getItem("creatorworks-saved") || "[]")),
+  saved: new Set(readLocalArray("creatorworks-saved")),
   interests: new Set(readGuestPersonalization()?rankedStoredCategories:[]),
   personalization: readGuestPersonalization(),
   preferencesHydrated: false,
-  communityPosts: window.CW_SERVER ? [] : JSON.parse(localStorage.getItem("creatorworks-community-posts") || "[]"),
+  communityPosts: window.CW_SERVER ? [] : readLocalArray("creatorworks-community-posts"),
   dailyComments: [],
   discussionCategory: "",
   discussionError: "",
@@ -279,7 +281,7 @@ function dailyCreatorTip(now = new Date()) {
   const dayKey=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
   const person=state.session?.user,initials=(person?.displayName||'You').split(/\s+/).slice(0,2).map(word=>word[0]).join('').toUpperCase();
   const identity=person?avatar({avatar:person.avatar,initials},'small'):avatar({initials:'?'},'small');
-  const draft=localStorage.getItem('trymybuild-daily-comment')||'',count=commentWordCount(draft);
+  const draft=readLocalValue('trymybuild-daily-comment'),count=commentWordCount(draft);
   return `<section class="community-maker-question" aria-labelledby="community-maker-question-title"><p class="eyebrow" id="community-maker-question-title">Question for makers</p><blockquote>${esc(creatorTips[elapsed % creatorTips.length])}</blockquote><p>Has this happened to you?</p><form data-daily-discussion data-day="${dayKey}"><div class="daily-comment-compose"><div class="daily-comment-author">${identity}<span>${person?esc(person.displayName||'Your response'):'Your response'}</span></div><label><span class="visually-hidden">Your response</span><textarea name="message" maxlength="800" rows="3" placeholder="Share your perspective…" aria-describedby="daily-comment-guidance daily-comment-count">${esc(draft)}</textarea></label><div class="daily-comment-actions"><small id="daily-comment-count" data-daily-word-count class="word-counter ${count&&count<7?'invalid':''}">${count} / 7–150 words</small><button type="submit" aria-label="Post response">Post</button></div></div><p id="daily-comment-guidance" class="comment-conduct"><strong>Be thoughtful. Be respectful.</strong> Discuss ideas, not people. No insults or abusive wording. <a href="/community-guidelines">Guidelines</a></p><p data-daily-status role="status"></p></form><div class="daily-comment-list">${state.dailyComments.map(dailyCommentCard).join('')}</div></section>`;
 }
 function projectSaveCount(project) {
@@ -372,7 +374,7 @@ function discoveryHero(listing = false) {
       ${listing ? '<button type="button" class="text-button" data-entry-mode="search">← Back to apps</button>' : `<form class="discovery-entry" data-discovery-entry>
         <label class="visually-hidden" for="discovery-input">${prompt}</label>
         <div class="discovery-entry-row"><div class="discovery-entry-field"><input id="discovery-input" data-app-link-entry value="${esc(value)}" type="text" maxlength="2048" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="${prompt}" /><span class="entry-placeholder" aria-hidden="true"><span class="entry-placeholder-track">${prompt}</span></span></div><button type="submit" class="primary-button" data-entry-submit><span data-entry-submit-label>${intent.label}</span><small>Share privately first. Publish when ready.</small></button></div>
-        <p class="discovery-entry-status" data-entry-status role="status"></p>
+        <p class="privacy-note">${state.session?.authenticated ? 'Your draft stays private until you publish.' : 'Start with your link. You’ll need a free account and verified email to save and share your page.'}</p><p class="discovery-entry-status" data-entry-status role="status"></p>
       </form>${state.listingInProgress ? '<button type="button" class="text-button entry-resume" data-entry-mode="list">Continue your draft →</button>' : ''}`}
     </div>
     ${listing ? '' : feedbackConversationExample()}
@@ -812,7 +814,7 @@ function feedbackPage() {
 function readListingDraft() {
   const defaults = { title: '', url: '', does: '', helps: '', firstTry: '', pricing: 'free', stage: 'Ready for a first try', category: 'Technology', visibility: 'draft', sharingPreference: 'not_sure', image: '', imageData: '', imageSourceUrl: '', imageMode: '', imageCapturedAt: '', imageTheme: '', imageHistory: '[]', serverId: '', serverSlug: '', serverStatus: '', imported: '', imageUploadedFor: '', clientToken: '', video: '', accountOwner: '' };
   try {
-    const saved = JSON.parse(localStorage.getItem('creatorworks-listing-draft-v1') || '{}');
+    const saved = CWListingStorage.read();
     for (const key of Object.keys(defaults)) if (typeof saved[key] === 'string') defaults[key] = key === 'imageData' ? CWPreviewUtils.imageData(saved[key]) : saved[key].slice(0, 2000);
   } catch {}
   return defaults;
@@ -824,12 +826,11 @@ let listingCategoryOtherOpen = !primaryCategoryNames.includes(normalizeCategory(
 // Start a brand-new listing (independent of any existing draft), used by "＋ New listing".
 function resetListingDraft() {
   Object.assign(listingDraft, { title: '', url: '', does: '', helps: '', firstTry: '', pricing: 'free', stage: 'Ready for a first try', category: 'Technology', visibility: 'draft', sharingPreference: 'not_sure', image: '', imageData: '', imageSourceUrl: '', imageMode: '', imageCapturedAt: '', imageTheme: '', imageHistory: '[]', serverId: '', serverSlug: '', serverStatus: '', imported: '', imageUploadedFor: '', clientToken: '', video: '', accountOwner: '' });
-  try { localStorage.removeItem('creatorworks-listing-draft-v1'); } catch {}
+  CWListingStorage.clear();
 }
 if (new URLSearchParams(location.search).get('new') === '1') { resetListingDraft(); listingSettings = false; const url = new URL(location.href); url.searchParams.delete('new'); history.replaceState({}, '', url); }
 function saveListingDraft() {
-  try { localStorage.setItem('creatorworks-listing-draft-v1', JSON.stringify(listingDraft)); return true; }
-  catch { return false; }
+  return CWListingStorage.save(listingDraft);
 }
 function listingUrl(value) {
   try { const url = new URL(value); return ['http:', 'https:'].includes(url.protocol) && !url.username && !url.password ? url.href : ''; } catch { return ''; }
@@ -948,7 +949,7 @@ document.addEventListener('drop', event => { if(event.target.closest('[data-list
 document.addEventListener('error', event => { if(event.target.matches?.('[data-listing-screenshot]')) {const failed=event.target.getAttribute('src')||'';if(failed===listingFailedImage)return;listingFailedImage=failed;listingCapture.state='error';listingCapture.message='That image could not be displayed. The saved preview has not been replaced.';saveListingDraft();refreshListingPreview();} },true);
 function listingField(key, label, placeholder, multiline = false) {
   const control = multiline
-    ? `<textarea data-listing-field="${key}" maxlength="140" required aria-describedby="words-${key}" placeholder="${placeholder}">${esc(listingDraft[key])}</textarea><small id="words-${key}" class="word-counter" data-word-counter="${key}">Word count: ${CWListingRules.count(listingDraft[key])}</small><small class="word-rules">Minimum: 4 words · Maximum: 10 words</small>`
+    ? `<textarea data-listing-field="${key}" maxlength="${CWListingRules.limit(key)}" required aria-describedby="words-${key}" placeholder="${placeholder}">${esc(listingDraft[key])}</textarea><small id="words-${key}" class="word-counter" data-word-counter="${key}">Word count: ${CWListingRules.count(listingDraft[key])}</small><small class="word-rules">A short sentence is enough · Up to ${CWListingRules.limit(key)} characters</small>`
     : `<input data-listing-field="${key}" value="${esc(listingDraft[key])}" maxlength="${key === 'url' ? 2000 : 80}" type="${key === 'url' ? 'url' : 'text'}" required placeholder="${placeholder}" />`;
   return `<label class="listing-field">${label}${control}</label>`;
 }
@@ -999,11 +1000,11 @@ function listingSettingsPage() {
   const publishControls = !hasServer ? '' : `<div class="cw-panel"><p role="status" data-listing-server-status>${esc(statusNote)}</p><div class="form-actions">${status === 'published'
       ? `<a class="primary-button" href="/?category=${encodeURIComponent(listingDraft.category)}&highlight=${encodeURIComponent(listingDraft.serverSlug)}">View my project in catalog</a><button class="secondary-button" data-listing-unpublish>Unpublish</button>`
       : '<button class="primary-button" data-listing-publish>Publish my app</button>'}<a class="share-browse-link" href="/dashboard?view=creator">Go to My projects →</a></div><p class="privacy-note">Publish instantly to the public catalog. No admin approval needed. You can unpublish anytime.</p></div>`;
-  return `<section class="page-shell listing-review"><p class="eyebrow">Your project · Settings</p><h1>Make it yours.</h1><p>Signed in as ${name}.</p><form data-listing-settings>${sharingPreferenceFields()}${listingField('title', 'Project name', 'Your project name')}${listingField('url', 'Project link', 'https://your-project.com')}${listingCategoryPicker()}${listingPricingField()}${listingField('does','What does your project do?','Describe your project in 4–10 words.',true)}${listingField('helps','How does it help people?','Explain the benefit in 4–10 words.',true)}${listingField('firstTry','What should someone try first?','Suggest one action in 4–10 words.',true)}${videoField()}<p class="share-name-hint">Each answer needs 4–10 words. Edit your screenshot in the preview below. Categories appear in homepage filters only when a listing is published. Drafts never create public filters.</p><p data-video-status class="video-status" role="status"></p><div class="form-actions share-start-actions"><button class="primary-button" type="submit">${hasServer ? 'Save changes' : 'Save draft'}</button><button class="secondary-button" type="button" data-listing-review>Back</button><button type="button" class="secondary-button listing-reset-button" data-listing-reset>Start over</button></div><p data-listing-status role="status"></p></form>${importCard}${listingPreview()}${publishControls}${status === 'published' ? `<section class="cw-panel tester-handoff"><p class="eyebrow">Your next step</p><h2>Invite your first testers</h2><p>Start with a few people who might use your app. Ask them to try one task and share what happened.</p><div class="form-actions"><button type="button" class="primary-button" data-invite-project="${esc(listingDraft.serverSlug)}">Prepare invitation</button><a class="secondary-button" href="/projects/${encodeURIComponent(listingDraft.serverSlug)}?invite=1">View your feedback page</a><button type="button" class="secondary-button" data-copy-feedback-link="${esc(listingDraft.serverSlug)}">Copy feedback link</button><p data-copy-feedback-status role="status"></p></div><p><a href="/guides/first-app-testers">No audience yet? Start here →</a></p></section>` : ''}</section>`;
+  return `<section class="page-shell listing-review"><p class="eyebrow">Your project · Settings</p><h1>Make it yours.</h1><p>Signed in as ${name}.</p><form data-listing-settings>${sharingPreferenceFields()}${listingField('title', 'Project name', 'Your project name')}${listingField('url', 'Project link', 'https://your-project.com')}${listingCategoryPicker()}${listingPricingField()}${listingField('does','What does your project do?','Describe your project in a short sentence.',true)}${listingField('helps','How does it help people?','Explain the benefit in a short sentence.',true)}${listingField('firstTry','What should someone try first?','Suggest one action in a short sentence.',true)}${videoField()}<p class="share-name-hint">Keep answers clear and concise. Edit your screenshot in the preview below. Categories appear in homepage filters only when a listing is published. Drafts never create public filters.</p><p data-video-status class="video-status" role="status"></p><div class="form-actions share-start-actions"><button class="primary-button" type="submit">${hasServer ? 'Save changes' : 'Save draft'}</button><button class="secondary-button" type="button" data-listing-review>Back</button><button type="button" class="secondary-button listing-reset-button" data-listing-reset>Start over</button></div><p data-listing-status role="status"></p></form>${importCard}${listingPreview()}${publishControls}${status === 'published' ? `<section class="cw-panel tester-handoff"><p class="eyebrow">Your next step</p><h2>Invite your first testers</h2><p>Start with a few people who might use your app. Ask them to try one task and share what happened.</p><div class="form-actions"><button type="button" class="primary-button" data-invite-project="${esc(listingDraft.serverSlug)}">Prepare invitation</button><a class="secondary-button" href="/projects/${encodeURIComponent(listingDraft.serverSlug)}?invite=1">View your feedback page</a><button type="button" class="secondary-button" data-copy-feedback-link="${esc(listingDraft.serverSlug)}">Copy feedback link</button><p data-copy-feedback-status role="status"></p></div><p><a href="/guides/first-app-testers">No audience yet? Start here →</a></p></section>` : ''}</section>`;
 }
 function listingAccountPage() {
   if (state.session?.authenticated) return listingSettingsPage();
-  return `<section class="page-shell listing-review"><p class="eyebrow">Keep your project yours</p><h1>Create your creator account.</h1><p>Your draft is ready. Sign up or sign in to continue to project settings.</p><div class="legal-signup"><label class="legal-agreement"><input type="checkbox" data-listing-terms> <span>I agree to the <a href="/terms" target="_blank" rel="noopener">Terms of Service</a> and <a href="/privacy" target="_blank" rel="noopener">Privacy Policy</a>.</span></label><button class="primary-button" type="button" data-listing-create-account>Create my account</button><p data-listing-account-status role="status" aria-live="polite"></p></div><div class="form-actions share-start-actions"><a class="share-browse-link" href="/auth/sign-in?next=listing">Already have an account? Sign in</a><button class="share-browse-link" data-listing-review>Back</button></div><p class="privacy-note">Your draft stays on this device through sign-in. Nothing is public yet.</p></section>`;
+  return `<section class="page-shell listing-review"><p class="eyebrow">Keep your project yours</p><h1>Create your creator account.</h1><p>Your draft is ready. Sign up or sign in to continue to project settings.</p><div class="legal-signup"><label class="legal-agreement"><input type="checkbox" data-listing-terms> <span>I agree to the <a href="/terms" target="_blank" rel="noopener">Terms of Service</a> and <a href="/privacy" target="_blank" rel="noopener">Privacy Policy</a>.</span></label><button class="primary-button" type="button" data-listing-create-account>Create my account</button><p data-listing-account-status role="status" aria-live="polite"></p></div><div class="form-actions share-start-actions"><a class="share-browse-link" href="/auth/sign-in?next=listing">Already have an account? Sign in</a><button class="share-browse-link" data-listing-review>Back</button></div><p class="privacy-note">Continue sign-in in this same tab so we can restore your draft. Nothing is public yet.</p></section>`;
 }
 function sharePage() {
   return discover(true);
@@ -1062,6 +1063,7 @@ document.addEventListener('submit', event => {
   if (!form) return;
   event.preventDefault();
   const { url } = updateHomepageEntry(form);
+  window.CWAnalytics?.urlAttempt(Boolean(url));
   if (!url) {
     form.querySelector('[data-entry-status]').textContent = 'Enter your app’s web address, or browse the apps below.';
     return;
@@ -1071,7 +1073,7 @@ document.addEventListener('submit', event => {
   if (different) { invalidateListingCapture(); resetListingDraft(); }
   listingDraft.url = url;
   if (!listingDraft.title.trim()) listingDraft.title = listingNameFromUrl(url);
-  if (!saveListingDraft()) { form.querySelector('[data-entry-status]').textContent = 'Your browser could not save this draft. Please enable site storage to continue.'; return; }
+  if (!saveListingDraft()) { form.querySelector('[data-entry-status]').textContent = 'This browser cannot keep your draft through sign-in. Open TryMyBuild in Safari or Chrome, or enable site storage, then try again.'; return; }
   listingSettings = false; listingStep = 1; state.route = 'share'; state.listingInProgress = true; state.entryMode = 'list';
   void ensureListingScreenshot(); render(true);
 });
@@ -1084,14 +1086,14 @@ document.addEventListener('submit', event => {
   const journeyFields = {0:['url'],1:['title'],2:['does'],3:['helps'],4:['firstTry']};
   const fields = form.hasAttribute('data-listing-settings') ? ['title','url','does','helps','firstTry'] : (journeyFields[listingStep] || []);
   if (fields.some(key => !listingDraft[key].trim())) { status.textContent = 'Please add a short answer to each field.'; return; }
-  if ((form.hasAttribute('data-listing-settings') ? ['does','helps','firstTry'] : fields).some(key=>['does','helps','firstTry'].includes(key)&&!CWListingRules.valid(listingDraft[key]))) { status.textContent='Use 4–10 words before continuing.'; firstInvalidField?.focus(); return; }
+  if ((form.hasAttribute('data-listing-settings') ? ['does','helps','firstTry'] : fields).some(key=>['does','helps','firstTry'].includes(key)&&!CWListingRules.valid(listingDraft[key],key))) { status.textContent='Add a short answer within the character limit before continuing.'; firstInvalidField?.focus(); return; }
   if (!listingUrl(listingDraft.url)) { status.textContent = 'Enter a complete http or https project link.'; return; }
   if (form.hasAttribute('data-listing-settings')) {
     const normalizedCategory = normalizeCategory(listingDraft.category);
     if (!normalizedCategory) { status.textContent = 'Choose a category or enter a short, recognizable category name.'; return; }
     listingDraft.category = normalizedCategory;
   }
-  if (!saveListingDraft()) { status.textContent = 'Your browser could not save this draft. Please enable site storage before continuing.'; return; }
+  if (!saveListingDraft()) { status.textContent = 'Your draft is still on this page, but could not be saved for sign-in. Keep this tab open and enable site storage, then try again.'; return; }
   if (form.hasAttribute('data-listing-settings')) {
     if (window.CW_SERVER && state.session?.authenticated) {
       // Material changes return a live listing to a private draft — warn first.
@@ -1167,7 +1169,7 @@ document.addEventListener('click', event => {
   if (event.target.closest('[data-listing-review]')) { listingSettings = false; listingStep = 7; state.route = 'share'; render(); }
   if (event.target.closest('[data-listing-decide-later]')) { listingDraft.sharingPreference = 'not_sure'; saveListingDraft(); listingStep = 7; render(); }
   if (event.target.closest('[data-listing-share]')) {
-    if (!saveListingDraft()) { document.querySelector('[data-listing-status]').textContent = 'Your browser could not save this draft. Please enable site storage before signing in.'; return; }
+    if (!saveListingDraft()) { document.querySelector('[data-listing-status]').textContent = 'Keep this tab open. Enable site storage before signing in so your draft can be restored.'; return; }
     if (state.session?.authenticated) { listingSettings = true; void saveServerListing().then(() => render()).catch(error => { const el = document.querySelector('[data-listing-status]'); if (el) el.textContent = error.message; }); } else listingStep = 8;
     render();
   }
@@ -1302,7 +1304,7 @@ document.addEventListener("click", async event => {
     const terms = document.querySelector('[data-listing-terms]');
     const status = document.querySelector('[data-listing-account-status]');
     if (!terms?.checked) { status.textContent = 'Agree to the Terms of Service and Privacy Policy to continue.'; terms?.focus(); return; }
-    if (!saveListingDraft()) { status.textContent = 'Your browser could not save this draft. Please enable site storage before continuing.'; return; }
+    if (!saveListingDraft()) { status.textContent = 'Your draft is still on this page, but could not be saved for sign-in. Keep this tab open and enable site storage, then try again.'; return; }
     createAccount.disabled = true;
     createAccount.textContent = state.session?.authenticated ? 'Opening project settings…' : 'Opening secure sign-up…';
     if (state.session?.authenticated) { listingSettings = true; history.replaceState({}, '', '/?listing=settings'); render(); }
@@ -1657,8 +1659,9 @@ document.addEventListener('input',event=>{
  }
  if(!['does','helps','firstTry'].includes(field.dataset.listingField))return;
  const counter=document.querySelector('[data-word-counter="'+field.dataset.listingField+'"]');const count=CWListingRules.count(field.value);
- if(counter){counter.textContent='Word count: '+count+(count>10?' · Remove '+(count-10)+' word'+(count-10===1?'':'s')+' to continue.':'');counter.classList.toggle('invalid',count<4||count>10);}
- field.setCustomValidity(count<4||count>10?'Use 4–10 words for this answer.':'');
+ const valid=CWListingRules.valid(field.value,field.dataset.listingField);
+ if(counter){counter.textContent=count+' words · '+field.value.length+' / '+CWListingRules.limit(field.dataset.listingField)+' characters';counter.classList.toggle('invalid',!valid);}
+ field.setCustomValidity(valid?'':'Add a short answer within the character limit.');
 });
 
 function trackCategoryInterest(category){

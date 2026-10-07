@@ -45,7 +45,7 @@ test('catalog stays simple while listing preview pairs screenshot with descripti
  assert.match(app,/creatorMatchesFilters\(creatorFor\(product\), state\.creatorType, state\.verifiedOnly\)/);
  assert.doesNotMatch(app,/Filter &amp; sort/);assert.doesNotMatch(app,/filter-trust/);
  assert.match(app,/class="catalog-wish-card" data-wish-focus/);
- assert.match(app,/Minimum: 4 words · Maximum: 10 words/);
+ assert.match(app,/A short sentence is enough · Up to/);
  assert.match(css,/listing-preview-hero>img\{position:static/);
  assert.match(app,/class="legal-agreement"[\s\S]*<span>I agree to the/);
 });

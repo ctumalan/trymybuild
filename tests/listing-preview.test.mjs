@@ -57,7 +57,7 @@ test('upload validation rejects scripts, huge and empty files; stored images are
 test('existing draft answers and image survive reload without 2000-character truncation',()=>{
  const image='data:image/jpeg;base64,'+'A'.repeat(8000),saved={title:'My draft',url:'https://public.site',does:'Helps',imageData:image,imageMode:'upload',category:'Music & audio'};
  const source=readFileSync(new URL('../app.js',import.meta.url),'utf8');
- const context=vm.createContext({CWPreviewUtils:utils,localStorage:{getItem:()=>JSON.stringify(saved)}});
+ const context=vm.createContext({CWPreviewUtils:utils,CWListingStorage:{read:()=>saved}});
  vm.runInContext(source.slice(source.indexOf('function readListingDraft()'),source.indexOf('const listingDraft =')),context);
  const result=context.readListingDraft();assert.equal(result.imageData,image);assert.equal(result.title,'My draft');assert.equal(result.category,'Music & audio');
 });

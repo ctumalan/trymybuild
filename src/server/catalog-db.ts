@@ -18,7 +18,7 @@ const studioNote = 'Founder exception—not earned through feedback. Founder-con
 const initialsOf = (name: string) => String(name || 'Member').split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase() || 'M';
 
 export const PROJECT_FIELDS =
-  'sharing_preference,video_url,lock_version,id,slug,owner_user_id,title,category,summary,tagline,headline,help_text,first_try,purpose,audience,stage,price_label,is_free,external_url,link_note,outcome,note,preview_path,preview_public_url,benefits,access_note,creator_slug,is_studio,listing_status,ownership_status,submitted_at,published_at,updated_at,created_at';
+  'sharing_preference,video_url,lock_version,id,slug,owner_user_id,title,category,summary,tagline,headline,help_text,first_try,purpose,audience,stage,price_label,is_free,external_url,link_note,outcome,note,preview_path,preview_public_url,preview_source,preview_source_url,preview_captured_at,preview_history,benefits,access_note,creator_slug,is_studio,listing_status,ownership_status,submitted_at,published_at,updated_at,created_at';
 const PUBLIC_CATALOG_FIELDS = `${PROJECT_FIELDS},saved_projects(count)`;
 
 // Resolve the public attribution for a set of project rows in one query (studio rows need no lookup).
@@ -71,12 +71,14 @@ export function toClientProject(row: any, attributedBy: (row: any) => any, index
     linkNote: studioCopy(row.link_note || ''),
     outcome: row.outcome || '',
     note: studioCopy(row.note || ''),
-    preview: row.preview_public_url || row.preview_path || `/assets/previews/${row.slug}.png`,
+    preview: String(row.slug || '').startsWith('codexnest')
+      ? '/assets/previews/codexnest.png'
+      : row.preview_public_url || row.preview_path || `/assets/previews/${row.slug}.png`,
     benefits,
     accessNote: studioCopy(row.access_note || 'Opens a separate site; sign-in may be required'),
     presentation: {
       eyebrow: row.tagline || row.category || '',
-      headline: row.headline || row.summary || row.title,
+      headline: row.slug === 'stackscout' ? 'Choose less. Ship sooner.' : row.headline || row.summary || row.title,
       help: row.help_text || '',
       firstTry: row.first_try || '',
     },

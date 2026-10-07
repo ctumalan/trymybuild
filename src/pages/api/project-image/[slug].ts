@@ -6,7 +6,7 @@ import { sameOrigin } from '../../../server/security.mjs';
 import { isFounder } from '../../../server/admin-policy.mjs';
 import { canViewProject } from '../../../server/listing-policy.mjs';
 import { projectStore, reencodeImage } from '../../../server/listing-store';
-import { replaceImage } from '../../../server/listing-service.mjs';
+import { replaceImage, restoreImage } from '../../../server/listing-service.mjs';
 
 const BUCKET = 'project-previews';
 
@@ -18,9 +18,8 @@ function dataUrlBytes(value: unknown): Buffer | null {
   try { return Buffer.from(m[1], 'base64'); } catch { return null; }
 }
 
-// Replace a project's preview. Owner-only; re-encoded server-side; uploaded as a NEW versioned object
-// with the DB reference confirmed before the old object is removed; a material image change on a
-// public/in-review listing returns it to a nonpublic draft (same rule as text edits).
+// Replace or restore a project's preview. Owner-only; new files are re-encoded server-side and stored
+// as versioned objects. The previous image remains available in the bounded rollback history.
 export const POST: APIRoute = async context => {
   if (!sameOrigin(context.request, origin(context))) return json({ error: 'Request not allowed.' }, 403);
   const user = await currentUser(context);
@@ -29,16 +28,22 @@ export const POST: APIRoute = async context => {
   try {
     const raw = await context.request.text();
     if (raw.length > 12_000_000) return json({ error: 'That image is too large.' }, 413);
-    const bytes = dataUrlBytes(JSON.parse(raw).image);
-    if (!bytes) return json({ error: 'Upload a valid PNG, JPG, or WebP image.' }, 400);
+    const body = JSON.parse(raw);
     const member = await ensureMember(user);
     const store = projectStore(database());
-    const result = await replaceImage(store, { ownerId: member.id, slug: context.params.slug || '', bytes }, {
+    if (body.action === 'restore') {
+      const result = await restoreImage(store, { ownerId: member.id, slug: context.params.slug || '', historyId: typeof body.historyId === 'string' ? body.historyId : '' });
+      if (result.error) return json({ error: result.error }, result.status || 400);
+      return json({ saved: true, preview: result.project.preview_public_url, previewSource: result.project.preview_source, previewSourceUrl: result.project.preview_source_url || '', previewCapturedAt: result.project.preview_captured_at || '', previewHistory: result.project.preview_history || [], reviewReset: !!result.reviewReset });
+    }
+    const bytes = dataUrlBytes(body.image);
+    if (!bytes) return json({ error: 'Upload a valid PNG, JPG, or WebP image.' }, 400);
+    const result = await replaceImage(store, { ownerId: member.id, slug: context.params.slug || '', bytes, source: body.source, sourceUrl: body.sourceUrl, capturedAt: body.capturedAt }, {
       reencode: reencodeImage,
       keyFactory: (owner: string, pid: string) => `previews/${owner}/${pid}/${Date.now()}-${randomBytes(4).toString('hex')}.jpg`,
     });
     if (result.error) return json({ error: result.error }, result.status || 400);
-    return json({ saved: true, preview: result.project.preview_public_url, reviewReset: !!result.reviewReset });
+    return json({ saved: true, preview: result.project.preview_public_url, previewSource: result.project.preview_source, previewSourceUrl: result.project.preview_source_url || '', previewCapturedAt: result.project.preview_captured_at || '', previewHistory: result.project.preview_history || [], reviewReset: !!result.reviewReset });
   } catch { return json({ error: 'The image could not be saved. Your listing image is unchanged; please retry.' }, 503); }
 };
 

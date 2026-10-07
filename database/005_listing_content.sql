@@ -64,7 +64,7 @@ update public.projects set
  where slug='afterschooltogether' and coalesce(headline,'')='';
 update public.projects set
   title='StackScout', category='Technology', summary='Compare technology choices without drowning in technical language.',
-  tagline='Make sense of your options', headline='Compare technology options around the needs of your project.', help_text='Understand the tradeoffs without getting lost in technical language.', first_try='Compare a few options for something you want to build.',
+  tagline='Make sense of your options', headline='Choose less. Ship sooner.', help_text='Understand the tradeoffs without getting lost in technical language.', first_try='Compare a few options for something you want to build.',
   purpose='Helps you narrow down the right tools for a project by comparing what matters most.', audience='People choosing technology for a new idea', stage='New',
   price_label='Free', is_free=true,
   external_url='https://stack-scout-cw.tumalanct.chatgpt.site', link_note='', outcome='Choose a practical technology direction', note='This is a new CreatorWorks listing. Community evidence has not been collected yet.',

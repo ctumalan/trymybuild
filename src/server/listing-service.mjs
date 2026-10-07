@@ -87,10 +87,21 @@ export async function unpublish(store, { ownerId, id }) {
   return { status: 200, project: updated };
 }
 
-// Safely replace a preview image: re-encode server-side, upload a NEW versioned object, confirm the DB
-// reference update, and only then delete the OLD object. On any failure the previous image is preserved,
-// and concurrent replacements can never delete the current image (each only removes the key it replaced).
-export async function replaceImage(store, { ownerId, slug, bytes }, deps = {}) {
+const previewSource = value => value === 'captured' ? 'captured' : 'uploaded';
+const previewSourceUrl = value => { try { const url=new URL(String(value||''));return ['http:','https:'].includes(url.protocol)&&!url.username&&!url.password?url.href:''; } catch { return ''; } };
+const previewCapturedAt = value => { const date=new Date(value||'');return Number.isFinite(date.getTime())?date.toISOString():new Date().toISOString(); };
+const previewHistory = row => Array.isArray(row.preview_history) ? row.preview_history.filter(item => item && typeof item.path === 'string') : [];
+const historyEntry = (row, replacedAt = new Date().toISOString()) => row.preview_path ? {
+  path: row.preview_path,
+  source: row.preview_source || (row.is_studio ? 'studio' : 'uploaded'),
+  source_url: row.preview_source_url || '',
+  captured_at: row.preview_captured_at || null,
+  replaced_at: replacedAt,
+} : null;
+
+// Safely replace a preview image: re-encode server-side, upload a NEW versioned object, then move the
+// previous image into a three-version rollback history. A failed capture/upload never changes the row.
+export async function replaceImage(store, { ownerId, slug, bytes, source = 'uploaded', sourceUrl = '', capturedAt = '' }, deps = {}) {
   const reencode = deps.reencode;
   const keyFactory = deps.keyFactory || ((owner, pid) => `previews/${owner}/${pid}/${Date.now()}-${Math.random().toString(16).slice(2, 8)}.jpg`);
   const row = await store.findOwnedBySlug(ownerId, slug);
@@ -106,7 +117,19 @@ export async function replaceImage(store, { ownerId, slug, bytes }, deps = {}) {
 
   const next = nonpublicNext(row.listing_status);
   const reviewReset = next !== row.listing_status;
-  const patch = { preview_path: newKey, preview_public_url: `/api/project-image/${slug}`, listing_status: next, visibility: visForStatus(next) };
+  const now = new Date().toISOString();
+  const old = historyEntry(row, now);
+  const prior = previewHistory(row).filter(item => item.path !== row.preview_path);
+  const fullHistory = old ? [old, ...prior] : prior;
+  const keptHistory = fullHistory.slice(0, 3);
+  const evicted = fullHistory.slice(3);
+  const normalizedSource = previewSource(source);
+  const patch = {
+    preview_path: newKey, preview_public_url: `/api/project-image/${slug}`,
+    preview_source: normalizedSource, preview_source_url: normalizedSource === 'captured' ? previewSourceUrl(sourceUrl) : '',
+    preview_captured_at: normalizedSource === 'captured' ? previewCapturedAt(capturedAt || now) : null,
+    preview_history: keptHistory, listing_status: next, visibility: visForStatus(next),
+  };
   if (reviewReset) patch.submitted_at = null;
 
   let updated;
@@ -123,8 +146,30 @@ export async function replaceImage(store, { ownerId, slug, bytes }, deps = {}) {
     await store.deleteImage(newKey).catch(() => {});
     return { status: 409, error: 'This listing changed during the upload. Your previous image is unchanged; reload and try again.' };
   }
-  // Success: remove only the specific object we replaced (never the new/current one).
-  const oldKey = row.preview_path;
-  if (oldKey && oldKey !== newKey && !oldKey.startsWith('/assets/')) await store.deleteImage(oldKey).catch(() => {});
+  // Only objects that fell beyond the three-version history are safe to remove.
+  for (const item of evicted) if (item.path && !item.path.startsWith('/assets/')) await store.deleteImage(item.path).catch(() => {});
+  return { status: 200, project: updated, reviewReset };
+}
+
+export async function restoreImage(store, { ownerId, slug, historyId }) {
+  const row = await store.findOwnedBySlug(ownerId, slug);
+  if (!row) return { status: 404, error: 'That project was not found in your account.' };
+  const history = previewHistory(row);
+  const selected = history.find(item => item.path === historyId);
+  if (!selected) return { status: 400, error: 'That preview version is no longer available.' };
+  const current = historyEntry(row);
+  const remaining = history.filter(item => item.path !== selected.path);
+  const nextHistory = (current ? [current, ...remaining] : remaining).slice(0, 3);
+  const next = nonpublicNext(row.listing_status);
+  const reviewReset = next !== row.listing_status;
+  const patch = {
+    preview_path: selected.path, preview_public_url: `/api/project-image/${slug}`,
+    preview_source: selected.source === 'captured' ? 'captured' : selected.source === 'studio' ? 'studio' : 'uploaded',
+    preview_source_url: selected.source_url || '', preview_captured_at: selected.captured_at || null,
+    preview_history: nextHistory, listing_status: next, visibility: visForStatus(next),
+  };
+  if (reviewReset) patch.submitted_at = null;
+  const updated = await store.updateOwnedGuarded(row.id, ownerId, { status: row.listing_status, lockVersion: row.lock_version }, patch);
+  if (!updated) return { status: 409, error: 'This listing changed. Reload and try again.' };
   return { status: 200, project: updated, reviewReset };
 }

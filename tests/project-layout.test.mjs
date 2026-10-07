@@ -53,3 +53,16 @@ test('app detail background animates and respects reduced motion',()=>{
  assert.match(themeCss,/@keyframes app-showcase-glow/);
  assert.match(themeCss,/@media\(prefers-reduced-motion:reduce\)[\s\S]*\.detail-dialog\.invitation-detail\[data-showcase-theme\] \.recipient-hero[\s\S]*animation:none/);
 });
+test('each launch app carries its own preview-matched detail palette',()=>{
+ const themes={
+  afterschooltogether:'afterschool',stackscout:'stackscout',gamegrid:'gamegrid',lessonlab:'lessonlab',
+  cartcompare:'cartcompare',pocketbalance:'pocketbalance',dayframe:'dayframe',mealmap:'mealmap',
+  homerhythm:'homerhythm',packlight:'packlight',briefbuilder:'briefbuilder','codexnest-d43ff0':'codexnest'
+ };
+ for(const [slug,theme] of Object.entries(themes)){
+  assert.equal(globalThis.CWProjectView.theme({slug,category:'Technology'}),theme);
+  assert.match(themeCss,new RegExp(`data-showcase-theme="${theme}"`));
+ }
+ assert.match(shared,/detail-note-icon[\s\S]*currentColor|detail-note-icon/);
+ assert.match(themeCss,/--app-accent/);
+});

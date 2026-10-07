@@ -483,7 +483,7 @@ const projectPresentation = {
   "stackscout": [
     "Make sense of your options",
     "Compare tools. Choose your next step.",
-    "Compare technology options around the needs of your project.",
+    "Choose less. Ship sooner.",
     "Understand the tradeoffs without getting lost in technical language.",
     "Compare a few options for something you want to build."
   ],
@@ -817,7 +817,7 @@ function feedbackPage() {
 }
 
 function readListingDraft() {
-  const defaults = { title: '', url: '', does: '', helps: '', firstTry: '', pricing: 'free', stage: 'Ready for a first try', category: 'Technology', visibility: 'draft', sharingPreference: 'not_sure', image: '', imageData: '', imageSourceUrl: '', imageMode: '', imageCapturedAt: '', imageTheme: '', serverId: '', serverSlug: '', serverStatus: '', imported: '', imageUploadedFor: '', clientToken: '', video: '', accountOwner: '' };
+  const defaults = { title: '', url: '', does: '', helps: '', firstTry: '', pricing: 'free', stage: 'Ready for a first try', category: 'Technology', visibility: 'draft', sharingPreference: 'not_sure', image: '', imageData: '', imageSourceUrl: '', imageMode: '', imageCapturedAt: '', imageTheme: '', imageHistory: '[]', serverId: '', serverSlug: '', serverStatus: '', imported: '', imageUploadedFor: '', clientToken: '', video: '', accountOwner: '' };
   try {
     const saved = JSON.parse(localStorage.getItem('creatorworks-listing-draft-v1') || '{}');
     for (const key of Object.keys(defaults)) if (typeof saved[key] === 'string') defaults[key] = key === 'imageData' ? CWPreviewUtils.imageData(saved[key]) : saved[key].slice(0, 2000);
@@ -830,7 +830,7 @@ let listingSettings = new URLSearchParams(location.search).get('listing') === 's
 let listingCategoryOtherOpen = !primaryCategoryNames.includes(normalizeCategory(listingDraft.category));
 // Start a brand-new listing (independent of any existing draft), used by "＋ New listing".
 function resetListingDraft() {
-  Object.assign(listingDraft, { title: '', url: '', does: '', helps: '', firstTry: '', pricing: 'free', stage: 'Ready for a first try', category: 'Technology', visibility: 'draft', sharingPreference: 'not_sure', image: '', imageData: '', imageSourceUrl: '', imageMode: '', imageCapturedAt: '', imageTheme: '', serverId: '', serverSlug: '', serverStatus: '', imported: '', imageUploadedFor: '', clientToken: '', video: '', accountOwner: '' });
+  Object.assign(listingDraft, { title: '', url: '', does: '', helps: '', firstTry: '', pricing: 'free', stage: 'Ready for a first try', category: 'Technology', visibility: 'draft', sharingPreference: 'not_sure', image: '', imageData: '', imageSourceUrl: '', imageMode: '', imageCapturedAt: '', imageTheme: '', imageHistory: '[]', serverId: '', serverSlug: '', serverStatus: '', imported: '', imageUploadedFor: '', clientToken: '', video: '', accountOwner: '' });
   try { localStorage.removeItem('creatorworks-listing-draft-v1'); } catch {}
 }
 if (new URLSearchParams(location.search).get('new') === '1') { resetListingDraft(); listingSettings = false; const url = new URL(location.href); url.searchParams.delete('new'); history.replaceState({}, '', url); }
@@ -846,11 +846,20 @@ function listingNameFromUrl(value) {
   const host = new URL(url).hostname.replace(/^www\./i,'').split('.')[0];
   return host.split(/[-_]+/).filter(Boolean).map(word=>word.charAt(0).toUpperCase()+word.slice(1)).join(' ').slice(0,80);
 }
-let listingCapture = { state: 'idle', message: '', attempted: '', revision: 0, controller: null };
+let listingCapture = { state: 'idle', message: '', attempted: '', revision: 0, controller: null }, listingFailedImage = '';
 function listingImage() {
   // A stored image may be an absolute http(s) link or a same-origin server path (/api/project-image/…).
   const stored = listingDraft.image ? (listingDraft.image.startsWith('/') ? listingDraft.image : listingUrl(listingDraft.image)) : '';
-  return listingDraft.imageSourceUrl === listingUrl(listingDraft.url) ? CWPreviewUtils.imageData(listingDraft.imageData) || stored : stored;
+  const image=CWPreviewUtils.imageData(listingDraft.imageData) || stored;
+  return image&&image!==listingFailedImage?image:'';
+}
+function listingImageHistory() { try { const history=JSON.parse(listingDraft.imageHistory||'[]'); return Array.isArray(history)?history.slice(0,3):[]; } catch { return []; } }
+function setListingImageHistory(history) { listingDraft.imageHistory=JSON.stringify((Array.isArray(history)?history:[]).slice(0,3).map(item=>({id:item.id||item.path||'',source:item.source||'uploaded',capturedAt:item.capturedAt||item.captured_at||'',replacedAt:item.replacedAt||item.replaced_at||''})).filter(item=>item.id)); }
+function listingImageSourceLabel() {
+  if (listingDraft.imageMode === 'upload') return 'Uploaded by you';
+  if (listingDraft.imageMode === 'studio') return 'Managed by TryMyBuild Studio';
+  if (listingDraft.imageMode === 'automatic') return `Captured from your website${listingDraft.imageCapturedAt ? ' · '+new Date(listingDraft.imageCapturedAt).toLocaleDateString() : ''}`;
+  return listingImage() ? 'Current preview' : '';
 }
 function refreshListingPreview() {
   const identity = document.querySelector('.listing-identity-confirmation');
@@ -862,14 +871,17 @@ function refreshListingPreview() {
 }
 function invalidateListingCapture() {
   listingCapture.revision++; listingCapture.controller?.abort(); listingCapture.state = 'idle'; listingCapture.message = ''; listingCapture.attempted = '';
-  // A changed project link must never retain another project's automatic/uploaded image.
-  if (listingDraft.imageSourceUrl !== listingUrl(listingDraft.url)) {
-    listingDraft.imageData = ''; listingDraft.imageSourceUrl = ''; listingDraft.imageMode = ''; listingDraft.imageTheme = '';
-  }
+  // Preserve the last good preview. An owner upload is never replaced automatically; a captured
+  // preview is refreshed only after the new URL produces a valid image.
+  if (listingDraft.imageSourceUrl !== listingUrl(listingDraft.url)) listingCapture.message = listingDraft.imageMode === 'upload'
+    ? 'Your uploaded preview is staying in place. Choose Refresh preview if you want a capture of the new website.'
+    : 'Your current preview is staying in place while the new website is captured.';
+  saveListingDraft();
 }
 async function ensureListingScreenshot(force = false) {
   const url = listingUrl(listingDraft.url);
-  if (!url || (!force && (listingImage() || listingCapture.attempted === url)) || listingCapture.state === 'loading') return;
+  const sourceMatches = listingDraft.imageSourceUrl === url;
+  if (!url || (!force && (listingDraft.imageMode === 'upload' || (listingImage() && sourceMatches) || listingCapture.attempted === url)) || listingCapture.state === 'loading') return;
   const revision = ++listingCapture.revision;
   listingCapture.attempted = url; listingCapture.state = 'loading'; listingCapture.message = 'Capturing your website… You can keep going while it loads.';
   listingCapture.controller?.abort(); const controller = new AbortController(); listingCapture.controller = controller;
@@ -886,6 +898,8 @@ async function ensureListingScreenshot(force = false) {
     if (!response.ok || !CWPreviewUtils.imageData(result.image)) throw Error(result.error || 'No screenshot was returned. Upload an image or retry.');
     if (revision !== listingCapture.revision || url !== listingUrl(listingDraft.url)) return;
     listingDraft.imageData = result.image; listingDraft.imageSourceUrl = url; listingDraft.imageMode = 'automatic'; listingDraft.imageCapturedAt = result.capturedAt || '';
+    listingFailedImage = '';
+    listingDraft.imageUploadedFor = '';
     listingDraft.imageTheme = JSON.stringify(CWPreviewUtils.theme(result.appearance));
     listingCapture.state = 'ready'; listingCapture.message = saveListingDraft() ? 'Website screenshot added and saved with this draft.' : 'Image added, but your browser could not save it. Keep this tab open or choose a smaller image.';
   } catch (error) {
@@ -916,19 +930,29 @@ async function useListingScreenshot(file) {
     const background = [...colors].sort((a,b)=>b[1]-a[1])[0]?.[0] || '#fff';
     if (revision !== listingCapture.revision || url !== listingUrl(listingDraft.url)) return;
     listingDraft.imageData = image; listingDraft.imageSourceUrl = url; listingDraft.imageMode = 'upload'; listingDraft.imageCapturedAt = ''; listingDraft.imageTheme = JSON.stringify(CWPreviewUtils.theme({ background, accent }));
+    listingFailedImage = '';
+    listingDraft.imageUploadedFor = '';
     listingCapture.state = 'ready'; listingCapture.message = saveListingDraft() ? 'Your screenshot is saved with this draft on this device.' : 'Image added, but your browser could not save it. Keep this tab open or use a smaller image.';
   } catch (error) { if(revision === listingCapture.revision) {listingCapture.state = 'error'; listingCapture.message = error.message || 'We couldn’t read that image.';} }
   finally { bitmap?.close(); if(revision === listingCapture.revision) refreshListingPreview(); }
 }
 function listingImageControls() {
   const busy = ['loading','uploading'].includes(listingCapture.state);
-  return `<section class="listing-image-tools" aria-label="Website screenshot"><div class="listing-image-heading"><h3>Website screenshot</h3><details class="listing-image-help"><summary aria-label="About website screenshots">?</summary><p class="listing-image-note">Automatic capture reads only the public website, never a page signed in to your app. If it shows a login screen or misses interactive content, upload your own screenshot. Your draft stays on this device.</p></details></div><p role="status" aria-live="polite">${esc(listingCapture.message || (listingImage() ? 'Your website preview is ready.' : 'Add a screenshot of the page people will try.'))}</p><div class="listing-image-drop" data-listing-image-drop><label> ${listingImage() ? 'Replace screenshot' : 'Upload a screenshot'}<input type="file" data-listing-image-upload accept="image/png,image/jpeg,image/webp"></label><span>Or drop it here · PNG, JPG, WebP · up to 5 MB</span></div><button type="button" class="secondary-button" data-listing-capture ${busy?'disabled':''}>${busy?'Preparing image…':listingImage()?'Recapture website':'Retry website capture'}</button></section>`;
+  const history=listingImageHistory();
+  const versions=history.length?`<div class="listing-preview-history"><h4>Earlier previews</h4>${history.map((item,index)=>`<div><span>${item.source==='captured'?'Website capture':'Your upload'}${item.replacedAt?' · '+esc(new Date(item.replacedAt).toLocaleDateString()):''}</span><button type="button" class="secondary-button" data-listing-preview-restore="${esc(item.id)}">Restore</button></div>`).join('')}</div>`:'';
+  return `<section class="listing-image-tools" aria-label="Website screenshot"><div class="listing-image-heading"><div><h3>Website screenshot</h3>${listingImage()?`<small class="listing-preview-source">${esc(listingImageSourceLabel())}</small>`:''}</div><details class="listing-image-help"><summary aria-label="About website screenshots">?</summary><p class="listing-image-note">Automatic capture reads only the public website, never a page signed in to your app. An image you upload stays in place until you choose to replace or refresh it. Failed captures keep the last good preview.</p></details></div><p role="status" aria-live="polite">${esc(listingCapture.message || (listingImage() ? 'Your website preview is ready.' : 'Add a screenshot of the page people will try.'))}</p><div class="listing-image-drop" data-listing-image-drop><label> ${listingImage() ? 'Replace screenshot' : 'Upload a screenshot'}<input type="file" data-listing-image-upload accept="image/png,image/jpeg,image/webp"></label><span>Or drop it here · PNG, JPG, WebP · up to 5 MB</span></div><button type="button" class="secondary-button" data-listing-capture ${busy?'disabled':''}>${busy?'Preparing image…':'Refresh preview'}</button>${versions}</section>`;
 }
 document.addEventListener('click', event => { if(event.target.closest('[data-listing-capture]')) void ensureListingScreenshot(true); });
+document.addEventListener('click', async event => {
+  const button=event.target.closest('[data-listing-preview-restore]');if(!button||!listingDraft.serverSlug)return;
+  button.disabled=true;listingCapture.message='Restoring that preview…';refreshListingPreview();
+  try{const response=await fetch('/api/project-image/'+encodeURIComponent(listingDraft.serverSlug),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'restore',historyId:button.dataset.listingPreviewRestore})});const result=await response.json();if(!response.ok)throw Error(result.error||'That preview could not be restored.');listingFailedImage='';listingDraft.image=result.preview||listingDraft.image;listingDraft.imageData='';listingDraft.imageMode=result.previewSource==='captured'?'automatic':result.previewSource==='studio'?'studio':'upload';listingDraft.imageSourceUrl=result.previewSourceUrl||'';listingDraft.imageCapturedAt=result.previewCapturedAt||'';setListingImageHistory(result.previewHistory);listingDraft.imageUploadedFor=listingDraft.serverSlug;listingCapture.state='ready';listingCapture.message='Earlier preview restored. Save or publish your other changes when you are ready.';saveListingDraft();refreshListingPreview();}
+  catch(error){listingCapture.state='error';listingCapture.message=error.message||'That preview could not be restored.';refreshListingPreview();}
+});
 document.addEventListener('change', event => { if(event.target.matches('[data-listing-image-upload]')) void useListingScreenshot(event.target.files?.[0]); });
 document.addEventListener('dragover', event => { if(event.target.closest('[data-listing-image-drop]')) {event.preventDefault();event.dataTransfer.dropEffect='copy';} });
 document.addEventListener('drop', event => { if(event.target.closest('[data-listing-image-drop]')) {event.preventDefault();void useListingScreenshot(event.dataTransfer.files?.[0]);} });
-document.addEventListener('error', event => { if(event.target.matches?.('[data-listing-screenshot]')) {listingCapture.state='error';listingCapture.message='That image could not be displayed. Upload another screenshot or retry capture.';listingDraft.imageData='';listingDraft.image='';saveListingDraft();refreshListingPreview();} },true);
+document.addEventListener('error', event => { if(event.target.matches?.('[data-listing-screenshot]')) {const failed=event.target.getAttribute('src')||'';if(failed===listingFailedImage)return;listingFailedImage=failed;listingCapture.state='error';listingCapture.message='That image could not be displayed. The saved preview has not been replaced.';saveListingDraft();refreshListingPreview();} },true);
 function listingField(key, label, placeholder, multiline = false) {
   const control = multiline
     ? `<textarea data-listing-field="${key}" maxlength="140" required aria-describedby="words-${key}" placeholder="${placeholder}">${esc(listingDraft[key])}</textarea><small id="words-${key}" class="word-counter" data-word-counter="${key}">Word count: ${CWListingRules.count(listingDraft[key])}</small><small class="word-rules">Minimum: 4 words · Maximum: 10 words</small>`
@@ -961,10 +985,10 @@ function listingPreview() {
 function listingIdentityConfirmation() {
   const image = listingImage();
   const busy = ['loading','uploading'].includes(listingCapture.state);
-  const message = listingCapture.message || (image ? 'Your website preview is ready.' : 'We’ll capture the public page. You can replace the image.');
+  const message = listingCapture.message || (image ? listingImageSourceLabel() : 'We’ll capture the public page. You can replace the image.');
   queueMicrotask(() => { void ensureListingScreenshot(); });
   const visual=image?`<img data-listing-screenshot src="${esc(image)}" alt="Screenshot captured from your app" referrerpolicy="no-referrer" />`:busy?`<div class="listing-capture-placeholder" aria-label="Website preview is loading"><span></span><span></span><span></span></div>`:`<div class="listing-capture-fallback" role="img" aria-label="Website preview unavailable"><strong>Preview unavailable</strong><span>${esc(message)}</span></div>`;
-  return `<div class="listing-identity-confirmation">${visual}<div class="listing-identity-tools"><p role="status" aria-live="polite">${esc(message)}</p><div><label class="secondary-button">${image?'Replace image':'Upload screenshot'}<input class="sr-only" type="file" data-listing-image-upload accept="image/png,image/jpeg,image/webp"></label><button type="button" class="secondary-button" data-listing-capture ${busy?'disabled':''}>${busy?'Preparing…':'Retry capture'}</button></div></div></div>`;
+  return `<div class="listing-identity-confirmation">${visual}<div class="listing-identity-tools"><p role="status" aria-live="polite">${esc(message)}</p><div><label class="secondary-button">${image?'Replace image':'Upload screenshot'}<input class="sr-only" type="file" data-listing-image-upload accept="image/png,image/jpeg,image/webp"></label><button type="button" class="secondary-button" data-listing-capture ${busy?'disabled':''}>${busy?'Preparing…':'Refresh preview'}</button></div></div></div>`;
 }
 function listingSettingsPage() {
   if (!window.CW_SERVER && !state.session) return listingAccountPage();
@@ -1099,6 +1123,10 @@ document.addEventListener('submit', event => {
 async function saveServerListing(statusEl) {
   if (listingDraft.accountOwner && listingDraft.accountOwner !== state.session?.user?.id) throw new Error('This draft belongs to another account. Open a project from My projects or choose Start over.');
   if (listingDraft.video && !CWMedia.videoUrl(listingDraft.video)) throw new Error('Use a YouTube, Vimeo, or Loom video URL or iframe embed.');
+  const currentUrl=listingUrl(listingDraft.url);
+  // URL changes refresh captured previews, while owner uploads remain untouched unless the owner
+  // explicitly chooses Refresh preview. Failed captures leave the current saved image in place.
+  if(currentUrl&&listingDraft.imageMode!=='upload'&&listingDraft.imageSourceUrl!==currentUrl)await ensureListingScreenshot(true);
   const body = { action: 'save', title: listingDraft.title, url: listingDraft.url, does: listingDraft.does, helps: listingDraft.helps, firstTry: listingDraft.firstTry, sharingPreference: listingDraft.sharingPreference, category: normalizeCategory(listingDraft.category), pricing: listingDraft.pricing, stage: listingDraft.stage, video: listingDraft.video };
   if (listingDraft.serverId) body.id = listingDraft.serverId;
   else {
@@ -1113,9 +1141,11 @@ async function saveServerListing(statusEl) {
   saveListingDraft();
   if (listingDraft.imageData && listingDraft.imageUploadedFor !== data.project.slug) {
     if (statusEl) statusEl.textContent = 'Saving your screenshot…';
-    const up = await fetch('/api/project-image/' + encodeURIComponent(data.project.slug), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ image: listingDraft.imageData }) });
+    const source=listingDraft.imageMode==='automatic'?'captured':'uploaded';
+    const up = await fetch('/api/project-image/' + encodeURIComponent(data.project.slug), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ image: listingDraft.imageData, source, sourceUrl: source==='captured'?listingDraft.imageSourceUrl:'', capturedAt: source==='captured'?listingDraft.imageCapturedAt:'' }) });
     const upData = await up.json();
     if (!up.ok) throw new Error(upData.error || 'Your text saved, but the screenshot upload failed. Please retry.');
+    listingFailedImage='';listingDraft.image=upData.preview||listingDraft.image;listingDraft.imageData='';listingDraft.imageMode=upData.previewSource==='captured'?'automatic':upData.previewSource==='studio'?'studio':'upload';listingDraft.imageSourceUrl=upData.previewSourceUrl||listingDraft.imageSourceUrl;listingDraft.imageCapturedAt=upData.previewCapturedAt||listingDraft.imageCapturedAt;setListingImageHistory(upData.previewHistory);
     listingDraft.imageUploadedFor = data.project.slug; saveListingDraft();
   }
   return data.project;
@@ -1472,13 +1502,14 @@ function hydrateCatalog(list) {
       slug: p.slug, name: p.name, category: p.category, color: categoryDefinition(p.category).color || 'teal',
       summary: p.summary, purpose: p.purpose || '', audience: p.audience || '', stage: p.stage || 'New',
       price: p.price || 'Free', url: p.url, outcome: p.outcome || (p.presentation && p.presentation.headline) || '',
-      video: p.video || '', note: p.note || '', preview: p.preview, benefits: p.benefits || [],
+      video: p.video || '', note: p.note || '', preview: String(p.slug || '').startsWith('codexnest') ? '/assets/previews/codexnest.png' : p.preview, benefits: p.benefits || [],
       creatorSlug: (p.creator && p.creator.slug) || 'creator-' + p.slug, accessNote: p.accessNote || '',
       reviewCount: p.reviewCount || 0, saveCount: projectSaveCount(p), recentOrder: p.recentOrder != null ? p.recentOrder : (list.length - index),
     });
     productBenefits[p.slug] = p.benefits || [];
     const pr = p.presentation || {};
-    projectPresentation[p.slug] = [pr.eyebrow || p.category || '', '', pr.headline || p.summary || p.name, pr.help || '', pr.firstTry || ''];
+    const headline = p.slug === 'stackscout' ? 'Choose less. Ship sooner.' : pr.headline || p.summary || p.name;
+    projectPresentation[p.slug] = [pr.eyebrow || p.category || '', '', headline, pr.help || '', pr.firstTry || ''];
     if (p.creator && (p.creator.slug || p.creator.name)) {
       const slug = p.creator.slug || 'creator-' + p.slug;
       const data = { slug, type: p.creator.type === 'company' ? 'company' : 'independent', avatar: p.creator.avatar || '', name: p.creator.name, initials: p.creator.initials || String(p.creator.name || 'C').slice(0, 2).toUpperCase(), label: p.creator.label || 'TryMyBuild creator', bio: p.creator.bio || '', verified: !!p.creator.verified, founderException: p.creator.founderException === true };
@@ -1565,7 +1596,7 @@ function loadOwnedProjectIntoDraft(p) {
   listingDraft.video = p.video || ''; listingDraft.sharingPreference = p.sharingPreference || 'not_sure'; listingDraft.accountOwner = state.session?.user?.id || '';
   listingDraft.title = p.title || ''; listingDraft.url = p.url || ''; listingDraft.category = p.category || 'Technology';
   listingDraft.stage = p.stage || 'Ready for a first try'; listingDraft.does = p.headline || ''; listingDraft.helps = p.help || ''; listingDraft.firstTry = p.firstTry || '';
-  if (p.preview) { listingDraft.image = p.preview; listingDraft.imageData = ''; listingDraft.imageSourceUrl = listingUrl(p.url); listingDraft.imageUploadedFor = p.slug; }
+  if (p.preview) { listingFailedImage='';listingDraft.image = p.preview; listingDraft.imageData = ''; listingDraft.imageMode=p.previewSource==='captured'?'automatic':p.previewSource==='studio'?'studio':'upload';listingDraft.imageSourceUrl = p.previewSourceUrl || (p.previewSource==='captured'?listingUrl(p.url):'');listingDraft.imageCapturedAt=p.previewCapturedAt||'';setListingImageHistory(p.previewHistory);listingDraft.imageUploadedFor = p.slug; }
   listingCategoryOtherOpen = !primaryCategoryNames.includes(normalizeCategory(listingDraft.category));
   saveListingDraft();
 }

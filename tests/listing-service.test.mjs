@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
-import { saveDraft, submit, unpublish, replaceImage, isMaterialChange } from '../src/server/listing-service.mjs';
+import { saveDraft, submit, unpublish, replaceImage, restoreImage, isMaterialChange } from '../src/server/listing-service.mjs';
 
 // In-memory store mirroring the Supabase adapter's contract: unique (owner, client_token), unique slug,
 // and optimistic updates guarded on BOTH listing_status and lock_version.
@@ -161,21 +161,47 @@ test('admin approval is bound to the reviewed revision: a stale approval after w
   assert.ok(fresh && fresh.listing_status === 'published');
 });
 
-test('replacing the image of an approved listing re-encodes, versions the object, and resets review', async () => {
+test('replacing the image of an approved listing re-encodes, records provenance, keeps rollback history, and resets review', async () => {
   const store = makeStore();
   const a = await saveDraft(store, { ownerId: 'A', clientToken: 't1', input: draft('One') }, deps);
   const row = store.rows.get(a.project.id);
   const oldKey = `previews/A/${row.id}/old.jpg`;
   store.storage.set(oldKey, Buffer.from('old'));
   Object.assign(row, { listing_status: 'published', visibility: 'public', preview_path: oldKey, lock_version: 2 });
-  const res = await replaceImage(store, { ownerId: 'A', slug: row.slug, bytes: Buffer.from('rawupload') },
+  Object.assign(row, { preview_source: 'uploaded', preview_history: [] });
+  const res = await replaceImage(store, { ownerId: 'A', slug: row.slug, bytes: Buffer.from('rawupload'), source: 'captured', sourceUrl: 'https://new.example/', capturedAt: '2026-10-06T12:00:00.000Z' },
     { reencode, keyFactory: (o, p) => `previews/${o}/${p}/new.jpg` });
   assert.equal(res.status, 200);
   assert.equal(res.reviewReset, true);
   assert.equal(res.project.listing_status, 'draft');
   assert.ok(store.storage.has(`previews/A/${row.id}/new.jpg`), 'new versioned object stored');
-  assert.ok(!store.storage.has(oldKey), 'old object removed only after the DB reference was updated');
+  assert.ok(store.storage.has(oldKey), 'old object retained for rollback');
+  assert.equal(res.project.preview_source, 'captured');
+  assert.equal(res.project.preview_source_url, 'https://new.example/');
+  assert.equal(res.project.preview_history[0].path, oldKey);
   assert.equal(store.storage.get(`previews/A/${row.id}/new.jpg`).toString(), 'reencoded', 'stored bytes are the re-encoded ones');
+});
+
+test('preview history keeps three versions, removes only the evicted object, and restores an owned version', async () => {
+  const store = makeStore();
+  const created = await saveDraft(store, { ownerId: 'A', clientToken: 'history', input: draft('History') }, deps);
+  const row = store.rows.get(created.project.id);
+  const keys = ['one','two','three','four'].map(name=>`previews/A/${row.id}/${name}.jpg`);
+  Object.assign(row,{preview_path:keys[0],preview_source:'uploaded',preview_history:[]});store.storage.set(keys[0],Buffer.from('one'));
+  for(let i=1;i<keys.length;i++){
+    const result=await replaceImage(store,{ownerId:'A',slug:row.slug,bytes:Buffer.from(keys[i]),source:'captured',sourceUrl:`https://${i}.example/`},{reencode,keyFactory:()=>keys[i]});
+    assert.equal(result.status,200);
+  }
+  const current=store.rows.get(row.id);
+  assert.equal(current.preview_history.length,3);
+  assert.ok(store.storage.has(keys[0]),'oldest remains while it is still one of three rollback versions');
+  const fifth='previews/A/'+row.id+'/five.jpg';
+  await replaceImage(store,{ownerId:'A',slug:row.slug,bytes:Buffer.from('five'),source:'uploaded'},{reencode,keyFactory:()=>fifth});
+  assert.ok(!store.storage.has(keys[0]),'only the version evicted from history is removed');
+  const beforeRestore=store.rows.get(row.id),restorePath=beforeRestore.preview_history[1].path;
+  const restored=await restoreImage(store,{ownerId:'A',slug:row.slug,historyId:restorePath});
+  assert.equal(restored.status,200);assert.equal(restored.project.preview_path,restorePath);
+  assert.ok(restored.project.preview_history.some(item=>item.path===fifth),'the replaced current image becomes rollback history');
 });
 
 test('concurrent review/edit: a stale guarded update is rejected instead of clobbering', async () => {

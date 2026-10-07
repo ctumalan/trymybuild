@@ -9,13 +9,16 @@ async function finishErasure(db:any,id:string){
  const reads=await db.from('feedback_reads').delete().eq('user_id',id);if(reads.error)throw reads.error;
  const ratings=await db.from('feedback_ratings').update({reason:'[Removed by account deletion]'}).or('creator_user_id.eq.'+id+',reviewer_user_id.eq.'+id);if(ratings.error)throw ratings.error;
  const prefs=await db.from('site_settings').delete().eq('key',notificationKey(id));if(prefs.error)throw prefs.error;
- const erasedProjects=await db.from('projects').select('id').eq('owner_user_id',id);if(erasedProjects.error)throw erasedProjects.error;
+ const erasedProjects=await db.from('projects').select('id,preview_history').eq('owner_user_id',id);if(erasedProjects.error)throw erasedProjects.error;
  if(erasedProjects.data.length){const builds=await db.from('site_settings').delete().in('key',erasedProjects.data.map((p:any)=>'project-builds:'+p.id));if(builds.error)throw builds.error;}
  const daily=await db.from('daily_discussion_comments').update({message:'[Removed by account deletion]',moderation_status:'hidden'}).eq('user_id',id);if(daily.error)throw daily.error;
  for(const table of ['maker_exchange_entries','credit_ledger','feedback_requests','feedback_qualifications','project_slot_assignments','project_slot_grants','category_engagement']){const removed=await db.from(table).delete().eq('user_id',id);if(removed.error)throw removed.error;}
  const job=await db.from('erasure_jobs').select('*').eq('user_id',id).single();if(job.error)throw job.error;
  if(job.data.status!=='complete'){
-  if(job.data.paths.length){const removed=await db.storage.from('project-previews').remove(job.data.paths);if(removed.error)throw removed.error;}
+  const historyPaths=erasedProjects.data.flatMap((project:any)=>Array.isArray(project.preview_history)?project.preview_history.map((item:any)=>item?.path).filter((path:any)=>typeof path==='string'&&!path.startsWith('/assets/')):[]);
+  const mediaPaths=[...new Set([...(job.data.paths||[]),...historyPaths])];
+  if(mediaPaths.length){const removed=await db.storage.from('project-previews').remove(mediaPaths);if(removed.error)throw removed.error;}
+  if(erasedProjects.data.length){const cleared=await db.from('projects').update({preview_history:[],preview_source_url:'',preview_captured_at:null}).eq('owner_user_id',id);if(cleared.error)throw cleared.error;}
   try{await workos().userManagement.deleteUser(job.data.workos_id);}catch(err:any){if(err.status!==404&&err.statusCode!==404)throw err;}
   const done=await db.from('erasure_jobs').update({status:'complete',workos_id:'',paths:[],completed_at:new Date().toISOString()}).eq('user_id',id);if(done.error)throw done.error;
  }

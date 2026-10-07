@@ -68,6 +68,15 @@ test('late automatic results cannot overwrite a changed URL or manually chosen i
  const pending=context.ensureListingScreenshot();context.invalidateListingCapture();context.listingDraft.imageData='chosen-image';
  finish({ok:true,json:async()=>({image:'data:image/jpeg;base64,AAAA'})});await pending;assert.equal(context.listingDraft.imageData,'chosen-image');
 });
+test('URL changes preserve owner uploads and automatic capture failures preserve the last good preview',async()=>{
+ const source=readFileSync(new URL('../app.js',import.meta.url),'utf8');
+ const listingDraft={url:'https://new.site',image:'/api/project-image/mine',imageSourceUrl:'https://old.site',imageData:'data:image/jpeg;base64,AAAA',imageMode:'upload',imageHistory:'[]'};
+ const context=vm.createContext({window:{CW_SERVER:true},state:{session:{authenticated:true}},CWPreviewUtils:utils,listingDraft,listingUrl:v=>v,document:{querySelector:()=>null},saveListingDraft:()=>true,fetch:async()=>({ok:false,json:async()=>({error:'Capture failed'})}),AbortController,setTimeout,clearTimeout});
+ vm.runInContext(source.slice(source.indexOf('let listingCapture ='),source.indexOf('async function useListingScreenshot')),context);
+ context.invalidateListingCapture();assert.equal(listingDraft.imageMode,'upload');assert.equal(listingDraft.imageData,'data:image/jpeg;base64,AAAA');
+ await context.ensureListingScreenshot();assert.equal(listingDraft.imageData,'data:image/jpeg;base64,AAAA','upload is not automatically replaced');
+ listingDraft.imageMode='automatic';await context.ensureListingScreenshot(true);assert.equal(listingDraft.image,'/api/project-image/mine');assert.equal(listingDraft.imageData,'data:image/jpeg;base64,AAAA','failed capture keeps last good preview');
+});
 test('guest preview captures before sign-in without refresh loops or repeat captures',async()=>{
  const source=readFileSync(new URL('../app.js',import.meta.url),'utf8');let refreshes=0,captures=0;
  const context=vm.createContext({window:{CW_SERVER:true},state:{session:{authenticated:false}},CWPreviewUtils:utils,listingDraft:{url:'https://public.site',image:'',imageSourceUrl:'',imageData:''},listingUrl:v=>v,document:{querySelector:()=>null},saveListingDraft:()=>true,fetch:async()=>{captures++;return {ok:true,json:async()=>({image:'data:image/jpeg;base64,AAAA'})};},AbortController,setTimeout,clearTimeout});

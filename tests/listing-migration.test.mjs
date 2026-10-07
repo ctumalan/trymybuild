@@ -50,3 +50,11 @@ test('006 creates a PRIVATE preview bucket and an atomic project-review function
   assert.match(sql, /project_review_history/, 'decisions are recorded');
   assert.match(sql, /grant execute on function public\.cw_review_project.*to service_role/s);
 });
+
+test('030 records preview consent provenance and limits rollback history to three versions',()=>{
+  const sql=readFileSync(new URL('../database/030_owner_controlled_previews.sql',import.meta.url),'utf8');
+  for(const column of ['preview_source','preview_source_url','preview_captured_at','preview_history'])assert.match(sql,new RegExp(`add column if not exists ${column}\\b`));
+  assert.match(sql,/preview_source in \('uploaded','captured','studio'\)/);
+  assert.match(sql,/jsonb_array_length\(preview_history\) <= 3/);
+  assert.match(sql,/where is_studio=true/);
+});

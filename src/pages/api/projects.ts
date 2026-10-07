@@ -11,11 +11,19 @@ import { PROJECT_FIELDS } from '../../server/catalog-db';
 import { publicationAccess } from '../../server/community-credits';
 
 function ownedView(row: any) {
+  const history = Array.isArray(row.preview_history) ? row.preview_history.slice(0, 3).map((item: any) => ({
+    id: typeof item?.path === 'string' ? item.path : '',
+    source: item?.source === 'captured' ? 'captured' : item?.source === 'studio' ? 'studio' : 'uploaded',
+    capturedAt: typeof item?.captured_at === 'string' ? item.captured_at : '',
+    replacedAt: typeof item?.replaced_at === 'string' ? item.replaced_at : '',
+  })).filter((item: any) => item.id) : [];
   return {
     price: row.price_label || 'Free', pricing: pricingKind(row.price_label || 'Free'), sharingPreference: row.sharing_preference || 'not_sure', video: row.video_url || '', id: row.id, slug: row.slug, title: row.title, category: row.category, stage: row.stage,
     status: row.listing_status, statusLabel: (PROJECT_STATUS_LABELS as Record<string, string>)[row.listing_status] || row.listing_status,
     headline: row.headline, help: row.help_text, firstTry: row.first_try, url: row.external_url,
     preview: row.preview_public_url || '', hasImage: !!row.preview_path,
+    previewSource: row.preview_source || (row.is_studio ? 'studio' : 'uploaded'),
+    previewSourceUrl: row.preview_source_url || '', previewCapturedAt: row.preview_captured_at || '', previewHistory: history,
     ownershipStatus: row.ownership_status, submittedAt: row.submitted_at, publishedAt: row.published_at, updatedAt: row.updated_at,
     lockVersion: row.lock_version, readiness: publishReadiness(row),
   };
@@ -54,13 +62,17 @@ export const POST: APIRoute = async context => {
 
     if(body.action==='delete'){
       if(body.confirm!=='DELETE'||!Number.isSafeInteger(body.version))return json({error:'Confirm deletion of this private draft.'},400);
+      const beforeDelete=await database().from('projects').select('preview_history').eq('id',body.id).eq('owner_user_id',member.id).maybeSingle();
+      if(beforeDelete.error)return json({error:'This draft could not be deleted safely. Reload and try again.'},503);
       const result=await database().rpc('cw_delete_unused_draft',{p_user:member.id,p_id:body.id,p_version:body.version});
       if(result.error)return json({error:'This draft could not be deleted. Reload it; only unused private drafts without project activity can be deleted.'},409);
       // Only remove the owned, now-unreferenced preview after the database confirms deletion.
       let cleanupPending=false;
-      if(typeof result.data==='string'&&result.data.startsWith(`previews/${member.id}/${body.id}/`)){
-        try{const removed=await database().storage.from('project-previews').remove([result.data]);cleanupPending=!!removed.error;}catch{cleanupPending=true;}
-        if(cleanupPending){console.warn('Deleted draft preview needs cleanup',body.id);await database().from('operations_log').insert({actor_id:member.id,target_id:body.id,action:'project.preview_cleanup_pending',reason:result.data}).then(()=>{},()=>{});}
+      const historyPaths=Array.isArray(beforeDelete.data?.preview_history)?beforeDelete.data.preview_history.map((item:any)=>item?.path).filter((path:any)=>typeof path==='string'&&path.startsWith(`previews/${member.id}/${body.id}/`)):[];
+      const paths=[...(typeof result.data==='string'&&result.data.startsWith(`previews/${member.id}/${body.id}/`)?[result.data]:[]),...historyPaths];
+      if(paths.length){
+        try{const removed=await database().storage.from('project-previews').remove([...new Set(paths)]);cleanupPending=!!removed.error;}catch{cleanupPending=true;}
+        if(cleanupPending){console.warn('Deleted draft previews need cleanup',body.id);await database().from('operations_log').insert({actor_id:member.id,target_id:body.id,action:'project.preview_cleanup_pending',reason:paths.join(',')}).then(()=>{},()=>{});}
       }
       return json({ok:true,deleted:true,cleanupPending});
     }

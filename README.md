@@ -74,3 +74,11 @@ not the application dependencies or live database. The concurrency check starts
 PostgreSQL on a private Unix socket with TCP disabled and cleans up after success.
 `scripts/maker-exchange-qa-server.mjs` previews synthetic join, waiting, matched,
 given, completed and cancelled screens with all sending disabled.
+
+## Owner-controlled listing previews
+
+Apply `database/030_owner_controlled_previews.sql` before deploying the matching
+application release. It records whether a preview was uploaded by its owner or
+captured from the public website and keeps three rollback versions. Uploaded images
+are never replaced merely because the listing URL changes; failed captures preserve
+the last good image. The release schema check verifies the required columns.

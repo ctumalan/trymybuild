@@ -1946,3 +1946,19 @@ body.public-site #app[tabindex="-1"]:focus { outline:none; }
 /* Shared lettering palette for both site logos. */
 .site-header .brand-name,body.public-site .site-footer .brand-name { color:#7545ad; }
 .site-header .brand-name-works,body.public-site .site-footer .brand-name-works { color:#17332a; }
+
+/* The pre-publish listing preview uses the same bounded showcase as the public page. */
+.listing-preview-card.invitation-detail[data-showcase-theme] .recipient-hero { min-height:0; }
+.listing-preview-card.invitation-detail[data-showcase-theme] .recipient-copy h2 {
+ max-width:16ch; font-size:clamp(2rem,8cqw,3rem); overflow-wrap:anywhere;
+}
+.listing-preview-card.invitation-detail[data-showcase-theme] .recipient-preview-column {
+ display:flex; flex-direction:column; align-items:center; width:100%; min-width:0;
+}
+.listing-preview-card.invitation-detail[data-showcase-theme] .recipient-art { width:100%; max-width:560px; }
+.listing-preview-card.invitation-detail[data-showcase-theme] .recipient-art-viewport { min-height:160px; }
+.listing-preview-card.invitation-detail[data-showcase-theme] .recipient-preview-column>.primary-button { align-self:center; }
+@media(max-width:620px) {
+ .listing-preview-card.invitation-detail[data-showcase-theme] .recipient-copy h2 { font-size:clamp(1.85rem,9cqw,2.5rem); }
+ .listing-preview-card.invitation-detail[data-showcase-theme] .recipient-art-viewport { min-height:130px; }
+}

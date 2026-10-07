@@ -974,7 +974,7 @@ function listingPreview() {
   const image = listingImage();
   queueMicrotask(() => { void ensureListingScreenshot(); });
   const product={slug:'listing-preview',name:listingDraft.title||'Your project',category:listingDraft.category,stage:listingDraft.stage,preview:image,url,presentation:{headline:listingDraft.does,help:listingDraft.helps,firstTry:listingDraft.firstTry}};
-  return `<div data-listing-preview-region><article class="listing-preview-card project-detail-content"><header class="public-detail-header"><div><strong>${esc(product.name)}</strong><small>${esc(product.category)} · ${esc(product.stage)}</small></div></header>${projectDetailContent(product,true)}</article>${listingImageControls()}</div>`;
+  return `<div data-listing-preview-region><article class="listing-preview-card project-detail-content invitation-detail mealmap-detail" data-showcase-theme="${esc(CWProjectView.theme(product))}"><header class="public-detail-header"><div><strong>${esc(product.name)}</strong><small>${esc(product.category)} · ${esc(product.stage)}</small></div></header>${projectDetailContent(product,true)}</article>${listingImageControls()}</div>`;
 }
 function listingIdentityConfirmation() {
   const image = listingImage();

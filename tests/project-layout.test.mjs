@@ -39,6 +39,9 @@ test('detail view uses the invitation screenshot layout and relevant information
  assert.doesNotMatch(drawer+serverDetail,/Connects to the video provider|project-video-note/);
  assert.match(css,/\.mealmap-detail \.project-screenshot\{[^}]*object-fit:contain/);
  assert.match(css,/\.listing-preview-card \.listing-preview-hero>img\{[^}]*object-fit:contain/);
+ assert.match(app,/listing-preview-card project-detail-content invitation-detail mealmap-detail/);
+ assert.match(app,/data-showcase-theme="\$\{esc\(CWProjectView\.theme\(product\)\)\}"/);
+ assert.match(themeCss,/\.listing-preview-card\.invitation-detail\[data-showcase-theme\] \.recipient-copy h2 \{[^}]*overflow-wrap:anywhere/);
 });
 test('demo belongs inside the app card after the app link, with no player loaded until clicked',()=>{
  const product={slug:'demo',name:'Demo app',url:'https://example.com',video:'https://youtu.be/dQw4w9WgXcQ'};

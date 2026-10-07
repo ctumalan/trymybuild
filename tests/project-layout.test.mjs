@@ -11,10 +11,30 @@ const serverDetail=readFileSync(new URL('../src/pages/projects/[slug].ts',import
 const drawer=shared+app.slice(app.indexOf('function projectDetailContent(product'),app.indexOf("document.addEventListener('input'",app.indexOf('function detailDrawer(product)')));
 test('detail view uses the invitation screenshot layout and relevant information',()=>{
  assert.match(drawer,/class="recipient-art"/);
+ assert.match(drawer,/class="detail-product-signal"/);
+ assert.match(shared,/class="detail-category-icon"/);
+ assert.match(shared,/categoryPaths\[category\]/);
+ assert.match(shared,/class="detail-product-meta"/);
+ assert.doesNotMatch(shared,/detail-product-meta[^\n]*product\.stage/);
+ assert.doesNotMatch(drawer,/<small>\$\{esc\(product\.price\)\} · \$\{esc\(product\.category\)\}/);
+ assert.match(drawer,/class="recipient-art-chrome"/);
+ assert.match(drawer,/class="recipient-art-viewport"/);
+ assert.match(drawer,/detail-note-brand-icon[^>]*viewBox="0 0 256 256"/);
  assert.doesNotMatch(drawer,/--project-wallpaper|Good to know/);
  assert.doesNotMatch(drawer,/What saving does|About opening this app/);
  assert.match(drawer,/Try this app ↗/);
  assert.match(drawer,/Ask the maker a question or share a thought/);
+ assert.match(drawer,/Posts immediately\./);
+ assert.doesNotMatch(drawer,/Public after review\./);
+ assert.match(shared,/Be the first to review this app/);
+ assert.doesNotMatch(shared,/Receive feedback back/);
+ const nudgeLayout=globalThis.CWProjectView.conversation({slug:'layout-check',communityReviewCount:0},{loading:false});
+ assert.ok(nudgeLayout.indexOf('conversation-tabs')<nudgeLayout.indexOf('feedback-nudge'));
+ assert.doesNotMatch(shared,/data-open-feedback|feedback-nudge-arrow/);
+ assert.match(shared,/feedback-nudge-doodle/);
+ assert.match(themeCss,/@keyframes feedback-arrow-line/);
+ assert.match(themeCss,/@keyframes feedback-sticker-pop/);
+ assert.match(themeCss,/@media\(prefers-reduced-motion:reduce\) \{ \.feedback-nudge/);
  assert.match(shared,/\$\{video\(product.video\)\}<\/div><\/section>/);
  assert.doesNotMatch(drawer+serverDetail,/Connects to the video provider|project-video-note/);
  assert.match(css,/\.mealmap-detail \.project-screenshot\{[^}]*object-fit:contain/);
@@ -65,4 +85,32 @@ test('each launch app carries its own preview-matched detail palette',()=>{
  }
  assert.match(shared,/detail-note-icon[\s\S]*currentColor|detail-note-icon/);
  assert.match(themeCss,/--app-accent/);
+});
+test('catalog project drawer stays intentionally narrow without shrinking shared pages',()=>{
+ assert.match(themeCss,/\.detail-dialog\.mealmap-detail\.invitation-detail\s*\{[\s\S]*?width:min\(440px,calc\(100vw - 24px\)\);[\s\S]*?max-width:440px/);
+ assert.match(themeCss,/data-showcase-theme="codexnest"[^}]*\.public-detail-header \.invite-actions \{[^}]*flex-wrap:nowrap/);
+});
+test('similar apps use one detailed card per row in the narrow project drawer',()=>{
+ assert.match(app,/similar-card-copy/);
+ assert.match(app,/similar-card-summary/);
+ assert.match(app,/\$\{esc\(p\.summary \|\| p\.purpose\)\}/);
+ assert.match(themeCss,/:is\(\[data-public-project\],\.detail-dialog\) \.similar-grid \{[^}]*grid-template-columns:1fr/);
+ assert.match(themeCss,/:is\(\[data-public-project\],\.detail-dialog\) \.similar-card \{[\s\S]*?grid-template-columns:minmax\(0,42%\) minmax\(0,1fr\)/);
+});
+test('light project canvas keeps the accent vectors moving with reduced-motion support',()=>{
+ assert.match(themeCss,/linear-gradient\(145deg,#fff,#fbfaf7\)/);
+ assert.match(themeCss,/\.recipient-copy h2,[\s\S]*?data-showcase-theme="stackscout"[^}]*\{[\s\S]*?color:#1f1b1d/);
+ assert.match(themeCss,/\.detail-orbit \{ animation:detail-orbit-float 7s ease-in-out infinite alternate/);
+ assert.match(themeCss,/@keyframes detail-orbit-float/);
+ assert.match(themeCss,/@media\(prefers-reduced-motion:reduce\)[\s\S]*\.detail-orbit \{ animation:none/);
+});
+test('first-review sticker disappears after a non-admin community review',()=>{
+ const first=globalThis.CWProjectView.conversation({slug:'new-app',communityReviewCount:0},{loading:false});
+ const reviewed=globalThis.CWProjectView.conversation({slug:'reviewed-app',communityReviewCount:1},{loading:false});
+ assert.match(first,/data-feedback-nudge/);
+ assert.doesNotMatch(reviewed,/data-feedback-nudge|Be the first to review this app/);
+ const migration=readFileSync(new URL('../database/032_first_community_review_count.sql',import.meta.url),'utf8');
+ assert.match(migration,/u\.system_role<>'admin'/);
+ assert.match(migration,/f\.attempt<>'not_tried'/);
+ assert.match(migration,/f\.moderation_status<>'hidden'/);
 });

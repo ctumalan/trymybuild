@@ -9,7 +9,8 @@ try{
  await db.exec('create role anon;create role authenticated;create role service_role bypassrls;create schema storage;create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);');
  for(const f of (await readdir(new URL('../database/',import.meta.url))).filter(f=>/^\d.*\.sql$/.test(f)).sort()){if(f.startsWith('004'))await run("insert into users(workos_user_id) values('user_01M1Q8HVXRTVJ7ZXSC9RDZT540')");await db.exec(await readFile(new URL('../database/'+f,import.meta.url),'utf8'));}
  const member=async(name,visible=true)=>{const id=randomUUID();await run('insert into users(id,workos_user_id) values($1,$2)',[id,name]);await run('insert into profiles(user_id,slug,display_name,is_public) values($1,$2,$2,$3)',[id,name,visible]);return id;};
- const a=await member('alice'),b=await member('bob'),c=await member('outsider'),hidden=await member('private-person',false);
+ const a=await member('alice'),b=await member('bob'),c=await member('outsider'),hidden=await member('private-person',false),admin=await member('admin-reviewer');
+ await run("update users set system_role='admin' where id=$1",[admin]);
  await run("insert into projects(slug,title,owner_user_id,listing_status) values('test-public','Public project',$1,'published'),('test-draft','Private draft',$1,'draft')",[b]);
  const hash='a'.repeat(64),id=randomUUID(),comment='I tried this tool and liked the clear layout.';
  await assert.rejects(run('select cw_submit_guest_comment($1,$2,$3,$4)',[id,'test-draft',hash,comment]));
@@ -26,7 +27,9 @@ try{
  assert.equal(Number(await one('select count(*) from notifications where id=$1',[id])),1);
  const expired=randomUUID();await run('select cw_submit_guest_comment($1,$2,$3,$4)',[expired,'test-public','c'.repeat(64),comment]);await run("update project_experiences set guest_expires_at=now()-interval '1 day' where id=$1",[expired]);assert.equal(Number(await one('select cw_claim_guest_comments($1,$2)',[c,'c'.repeat(64)])),0);
  await run("insert into creator_feedback(project_slug,author_user_id,helpful,price,message,visibility,moderation_status,attempt,focus) values('test-public',$1,'not_tried','free','I wonder whether this could work without internet access.','private','pending','not_tried','ease')",[a]);
- const stats=(await run("select * from cw_public_activity() where slug='test-public'")).rows[0];assert.equal(Number(stats.comments),1);assert.equal(Number(stats.recent_comments),1);assert.equal(Number(await one("select count(*) from cw_public_activity() where slug='test-draft'")),0);
+ await run("insert into creator_feedback(project_slug,author_user_id,helpful,price,message,visibility,moderation_status,attempt,focus) values('test-public',$1,'somewhat','free','I tried the planner and found the save action hard to notice.','private','pending','completed','ease')",[c]);
+ await run("insert into creator_feedback(project_slug,author_user_id,helpful,price,message,visibility,moderation_status,attempt,focus) values('test-public',$1,'yes','free','I tried the planner and the first task worked well for me.','public','published','completed','ease')",[admin]);
+ const stats=(await run("select * from cw_public_activity() where slug='test-public'")).rows[0];assert.equal(Number(stats.comments),2);assert.equal(Number(stats.recent_comments),2);assert.equal(Number(stats.community_reviews),1);assert.equal(Number(await one("select count(*) from cw_public_activity() where slug='test-draft'")),0);
  console.log('PASS: guest retry, moderation, one-time verified claim, expiry, publication notification, public-only aggregates');
  const alreadyPublic=randomUUID();await run('select cw_submit_guest_comment($1,$2,$3,$4)',[alreadyPublic,'test-public','d'.repeat(64),comment]);await run("update project_experiences set moderation_status='published' where id=$1",[alreadyPublic]);
  assert.equal(Number(await one('select count(*) from notifications where id=$1',[alreadyPublic])),0);

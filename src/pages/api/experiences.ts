@@ -28,7 +28,6 @@ export const GET: APIRoute = async context => {
 export const POST: APIRoute = async context => {
   if (!sameOrigin(context.request, origin(context))) return json({ error: 'Request not allowed.' }, 403);
   const user = await currentUser(context);
-  if (user&&!user.emailVerified) return json({error:'Verify your email before posting.'},403);
   if (!databaseReady()) return json({ error: 'Community sharing is being connected.' }, 503);
   try {
     const raw=await context.request.text();if(raw.length>4000)return json({error:'Comment too long.'},413);
@@ -39,16 +38,20 @@ export const POST: APIRoute = async context => {
       const address=context.clientAddress;if(!address)return json({error:'Guest sharing is unavailable. Please sign in.'},503);
       if(!await allowRequest(address,'guest-comment-network',3,3600))return json({error:'Please wait before submitting another guest comment, or sign in.'},429);
       const hash=guestToken(context,true);if(!hash)throw Error();
-      const r=await database().rpc('cw_submit_guest_comment',{p_id:body.requestId,p_slug:body.slug,p_hash:hash,p_message:body.response.trim()});if(r.error)throw r.error;
-      return json({saved:true,guest:true,duplicate:r.data!==body.requestId,message:r.data===body.requestId?'Your comment has been sent for review.':'You already submitted a guest comment for this project. It remains in the review process. Your new text has not replaced it.'});
+      const db=database(),r=await db.rpc('cw_submit_guest_comment',{p_id:body.requestId,p_slug:body.slug,p_hash:hash,p_message:body.response.trim()});if(r.error)throw r.error;
+      const published=await db.from('project_experiences').update({moderation_status:'published'}).eq('id',r.data).eq('project_slug',body.slug).eq('guest_hash',hash).neq('moderation_status','hidden').select('id').maybeSingle();
+      if(published.error)throw published.error;if(!published.data)return json({error:'This comment is not available.'},409);
+      return json({saved:true,guest:true,duplicate:r.data!==body.requestId,message:r.data===body.requestId?'Your comment is now public.':'You already posted a comment for this app. Your original comment is public.'});
     }
     if (!await allowRequest(user.id, 'experiences')) return json({error:'Please wait a minute before trying again.'},429);
     const member = await ensureMember(user);
     const db = database();
     const project = await db.from('projects').select('slug').eq('slug', body.slug).eq('listing_status', 'published').maybeSingle();
     if (!project.data) return json({ error: 'Project not found.' }, 404);
-    const result = await db.from('project_experiences').upsert({ project_slug: body.slug, author_user_id: member.id, response: body.response.trim(), moderation_status: 'pending' }, { onConflict: 'project_slug,author_user_id' }).select('id').single();
+    const existing=await db.from('project_experiences').select('moderation_status').eq('project_slug',body.slug).eq('author_user_id',member.id).maybeSingle();
+    if(existing.error)throw existing.error;if(existing.data?.moderation_status==='hidden')return json({error:'This comment cannot be republished.'},409);
+    const result = await db.from('project_experiences').upsert({ project_slug: body.slug, author_user_id: member.id, response: body.response.trim(), moderation_status: 'published' }, { onConflict: 'project_slug,author_user_id' }).select('id').single();
     if (result.error) throw result.error;
-    return json({ saved: true, message: 'Your experience has been sent for review.' });
+    return json({ saved: true, message: 'Your comment is now public.' });
   } catch { return json({ error: 'Your experience could not be sent. Please try again.' }, 503); }
 };

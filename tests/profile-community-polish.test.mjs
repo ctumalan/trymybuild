@@ -48,6 +48,13 @@ test('guest success is optional signup only after confirmed submission; no autom
  const app=read('app.js'),polish=read('interaction-polish.js');assert.match(app,/if\(data.guest\)window.CWGuestComment\?\.offer\(status\)/);assert.match(polish,/in-site notification/);assert.match(polish,/Not now/);assert.match(polish,/No email is sent/);
  assert.match(read('src/pages/api/comment-updates.ts'),/sameOrigin/);assert.match(read('src/pages/auth/callback.ts'),/claimGuestComments/);assert.match(read('src/pages/api/experiences.ts'),/guest-comment-network',3,3600/);
 });
+test('project comments publish immediately for members and guests and refresh the conversation',()=>{
+ const api=read('src/pages/api/experiences.ts'),migration=read('database/031_immediate_project_comments.sql'),app=read('app.js'),publicComments=read('public-comments.js');
+ assert.match(api,/moderation_status:\s*'published'/);assert.doesNotMatch(api,/moderation_status:\s*'pending'/);assert.doesNotMatch(api,/Verify your email before posting/);
+ assert.match(migration,/guest_expires_at,moderation_status\)[\s\S]*'published'/);assert.match(migration,/cw_submit_guest_comment/);
+ assert.match(app,/loadProjectConversation\(conversation\)/);assert.match(publicComments,/loadProjectConversation\(conversation\)/);
+ assert.match(app,/Posts immediately\./);assert.doesNotMatch(app,/Public after review\./);
+});
 test('motion respects reduced motion; textareas grow; sharing remains a deliberate action',()=>{
  const css=read('ui-refinements.css'),js=read('interaction-polish.js'),share=read('share-invitation.js');assert.match(css,/prefers-reduced-motion:reduce/);assert.match(css,/resize:none!important/);assert.match(js,/Math.min\(280/);assert.match(js,/localStorage.getItem\('trymybuild-brand-intro'\)/);
  assert.match(share,/Open email draft/);assert.match(share,/data-send-invitation/);for(const label of ['Text','Copy invitation','Choose an app','Gmail in browser','Yahoo in browser'])assert.ok(share.includes(label));assert.match(share,/data-share-profile/);

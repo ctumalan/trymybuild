@@ -39,19 +39,21 @@ test('an open feedback request becomes a focused trial brief and removes the pri
 });
 test('catalog loads the handlers needed by guided and native project overlays',()=>{
  const html=read('index.html');for(const file of ['community-input.js','public-comments.js','project-actions.js'])assert.match(html,new RegExp('src="'+file.replaceAll('.','\\.')+'" defer'));
- const app=read('app.js');assert.match(read('project-view.js'),/data-inline-feedback data-feedback-slug=/);assert.match(app,/window.CWBrowseContext/);
+ const app=read('app.js'),input=read('community-input.js');assert.match(read('project-view.js'),/data-inline-feedback data-feedback-slug=/);assert.match(app,/window.CWBrowseContext/);assert.match(input,/countsTowardFirstReview[\s\S]*data-feedback-nudge/);
 });
 test('guided submission requires membership and creates a replyable review rather than a public comment',async()=>{
  const f=workspaceFixtures(),writes=[];
  const db={from(table){const query={select(){return query;},eq(){return query;},maybeSingle:async()=>({data:{owner_user_id:f.owner}}),insert(row){writes.push({table,row});return query;},single:async()=>({data:{id:f.id}})};return query;}};
  const fields={slug:'sample-0',attempt:'stuck',helpful:'not_yet',price:'free',focus:'ease',visibility:'private',message:'I tried editing yesterday’s plan but could not find the edit action.'};
  const request=()=>new Request('https://example.invalid/api/feedback',{method:'POST',headers:{accept:'application/json'},body:new URLSearchParams(fields)});
- const scope={...f.scope,json:(body,status=200)=>Response.json(body,{status}),database:()=>db,sameOrigin:()=>true,allowRequest:async()=>true,currentUser:async()=>({id:f.author,emailVerified:true}),ensureMember:async()=>({id:f.author})};
+ const scope={...f.scope,json:(body,status=200)=>Response.json(body,{status}),database:()=>db,sameOrigin:()=>true,allowRequest:async()=>true,currentUser:async()=>({id:f.author,emailVerified:true}),ensureMember:async()=>({id:f.author,system_role:'member'})};
  const route=moduleFixture('src/pages/api/feedback.ts',['POST'],scope).POST;
- let response=await route({...context('sample-0'),request:request()});assert.equal(response.status,200);const data=await response.json();assert.equal(data.href,'/dashboard/messages?thread='+f.id);assert.match(data.message,/sent to the maker/);
+ let response=await route({...context('sample-0'),request:request()});assert.equal(response.status,200);const data=await response.json();assert.equal(data.href,'/dashboard/messages?thread='+f.id);assert.match(data.message,/sent to the maker/);assert.equal(data.countsTowardFirstReview,true);
  assert.equal(writes.length,1);assert.equal(writes[0].table,'creator_feedback');assert.equal(writes[0].row.visibility,'private');assert.equal(writes[0].row.author_user_id,f.author);assert.equal(writes[0].row.message,fields.message);
  const guest=moduleFixture('src/pages/api/feedback.ts',['POST'],{...scope,currentUser:async()=>null}).POST;
  response=await guest({...context('sample-0'),request:request()});assert.equal(response.status,401);assert.equal(writes.length,1);
+ const admin=moduleFixture('src/pages/api/feedback.ts',['POST'],{...scope,ensureMember:async()=>({id:f.author,system_role:'admin'})}).POST;
+ response=await admin({...context('sample-0'),request:request()});assert.equal(response.status,200);assert.equal((await response.json()).countsTowardFirstReview,false);
 });
 
 function modalFixture({ok=true,panelAvailable=true,deferred=false}={}){

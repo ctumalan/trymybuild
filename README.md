@@ -82,3 +82,15 @@ application release. It records whether a preview was uploaded by its owner or
 captured from the public website and keeps three rollback versions. Uploaded images
 are never replaced merely because the listing URL changes; failed captures preserve
 the last good image. The release schema check verifies the required columns.
+
+## Immediate project comments
+
+Apply `database/031_immediate_project_comments.sql` before deploying the matching
+application release. It publishes new guest project comments at insertion time;
+member comments are published by the application API. Rate limits, word limits,
+duplicate prevention, reporting, and the ability to hide abusive comments remain.
+
+Apply `database/032_first_community_review_count.sql` with the same release. It
+adds the review count used by the first-review sticker. The count excludes
+administrator reviews, removed feedback, and responses from people who selected
+“I haven’t tried it yet.”

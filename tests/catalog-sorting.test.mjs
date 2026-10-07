@@ -18,7 +18,7 @@ test('Most saved sorts by aggregate saves and keeps newest-first ties', () => {
   projects.sort((a, b) => context.compareCatalogProjects(a, b));
   assert.deepEqual(projects.map(project => project.slug), ['popular', 'newer', 'older-tie']);
   assert.equal(context.catalogSortLabel(), 'Most saved first.');
-  assert.match(app, /<option value="saved"[^>]*>Most saved<\/option>/);
+  assert.doesNotMatch(app, /<option value="saved"[^>]*>Most saved<\/option>/);
 });
 
 test('public catalog returns aggregate save counts without exposing savers', () => {
@@ -27,7 +27,9 @@ test('public catalog returns aggregate save counts without exposing savers', () 
   const fn = source.slice(source.indexOf('export function toClientProject'), source.indexOf('// Every published listing'));
   const context = vm.createContext({});
   vm.runInContext(stripTypeScriptTypes(fn.replace('export function', 'function')), context);
-  const project = context.toClientProject({ slug: 'popular', saved_projects: [{ count: 12 }] }, () => ({}));
+  const project = context.toClientProject({ slug: 'popular', saved_projects: [{ count: 12 }], communityReviews: 3 }, () => ({}));
   assert.equal(project.saveCount, 12);
+  assert.equal(project.communityReviewCount, 3);
   assert.equal('savedProjects' in project, false);
+  assert.match(app,/communityReviewCount: p\.communityReviewCount \|\| 0/);
 });

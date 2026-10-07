@@ -40,29 +40,15 @@ test('review navigation shares the admin shell',()=>{
  for(const page of ['index','community','feedback','project'])assert.match(read('src/pages/admin/'+page+'.ts'),/adminSurface/);
  assert.match(read('src/server/feedback-ui.ts'),/\['messages','\/dashboard\/messages','Messages'\]/);
 });
-test('filter uses creator type and verified account data and preview pairs screenshot with description',()=>{
+test('catalog stays simple while listing preview pairs screenshot with description',()=>{
  const app=read('app.js'),css=read('launch-refinements.css');
  assert.match(app,/creatorMatchesFilters\(creatorFor\(product\), state\.creatorType, state\.verifiedOnly\)/);
- assert.match(app,/Filter &amp; sort/);assert.doesNotMatch(app,/filter-trust/);
+ assert.doesNotMatch(app,/Filter &amp; sort/);assert.doesNotMatch(app,/filter-trust/);
+ assert.match(app,/class="catalog-wish-card" data-wish-focus/);
  assert.match(app,/Minimum: 4 words · Maximum: 10 words/);
  assert.match(css,/listing-preview-hero>img\{position:static/);
  assert.match(app,/class="legal-agreement"[\s\S]*<span>I agree to the/);
 });
-test('creator type and earned builder verification are separate accessible filters',()=>{
- const app=read('app.js');
- assert.match(app,/<label for="creator-filter">Creators<\/label>/);
- assert.match(app,/<select id="creator-filter" data-creator-type-select>/);
- assert.match(app,/>All creators<\/option><option[^>]+>Independent<\/option><option[^>]+>Companies<\/option>/);
- assert.doesNotMatch(app,/>Verified creators only<\/option>/);
- assert.match(app,/id="verified-builder-filter" type="checkbox" data-verified-select/);
- assert.match(app,/state\.creatorType = event\.target\.value/);
- assert.match(app,/state\.verifiedOnly = event\.target\.checked/);
- assert.match(app,/aria-label="About builder verification" aria-expanded="false" aria-controls="creator-verification-help"/);
- assert.match(app,/id="creator-verification-help" class="creator-verification-help" hidden/);
- assert.match(app,/Verified Builder is earned by independent creators after qualifying contributions and confirmation that they own their published app\./);
- assert.doesNotMatch(app,/Results follow your sorting choice—not advertising\./);
-});
-
 test('creator filters compose without treating companies as verified builders',()=>{
  const app=read('app.js');
  const source=app.slice(app.indexOf('function creatorMatchesFilters'),app.indexOf('function experienceCount'));
@@ -74,14 +60,20 @@ test('creator filters compose without treating companies as verified builders',(
  assert.equal(context.match({type:'company',verified:true},'all',true),false);
  assert.equal(context.match({type:'independent',verified:true},'company',false),false);
 });
-test('discovery keeps primary categories visible and the remaining filters compact',()=>{
+test('discovery gives heading, categories, and the wish action separate zones',()=>{
  const app=read('app.js'),css=read('launch-refinements.css'),future=read('future-design.css');
  assert.match(app,/<nav class="discovery-categories" aria-label="Browse apps by category">/);
  assert.match(app,/More categories/);
  assert.doesNotMatch(app,/<aside class="filter-panel">/);
- assert.match(app,/\$\{discoveryHero\(\)\}\$\{catalogCategoryNavigation\(\)\}<div id="home-panel"/);
- assert.doesNotMatch(app,/<div class="catalog-filter-options">[\s\S]*class="category-strip"/);
+ assert.match(app,/\$\{discoveryHero\(\)\}<div id="home-panel"[\s\S]*\$\{catalogCategoryNavigation\(\)\}/);
+ assert.doesNotMatch(app,/class="catalog-filter-menu"/);
+ assert.match(app,/Don’t see what you need\?/);
  assert.match(future,/\.discovery-categories \{[^}]*border-block/);
+ assert.match(future,/\.results-heading \+ \.discovery-categories \{[^}]*flex-wrap:nowrap/);
+ assert.match(future,/\.results-heading \+ \.discovery-categories \{[^}]*overflow:visible/);
+ assert.match(future,/\.discovery-categories details>div \{[^}]*overflow-y:auto/);
+ assert.match(future,/\.discovery-categories summary:focus-visible \{[^}]*outline:none/);
+ assert.match(future,/\.catalog-wish-card \{[^}]*max-width:300px/);
  assert.match(css,/\.discover-page \.catalog-list,.profile-work \.catalog-list\{display:grid;grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/);
  assert.match(css,/@media\(max-width:1050px\)\{\.discover-page \.catalog-list,.profile-work \.catalog-list\{grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
  assert.match(css,/@media\(max-width:680px\)[\s\S]*\.discover-page \.catalog-list,.profile-work \.catalog-list\{grid-template-columns:minmax\(0,1fr\)/);

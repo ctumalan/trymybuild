@@ -15,7 +15,7 @@ test('homepage pairs its title with a compact founder trust note',()=>{
  assert.match(app,/>yourURL\.com<\/div>/);
  assert.match(app,/class="discovery-title-row"[\s\S]*?class="discovery-title-copy"[\s\S]*?founderConversation\(\)/);
  assert.match(app,/class="founder-identity"[\s\S]*?<strong>Christian Tumalan<\/strong>[\s\S]*?data-founder-about>Founder/);
- assert.match(app,/class="founder-quote">“I built my apps with AI—but AI can’t tell me what confuses a <em>real person\.<\/em> I read every message\.”<\/p>/);
+ assert.match(app,/class="founder-quote">“I built my apps with AI—but AI can’t tell me what confuses a <em>real person\.<\/em> I personally check all new apps and give them your first review\.”<\/p>/);
  assert.doesNotMatch(app,/founder-quote-(?:collapsed|expanded|ellipsis|more|less)/);
  assert.match(css,/\.discovery-title-row[\s\S]*?grid-template-columns:minmax\(0,1\.2fr\) minmax\(390px,\.8fr\)/);
  assert.match(css,/\.discovery-title-row:not\(:has\(\.founder-banner:not\(\[hidden\]\)\)\)[\s\S]*?grid-template-columns:minmax\(0,1fr\); text-align:center/);

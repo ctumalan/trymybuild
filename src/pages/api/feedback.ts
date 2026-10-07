@@ -23,13 +23,13 @@ export const POST:APIRoute=async context=>{
   const request=await activeFeedbackRequest(db,slug),trial=!!request?.question;
   const result=await db.from('creator_feedback').insert({...input,author_user_id:member.id,moderation_status:'pending'}).select('id').single();
   if(result.error?.code==='23505'){
-   const existing=await db.from('creator_feedback').select('id').eq('project_slug',slug).eq('author_user_id',member.id).single();
+   const existing=await db.from('creator_feedback').select('id,attempt,moderation_status').eq('project_slug',slug).eq('author_user_id',member.id).single();
    if(existing.error)throw existing.error;
-   if(context.request.headers.get('accept')?.includes('application/json'))return json({ok:true,duplicate:true,href:`/dashboard/messages?thread=${existing.data.id}`});
+   if(context.request.headers.get('accept')?.includes('application/json'))return json({ok:true,duplicate:true,countsTowardFirstReview:member.system_role!=='admin'&&existing.data.attempt!=='not_tried'&&existing.data.moderation_status!=='hidden',href:`/dashboard/messages?thread=${existing.data.id}`});
    return context.redirect(`/dashboard/messages?thread=${existing.data.id}`,303);
   }
   if(result.error)throw result.error;
-  if(context.request.headers.get('accept')?.includes('application/json'))return json({ok:true,message:trial?'Your feedback is with the maker. They committed to replying.':'Your feedback was sent to the maker.',href:`/dashboard/messages?thread=${result.data.id}${trial?'&trial=1':''}`});
+  if(context.request.headers.get('accept')?.includes('application/json'))return json({ok:true,countsTowardFirstReview:member.system_role!=='admin'&&input.attempt!=='not_tried',message:trial?'Your feedback is with the maker. They committed to replying.':'Your feedback was sent to the maker.',href:`/dashboard/messages?thread=${result.data.id}${trial?'&trial=1':''}`});
   return context.redirect(`/dashboard/messages?thread=${result.data.id}&${trial?'trial=1':'feedback=sent'}`,303);
  }catch{if(context.request.headers.get('accept')?.includes('application/json'))return json({error:'Your review could not be confirmed. Your text is still here; check Messages before retrying.'},503);return context.redirect(slug?`/tell/${slug}?error=1`:'/dashboard?error=1',303);}
 };

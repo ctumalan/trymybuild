@@ -19,7 +19,7 @@ function setup({seen=false,reduced=false,storageBlocked=false}={}) {
 }
 test('the persistent promise is above the search form, not beside the logo',()=>{
  assert.match(read('app.js'),/class="discovery-promise"><span>Stop guessing\. Get <em>human feedback[\s\S]*?<\/em> on your early-stage app\.<\/span><\/h1>/);
- assert.match(read('app.js'),/class="discovery-instrument-copy">Get valuable feedback on your app while helping another creator improve theirs by reviewing it in return\.<\/p>/);
+ assert.match(read('app.js'),/class="discovery-instrument-copy">Exchange thoughtful reviews with another creator: they try your app, and you try theirs\.<\/p>/);
  assert.doesNotMatch(read('index.html'),/class="brand-intro"/);
  assert.ok(read('app.js').indexOf('class="discovery-promise"')<read('app.js').indexOf('class="discovery-entry"'));
 });

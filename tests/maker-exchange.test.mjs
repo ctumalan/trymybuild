@@ -52,3 +52,14 @@ test('opting into a normal request routes to the exchange; normal requests stay 
  assert.equal((await call({exchangeCommitment:'on'})).headers.get('location'),'/dashboard/exchange?saved=1');
  assert.ok(f.db.calls.some(([name])=>name==='cw_join_maker_exchange'));assert.ok(f.db.calls.some(([name])=>name==='cw_launch_feedback_request'));
 });
+test('suggested testers come only from active public members waiting for a feedback swap',async()=>{
+ const f=workspaceFixtures();f.tables.creator_feedback=[];
+ f.tables.maker_exchange_entries=[
+  {request_id:f.id,user_id:f.author,project_slug:'sample-guest',state:'waiting',joined_at:'2026-09-12T16:00:00Z'},
+  {request_id:'44444444-4444-4444-8444-444444444444',user_id:f.owner,project_slug:'sample-0',state:'waiting',joined_at:'2026-09-12T17:00:00Z'}
+ ];
+ const route=moduleFixture('src/pages/api/suggested-testers.ts',['GET'],{...f.scope,json:(data,status=200)=>Response.json(data,{status})}).GET;
+ const response=await route(ctx('/api/suggested-testers?project=sample-0')),data=await response.json();
+ assert.equal(response.status,200);assert.equal(data.testers.length,1);assert.equal(data.testers[0].slug,'sample-reviewer');assert.equal(data.testers[0].project.title,'Daily sketchbook');
+ assert.equal('user_id' in data.testers[0],false);assert.equal('request_id' in data.testers[0],false);
+});

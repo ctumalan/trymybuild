@@ -10,8 +10,12 @@ export const GET:APIRoute=async()=>{
   const db=database(),testers:any[]=[];const seen=new Set<string>();
   const founderWorkosId=env('FOUNDER_WORKOS_USER_ID');
   if(founderWorkosId){
-   const founderUser=await db.from('users').select('id,account_status').eq('workos_user_id',founderWorkosId).maybeSingle();
+   let founderUser=await db.from('users').select('id,account_status').eq('workos_user_id',founderWorkosId).maybeSingle();
    if(founderUser.error)throw founderUser.error;
+   if(!founderUser.data){
+    founderUser=await db.from('users').select('id,account_status').eq('system_role','admin').eq('account_status','active').order('created_at').limit(1).maybeSingle();
+    if(founderUser.error)throw founderUser.error;
+   }
    if(founderUser.data?.account_status==='active'){
     const founderId=founderUser.data.id;
     const [profile,project]=await Promise.all([

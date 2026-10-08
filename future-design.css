@@ -1037,7 +1037,8 @@ body.public-site #app[tabindex="-1"]:focus { outline:none; }
 .discovery-hero-action .discovery-entry { max-width:780px; margin:32px auto 0; }
 .discovery-hero-action .discovery-entry-row { display:flex; align-items:center; gap:8px; padding:7px; background:#fff; border:1px solid #e9e0f0; border-radius:20px; box-shadow:0 12px 36px #7545ad12; }
 .discovery-hero-action .discovery-entry-field { flex:1; min-width:0; }
-.discovery-hero-action .discovery-entry-field input { border:0; background:transparent; box-shadow:none; border-radius:12px; height:58px; padding-left:20px; }
+.discovery-hero-action .discovery-entry-field input { border:0; background:transparent; box-shadow:none; border-radius:12px; height:58px; padding-left:20px; caret-color:#7545ad; }
+.discovery-hero-action .discovery-entry-field input:focus::placeholder { color:#68616e; }
 .discovery-hero-action .discovery-entry-row .primary-button { min-width:150px; height:58px; border-radius:14px; font-size:1.05rem; }
 .discovery-hero-action .discovery-explore { display:inline-block; margin-top:20px; }
 .hero-steps { display:flex; justify-content:center; align-items:center; gap:28px; color:#7c6d89; font-size:.86rem; margin:32px auto; }

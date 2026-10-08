@@ -5,7 +5,7 @@ const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 
 test('discovery language, navigation and destinations use the requested public wording',()=>{
  const app=read('app.js');
- assert.match(app,/Paste your app’s link/);
+ assert.match(app,/Paste your app or website URL/);
  assert.match(app,/aria-label="View \$\{esc\(product\.name\)\} details"/);
  assert.match(read('project-view.js'),/data-conversation-tab="feedback"><span data-feedback-tab-label>Feedback<\/span><\/button>/);
  assert.match(app,/class="discovery-categories"/);

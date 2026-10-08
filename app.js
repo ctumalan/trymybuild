@@ -367,7 +367,7 @@ function updateHomepageEntry(form) {
 function discoveryHero(listing = false) {
   const value = state.entryUrl || '';
   const intent = homepageEntryIntent(value);
-  const prompt = 'Paste your app’s link';
+  const prompt = 'Paste your app or website URL';
   return `<header class="discovery-hero discovery-hero-minimal discovery-hero-action${listing ? ' listing-entry-header' : ''}" aria-label="Share your app">
     <div class="discovery-hero-copy">
       ${listing ? '' : `<div class="discovery-title-row"><div class="discovery-title-copy"><h1 class="discovery-promise"><span>Stop guessing. Get <em>human feedback<svg class="feedback-hand-underline" viewBox="0 0 420 16" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path d="M3 10C42 5 72 9 111 7S181 9 218 6S288 7 321 5S383 5 417 2L411 5C377 9 351 7 320 10S252 9 218 11S146 10 111 12S41 10 3 13Z" /></svg></em> on your early-stage app.</span></h1><p class="discovery-instrument-copy">Get valuable feedback on your app while helping another creator improve theirs by reviewing it in return.</p></div>${founderConversation()}</div>`}

@@ -16,7 +16,7 @@ test('signup and global navigation expose the legal agreement',()=>{
  assert.match(app,/projectDetailContent\(product,true,!editable\)/);
  for(const label of ['Confirm your app’s name','Confirm your app’s link','What’s your app’s category?','What’s your app’s pricing?'])assert.match(app,new RegExp(label.replace(/[?]/g,'\\?')));
  assert.match(app,/href="\/\?project=\$\{encodeURIComponent\(listingDraft\.serverSlug\)\}">View my project in catalog/);
- assert.match(app,/saveListingDraft\(\); await loadCatalog\(\);/);
+ assert.match(app,/listingDraft\.serverSlug = data\.project\.slug \|\| listingDraft\.serverSlug; saveListingDraft\(\); location\.assign\('\/\?project='\+encodeURIComponent\(listingDraft\.serverSlug\)\); return;/);
  assert.ok(app.indexOf('${publishControls}${importCard}${listingPreview()}')>-1);
  assert.match(read('project-view.js'),/preview-try-disabled[^>]+disabled aria-label="Try this app, available after saving"/);
  const guestDecision=app.slice(app.indexOf('<div class="legal-signup">'),app.indexOf('</div>`}<p data-listing-account-status'));

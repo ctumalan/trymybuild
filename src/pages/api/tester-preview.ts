@@ -16,6 +16,11 @@ export const GET:APIRoute=async()=>{
     founderUser=await db.from('users').select('id,account_status').eq('system_role','admin').eq('account_status','active').order('created_at').limit(1).maybeSingle();
     if(founderUser.error)throw founderUser.error;
    }
+   if(!founderUser.data){
+    const studio=await db.from('projects').select('owner_user_id').eq('is_studio',true).eq('listing_status','published').limit(1).maybeSingle();
+    if(studio.error)throw studio.error;
+    if(studio.data?.owner_user_id){founderUser=await db.from('users').select('id,account_status').eq('id',studio.data.owner_user_id).maybeSingle();if(founderUser.error)throw founderUser.error;}
+   }
    if(founderUser.data?.account_status==='active'){
     const founderId=founderUser.data.id;
     const [profile,project]=await Promise.all([

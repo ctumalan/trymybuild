@@ -65,7 +65,7 @@ test('suggested testers come only from active public members waiting for a feedb
 });
 test('the configured founder is suggested to early users without joining the swap queue',async()=>{
  const f=workspaceFixtures();f.tables.creator_feedback=[];f.tables.maker_exchange_entries=[];
- f.tables.users.find(user=>user.id===f.author).system_role='admin';
+ f.tables.projects.find(project=>project.owner_user_id===f.author).is_studio=true;
  const scope={...f.scope,env:key=>key==='FOUNDER_WORKOS_USER_ID'?'migrated-founder-workos':''};
  const route=moduleFixture('src/pages/api/suggested-testers.ts',['GET'],{...scope,json:(data,status=200)=>Response.json(data,{status})}).GET;
  const response=await route(ctx('/api/suggested-testers?project=sample-0')),data=await response.json();
@@ -84,9 +84,9 @@ test('signed-out visitors can preview only active public testers who opted in',a
  assert.equal(data.testers[0].avatar,'');
  assert.equal('user_id' in data.testers[0],false);assert.equal('project_slug' in data.testers[0],false);
 });
-test('the public preview resolves a migrated founder through the active administrator account',async()=>{
+test('the public preview resolves a migrated founder through the TryMyBuild Studio owner',async()=>{
  const f=workspaceFixtures();f.tables.maker_exchange_entries=[];
- f.tables.users.find(user=>user.id===f.author).system_role='admin';
+ f.tables.projects.find(project=>project.owner_user_id===f.author).is_studio=true;
  f.tables.profiles.find(profile=>profile.user_id===f.author).avatar_path='data:image/jpeg;base64,inline-founder-photo';
  const scope={...f.scope,env:key=>key==='FOUNDER_WORKOS_USER_ID'?'migrated-founder-workos':''};
  const route=moduleFixture('src/pages/api/tester-preview.ts',['GET'],{...scope,json:(data,status=200)=>Response.json(data,{status})}).GET;

@@ -51,6 +51,7 @@ test('listing journey asks only for the URL before the preview and visibility de
  assert.equal((html.match(/FIELD:/g)||[]).length,1);assert.match(html,/Preview my app/);
  const visibility=ctx.listingJourneyVisibility();assert.match(visibility,/Keep it private while I finish/);assert.match(visibility,/Make it public when it’s ready/);assert.doesNotMatch(visibility,/Not sure yet/);
  assert.match(app,/discoveryHero\(true\)[\s\S]*listingJourney\(\)/);
+ assert.match(app,/Invite TryMyBuild members to test your app/);assert.match(app,/\/api\/tester-preview/);assert.match(app,/Sending invitations requires an account/);
  assert.doesNotMatch(app,/Meet the creator|<h3>Tell the creator<\/h3>/);
 });
 test('signup and wish return paths remain same-origin and strictly allowlisted',()=>{

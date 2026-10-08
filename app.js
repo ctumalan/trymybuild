@@ -170,6 +170,7 @@ const state = {
 // only for the offline/no-server prototype. 'loading' until /api/catalog answers; 'error' shows a retry.
 let catalogState = window.CW_SERVER ? 'loading' : 'ready';
 let discussionRequest=0;
+let guestTesterPreviewPromise;
 const app = document.querySelector("#app");
 const nav = document.querySelector(".site-nav");
 const menu = document.querySelector(".menu-toggle");
@@ -1019,7 +1020,17 @@ function listingSignupPreview() {
   const preference=['private','public'].includes(listingDraft.sharingPreference)?listingDraft.sharingPreference:'private';
   listingDraft.sharingPreference=preference;
   const signIn='/auth/sign-in?next='+encodeURIComponent('listing-dashboard');
-  return `<section class="page-shell listing-review listing-signup-preview"><header class="listing-preview-heading"><p class="eyebrow">Your app preview</p><h1>Congratulations—your app has started.</h1><p>Sharing your app with the world takes courage, and it matters. Taking the first step is usually the hardest.</p></header><div class="listing-preview-conversion"><div>${listingPreview(false)}</div><aside class="listing-preview-decision"><p class="eyebrow">Before you save</p><h2>Who should see it?</h2>${listingJourneyVisibility()}<p class="listing-visibility-assurance">${preference==='public'?'You chose public when ready. Your app stays private until you finish the required details and publish it.':'Private is selected. Only you can see this draft in your dashboard.'}</p>${state.session?.authenticated?`<button class="primary-button listing-save-hero" type="button" data-listing-create-account>Save this app</button>`:`<div class="legal-signup"><button class="primary-button listing-save-hero" type="button" data-listing-create-account>Save this app</button><label class="legal-agreement"><input type="checkbox" data-listing-terms> <span>I agree to the <a href="/terms" target="_blank" rel="noopener">Terms of Service</a> and <a href="/privacy" target="_blank" rel="noopener">Privacy Policy</a>.</span></label><p class="listing-account-signin">Already have an account? <a href="${signIn}">Sign in</a></p></div>`}<p data-listing-account-status role="status" aria-live="polite"></p><p class="privacy-note">Your URL and preview are saved as a private draft first. Nothing is published automatically.</p><button class="share-browse-link" type="button" data-listing-back>Use a different URL</button></aside></div></section>`;
+  const testerPreview=!state.session?.authenticated?`<section class="guest-tester-preview" aria-labelledby="guest-tester-title"><div><p class="eyebrow">People ready to help</p><h2 id="guest-tester-title">Invite TryMyBuild members to test your app</h2><p>After you publish, you can invite members who volunteered to exchange thoughtful feedback. You choose who to contact.</p></div><div class="guest-tester-list" data-guest-tester-preview><p role="status">Finding available testers…</p></div><small>Profiles shown here are public and opted in. Sending invitations requires an account.</small></section>`:'';
+  return `<section class="page-shell listing-review listing-signup-preview"><header class="listing-preview-heading"><p class="eyebrow">Your app preview</p><h1>Congratulations—your app has started.</h1><p>Sharing your app with the world takes courage, and it matters. Taking the first step is usually the hardest.</p></header><div class="listing-preview-conversion"><div>${listingPreview(false)}</div><aside class="listing-preview-decision"><p class="eyebrow">Before you save</p><h2>Who should see it?</h2>${listingJourneyVisibility()}<p class="listing-visibility-assurance">${preference==='public'?'You chose public when ready. Your app stays private until you finish the required details and publish it.':'Private is selected. Only you can see this draft in your dashboard.'}</p>${state.session?.authenticated?`<button class="primary-button listing-save-hero" type="button" data-listing-create-account>Save this app</button>`:`<div class="legal-signup"><button class="primary-button listing-save-hero" type="button" data-listing-create-account>Save this app</button><label class="legal-agreement"><input type="checkbox" data-listing-terms> <span>I agree to the <a href="/terms" target="_blank" rel="noopener">Terms of Service</a> and <a href="/privacy" target="_blank" rel="noopener">Privacy Policy</a>.</span></label><p class="listing-account-signin">Already have an account? <a href="${signIn}">Sign in</a></p></div>`}<p data-listing-account-status role="status" aria-live="polite"></p><p class="privacy-note">Your URL and preview are saved as a private draft first. Nothing is published automatically.</p><button class="share-browse-link" type="button" data-listing-back>Use a different URL</button></aside></div>${testerPreview}</section>`;
+}
+
+function loadGuestTesterPreview(){
+ const target=document.querySelector('[data-guest-tester-preview]');if(!target)return;
+ guestTesterPreviewPromise ||= fetch('/api/tester-preview').then(response=>response.ok?response.json():Promise.reject()).then(data=>Array.isArray(data.testers)?data.testers:[]);
+ guestTesterPreviewPromise.then(testers=>{
+  if(!target.isConnected)return;
+  target.innerHTML=testers.length?testers.map(t=>{const initials=String(t.name||'Member').split(/\s+/).slice(0,2).map(part=>part[0]).join('').toUpperCase();return `<article><a href="/people/${encodeURIComponent(t.slug)}" target="_blank" rel="noopener">${t.avatar?`<img src="${esc(t.avatar)}" alt="">`:`<span aria-hidden="true">${esc(initials)}</span>`}<strong>${esc(t.name)}</strong></a><small>${esc(t.label||'TryMyBuild member')}</small><p>${esc(t.bio||'Ready to exchange thoughtful feedback with another creator.')}</p></article>`;}).join(''):'<p role="status">New testers are joining. You can also invite people you already know after publishing.</p>';
+ }).catch(()=>{if(target.isConnected)target.innerHTML='<p role="status">Tester profiles are temporarily unavailable. You can still save your app privately.</p>';});
 }
 document.addEventListener('input', event => {
   const field = event.target.closest('[data-listing-field]');
@@ -1313,6 +1324,7 @@ function render(preserveScroll = false) {
   if (focusedSearch) { const input = document.querySelector('[data-app-link-entry]'); input?.focus({preventScroll:true}); input?.setSelectionRange(focusedSearch.start, focusedSearch.end); }
   else if (!preserveScroll) window.scrollTo({ top: 0, behavior: "smooth" });
   window.CWEntryIntro?.mount(app);
+  loadGuestTesterPreview();
   focusHomepageEntry();
 }
 

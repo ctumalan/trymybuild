@@ -72,3 +72,13 @@ test('the configured founder is suggested to early users without joining the swa
  assert.equal(response.status,200);assert.equal(data.testers.length,1);assert.equal(data.testers[0].slug,'sample-reviewer');
  assert.equal(data.testers[0].avatar,'/assets/avatars/chris-nava-founder.jpg');assert.equal(data.testers[0].project.slug,'sample-guest');
 });
+test('signed-out visitors can preview only active public testers who opted in',async()=>{
+ const f=workspaceFixtures();f.tables.maker_exchange_entries=[
+  {user_id:f.author,project_slug:'sample-guest',state:'waiting',joined_at:'2026-09-12T16:00:00Z'},
+  {user_id:f.owner,project_slug:'sample-0',state:'matched',joined_at:'2026-09-12T17:00:00Z'}
+ ];
+ const route=moduleFixture('src/pages/api/tester-preview.ts',['GET'],{...f.scope,json:(data,status=200)=>Response.json(data,{status})}).GET;
+ const response=await route(ctx('/api/tester-preview')),data=await response.json();
+ assert.equal(response.status,200);assert.equal(data.testers.length,1);assert.equal(data.testers[0].slug,'sample-reviewer');
+ assert.equal('user_id' in data.testers[0],false);assert.equal('project_slug' in data.testers[0],false);
+});

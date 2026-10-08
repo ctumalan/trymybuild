@@ -2,6 +2,7 @@
 // items, and dashboards all resolve project content through here so a newly published listing appears
 // everywhere without a rebuild or redeploy.
 import { database } from './database';
+import { reviewEvidenceCounts } from './review-evidence';
 
 const STUDIO = {
   slug: 'creatorworks-studio',
@@ -99,9 +100,9 @@ export async function listPublished() {
     .eq('listing_status', 'published').order('published_at', { ascending: false }).order('updated_at', { ascending: false }).limit(500);
   if (error) throw error;
   const attributedBy = await attributions(db, data || []);
-  const activity=await db.rpc('cw_public_activity');if(activity.error)throw activity.error;
+  const [activity,reviews]=await Promise.all([db.rpc('cw_public_activity'),reviewEvidenceCounts((data||[]).map((row:any)=>row.slug))]);if(activity.error)throw activity.error;
   const counts=new Map((activity.data||[]).map((r:any)=>[r.slug,r]));
-  return (data || []).map((row: any, i: number) => {const a:any=counts.get(row.slug);return toClientProject({...row,publicComments:a?.comments,communityReviews:a?.community_reviews,recentComments:a?.recent_comments}, attributedBy, i);});
+  return (data || []).map((row: any, i: number) => {const a:any=counts.get(row.slug);return toClientProject({...row,publicComments:a?.comments,communityReviews:reviews.get(row.slug)?.total,recentComments:a?.recent_comments}, attributedBy, i);});
 }
 
 // One published listing by slug, or null. Used for shareable /?project=slug and detail hydration.
@@ -111,8 +112,8 @@ export async function getPublishedProject(slug: string) {
   if (error) throw error;
   if (!data) return null;
   const attributedBy = await attributions(db, [data]);
-  const activity=await db.rpc('cw_public_activity');if(activity.error)throw activity.error;const a=activity.data?.find((r:any)=>r.slug===slug);
-  return toClientProject({...data,publicComments:a?.comments,communityReviews:a?.community_reviews,recentComments:a?.recent_comments}, attributedBy);
+  const [activity,reviews]=await Promise.all([db.rpc('cw_public_activity'),reviewEvidenceCounts([slug])]);if(activity.error)throw activity.error;const a=activity.data?.find((r:any)=>r.slug===slug);
+  return toClientProject({...data,publicComments:a?.comments,communityReviews:reviews.get(slug)?.total,recentComments:a?.recent_comments}, attributedBy);
 }
 
 // The raw project row for a slug (any status), for ownership-aware server logic.

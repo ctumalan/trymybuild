@@ -24,6 +24,8 @@ test('Most saved sorts by aggregate saves and keeps newest-first ties', () => {
 test('public catalog returns aggregate save counts without exposing savers', () => {
   const source = readFileSync(new URL('../src/server/catalog-db.ts', import.meta.url), 'utf8');
   assert.match(source, /saved_projects\(count\)/);
+  assert.match(source, /reviewEvidenceCounts/);
+  assert.match(source, /communityReviews:reviews\.get\(row\.slug\)\?\.total/);
   const fn = source.slice(source.indexOf('export function toClientProject'), source.indexOf('// Every published listing'));
   const context = vm.createContext({});
   vm.runInContext(stripTypeScriptTypes(fn.replace('export function', 'function')), context);

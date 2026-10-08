@@ -14,11 +14,13 @@ test('review evidence counts eligible member reviews and exposes only published 
   users:[{id:'member-public',system_role:'member',account_status:'active'},{id:'member-private',system_role:'member',account_status:'active'},{id:'admin',system_role:'admin',account_status:'active'},{id:'observer',system_role:'member',account_status:'active'}],
   profiles:[{user_id:'member-public',display_name:'Public Reviewer',avatar_path:'/avatar.png'}],
  });
- const {reviewEvidence}=moduleFixture('src/server/review-evidence.ts',['reviewEvidence'],{database:()=>db});
+ const {reviewEvidence,reviewEvidenceCounts}=moduleFixture('src/server/review-evidence.ts',['reviewEvidence','reviewEvidenceCounts'],{database:()=>db});
  const result=await reviewEvidence('sample');
  assert.equal(result.total,2);assert.equal(result.publicCount,1);assert.equal(result.reviews.length,1);
  assert.deepEqual({...result.reviews[0]},{author:'Public Reviewer',avatar:'/avatar.png',attempt:'completed',focus:'ease',message:rows[0].message,createdAt:rows[0].created_at});
  assert.doesNotMatch(JSON.stringify(result),/Administrator review|remains private|did not try/);
+ const counts=await reviewEvidenceCounts(['sample','another-project']);
+ assert.equal(counts.get('sample').total,2);assert.equal(counts.get('sample').publicCount,1);assert.equal(counts.get('another-project').total,0);
 });
 
 test('review evidence returns an empty result for unpublished projects',async()=>{

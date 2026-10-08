@@ -77,8 +77,10 @@ test('signed-out visitors can preview only active public testers who opted in',a
   {user_id:f.author,project_slug:'sample-guest',state:'waiting',joined_at:'2026-09-12T16:00:00Z'},
   {user_id:f.owner,project_slug:'sample-0',state:'matched',joined_at:'2026-09-12T17:00:00Z'}
  ];
+ f.tables.profiles.find(profile=>profile.user_id===f.author).avatar_path='data:image/jpeg;base64,private-inline-pixels';
  const route=moduleFixture('src/pages/api/tester-preview.ts',['GET'],{...f.scope,json:(data,status=200)=>Response.json(data,{status})}).GET;
  const response=await route(ctx('/api/tester-preview')),data=await response.json();
  assert.equal(response.status,200);assert.equal(data.testers.length,1);assert.equal(data.testers[0].slug,'sample-reviewer');
+ assert.equal(data.testers[0].avatar,'');
  assert.equal('user_id' in data.testers[0],false);assert.equal('project_slug' in data.testers[0],false);
 });

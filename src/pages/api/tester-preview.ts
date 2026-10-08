@@ -2,6 +2,8 @@ import type {APIRoute} from 'astro';
 import {database,databaseReady} from '../../server/database';
 import {env,json} from '../../server/auth';
 
+const publicAvatar=(value:unknown,fallback='')=>typeof value==='string'&&(/^\/(?!\/)/.test(value)||/^https:\/\//.test(value))?value:fallback;
+
 export const GET:APIRoute=async()=>{
  try{
   if(!databaseReady())return json({error:'Tester preview is temporarily unavailable.'},503);
@@ -19,7 +21,7 @@ export const GET:APIRoute=async()=>{
     if(profile.error||project.error)throw Error('Founder preview unavailable');
     if(profile.data&&project.data){
      const person:any=profile.data,founderProject:any=project.data;
-     testers.push({slug:person.slug,name:person.display_name,label:person.identity_label||'',bio:person.bio||'',avatar:person.avatar_path||'/assets/avatars/chris-nava-founder.jpg',project:{title:founderProject.title,category:founderProject.category||''}});
+     testers.push({slug:person.slug,name:person.display_name,label:person.identity_label||'',bio:person.bio||'',avatar:publicAvatar(person.avatar_path,'/assets/avatars/chris-nava-founder.jpg'),project:{title:founderProject.title,category:founderProject.category||''}});
      seen.add(founderId);
     }
    }
@@ -39,7 +41,7 @@ export const GET:APIRoute=async()=>{
    if(seen.has(entry.user_id)||!active.has(entry.user_id))continue;
    const profile:any=profileByUser.get(entry.user_id),project:any=projectBySlug.get(entry.project_slug);
    if(!profile||!project||project.owner_user_id!==entry.user_id)continue;
-   seen.add(entry.user_id);testers.push({slug:profile.slug,name:profile.display_name,label:profile.identity_label||'',bio:profile.bio||'',avatar:profile.avatar_path||'',project:{title:project.title,category:project.category||''}});
+   seen.add(entry.user_id);testers.push({slug:profile.slug,name:profile.display_name,label:profile.identity_label||'',bio:profile.bio||'',avatar:publicAvatar(profile.avatar_path),project:{title:project.title,category:project.category||''}});
    if(testers.length===4)break;
   }
   return json({testers});

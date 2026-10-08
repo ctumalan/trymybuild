@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {profileCompletion,projectCompletion,nextSetupStep} from '../src/server/setup-completion.mjs';
+import {readFileSync} from 'node:fs';
 
 test('app and creator completion remain separate and point to the next useful action',()=>{
  const project=projectCompletion({title:'Pocket Plan',external_url:'https://example.com',preview_path:'previews/one.webp'});
@@ -12,4 +13,13 @@ test('app and creator completion remain separate and point to the next useful ac
 test('blank values never count as completed setup',()=>{
  assert.equal(projectCompletion({title:'   '}).percent,0);
  assert.equal(profileCompletion({display_name:'\n'}).percent,0);
+});
+
+test('a complete unpublished app keeps a visible final publishing step',()=>{
+ const dashboard=readFileSync(new URL('../src/pages/dashboard/[section].ts',import.meta.url),'utf8');
+ assert.match(dashboard,/awaitingPublication=!!setupProject&&setupProject\.listing_status!=='published'/);
+ assert.match(dashboard,/appProgress\.percent<100\|\|awaitingPublication/);
+ assert.match(dashboard,/Your app is ready for the final step\./);
+ assert.match(dashboard,/Review and publish app/);
+ assert.match(dashboard,/choose Publish my app to add it to Explore apps/);
 });

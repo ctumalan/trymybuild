@@ -14,6 +14,9 @@ test('signup and global navigation expose the legal agreement',()=>{
  assert.match(css,/\.listing-preview-decision \{ position:static;/);
  assert.doesNotMatch(css,/\.listing-preview-conversion \{[^}]*1\.45fr/);
  assert.match(app,/projectDetailContent\(product,true,!editable\)/);
+ assert.match(app,/href="\/\?project=\$\{encodeURIComponent\(listingDraft\.serverSlug\)\}">View my project in catalog/);
+ assert.match(app,/saveListingDraft\(\); await loadCatalog\(\);/);
+ assert.ok(app.indexOf('${publishControls}${importCard}${listingPreview()}')>-1);
  assert.match(read('project-view.js'),/preview-try-disabled[^>]+disabled aria-label="Try this app, available after saving"/);
  const guestDecision=app.slice(app.indexOf('<div class="legal-signup">'),app.indexOf('</div>`}<p data-listing-account-status'));
  assert.ok(guestDecision.indexOf('listing-save-hero')<guestDecision.indexOf('legal-agreement'));

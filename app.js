@@ -593,8 +593,8 @@ function maybeShowReturnFeedback() {
   const dialog = document.createElement('dialog');
   dialog.className = 'return-feedback-dialog';
   dialog.setAttribute('aria-labelledby', 'return-feedback-title');
-  const quickOptions = ['Too much to read', 'Hard to understand', 'Not what I expected', 'Just curious'];
-  dialog.innerHTML = `<button type="button" class="return-feedback-close" aria-label="Close feedback prompt">×</button>${quick ? `<h2 id="return-feedback-title">A quick thought on ${esc(product.name)}?</h2><p>Was there anything that made you stop exploring?</p><form data-quick-return-feedback><fieldset><legend>Select any that fit</legend>${quickOptions.map((label,index)=>`<label><input type="checkbox" name="reason" value="${index}"><span>${label}</span></label>`).join('')}</fieldset><button class="primary-button return-feedback-send" type="submit">Send response</button><p class="quick-preview-note">Shared privately with the creator.</p><p data-quick-status role="status"></p></form>` : detailed ? `<h2 id="return-feedback-title">What stood out in ${esc(product.name)}?</h2><p>Tell the creator what worked and what could improve.</p>${guidedReturnComposer(product)}` : `<h2 id="return-feedback-title">How was ${esc(product.name)}?</h2><p>Leave a public comment about what worked or could be better.</p>${projectCommentComposer(product, false, 'return-')}`}${!detailed?window.CWReturnPrompts?.option()||'':''}<button type="button" class="text-button" data-return-dismiss>Not now</button>`;
+  const quickOptions = ['The website is great. I love it.', 'Too much to read', 'Hard to understand', 'Not what I expected', 'Just curious'];
+  dialog.innerHTML = `<button type="button" class="return-feedback-close" aria-label="Close feedback prompt">×</button>${quick ? `<h2 id="return-feedback-title">A quick thought on ${esc(product.name)}?</h2><p>What stood out during your visit?</p><form data-quick-return-feedback><fieldset><legend>Select any that fit</legend>${quickOptions.map((label,index)=>`<label><input type="checkbox" name="reason" value="${index}"><span>${label}</span></label>`).join('')}</fieldset><button class="primary-button return-feedback-send" type="submit">Send response</button><p class="quick-preview-note">Shared privately with the creator.</p><p data-quick-status role="status"></p></form>` : detailed ? `<h2 id="return-feedback-title">What stood out in ${esc(product.name)}?</h2><p>Tell the creator what worked and what could improve.</p>${guidedReturnComposer(product)}` : `<h2 id="return-feedback-title">How was ${esc(product.name)}?</h2><p>Leave a public comment about what worked or could be better.</p>${projectCommentComposer(product, false, 'return-')}`}${!detailed?window.CWReturnPrompts?.option()||'':''}<button type="button" class="text-button" data-return-dismiss>Not now</button>`;
   if (!quick && !detailed) {
     const submit = dialog.querySelector('[type="submit"]');
     submit.textContent = 'Send comment';
@@ -609,7 +609,7 @@ function maybeShowReturnFeedback() {
       if (!answers.length) {status.textContent='Choose an option, or select Not now.';return;}
       const form = event.currentTarget;
       const button = form.querySelector('[type="submit"]');
-      const reasonKeys = ['too_much_to_read','hard_to_understand','unexpected','curious'];
+      const reasonKeys = ['love_it','too_much_to_read','hard_to_understand','unexpected','curious'];
       const reasons = [...dialog.querySelectorAll('input[name=reason]:checked')].map(input=>reasonKeys[Number(input.value)]);
       form.dataset.requestId ||= crypto.randomUUID();
       button.disabled = true;

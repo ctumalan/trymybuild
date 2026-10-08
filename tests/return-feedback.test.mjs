@@ -63,8 +63,12 @@ test('opting out skips both short prompt types while long visits still open guid
 test('the return-prompt preference is not submitted as a feedback reason',async()=>{
  const x=setup();let payload;
  x.ctx.crypto={randomUUID:()=> 'request-id'};x.ctx.fetch=async(url,request)=>{payload=JSON.parse(request.body);return {ok:true,json:async()=>({ok:true,message:'Received'})};};
- x.dialog.querySelectorAll=selector=>selector==='input[name=reason]:checked'?[{value:'3'}]:[{value:'3'},{value:'on'}];
+ x.dialog.querySelectorAll=selector=>selector==='input[name=reason]:checked'?[{value:'4'}]:[{value:'4'},{value:'on'}];
  x.ctx.armReturnFeedback('one');x.ctx.markFeedbackDeparture();x.tick(10000);x.ctx.maybeShowReturnFeedback();
  const form=x.elements.get('form');form.dataset={};form.querySelector=()=>({});await form.submit({preventDefault(){},currentTarget:form});
  assert.deepEqual(payload.reasons,['curious']);
+});
+test('quick response offers a genuinely positive choice and a neutral prompt',()=>{
+ const x=setup();x.ctx.armReturnFeedback('one');x.ctx.markFeedbackDeparture();x.tick(10000);x.ctx.maybeShowReturnFeedback();
+ assert.match(x.dialog.innerHTML,/The website is great\. I love it\./);assert.match(x.dialog.innerHTML,/What stood out during your visit\?/);assert.doesNotMatch(x.dialog.innerHTML,/made you stop exploring/);
 });

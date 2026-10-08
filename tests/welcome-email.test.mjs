@@ -11,6 +11,10 @@ test('founder welcome reports both completion scores and tells the truth about v
  assert.match(message.text,/App page: 50% complete/);assert.match(message.text,/Creator profile: 25% complete/);
  assert.match(message.text,/still private/);assert.match(message.text,/Explain what the app is for/);
  assert.equal(message.dashboardUrl,'https://trymybuild.com/dashboard/overview?started=safe-app');
+ assert.equal(message.logoUrl,'https://trymybuild.com/assets/brand/trymybuild-app-192.png');
+ assert.equal(message.founderUrl,'https://trymybuild.com/assets/avatars/chris-nava-founder.jpg');
+ assert.equal(message.aboutUrl,'https://trymybuild.com/?page=about');
+ assert.match(message.html,/alt="TryMyBuild"/);assert.match(message.html,/alt="Christian Tumalan"/);
  assert.match(message.html,/Safe &lt;App&gt;/);assert.doesNotMatch(message.html,/<strong>Safe <App>/);
 });
 

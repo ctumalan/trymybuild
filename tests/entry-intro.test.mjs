@@ -7,7 +7,7 @@ const source=read('entry-intro.js');
 function setup({seen=false,reduced=false,storageBlocked=false}={}) {
  const events={},timers=new Map(),classes=new Set(),storage=new Map();let count=0,resize;
  if(seen)storage.set('trymybuild-discovery-intro-seen','1');
- const brand={textContent:'Get human feedback on your early app.',classList:{add:k=>classes.add(k),remove:k=>classes.delete(k)}};
+ const brand={textContent:'Get human feedback on your early-stage app.',classList:{add:k=>classes.add(k),remove:k=>classes.delete(k)}};
  const track={scrollWidth:600,style:{setProperty(k,v){this[k]=v;}}};
  const prompt={clientWidth:280,querySelector:()=>track,classList:{toggle(k,v){this[k]=v;}}};
  const document={hidden:false,querySelector:s=>s==='.discovery-promise'?brand:s==='.entry-placeholder'?prompt:null,addEventListener:(t,f)=>events[t]=f};
@@ -18,8 +18,8 @@ function setup({seen=false,reduced=false,storageBlocked=false}={}) {
  return {brand,classes,timers,track,prompt,mount:()=>context.window.CWEntryIntro.mount(document),resize:()=>resize(),event:t=>events[t]({target:{closest:()=>true}})};
 }
 test('the persistent promise is above the search form, not beside the logo',()=>{
- assert.match(read('app.js'),/class="discovery-promise"><span>Stop guessing\. Get <em>human feedback[\s\S]*?<\/em> on your early app<\/span><\/h1>/);
- assert.match(read('app.js'),/class="discovery-instrument-copy">Invite people to try your early-stage app, gather their honest feedback, identify anything they find confusing, and have open conversations about how to improve the experience\.<\/p>/);
+ assert.match(read('app.js'),/class="discovery-promise"><span>Stop guessing\. Get <em>human feedback[\s\S]*?<\/em> on your early-stage app\.<\/span><\/h1>/);
+ assert.match(read('app.js'),/class="discovery-instrument-copy">Get valuable feedback on your app while helping another creator improve theirs by reviewing it in return\.<\/p>/);
  assert.doesNotMatch(read('index.html'),/class="brand-intro"/);
  assert.ok(read('app.js').indexOf('class="discovery-promise"')<read('app.js').indexOf('class="discovery-entry"'));
 });

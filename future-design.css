@@ -606,7 +606,7 @@ a.secondary-button,.cw-main a.secondary-button { background: #f2edf8; color: #5e
 
 @media(max-width:620px) {
   .discovery-categories { overflow-x:auto; flex-wrap:nowrap; }
-  .discovery-categories details>div { position:fixed; inset:auto 18px auto auto; width:min(260px,calc(100vw - 36px)); }
+  .discovery-categories details>div { position:absolute; top:calc(100% + 8px); right:0; bottom:auto; left:auto; width:min(260px,calc(100vw - 36px)); max-height:min(360px,calc(100dvh - 180px)); overscroll-behavior:contain; }
   .future-card-foot { grid-template-columns:auto auto minmax(0,1fr); gap:8px 10px; }
   .future-card-foot .future-overview { min-height:34px; }
   .future-card-foot .card-try-actions .primary-button { justify-self:end; }

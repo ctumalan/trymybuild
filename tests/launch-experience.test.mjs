@@ -14,6 +14,7 @@ test('signup and global navigation expose the legal agreement',()=>{
  assert.match(css,/\.listing-preview-decision \{ position:static;/);
  assert.doesNotMatch(css,/\.listing-preview-conversion \{[^}]*1\.45fr/);
  assert.match(app,/projectDetailContent\(product,true,!editable\)/);
+ for(const label of ['Confirm your app’s name','Confirm your app’s link','What’s your app’s category?','What’s your app’s pricing?'])assert.match(app,new RegExp(label.replace(/[?]/g,'\\?')));
  assert.match(app,/href="\/\?project=\$\{encodeURIComponent\(listingDraft\.serverSlug\)\}">View my project in catalog/);
  assert.match(app,/saveListingDraft\(\); await loadCatalog\(\);/);
  assert.ok(app.indexOf('${publishControls}${importCard}${listingPreview()}')>-1);

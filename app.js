@@ -812,7 +812,7 @@ function feedbackPage() {
 }
 
 function readListingDraft() {
-  const defaults = { title: '', url: '', does: '', helps: '', firstTry: '', pricing: 'free', stage: 'Ready for a first try', category: 'Technology', visibility: 'draft', sharingPreference: 'not_sure', image: '', imageData: '', imageSourceUrl: '', imageMode: '', imageCapturedAt: '', imageTheme: '', imageHistory: '[]', serverId: '', serverSlug: '', serverStatus: '', imported: '', imageUploadedFor: '', clientToken: '', video: '', accountOwner: '' };
+  const defaults = { title: '', url: '', does: '', helps: '', firstTry: '', pricing: 'free', stage: 'Ready for a first try', category: 'Technology', visibility: 'draft', sharingPreference: 'private', image: '', imageData: '', imageSourceUrl: '', imageMode: '', imageCapturedAt: '', imageTheme: '', imageHistory: '[]', serverId: '', serverSlug: '', serverStatus: '', imported: '', imageUploadedFor: '', clientToken: '', video: '', accountOwner: '' };
   try {
     const saved = CWListingStorage.read();
     for (const key of Object.keys(defaults)) if (typeof saved[key] === 'string') defaults[key] = key === 'imageData' ? CWPreviewUtils.imageData(saved[key]) : saved[key].slice(0, 2000);
@@ -825,7 +825,7 @@ let listingSettings = new URLSearchParams(location.search).get('listing') === 's
 let listingCategoryOtherOpen = !primaryCategoryNames.includes(normalizeCategory(listingDraft.category));
 // Start a brand-new listing (independent of any existing draft), used by "＋ New listing".
 function resetListingDraft() {
-  Object.assign(listingDraft, { title: '', url: '', does: '', helps: '', firstTry: '', pricing: 'free', stage: 'Ready for a first try', category: 'Technology', visibility: 'draft', sharingPreference: 'not_sure', image: '', imageData: '', imageSourceUrl: '', imageMode: '', imageCapturedAt: '', imageTheme: '', imageHistory: '[]', serverId: '', serverSlug: '', serverStatus: '', imported: '', imageUploadedFor: '', clientToken: '', video: '', accountOwner: '' });
+  Object.assign(listingDraft, { title: '', url: '', does: '', helps: '', firstTry: '', pricing: 'free', stage: 'Ready for a first try', category: 'Technology', visibility: 'draft', sharingPreference: 'private', image: '', imageData: '', imageSourceUrl: '', imageMode: '', imageCapturedAt: '', imageTheme: '', imageHistory: '[]', serverId: '', serverSlug: '', serverStatus: '', imported: '', imageUploadedFor: '', clientToken: '', video: '', accountOwner: '' });
   CWListingStorage.clear();
 }
 if (new URLSearchParams(location.search).get('new') === '1') { resetListingDraft(); listingSettings = false; const url = new URL(location.href); url.searchParams.delete('new'); history.replaceState({}, '', url); }
@@ -859,7 +859,7 @@ function refreshListingPreview() {
   const identity = document.querySelector('.listing-identity-confirmation');
   if (identity) identity.outerHTML = listingIdentityConfirmation();
   const region = document.querySelector('[data-listing-preview-region]');
-  if (region) region.outerHTML = listingPreview();
+  if (region) region.outerHTML = listingPreview(region.dataset.listingPreviewEditable !== 'false');
   const video = document.querySelector('[data-listing-video-preview]');
   if (video) video.innerHTML = videoPlayer(listingDraft.video);
 }
@@ -969,12 +969,13 @@ function listingCategoryPicker() {
     </label><p class="share-name-hint" id="listing-category-help">Choose a match when possible. If none fits, enter a short category people would naturally search for.</p>` : ''}
   </fieldset>`;
 }
-function listingPreview() {
+function listingPreview(editable = true) {
   const url = listingUrl(listingDraft.url);
   const image = listingImage();
   queueMicrotask(() => { void ensureListingScreenshot(); });
-  const product={slug:'listing-preview',name:listingDraft.title||'Your project',category:listingDraft.category,stage:listingDraft.stage,preview:image,url,presentation:{headline:listingDraft.does,help:listingDraft.helps,firstTry:listingDraft.firstTry}};
-  return `<div data-listing-preview-region><article class="listing-preview-card project-detail-content invitation-detail mealmap-detail" data-showcase-theme="${esc(CWProjectView.theme(product))}"><header class="public-detail-header"><div><strong>${esc(product.name)}</strong><small>${esc(product.category)} · ${esc(product.stage)}</small></div></header>${projectDetailContent(product,true)}</article>${listingImageControls()}</div>`;
+  const title=listingDraft.title||'Your project';
+  const product={slug:'listing-preview',name:title,category:listingDraft.category,stage:listingDraft.stage,preview:image,url,presentation:{headline:listingDraft.does||title,help:listingDraft.helps||'Add the benefit people should understand in your dashboard.',firstTry:listingDraft.firstTry||'Give visitors one clear place to begin after you save this app.'}};
+  return `<div data-listing-preview-region data-listing-preview-editable="${editable}"><article class="listing-preview-card project-detail-content invitation-detail mealmap-detail" data-showcase-theme="${esc(CWProjectView.theme(product))}"><header class="public-detail-header"><div><strong>${esc(product.name)}</strong><small>${esc(product.category)} · ${esc(product.stage)}</small></div></header>${projectDetailContent(product,true)}</article>${editable?listingImageControls():''}</div>`;
 }
 function listingIdentityConfirmation() {
   const image = listingImage();
@@ -1004,16 +1005,21 @@ function listingSettingsPage() {
 }
 function listingAccountPage() {
   if (state.session?.authenticated) return listingSettingsPage();
-  return `<section class="page-shell listing-review"><p class="eyebrow">Keep your project yours</p><h1>Create your creator account.</h1><p>Your draft is ready. Sign up or sign in to continue to project settings.</p><div class="legal-signup"><label class="legal-agreement"><input type="checkbox" data-listing-terms> <span>I agree to the <a href="/terms" target="_blank" rel="noopener">Terms of Service</a> and <a href="/privacy" target="_blank" rel="noopener">Privacy Policy</a>.</span></label><button class="primary-button" type="button" data-listing-create-account>Create my account</button><p data-listing-account-status role="status" aria-live="polite"></p></div><div class="form-actions share-start-actions"><a class="share-browse-link" href="/auth/sign-in?next=listing">Already have an account? Sign in</a><button class="share-browse-link" data-listing-review>Back</button></div><p class="privacy-note">Continue sign-in in this same tab so we can restore your draft. Nothing is public yet.</p></section>`;
+  return listingSignupPreview();
 }
 function sharePage() {
   return discover(true);
 }
 function listingJourney() {
   if (listingSettings) return listingSettingsPage();
-  if (listingStep === 8) return state.session?.authenticated ? listingSettingsPage() : listingAccountPage();
-  if (listingStep < 7) return inlineListingForm();
-  return `<section class="page-shell listing-review"><p class="eyebrow">8 · Preview your listing</p><h1>Ready to share.</h1><p>Check what visitors will see before you continue.</p>${listingPreview()}<div class="form-actions share-start-actions"><button class="primary-button" data-listing-share>Confirm and continue</button><button class="secondary-button" data-listing-back>Back</button><button type="button" class="secondary-button listing-reset-button" data-listing-reset>Start over</button></div><p class="privacy-note">Next: sign up or sign in, then confirm project settings. Nothing is published or sent yet.</p><p data-listing-status role="status"></p></section>`;
+  if (listingStep === 0) return inlineListingForm();
+  return listingSignupPreview();
+}
+function listingSignupPreview() {
+  const preference=['private','public'].includes(listingDraft.sharingPreference)?listingDraft.sharingPreference:'private';
+  listingDraft.sharingPreference=preference;
+  const signIn='/auth/sign-in?next='+encodeURIComponent('listing-dashboard');
+  return `<section class="page-shell listing-review listing-signup-preview"><header class="listing-preview-heading"><p class="eyebrow">Your app preview</p><h1>Your page has started.</h1><p>Save this preview now. Add the description, first task, video, and other details from your dashboard.</p></header><div class="listing-preview-conversion"><div>${listingPreview(false)}</div><aside class="listing-preview-decision"><p class="eyebrow">Before you save</p><h2>Who should see it?</h2>${listingJourneyVisibility()}<p class="listing-visibility-assurance">${preference==='public'?'You chose public when ready. Your app stays private until you finish the required details and publish it.':'Private is selected. Only you can see this draft in your dashboard.'}</p>${state.session?.authenticated?`<button class="primary-button" type="button" data-listing-create-account>Save this app</button>`:`<div class="legal-signup"><label class="legal-agreement"><input type="checkbox" data-listing-terms> <span>I agree to the <a href="/terms" target="_blank" rel="noopener">Terms of Service</a> and <a href="/privacy" target="_blank" rel="noopener">Privacy Policy</a>.</span></label><button class="primary-button" type="button" data-listing-create-account>Save this app</button><a class="secondary-button" href="${signIn}">Already have an account? Sign in</a></div>`}<p data-listing-account-status role="status" aria-live="polite"></p><p class="privacy-note">Your URL and preview are saved as a private draft first. Nothing is published automatically.</p><button class="share-browse-link" type="button" data-listing-back>Use a different URL</button></aside></div></section>`;
 }
 document.addEventListener('input', event => {
   const field = event.target.closest('[data-listing-field]');
@@ -1074,6 +1080,7 @@ document.addEventListener('submit', event => {
   listingDraft.url = url;
   if (!listingDraft.title.trim()) listingDraft.title = listingNameFromUrl(url);
   if (!saveListingDraft()) { form.querySelector('[data-entry-status]').textContent = 'This browser cannot keep your draft through sign-in. Open TryMyBuild in Safari or Chrome, or enable site storage, then try again.'; return; }
+  if (!['private','public'].includes(listingDraft.sharingPreference)) listingDraft.sharingPreference='private';
   listingSettings = false; listingStep = 1; state.route = 'share'; state.listingInProgress = true; state.entryMode = 'list';
   void ensureListingScreenshot(); render(true);
 });
@@ -1110,7 +1117,7 @@ document.addEventListener('submit', event => {
     return;
   }
   if (listingStep === 0) { if (!listingDraft.title.trim()) listingDraft.title = listingNameFromUrl(listingDraft.url); saveListingDraft(); void ensureListingScreenshot(); }
-  listingStep = Math.min(7,listingStep+1); render();
+  listingStep = 1; render();
 });
 
 // Server-backed listing persistence. The on-device draft is never cleared until the server confirms,
@@ -1143,6 +1150,9 @@ async function saveServerListing(statusEl) {
     listingFailedImage='';listingDraft.image=upData.preview||listingDraft.image;listingDraft.imageData='';listingDraft.imageMode=upData.previewSource==='captured'?'automatic':upData.previewSource==='studio'?'studio':'upload';listingDraft.imageSourceUrl=upData.previewSourceUrl||listingDraft.imageSourceUrl;listingDraft.imageCapturedAt=upData.previewCapturedAt||listingDraft.imageCapturedAt;setListingImageHistory(upData.previewHistory);
     listingDraft.imageUploadedFor = data.project.slug; saveListingDraft();
   }
+  // Trigger the one-time welcome only after the draft and any captured preview are safely stored,
+  // so its completion numbers match the dashboard the creator is about to see.
+  await fetch('/api/projects', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'welcome', id: data.project.id }), keepalive: true }).catch(() => {});
   return data.project;
 }
 
@@ -1317,12 +1327,15 @@ document.addEventListener("click", async event => {
   if (createAccount) {
     const terms = document.querySelector('[data-listing-terms]');
     const status = document.querySelector('[data-listing-account-status]');
-    if (!terms?.checked) { status.textContent = 'Agree to the Terms of Service and Privacy Policy to continue.'; terms?.focus(); return; }
+    if (!state.session?.authenticated && !terms?.checked) { status.textContent = 'Agree to the Terms of Service and Privacy Policy to continue.'; terms?.focus(); return; }
     if (!saveListingDraft()) { status.textContent = 'Your draft is still on this page, but could not be saved for sign-in. Keep this tab open and enable site storage, then try again.'; return; }
     createAccount.disabled = true;
-    createAccount.textContent = state.session?.authenticated ? 'Opening project settings…' : 'Opening secure sign-up…';
-    if (state.session?.authenticated) { listingSettings = true; history.replaceState({}, '', '/?listing=settings'); render(); }
-    else location.assign('/auth/sign-in?signup=1&next=listing');
+    createAccount.textContent = state.session?.authenticated ? 'Saving your app…' : 'Opening secure sign-up…';
+    if (state.session?.authenticated) {
+      try { const project=await saveServerListing(status); location.assign('/dashboard/overview?started='+encodeURIComponent(project.slug)); }
+      catch(error) { status.textContent=error.message||'Your app could not be saved. Your draft is still here.';createAccount.disabled=false;createAccount.textContent='Save this app'; }
+    }
+    else location.assign('/auth/sign-in?signup=1&next=listing-dashboard');
     return;
   }
   const entryMode = event.target.closest('[data-entry-mode]');
@@ -1551,7 +1564,11 @@ if (window.CW_SERVER) {
   fetch('/api/me').then(response => { if (!response.ok) throw new Error('Unavailable'); return response.json(); }).then(session => {
     state.session = session;
     if (session.authenticated && session.databaseReady) fetch('/api/saved').then(r => r.json()).then(data => { if (Array.isArray(data.saved)) { state.saved = new Set(data.saved); if (state.route === 'discover' && !document.querySelector('.detail-dialog')) render(); } }).catch(() => {});
-    if (session.authenticated) { void syncListingProject(); if(listingUrl(listingDraft.url)&&!listingImage()) void ensureListingScreenshot(true); }
+    if (session.authenticated) {
+      const continueToDashboard=new URLSearchParams(location.search).get('after')==='dashboard';
+      void syncListingProject().then(project=>{if(continueToDashboard&&project?.slug)location.replace('/dashboard/overview?started='+encodeURIComponent(project.slug));});
+      if(listingUrl(listingDraft.url)&&!listingImage()) void ensureListingScreenshot(true);
+    }
     render();openLinkedProject();void window.CWJoin?.restore(session);void loadDailyComments();
   }).catch(() => {
     state.session = { authenticated: false, authReady: false };
@@ -1615,10 +1632,10 @@ async function syncListingProject() {
   if (listingDraft.accountOwner && listingDraft.accountOwner !== state.session?.user?.id) return;
   if (!listingDraft.serverId && !wantSlug) {
     if (state.route === 'share' && listingSettings && listingDraft.title.trim() && listingDraft.url.trim()) {
-      try { await saveServerListing(); render(); }
+      try { const project=await saveServerListing(); render(); return project; }
       catch (error) { const el = document.querySelector('[data-listing-status]'); if (el) el.textContent = error.message; }
     }
-    return;
+    return null;
   }
   try {
     const data = await (await fetch('/api/projects')).json();
@@ -1628,7 +1645,8 @@ async function syncListingProject() {
     if (wantSlug) loadOwnedProjectIntoDraft(proj);
     else { listingDraft.serverStatus = proj.status; listingDraft.serverSlug = proj.slug; saveListingDraft(); }
     if (state.route === 'share' && listingSettings) render();
-  } catch {}
+    return proj;
+  } catch { return null; }
 }
 
 // Open a shared listing (?project=slug) as a detail drawer, but never over the listing builder.

@@ -31,8 +31,9 @@ public deployment.
 When a creator submits a project for review, the production app can email the founder a
 direct review link. Set `RESEND_API_KEY` after verifying `trymybuild.com` with Resend.
 The recipient defaults to `FOUNDER_EMAIL`; `PROJECT_REVIEW_EMAIL` can override it, and
-`PROJECT_REVIEW_FROM` can override the default sender
-`TryMyBuild <notifications@trymybuild.com>`. A delivery failure never blocks the project
+`PROJECT_REVIEW_FROM` can override the default sender address. `WELCOME_EMAIL_FROM`
+can separately set the founder welcome sender; it defaults to
+`Christian at TryMyBuild <notifications@trymybuild.com>`. A delivery failure never blocks the project
 submission, and retries use the project revision to prevent duplicate messages.
 
 ## Maker feedback exchange

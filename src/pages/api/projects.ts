@@ -9,6 +9,7 @@ import { saveDraft, submit, unpublish } from '../../server/listing-service.mjs';
 import { projectStore } from '../../server/listing-store';
 import { PROJECT_FIELDS } from '../../server/catalog-db';
 import { publicationAccess } from '../../server/community-credits';
+import { sendFirstProjectWelcome } from '../../server/welcome-email.mjs';
 
 function ownedView(row: any) {
   const history = Array.isArray(row.preview_history) ? row.preview_history.slice(0, 3).map((item: any) => ({
@@ -86,6 +87,12 @@ export const POST: APIRoute = async context => {
       const result = await saveDraft(store, { ownerId: member.id, id: body.id, clientToken, input: value },
         { slugify, randomSuffix: () => randomBytes(3).toString('hex') });
       return reply(result);
+    }
+    if (body.action === 'welcome') {
+      const project = await store.findOwnedById(member.id, String(body.id || ''));
+      if (!project) return json({error:'That project was not found in your account.'},404);
+      await sendFirstProjectWelcome({db: database(), user, member, project}).catch(error => console.warn('Welcome email could not be sent', error));
+      return json({ok:true});
     }
     if (body.action === 'submit') {
       const access=await publicationAccess(database(),member.id,String(body.id||''));

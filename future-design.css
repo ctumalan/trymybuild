@@ -1060,6 +1060,43 @@ body.public-site #app[tabindex="-1"]:focus { outline:none; }
 
 .hero-founder-card .hero-founder-note { margin-top:12px; }
 
+/* The guest listing journey rewards the URL with a real preview before account creation. */
+.listing-signup-preview { max-width:1120px; }
+.listing-preview-heading { max-width:720px; margin:0 auto 28px; text-align:center; }
+.listing-preview-heading h1 { margin:.25rem 0 .7rem; }
+.listing-preview-conversion { display:grid; grid-template-columns:minmax(0,1.45fr) minmax(290px,.7fr); align-items:start; gap:24px; }
+.listing-preview-conversion [data-listing-preview-region] { margin:0; }
+.listing-preview-decision { position:sticky; top:24px; padding:24px; border:1px solid #dfd2ea; border-radius:20px; background:#fff; box-shadow:0 16px 38px #3b244c12; }
+.listing-preview-decision h2 { margin:.25rem 0 16px; }
+.listing-preview-decision .journey-visibility { display:grid; gap:10px; margin:0; padding:0; border:0; }
+.listing-preview-decision .visibility-card { margin:0; }
+.listing-preview-decision .listing-visibility-assurance { min-height:3.2em; margin:14px 0; color:#5e516a; font-size:.84rem; line-height:1.55; }
+.listing-preview-decision .legal-signup { display:grid; gap:12px; }
+.listing-preview-decision .legal-agreement { font-size:.78rem; line-height:1.45; }
+.listing-preview-decision>.primary-button,.listing-preview-decision .legal-signup>.primary-button,.listing-preview-decision .legal-signup>.secondary-button { width:100%; box-sizing:border-box; text-align:center; }
+.listing-preview-decision .privacy-note { margin:14px 0 6px; }
+.listing-preview-decision .share-browse-link { margin-top:8px; }
+@media(max-width:820px) {
+ .listing-preview-conversion { grid-template-columns:1fr; }
+ .listing-preview-decision { position:static; }
+}
+
+/* Dashboard setup keeps app and creator work distinct and measurable. */
+.setup-progress { border-color:#d8c8e7; background:linear-gradient(145deg,#fffdfa,#f8f3fb); }
+.setup-progress>h2 { margin:.2rem 0 .5rem; }
+.setup-progress-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; margin-top:22px; }
+.setup-progress-grid>article { padding:20px; border:1px solid #e1d7e9; border-radius:16px; background:#fff; }
+.setup-progress-heading { display:flex; align-items:baseline; justify-content:space-between; gap:16px; }
+.setup-progress-heading h3 { margin:0; }
+.setup-progress-heading strong { color:#7545ad; font-size:1.35rem; }
+.setup-progress progress { width:100%; height:8px; margin:12px 0 16px; accent-color:#7545ad; }
+.setup-checklist { display:grid; gap:8px; min-height:9rem; margin:0 0 18px; padding:0; list-style:none; }
+.setup-checklist li { display:flex; gap:8px; color:#51445b; font-size:.84rem; line-height:1.4; }
+.setup-checklist li>span { color:#9c7ab8; font-weight:800; }
+.setup-checklist li.is-complete { color:#7b7281; text-decoration:line-through; text-decoration-color:#cdbfd7; }
+.setup-checklist li.is-complete>span { color:#28735a; }
+@media(max-width:700px) { .setup-progress-grid { grid-template-columns:1fr; } .setup-checklist { min-height:0; } }
+
 /* Keep the two exploration choices beside one another. */
 .hero-discovery-links { display:grid; grid-template-columns:auto auto; justify-content:center; align-items:center; gap:18px 28px; margin:24px auto 0; max-width:720px; text-align:left; }
 .discovery-hero-action .hero-discovery-links .feedback-example { display:contents; }

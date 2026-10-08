@@ -69,7 +69,7 @@ test('signup interests stay visible and retain multiple saved choices',()=>{
 });
 test('category picker includes the full menu and custom category input',()=>{
  const ctx=vm.createContext({categoryCatalog:[{name:'Technology'},{name:'Science & research'}],listingDraft:{category:'Science & research'},listingCategoryOtherOpen:false,normalizeCategory:s=>s,esc:String});
- vm.runInContext(app.slice(app.indexOf('function listingCategoryPicker()'),app.indexOf('function listingPreview()')),ctx);
+ vm.runInContext(app.slice(app.indexOf('function listingCategoryPicker()'),app.indexOf('function listingPreview(')),ctx);
  assert.match(ctx.listingCategoryPicker(),/value="Science & research" selected/);
  ctx.listingCategoryOtherOpen=true;assert.match(ctx.listingCategoryPicker(),/Suggest a category/);assert.match(ctx.listingCategoryPicker(),/data-listing-category-custom/);
 });

@@ -25,13 +25,14 @@ test('declining a draft replacement preserves the existing draft',()=>{const x=s
 test('a URL starts a draft regardless of the previous search mode',()=>{const x=setup('finalprompt.ai');x.c.state.entryMode='search';x.run();assert.equal(x.c.state.route,'share');assert.equal(x.counts().saves,1);});
 test('keywords never become a hidden search',()=>{const x=setup('meal planner');x.c.state.entryMode='list';x.run();assert.deepEqual(x.counts(),{saves:0,renders:0,scrolled:0});assert.equal(x.c.state.query,undefined);assert.match(x.status.textContent,/web address, or browse/);});
 
-test('listing questions, preview, account and settings retain the same navigation',()=>{
+test('URL entry, preview and settings retain the same navigation',()=>{
  const fn=name=>{const start=source.indexOf('function '+name+'(');return source.slice(start,source.indexOf('\n}',start)+2);};
  const context=vm.createContext({URL,esc:v=>v,state:{entryMode:'list'},homeView:'test',listingStep:0,listingSettings:false,
   inlineListingForm:()=>'<h1>Question</h1>',listingPreview:()=>'<div>Preview</div>',
+  listingSignupPreview:()=>'<h1>Preview</h1>',
   listingAccountPage:()=>'<h1>Account</h1>',listingSettingsPage:()=>'<h1>Settings</h1>'});
  vm.runInContext(urlCode+fn('discoveryHero')+fn('discover')+fn('listingJourney'),context);
- for(let step=0;step<=8;step++){
+ for(let step=0;step<=1;step++){
   context.listingStep=step;
   const html=context.discover(true);
   assert.match(html,/future-discover listing-in-place/);

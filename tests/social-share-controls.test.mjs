@@ -74,8 +74,9 @@ test('editing the link invalidates a pending copy confirmation',async()=>{
  h.control('#social-headline').value='New headline';h.control('#social-headline').events.input();finish();await pending;
  assert.equal(h.control('[data-social-link]').textContent,'Copy app link');assert.equal(h.control('[data-social-status]').textContent,'');h.controller.abort();
 });
-test('listing uses seven quiet dots with accessible progress and explicit private draft wording',()=>{
+test('listing moves from one URL field to a private preview without a long progress sequence',()=>{
  const journey=readFileSync(new URL('../community-entry.js',import.meta.url),'utf8');
- assert.match(journey,/title:'Type your app URL'/);assert.match(journey,/Your draft stays private until you are ready to share it/);
- assert.match(journey,/journey-progress journey-dots/);assert.match(journey,/steps\.map\(\(_,index\)/);assert.match(journey,/role="progressbar"/);assert.match(journey,/aria-valuenow="\$\{listingStep\+1\}"/);
+ assert.match(journey,/Type your app URL/);assert.match(journey,/Nothing is published at this step/);
+ assert.match(journey,/Keep it private while I finish/);assert.match(journey,/Make it public when it’s ready/);
+ assert.doesNotMatch(journey,/journey-progress journey-dots|steps\.map\(\(_,index\)|role="progressbar"/);
 });

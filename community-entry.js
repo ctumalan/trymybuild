@@ -37,6 +37,8 @@ document.addEventListener('change',event=>{
  if(!event.target.matches('[data-sharing-preference]'))return;
  listingDraft.sharingPreference=event.target.value;saveListingDraft();
  const note=event.target.closest('fieldset')?.querySelector('[data-sharing-note]');if(note)note.textContent=sharingPreferenceNote(event.target.value);
+ const assurance=event.target.closest('.listing-preview-decision')?.querySelector('.listing-visibility-assurance');
+ if(assurance)assurance.textContent=event.target.value==='public'?'You chose public when ready. Your app stays private until you finish the required details and publish it.':'Private is selected. Only you can see this draft in your dashboard.';
  const form=event.target.closest('[data-listing-step]');if(form)form.querySelector('button[type="submit"]')?.removeAttribute('disabled');
 });
 const creatorQuotes=[
@@ -82,22 +84,12 @@ document.addEventListener('click',event=>{
  if(event.target.closest('[data-quote-dismiss]')){quoteDismissed=true;clearTimeout(quoteTimer);pendingQuotes.length=0;activeQuoteCard?.remove();activeQuoteCard=null;}
 });
 function inlineListingForm() {
- const steps=[
-  {title:'Type your app URL',copy:'We’ll use it to prepare your listing. Your draft stays private until you are ready to share it.',fields:listingField('url','App link','https://your-app.com'),next:'Continue'},
-  {title:'Is this the right app?',copy:'Confirm the name and image people will see.',fields:`${listingIdentityConfirmation()}${listingField('title','App name','Your app name')}`,next:'Yes, continue'},
-  {title:'What does your app do?',copy:'Describe the result in a short sentence.',fields:listingField('does','One clear sentence','For example: Turns ingredients into meal ideas.',true),next:'Continue'},
-  {title:'How does it help?',copy:'Name the practical benefit in a short sentence.',fields:listingField('helps','The benefit','For example: Makes dinner decisions easier and reduces waste.',true),next:'Continue'},
-  {title:'What should someone try first?',copy:'Give visitors one clear starting point in a short sentence.',fields:listingField('firstTry','First action','For example: Enter three ingredients from your fridge.',true),next:'Continue'},
-  {title:'How ready is it?',copy:'Choose the closest stage. You can change it later.',fields:`<div class="choice-grid listing-stage-choices" role="group" aria-label="Project stage">${['Still taking shape','Ready for a first try','Being tested by early users','Finished and launched'].map(stage=>`<button type="button" class="choice-button ${stage===listingDraft.stage?'is-selected':''}" aria-pressed="${stage===listingDraft.stage}" data-listing-stage="${stage}"><span aria-hidden="true">${stage===listingDraft.stage?'✓':''}</span>${stage}</button>`).join('')}</div>`,next:'Continue'},
-  {title:'Who should see it?',copy:'Choose how you want to begin.',fields:listingJourneyVisibility(),next:'Preview my listing'}
- ];
- const step=steps[listingStep]||steps[0],first=listingStep===0,visibility=listingStep===steps.length-1;
- return `<section class="inline-listing listing-journey-step ${first?'listing-journey-first':''}"><div class="journey-progress journey-dots" role="progressbar" aria-label="Create your listing" aria-valuemin="1" aria-valuemax="${steps.length}" aria-valuenow="${listingStep+1}">${steps.map((_,index)=>`<span aria-hidden="true" class="${index===listingStep?'is-current':''}"></span>`).join('')}</div><p class="eyebrow">Create your listing · ${listingStep+1} of ${steps.length}</p><h1>${step.title}</h1><p class="journey-copy">${step.copy}</p><form data-listing-step data-inline-listing>${step.fields}<div class="journey-actions"><button type="submit" class="primary-button" ${visibility&&listingDraft.sharingPreference==='not_sure'?'disabled':''}>${step.next}</button>${first?'':'<button class="secondary-button" type="button" data-listing-back>Back</button>'}</div>${visibility?'<button class="share-browse-link listing-decide-later" type="button" data-listing-decide-later>Decide later</button>':''}<p data-listing-status role="status"></p><p class="privacy-note">${visibility?'Nothing is shared or published yet.':'Your draft stays on this device.'}</p></form></section>`;
+ return `<section class="inline-listing listing-journey-step listing-journey-first"><p class="eyebrow">Create your app page</p><h1>Type your app URL</h1><p class="journey-copy">We’ll prepare a preview first. You can complete the details after your draft is safely in your dashboard.</p><form data-listing-step data-inline-listing>${listingField('url','App link','https://your-app.com')}<div class="journey-actions"><button type="submit" class="primary-button">Preview my app</button></div><p data-listing-status role="status"></p><p class="privacy-note">Nothing is published at this step.</p></form></section>`;
 }
 
 function listingJourneyVisibility(){
- const preference=listingDraft.sharingPreference||'not_sure';
- return `<fieldset class="journey-visibility"><legend class="sr-only">Choose who should see your app</legend>${[['private','Invite only','Share with people you choose.'],['public','Public','Apply to appear in TryMyBuild discovery.']].map(([value,title,copy])=>`<label class="visibility-card"><input type="radio" name="sharingPreference" data-sharing-preference value="${value}" ${preference===value?'checked':''} required><span><strong>${title}</strong><small>${copy}</small></span></label>`).join('')}</fieldset>`;
+ const preference=['private','public'].includes(listingDraft.sharingPreference)?listingDraft.sharingPreference:'private';
+ return `<fieldset class="journey-visibility"><legend class="sr-only">Choose who should see your app</legend>${[['private','Keep it private while I finish','Only you can see the saved draft.'],['public','Make it public when it’s ready','Finish the required details, then publish it yourself.']].map(([value,title,copy])=>`<label class="visibility-card"><input type="radio" name="sharingPreference" data-sharing-preference value="${value}" ${preference===value?'checked':''} required><span><strong>${title}</strong><small>${copy}</small></span></label>`).join('')}</fieldset>`;
 }
 function welcomeAccountPage() {
  let selected=[],alerts=false;try{selected=JSON.parse(localStorage.getItem('trymybuild-signup-interests')||'[]');alerts=localStorage.getItem('trymybuild-signup-alerts')==='true';}catch{}

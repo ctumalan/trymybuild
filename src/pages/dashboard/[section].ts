@@ -4,6 +4,7 @@ import {listPublished} from '../../server/catalog-db';
 import {wishCategories} from '../../server/wish-policy.mjs';
 import {OWNED_CARD_FIELDS,performancePanel} from '../../server/dashboard-cards';
 import {notificationPreferences,prepareNotifications} from '../../server/notifications';
+import {profileCompletion,projectCompletion} from '../../server/setup-completion.mjs';
 import type { APIRoute } from 'astro';
 import { memberContext, workspace, notice, empty } from '../../server/workspace';
 import { signIn, e, unavailable } from '../../server/feedback-ui';
@@ -19,7 +20,7 @@ export const GET:APIRoute=async context=>{
   const m=await memberContext(context);if(!m)return signIn('/dashboard/'+section);
   const {db,member,admin}=m;let body=notice(context),title='',identity:any;
   if(section==='overview'){
-   const profile=await db.from('profiles').select('display_name,avatar_path').eq('user_id',member.id).single();if(profile.error)throw Error();
+   const profile=await db.from('profiles').select('display_name,avatar_path,identity_label,bio').eq('user_id',member.id).single();if(profile.error)throw Error();
    const first=(m.user.firstName||profile.data.display_name.split(/\s+/)[0]||'there').trim();title=`Welcome to your dashboard, ${first}.`;identity={name:profile.data.display_name,avatar:profile.data.avatar_path||''};
    const results=await Promise.all([db.from('projects').select('id',{head:true,count:'exact'}).eq('owner_user_id',member.id),db.from('saved_projects').select('project_slug',{head:true,count:'exact'}).eq('user_id',member.id),db.from('notifications').select('id',{head:true,count:'exact'}).eq('user_id',member.id).is('read_at',null),db.from('support_cases').select('id',{head:true,count:'exact'}).eq('user_id',member.id).neq('status','resolved')]);
    if(results.some(r=>r.error))throw Error();
@@ -29,6 +30,12 @@ export const GET:APIRoute=async context=>{
    const mine=new Set(ownedSlugs.data.map((p:any)=>p.slug)),prior=await db.from('creator_feedback').select('project_slug').eq('author_user_id',member.id);if(prior.error)throw Error();
    const reviewed=new Set(prior.data.map((f:any)=>f.project_slug)),available=catalog.filter(p=>!mine.has(p.slug)&&!reviewed.has(p.slug)),suggestions=[...available,...catalog.filter(p=>!available.some(a=>a.slug===p.slug))].slice(0,3);
    identity.verified=badge.verified;identity.founderException=badge.founderException;
+   const started=context.url.searchParams.get('started'),setupProject=projects.data.find((p:any)=>p.slug===started)||projects.data[0],profileProgress=profileCompletion(profile.data),appProgress=projectCompletion(setupProject||{});
+   if(started||profileProgress.percent<100||!setupProject||appProgress.percent<100){
+    const visibility=setupProject?.sharing_preference==='public'?'You chose public when ready. This draft stays private until the required details are complete and you publish it.':'This app is a private draft. Only you can see it until you choose otherwise.';
+    const checklist=(items:any[])=>`<ul class="setup-checklist">${items.map(item=>`<li class="${item.complete?'is-complete':''}"><span aria-hidden="true">${item.complete?'✓':'○'}</span>${e(item.label)}</li>`).join('')}</ul>`;
+    body+=`<section class="cw-panel setup-progress" aria-labelledby="setup-progress-title"><p class="eyebrow">Your setup</p><h2 id="setup-progress-title">${started?'Your app is safely in your dashboard.':'Finish your page at your pace.'}</h2><p>${e(visibility)}</p><div class="setup-progress-grid"><article><div class="setup-progress-heading"><h3>App page</h3><strong>${appProgress.percent}%</strong></div><progress max="100" value="${appProgress.percent}">${appProgress.percent}%</progress>${checklist(appProgress.items)}<a class="primary-button" href="${setupProject?'/?listing=settings&amp;project='+e(setupProject.slug):'/?listing=settings&amp;new=1'}">${setupProject?'Complete app page':'Add your app'}</a>${setupProject&&!setupProject.video_url?'<p class="cw-meta">Optional afterward: add a demo video or supported video link.</p>':''}</article><article><div class="setup-progress-heading"><h3>Creator profile</h3><strong>${profileProgress.percent}%</strong></div><progress max="100" value="${profileProgress.percent}">${profileProgress.percent}%</progress>${checklist(profileProgress.items)}<a class="secondary-button" href="/dashboard/profile">Complete creator profile</a></article></div></section>`;
+   }
    body+=`<section class="cw-panel"><h2>You try their app. They try yours.</h2><p>Pair up with another app creator to give each other feedback. It’s free and optional. A match or reply isn’t guaranteed.</p><a class="secondary-button" href="/dashboard/exchange">Swap app feedback</a></section>`;
    body+=verificationCard(badge)+`<section class="cw-panel"><h2>Apps you could help improve</h2>${available.length<suggestions.length?'<p class="cw-meta">Explore the current launch apps. Reviews of your own apps do not count toward the earned badge.</p>':''}<div class="dashboard-discovery-grid">${suggestions.map(discoveryCard).join('')||'<p>No published apps are available yet.</p>'}</div><a class="dashboard-saved-link" href="/dashboard?view=visitor">View saved apps →</a></section>`;
    body+=`<div class="workspace-summary">${results.map((r,i)=>`<a href="${['/dashboard?view=creator','/dashboard?view=visitor','/dashboard/notifications','/dashboard/help'][i]}"><strong>${r.count}</strong><span>${['My projects','Saved projects','Unread notifications','Open requests'][i]}</span></a>`).join('')}<a href="/dashboard/messages"><strong>${Number(comments.data?.[0]?.total_count)||0}</strong><span>Conversations</span></a></div>${performancePanel(projects.data,results[0].count||0)}`;

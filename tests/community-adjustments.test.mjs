@@ -43,23 +43,20 @@ test('comment input has its own flexible grid track; counters and status cannot 
  assert.match(css,/\.compact-comment \[data-comment-status\]:empty\{display:none\}/);
  assert.match(css,/\.card-comments \.inline-help\[open\]\{grid-column:1\/-1\}/);
 });
-test('listing journey asks for one decision at a time and keeps tab navigation',()=>{
- const ctx=vm.createContext({document:{addEventListener(){}},listingField:(name)=>`FIELD:${name}`,listingIdentityConfirmation:()=>'<div>APP CONFIRMATION</div>',listingStep:0,listingDraft:{stage:'Ready for a first try',sharingPreference:'not_sure'},esc:String});
+test('listing journey asks only for the URL before the preview and visibility decision',()=>{
+ const ctx=vm.createContext({document:{addEventListener(){}},listingField:(name)=>`FIELD:${name}`,listingStep:0,listingDraft:{stage:'Ready for a first try',sharingPreference:'private'},esc:String});
  vm.runInContext(entry,ctx);
  let html=ctx.inlineListingForm();assert.match(html,/FIELD:url/);assert.doesNotMatch(html,/FIELD:title|Who should see it/);
- assert.match(html,/role="progressbar"/);assert.match(html,/aria-valuenow="1"/);assert.equal((html.match(/FIELD:/g)||[]).length,1);
- ctx.listingStep=1;html=ctx.inlineListingForm();assert.match(html,/APP CONFIRMATION/);assert.match(html,/FIELD:title/);assert.doesNotMatch(html,/FIELD:url|FIELD:does/);
- for(const [step,field] of [[2,'does'],[3,'helps'],[4,'firstTry']]){ctx.listingStep=step;html=ctx.inlineListingForm();assert.match(html,new RegExp('FIELD:'+field));assert.equal((html.match(/FIELD:/g)||[]).length,1);}
- ctx.listingStep=5;html=ctx.inlineListingForm();assert.match(html,/How ready is it\?/);assert.equal((html.match(/data-listing-stage=/g)||[]).length,4);
- ctx.listingStep=6;html=ctx.inlineListingForm();assert.match(html,/Who should see it\?/);assert.match(html,/Invite only/);assert.match(html,/Public/);assert.match(html,/Decide later/);assert.doesNotMatch(html,/Not sure yet/);
- assert.match(html,/data-inline-listing/);assert.match(html,/button type="submit" class="primary-button" disabled/);
- assert.match(entry,/data-listing-stage[^\n]+requestCreatorQuote\(2\)/);
+ assert.doesNotMatch(html,/role="progressbar"|data-listing-stage|FIELD:does|FIELD:helps|FIELD:firstTry/);
+ assert.equal((html.match(/FIELD:/g)||[]).length,1);assert.match(html,/Preview my app/);
+ const visibility=ctx.listingJourneyVisibility();assert.match(visibility,/Keep it private while I finish/);assert.match(visibility,/Make it public when it’s ready/);assert.doesNotMatch(visibility,/Not sure yet/);
  assert.match(app,/discoveryHero\(true\)[\s\S]*listingJourney\(\)/);
  assert.doesNotMatch(app,/Meet the creator|<h3>Tell the creator<\/h3>/);
 });
 test('signup and wish return paths remain same-origin and strictly allowlisted',()=>{
  assert.equal(feedbackDestination('/?welcome=1'),'/?welcome=1');
  assert.equal(feedbackDestination('/?wish=1#wish-list'),'/?wish=1#wish-list');
+ assert.equal(feedbackDestination('listing-dashboard'),'/?listing=settings&after=dashboard');
  assert.notEqual(feedbackDestination('https://evil.example/?welcome=1'),'https://evil.example/?welcome=1');
 });
 test('wish persistence protects writes and participates in account deletion',()=>{

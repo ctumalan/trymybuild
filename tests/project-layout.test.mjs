@@ -62,6 +62,15 @@ test('project destination shows the exact destination URL',()=>{
  assert.equal(context.destination('/projects/example'),'https://trymybuild.com/projects/example');
  assert.equal(context.destination('https://example.com/tool'),'https://example.com/tool');
 });
+test('the signup preview shows the launch action without making it clickable',()=>{
+ const product={slug:'preview-app',name:'Preview app',url:'https://example.com'};
+ const disabled=globalThis.CWProjectView.hero(product,{preview:true,disabledLaunch:true});
+ assert.match(disabled,/<button class="primary-button preview-try-disabled"[^>]+disabled[^>]*>Try this app ↗<\/button>/);
+ assert.doesNotMatch(disabled,/href="https:\/\/example\.com"/);
+ const published=globalThis.CWProjectView.hero(product);
+ assert.match(published,/<a class="primary-button" href="https:\/\/example\.com"/);
+ assert.doesNotMatch(published,/preview-try-disabled/);
+});
 test('categories wrap and violet accents apply to navigation and illustration panels',()=>{
  assert.match(css,/\.category-strip-scroll\{flex-wrap:wrap;overflow:visible/);
  assert.match(css,/\.site-header nav button:hover/);

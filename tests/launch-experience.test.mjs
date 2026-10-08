@@ -7,6 +7,8 @@ test('signup and global navigation expose the legal agreement',()=>{
  const app=read('app.js'),index=read('index.html'),terms=read('src/pages/terms.ts'),privacy=read('src/pages/privacy.ts');
  assert.match(app,/legal-agreement/);assert.match(app,/Terms of Service/);assert.match(app,/Privacy Policy/);
  assert.match(app,/data-listing-create-account/);assert.match(app,/location\.assign\('\/auth\/sign-in\?signup=1&next=listing-dashboard'\)/);
+ assert.match(app,/projectDetailContent\(product,true,!editable\)/);
+ assert.match(read('project-view.js'),/preview-try-disabled[^>]+disabled aria-label="Try this app, available after saving"/);
  const guestDecision=app.slice(app.indexOf('<div class="legal-signup">'),app.indexOf('</div>`}<p data-listing-account-status'));
  assert.ok(guestDecision.indexOf('listing-save-hero')<guestDecision.indexOf('legal-agreement'));
  assert.match(guestDecision,/Already have an account\? <a[^>]+>Sign in<\/a>/);assert.doesNotMatch(guestDecision,/secondary-button/);

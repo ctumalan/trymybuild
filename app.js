@@ -646,11 +646,11 @@ document.addEventListener('visibilitychange', () => {
   else maybeShowReturnFeedback();
 });
 
-function projectDetailContent(product, preview = false) {
+function projectDetailContent(product, preview = false, disabledLaunch = false) {
   const copy = projectPresentation[product.slug] || ['', '',product.summary,'',''];
   const presentation = product.presentation || {headline:copy[2],help:copy[3],firstTry:copy[4]};
   const creator = preview ? `<span class="creator-byline">by ${esc(state.session?.user?.displayName||'You')}</span>` : creatorLink(product,true,true,true);
-  return CWProjectView.hero({...product, presentation, url:product.url ? safeProjectUrl(product.url) : ''}, {creator, preview, titleId:preview ? '' : 'detail-title-'+product.slug});
+  return CWProjectView.hero({...product, presentation, url:product.url ? safeProjectUrl(product.url) : ''}, {creator, preview, disabledLaunch, titleId:preview ? '' : 'detail-title-'+product.slug});
 }
 function projectConversation(product) {
   return CWProjectView.conversation(product, {posts:state.communityPosts.filter(post=>post.projectSlug===product.slug), loading:!!window.CW_SERVER, composer:projectCommentComposer(product,false,'conversation-')});
@@ -975,7 +975,7 @@ function listingPreview(editable = true) {
   queueMicrotask(() => { void ensureListingScreenshot(); });
   const title=listingDraft.title||'Your project';
   const product={slug:'listing-preview',name:title,category:listingDraft.category,stage:listingDraft.stage,preview:image,url,presentation:{headline:listingDraft.does||title,help:listingDraft.helps||'Add the benefit people should understand in your dashboard.',firstTry:listingDraft.firstTry||'Give visitors one clear place to begin after you save this app.'}};
-  return `<div data-listing-preview-region data-listing-preview-editable="${editable}"><article class="listing-preview-card project-detail-content invitation-detail mealmap-detail" data-showcase-theme="${esc(CWProjectView.theme(product))}"><header class="public-detail-header"><div><strong>${esc(product.name)}</strong><small>${esc(product.category)} · ${esc(product.stage)}</small></div></header>${projectDetailContent(product,true)}</article>${editable?listingImageControls():''}</div>`;
+  return `<div data-listing-preview-region data-listing-preview-editable="${editable}"><article class="listing-preview-card project-detail-content invitation-detail mealmap-detail" data-showcase-theme="${esc(CWProjectView.theme(product))}"><header class="public-detail-header"><div><strong>${esc(product.name)}</strong><small>${esc(product.category)} · ${esc(product.stage)}</small></div></header>${projectDetailContent(product,true,!editable)}</article>${editable?listingImageControls():''}</div>`;
 }
 function listingIdentityConfirmation() {
   const image = listingImage();

@@ -1064,10 +1064,10 @@ body.public-site #app[tabindex="-1"]:focus { outline:none; }
 .listing-signup-preview { max-width:1120px; }
 .listing-preview-heading { max-width:720px; margin:0 auto 28px; text-align:center; }
 .listing-preview-heading h1 { margin:.25rem 0 .7rem; }
-.listing-preview-conversion { display:grid; grid-template-columns:minmax(0,1.45fr) minmax(290px,.7fr); align-items:start; gap:24px; }
+.listing-preview-conversion { display:grid; grid-template-columns:minmax(0,1fr); align-items:start; gap:24px; width:min(100%,760px); margin-inline:auto; }
 .listing-preview-conversion [data-listing-preview-region] { margin:0; }
 .listing-signup-preview .preview-try-disabled,.listing-signup-preview .preview-try-disabled:hover { color:#746f78; background:#dedbe1; border-color:#d2ced6; box-shadow:none; cursor:not-allowed; opacity:.72; transform:none; }
-.listing-preview-decision { position:sticky; top:24px; padding:24px; border:1px solid #dfd2ea; border-radius:20px; background:#fff; box-shadow:0 16px 38px #3b244c12; }
+.listing-preview-decision { position:static; padding:24px; border:1px solid #dfd2ea; border-radius:20px; background:#fff; box-shadow:0 16px 38px #3b244c12; }
 .listing-preview-decision h2 { margin:.25rem 0 16px; }
 .listing-preview-decision .journey-visibility { display:grid; gap:10px; margin:0; padding:0; border:0; }
 .listing-preview-decision .visibility-card { margin:0; }

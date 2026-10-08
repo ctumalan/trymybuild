@@ -7,6 +7,9 @@ test('signup and global navigation expose the legal agreement',()=>{
  const app=read('app.js'),index=read('index.html'),terms=read('src/pages/terms.ts'),privacy=read('src/pages/privacy.ts');
  assert.match(app,/legal-agreement/);assert.match(app,/Terms of Service/);assert.match(app,/Privacy Policy/);
  assert.match(app,/data-listing-create-account/);assert.match(app,/location\.assign\('\/auth\/sign-in\?signup=1&next=listing-dashboard'\)/);
+ const guestDecision=app.slice(app.indexOf('<div class="legal-signup">'),app.indexOf('</div>`}<p data-listing-account-status'));
+ assert.ok(guestDecision.indexOf('listing-save-hero')<guestDecision.indexOf('legal-agreement'));
+ assert.match(guestDecision,/Already have an account\? <a[^>]+>Sign in<\/a>/);assert.doesNotMatch(guestDecision,/secondary-button/);
  assert.match(app,/Agree to the Terms of Service and Privacy Policy to continue\./);
  assert.match(app,/location\.assign\('\/dashboard\/overview\?started='/);
  assert.match(index,/href="\/terms"/);assert.match(index,/href="\/privacy"/);

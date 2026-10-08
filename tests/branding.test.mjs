@@ -10,7 +10,7 @@ test('discovery introduces both project discovery and creator participation', ()
   assert.doesNotMatch(read('index.html'), /class="brand-promise"/);
   assert.doesNotMatch(read('index.html'), /Find apps that make life easier|class="brand-intro"/);
   assert.match(read('app.js'), /Stop guessing\. Get <em>human feedback/);
-  assert.match(read('app.js'), /Invite people to try your app, find out what’s confusing/);
+  assert.match(read('app.js'), /Invite people to try your early-stage app, gather their honest feedback/);
   assert.match(read('index.html'), /<title>TryMyBuild — Get usable feedback on your early app.<\/title>/);
   const app = read('app.js');
   assert.match(app, /Share your app/);

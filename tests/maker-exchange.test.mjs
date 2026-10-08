@@ -63,3 +63,12 @@ test('suggested testers come only from active public members waiting for a feedb
  assert.equal(response.status,200);assert.equal(data.testers.length,1);assert.equal(data.testers[0].slug,'sample-reviewer');assert.equal(data.testers[0].project.title,'Daily sketchbook');
  assert.equal('user_id' in data.testers[0],false);assert.equal('request_id' in data.testers[0],false);
 });
+test('the configured founder is suggested to early users without joining the swap queue',async()=>{
+ const f=workspaceFixtures();f.tables.creator_feedback=[];f.tables.maker_exchange_entries=[];
+ f.tables.users.find(user=>user.id===f.author).workos_user_id='founder-workos';
+ const scope={...f.scope,env:key=>key==='FOUNDER_WORKOS_USER_ID'?'founder-workos':''};
+ const route=moduleFixture('src/pages/api/suggested-testers.ts',['GET'],{...scope,json:(data,status=200)=>Response.json(data,{status})}).GET;
+ const response=await route(ctx('/api/suggested-testers?project=sample-0')),data=await response.json();
+ assert.equal(response.status,200);assert.equal(data.testers.length,1);assert.equal(data.testers[0].slug,'sample-reviewer');
+ assert.equal(data.testers[0].avatar,'/assets/avatars/chris-nava-founder.jpg');assert.equal(data.testers[0].project.slug,'sample-guest');
+});

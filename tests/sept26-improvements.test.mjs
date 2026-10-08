@@ -7,7 +7,7 @@ test('discovery language, navigation and destinations use the requested public w
  const app=read('app.js');
  assert.match(app,/Paste your app or website URL/);
  assert.match(app,/aria-label="View \$\{esc\(product\.name\)\} details"/);
- assert.match(read('project-view.js'),/data-conversation-tab="feedback"><span data-feedback-tab-label>Feedback<\/span><\/button>/);
+ assert.match(read('project-view.js'),/data-conversation-tab="feedback"><span data-feedback-tab-label>Feedback<\/span><span class="feedback-count" data-feedback-count/);
  assert.match(app,/class="discovery-categories"/);
  assert.match(app,/return parsed\.href/);
 });

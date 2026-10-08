@@ -5,6 +5,7 @@ import { database, ensureMember } from '../../server/database';
 import { sameOrigin } from '../../server/security.mjs';
 import { structuredFeedbackInput } from '../../server/feedback-policy.mjs';
 import {activeFeedbackRequest} from '../../server/project-requests';
+import {reviewEvidence} from '../../server/review-evidence';
 export const POST:APIRoute=async context=>{
  if(!sameOrigin(context.request,origin(context))) return json({error:'Request not allowed.'},403);
  const user=await currentUser(context);if(!user)return json({error:'Please sign in.'},401);
@@ -25,11 +26,13 @@ export const POST:APIRoute=async context=>{
   if(result.error?.code==='23505'){
    const existing=await db.from('creator_feedback').select('id,attempt,moderation_status').eq('project_slug',slug).eq('author_user_id',member.id).single();
    if(existing.error)throw existing.error;
-   if(context.request.headers.get('accept')?.includes('application/json'))return json({ok:true,duplicate:true,countsTowardFirstReview:member.system_role!=='admin'&&existing.data.attempt!=='not_tried'&&existing.data.moderation_status!=='hidden',href:`/dashboard/messages?thread=${existing.data.id}`});
+   const evidence=await reviewEvidence(slug).catch(()=>null);
+   if(context.request.headers.get('accept')?.includes('application/json'))return json({ok:true,duplicate:true,countsTowardFirstReview:member.system_role!=='admin'&&existing.data.attempt!=='not_tried'&&existing.data.moderation_status!=='hidden',communityReviewCount:evidence?.total,href:`/dashboard/messages?thread=${existing.data.id}`});
    return context.redirect(`/dashboard/messages?thread=${existing.data.id}`,303);
   }
   if(result.error)throw result.error;
-  if(context.request.headers.get('accept')?.includes('application/json'))return json({ok:true,countsTowardFirstReview:member.system_role!=='admin'&&input.attempt!=='not_tried',message:trial?'Your feedback is with the maker. They committed to replying.':'Your feedback was sent to the maker.',href:`/dashboard/messages?thread=${result.data.id}${trial?'&trial=1':''}`});
+  const evidence=await reviewEvidence(slug).catch(()=>null);
+  if(context.request.headers.get('accept')?.includes('application/json'))return json({ok:true,countsTowardFirstReview:member.system_role!=='admin'&&input.attempt!=='not_tried',communityReviewCount:evidence?.total,message:trial?'Your feedback is with the maker. They committed to replying.':'Your feedback was sent to the maker.',href:`/dashboard/messages?thread=${result.data.id}${trial?'&trial=1':''}`});
   return context.redirect(`/dashboard/messages?thread=${result.data.id}&${trial?'trial=1':'feedback=sent'}`,303);
  }catch{if(context.request.headers.get('accept')?.includes('application/json'))return json({error:'Your review could not be confirmed. Your text is still here; check Messages before retrying.'},503);return context.redirect(slug?`/tell/${slug}?error=1`:'/dashboard?error=1',303);}
 };

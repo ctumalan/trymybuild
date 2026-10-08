@@ -121,6 +121,9 @@ test('first-review sticker disappears after a non-admin community review',()=>{
  const reviewed=globalThis.CWProjectView.conversation({slug:'reviewed-app',communityReviewCount:1},{loading:false});
  assert.match(first,/data-feedback-nudge/);
  assert.doesNotMatch(reviewed,/data-feedback-nudge|Be the first to review this app/);
+ assert.match(reviewed,/data-feedback-count[^>]*aria-label="1 review"[^>]*>1/);
+ assert.match(reviewed,/1 early user<\/strong> shared feedback/);
+ assert.match(reviewed,/Their feedback was shared privately with the creator/);
  const migration=readFileSync(new URL('../database/032_first_community_review_count.sql',import.meta.url),'utf8');
  assert.match(migration,/u\.system_role<>'admin'/);
  assert.match(migration,/f\.attempt<>'not_tried'/);

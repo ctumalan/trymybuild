@@ -44,10 +44,28 @@ function conversationFeed(posts) {
   const sorted = [...posts].sort((a,b)=>(Date.parse(b.createdAt)||0)-(Date.parse(a.createdAt)||0));
   return sorted.slice(0,3).map(conversationPost).join('') + (sorted.length>3 ? `<details class="conversation-more"><summary>View all ${sorted.length} comments</summary>${sorted.slice(3).map(conversationPost).join('')}</details>` : '');
 }
+const reviewAttemptLabels = {completed:'Tried the main feature',stuck:'Tried it and got stuck',blocked:'Could not get started'};
+const reviewFocusLabels = {ease:'Ease of use',bugs:'Something went wrong',results:'The results',explanation:'Understanding the app',development:'What to develop next'};
+function reviewQuantity(count) { return `${count} ${count === 1 ? 'early user' : 'early users'}`; }
+function reviewProof(count) {
+  return count > 0 ? `<div class="review-proof" data-review-proof><span class="review-proof-check" aria-hidden="true">&#10003;</span><span><strong>${reviewQuantity(count)}</strong> shared feedback</span></div>` : '';
+}
+function reviewCard(review) {
+  const when = new Date(review.createdAt), dated = Number.isFinite(when.getTime());
+  const initials = String(review.author||'Member').split(/\s+/).filter(Boolean).slice(0,2).map(word=>word[0]).join('').toUpperCase();
+  const signals = [reviewAttemptLabels[review.attempt],reviewFocusLabels[review.focus]].filter(Boolean);
+  return `<article class="public-review-card"><header><span class="person-avatar small" aria-hidden="true">${review.avatar?`<img src="${esc(review.avatar)}" alt="">`:esc(initials||'M')}</span><span><strong>${esc(review.author||'TryMyBuild member')}</strong><small>Early user review</small></span>${dated?`<time datetime="${esc(when.toISOString())}">${esc(when.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}))}</time>`:''}</header>${signals.length?`<p class="public-review-signals">${signals.map(signal=>`<span>${esc(signal)}</span>`).join('')}</p>`:''}<p>${esc(review.message)}</p></article>`;
+}
+function reviewEvidenceMarkup(data) {
+  const total = Math.max(0,Number(data.total)||0), publicCount = Math.max(0,Number(data.publicCount)||0), reviews = Array.isArray(data.reviews)?data.reviews:[];
+  if (!total) return '';
+  const privateCount = Math.max(0,total-publicCount);
+  return `<section class="review-evidence-summary" aria-label="Early user reviews"><div class="review-evidence-heading"><span class="review-proof-check" aria-hidden="true">&#10003;</span><div><h2>${reviewQuantity(total)} shared feedback</h2><p>${publicCount?`${publicCount} chose to share ${publicCount===1?'their review':'their reviews'} publicly.`:'Their feedback was shared privately with the creator.'}</p></div></div>${reviews.length?`<div class="public-review-list">${reviews.map(reviewCard).join('')}</div>`:''}${publicCount&&privateCount?`<p class="private-review-note">${privateCount} more ${privateCount===1?'review was':'reviews were'} shared privately with the creator.</p>`:''}</section>`;
+}
 function conversation(product, options = {}) {
- const posts = options.posts || [], id = esc(product.slug);
-  const nudge=Number(product.communityReviewCount||0)===0?`<div class="feedback-nudge" data-feedback-nudge><span class="feedback-nudge-copy"><span>Be the first to review this app</span></span><svg class="feedback-nudge-doodle" viewBox="0 0 100 62" aria-hidden="true"><path class="feedback-nudge-line" d="M86 32C66 12 39 12 12 30"/><path class="feedback-nudge-head" d="m24 18-12 12 17 4"/></svg></div>`:'';
-  return `<section class="project-conversation" data-conversation="${id}" aria-label="Comments and feedback"><div class="conversation-tab-row"><div class="conversation-tabs" role="tablist" aria-label="Join in"><button type="button" role="tab" id="conversation-tab-${id}" aria-controls="conversation-panel-${id}" aria-selected="true" tabindex="0" data-conversation-tab="comments">Conversation <span data-conversation-count>${posts.length || ''}</span></button><button type="button" role="tab" id="feedback-tab-${id}" aria-controls="feedback-panel-${id}" aria-selected="false" tabindex="-1" data-conversation-tab="feedback"><span data-feedback-tab-label>Feedback</span></button></div>${nudge}</div><div role="tabpanel" id="conversation-panel-${id}" aria-labelledby="conversation-tab-${id}" data-conversation-panel="comments"><div class="conversation-feed" data-conversation-feed aria-live="polite">${options.loading !== false ? '<p class="conversation-empty">Loading conversation…</p>' : conversationFeed(posts)}</div>${options.composer || composer(product.slug)}</div><div role="tabpanel" id="feedback-panel-${id}" aria-labelledby="feedback-tab-${id}" data-conversation-panel="feedback" hidden><div class="feedback-tab-intro"><h2>Share your experience</h2><p>Try the app, then share what worked and what could improve.</p></div><div data-inline-feedback data-feedback-slug="${id}"><p role="status">Loading feedback options…</p></div></div></section>`;
+ const posts = options.posts || [], id = esc(product.slug), reviewCount = Math.max(0,Number(product.communityReviewCount)||0);
+  const nudge=reviewCount===0?`<div class="feedback-nudge" data-feedback-nudge><span class="feedback-nudge-copy"><span>Be the first to review this app</span></span><svg class="feedback-nudge-doodle" viewBox="0 0 100 62" aria-hidden="true"><path class="feedback-nudge-line" d="M86 32C66 12 39 12 12 30"/><path class="feedback-nudge-head" d="m24 18-12 12 17 4"/></svg></div>`:reviewProof(reviewCount);
+  return `<section class="project-conversation" data-conversation="${id}" data-review-total="${reviewCount}" aria-label="Comments and feedback"><div class="conversation-tab-row"><div class="conversation-tabs" role="tablist" aria-label="Join in"><button type="button" role="tab" id="conversation-tab-${id}" aria-controls="conversation-panel-${id}" aria-selected="true" tabindex="0" data-conversation-tab="comments">Conversation <span data-conversation-count>${posts.length || ''}</span></button><button type="button" role="tab" id="feedback-tab-${id}" aria-controls="feedback-panel-${id}" aria-selected="false" tabindex="-1" data-conversation-tab="feedback"><span data-feedback-tab-label>Feedback</span><span class="feedback-count" data-feedback-count ${reviewCount?'':'hidden'} aria-label="${reviewCount} ${reviewCount===1?'review':'reviews'}">${reviewCount||''}</span></button></div><div data-review-signal>${nudge}</div></div><div role="tabpanel" id="conversation-panel-${id}" aria-labelledby="conversation-tab-${id}" data-conversation-panel="comments"><div class="conversation-feed" data-conversation-feed aria-live="polite">${options.loading !== false ? '<p class="conversation-empty">Loading conversation…</p>' : conversationFeed(posts)}</div>${options.composer || composer(product.slug)}</div><div role="tabpanel" id="feedback-panel-${id}" aria-labelledby="feedback-tab-${id}" data-conversation-panel="feedback" hidden><div data-review-evidence aria-live="polite">${reviewEvidenceMarkup({total:reviewCount,publicCount:0,reviews:[]})}</div><div class="feedback-tab-intro"><h2>Share your experience</h2><p>Try the app, then share what worked and what could improve.</p></div><div data-inline-feedback data-feedback-slug="${id}"><p role="status">Loading feedback options…</p></div></div></section>`;
 }
 function selectConversationTab(tab) {
   const region = tab.closest('[data-conversation]');
@@ -79,7 +97,27 @@ async function loadProjectConversation(region) {
     if (region.isConnected && region.conversationRequest === request) feed.innerHTML = '<p class="conversation-empty">Comments couldn’t load. <button type="button" class="text-button" data-conversation-retry>Try again</button></p>';
   }
 }
-globalThis.CWProjectView = {theme,hero,video, conversation, conversationFeed, selectConversationTab, loadProjectConversation};
+function applyReviewEvidence(region,data) {
+  if (!region || !data) return;
+  const total=Math.max(0,Number(data.total)||0);region.dataset.reviewTotal=String(total);
+  const count=region.querySelector('[data-feedback-count]');if(count){count.textContent=total||'';count.hidden=!total;count.setAttribute('aria-label',`${total} ${total===1?'review':'reviews'}`);}
+  const signal=region.querySelector('[data-review-signal]');if(signal)signal.innerHTML=total?reviewProof(total):`<div class="feedback-nudge" data-feedback-nudge><span class="feedback-nudge-copy"><span>Be the first to review this app</span></span><svg class="feedback-nudge-doodle" viewBox="0 0 100 62" aria-hidden="true"><path class="feedback-nudge-line" d="M86 32C66 12 39 12 12 30"/><path class="feedback-nudge-head" d="m24 18-12 12 17 4"/></svg></div>`;
+  const evidence=region.querySelector('[data-review-evidence]');if(evidence)evidence.innerHTML=reviewEvidenceMarkup(data);
+}
+function recordCommunityReview(region,confirmedTotal) {
+  const total=Number.isFinite(Number(confirmedTotal))?Math.max(0,Number(confirmedTotal)):Math.max(0,Number(region?.dataset.reviewTotal)||0)+1;
+  applyReviewEvidence(region,{total,publicCount:0,reviews:[]});
+}
+async function loadProjectReviews(region) {
+  if (!region) return;
+  const request={};region.reviewRequest=request;
+  try {
+    const response=await fetch('/api/reviews?project='+encodeURIComponent(region.dataset.conversation)),data=await response.json();
+    if(!response.ok||data.connected===false)throw Error();
+    if(region.isConnected&&region.reviewRequest===request)applyReviewEvidence(region,data);
+  } catch { /* Keep the server-provided aggregate when public evidence is unavailable. */ }
+}
+globalThis.CWProjectView = {theme,hero,video, conversation, conversationFeed, selectConversationTab, loadProjectConversation, loadProjectReviews, recordCommunityReview, applyReviewEvidence};
 if (typeof document === 'undefined') return;
 document.addEventListener('click', event => {
   const tab = event.target.closest('[data-conversation-tab]');
@@ -109,7 +147,7 @@ function hydrate() {
     const label=region.querySelector('[data-feedback-tab-label]');if(label)label.textContent='Give feedback';
    }
   } catch {}
-  void loadProjectConversation(region);
+  void loadProjectConversation(region);void loadProjectReviews(region);
  });
 }
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', hydrate);

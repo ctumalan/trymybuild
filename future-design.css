@@ -737,8 +737,9 @@ a.secondary-button,.cw-main a.secondary-button { background: #f2edf8; color: #5e
 :is(.future-discover .catalog-list,.dashboard-discovery-grid) > .future-card { align-self: start; border-color: #e4e2df; box-shadow: 0 2px 4px rgb(38 30 48 / 3%), 0 6px 18px rgb(38 30 48 / 4%); }
 :is(.future-discover .catalog-list,.dashboard-discovery-grid) > .future-card:hover { border-color: #cbc5d1; box-shadow: 0 3px 6px rgb(38 30 48 / 4%), 0 8px 22px rgb(38 30 48 / 6%); }
 :is(.future-discover .catalog-list,.dashboard-discovery-grid) > .future-card .future-card-heading { padding: 14px 16px 4px; }
-:is(.future-discover .catalog-list,.dashboard-discovery-grid) > .future-card .future-card-summary { margin-top: 5px; min-height: 0; color: #424047; }
-:is(.future-discover .catalog-list,.dashboard-discovery-grid) > .future-card .future-card-creator { margin-top: 12px; color: #74717a; font-size: .75rem; }
+:is(.future-discover .catalog-list,.dashboard-discovery-grid) > .future-card .future-card-summary { margin: 0; min-height: 0; color: var(--ink); font-size: 1.18rem; font-weight: 650; line-height: 1.32; -webkit-line-clamp: 3; }
+:is(.future-discover .catalog-list,.dashboard-discovery-grid) > .future-card .row-title { margin-top: 16px; color: #4f4b53; font-size: 1rem; }
+:is(.future-discover .catalog-list,.dashboard-discovery-grid) > .future-card .future-card-creator { margin-top: 7px; color: #74717a; font-size: .75rem; }
 :is(.future-discover .catalog-list,.dashboard-discovery-grid) > .future-card .creator-link.is-compact strong { color: #74717a; font-size: .75rem; font-weight: 400; }
 :is(.future-discover .catalog-list,.dashboard-discovery-grid) > .future-card .creator-link:hover strong { color: #424047; }
 :is(.future-discover .catalog-list,.dashboard-discovery-grid) > .future-card .future-card-meta { margin-top: 3px; color: #74717a; font-size: .75rem; }

@@ -462,7 +462,7 @@ const openedCatalogApps = new Set();
 function catalogRow(product) {
   return `<article class="catalog-row future-card">
     <div class="row-media"><button class="row-preview" data-product="${esc(product.slug)}" aria-label="View ${esc(product.name)} details"><img src="${esc(product.preview)}" alt="Preview of the ${esc(product.name)} website" loading="lazy" /></button></div>
-    <div class="future-card-heading"><div class="future-card-copy"><button class="row-title" data-product="${esc(product.slug)}">${esc(product.name)}</button><p class="future-card-summary">${esc(product.summary)}</p><div class="future-card-creator"><span>By</span>${creatorLink(product, true)}</div><div class="future-card-meta"><span class="future-card-category">${esc(product.category)}</span><span class="price-badge">${esc(product.price)}</span></div></div></div>
+    <div class="future-card-heading"><div class="future-card-copy"><p class="future-card-summary">${esc(product.summary)}</p><button class="row-title" data-product="${esc(product.slug)}">${esc(product.name)}</button><div class="future-card-creator"><span>By</span>${creatorLink(product, true)}</div><div class="future-card-meta"><span class="future-card-category">${esc(product.category)}</span><span class="price-badge">${esc(product.price)}</span></div></div></div>
     <div class="future-card-foot"><div class="card-try-actions"><button type="button" class="primary-button" data-product="${esc(product.slug)}" aria-label="Explore ${esc(product.name)}">Explore app</button></div></div>
   </article>`;
 }

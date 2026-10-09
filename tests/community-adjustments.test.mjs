@@ -28,6 +28,11 @@ test('compact comments have unique labels, contextual placeholders and hidden em
  assert.match(ctx.projectCommentComposer(p),/Mention one or two improvements/);
  assert.match(ctx.projectCommentComposer(p),/aria-label="Send comment" hidden/);
  assert.doesNotMatch(ctx.projectCommentComposer(p),/>Post comment</);
+ const conversation=ctx.projectCommentComposer(p,false,'conversation-');
+ assert.match(conversation,/class="conversation-input-shell"/);
+ assert.match(conversation,/aria-label="Post comment" hidden><svg/);
+ assert.match(conversation,/<summary aria-label="Comment guidelines">\?<\/summary>/);
+ assert.doesNotMatch(conversation,/>Post comment<|Posts immediately|<summary>Guidelines/);
  ctx.projectCommentDraft=()=>'<script>bad</script>';
  ctx.esc=s=>String(s).replaceAll('<','&lt;');
  assert.doesNotMatch(ctx.projectCommentComposer(p),/<script>/);

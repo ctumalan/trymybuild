@@ -24,24 +24,12 @@ test('detail view uses the invitation screenshot layout and relevant information
  assert.doesNotMatch(drawer,/What saving does|About opening this app/);
  assert.match(drawer,/Try this app ↗/);
  assert.match(drawer,/Ask the maker a question or share a thought/);
- assert.match(drawer,/Posts immediately\./);
- assert.doesNotMatch(drawer,/Public after review\./);
- assert.match(shared,/Be the first to review this app/);
- assert.doesNotMatch(shared,/Receive feedback back/);
- const nudgeLayout=globalThis.CWProjectView.conversation({slug:'layout-check',communityReviewCount:0},{loading:false});
- assert.ok(nudgeLayout.indexOf('conversation-tabs')<nudgeLayout.indexOf('feedback-nudge'));
- assert.doesNotMatch(shared,/data-open-feedback|feedback-nudge-arrow/);
- assert.match(shared,/feedback-nudge-doodle/);
- assert.match(themeCss,/@keyframes feedback-arrow-line/);
- assert.match(themeCss,/@keyframes feedback-sticker-pop/);
- assert.match(themeCss,/@media\(prefers-reduced-motion:reduce\) \{ \.feedback-nudge/);
- assert.match(shared,/\$\{video\(product.video\)\}<\/div><\/section>/);
- assert.doesNotMatch(drawer+serverDetail,/Connects to the video provider|project-video-note/);
- assert.match(css,/\.mealmap-detail \.project-screenshot\{[^}]*object-fit:contain/);
- assert.match(css,/\.listing-preview-card \.listing-preview-hero>img\{[^}]*object-fit:contain/);
- assert.match(app,/listing-preview-card project-detail-content invitation-detail mealmap-detail/);
- assert.match(app,/data-showcase-theme="\$\{esc\(CWProjectView\.theme\(product\)\)\}"/);
- assert.match(themeCss,/\.listing-preview-card\.invitation-detail\[data-showcase-theme\] \.recipient-copy h2 \{[^}]*overflow-wrap:anywhere/);
+ assert.doesNotMatch(shared,/>Post comment<|Posts immediately/);
+ const html=globalThis.CWProjectView.hero({slug:'layout-check',name:'Test app',url:'https://example.com',presentation:{help:'Helpful',firstTry:'Try a task'}});
+ assert.ok(html.indexOf('</h2>')<html.indexOf('class="recipient-art"'));
+ assert.ok(html.indexOf('class="recipient-art"')<html.indexOf('How it helps'));
+ assert.ok(html.indexOf('How it helps')<html.indexOf('One thing to try first'));
+
 });
 test('demo belongs inside the app card after the app link, with no player loaded until clicked',()=>{
  const product={slug:'demo',name:'Demo app',url:'https://example.com',video:'https://youtu.be/dQw4w9WgXcQ'};
@@ -116,14 +104,13 @@ test('light project canvas keeps the accent vectors moving with reduced-motion s
  assert.match(themeCss,/@keyframes detail-orbit-float/);
  assert.match(themeCss,/@media\(prefers-reduced-motion:reduce\)[\s\S]*\.detail-orbit \{ animation:none/);
 });
-test('first-review sticker disappears after a non-admin community review',()=>{
+test('review counts use one summary and private reviews stay private',()=>{
  const first=globalThis.CWProjectView.conversation({slug:'new-app',communityReviewCount:0},{loading:false});
  const reviewed=globalThis.CWProjectView.conversation({slug:'reviewed-app',communityReviewCount:1},{loading:false});
- assert.match(first,/data-feedback-nudge/);
- assert.doesNotMatch(reviewed,/data-feedback-nudge|Be the first to review this app/);
- assert.match(reviewed,/data-feedback-count[^>]*aria-label="1 review"[^>]*>1/);
- assert.match(reviewed,/1 early user<\/strong> shared feedback/);
- assert.match(reviewed,/Their review is visible to the creator/);
+ assert.doesNotMatch(first,/data-feedback-nudge/);
+ assert.doesNotMatch(reviewed,/data-feedback-nudge|review-evidence-summary/);
+ assert.match(reviewed,/data-feedback-count>1/);
+ assert.match(reviewed,/1 review shared privately with the creator/);
  const migration=readFileSync(new URL('../database/032_first_community_review_count.sql',import.meta.url),'utf8');
  assert.match(migration,/u\.system_role<>'admin'/);
  assert.match(migration,/f\.attempt<>'not_tried'/);

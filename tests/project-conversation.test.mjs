@@ -19,13 +19,12 @@ test('long conversations show three recent comments and expand the rest',()=>{
  assert.match(html,/View all 5 comments/);assert.ok(html.indexOf('Comment 4')<html.indexOf('Comment 3'));
  assert.equal(c.CWProjectView.conversationFeed([]),'');
 });
-test('each app gets accessible conversation and feedback panels without owner-only badge assumptions',()=>{
+test('conversation and feedback share one visible flow without tab controls',()=>{
  const c=setup();vm.runInContext(source,c);const html=c.CWProjectView.conversation({slug:'example'});
- assert.equal((html.match(/role="tab"/g)||[]).length,2);assert.match(html,/data-conversation-tab="feedback"><span data-feedback-tab-label>Feedback/);
- assert.match(html,/data-conversation-panel="feedback" hidden/);assert.match(html,/data-inline-feedback/);
- assert.doesNotMatch(html,/conversation-header|conversation-feedback/);
- assert.doesNotMatch(html,/five approved qualifying reviews|Ordinary comments do not count/);
- assert.doesNotMatch(html,/Had a chance|No public comments yet|Give feedback/);
+ assert.doesNotMatch(html,/role="tab"|role="tabpanel"|data-conversation-panel/);
+ assert.match(html,/aria-label="Conversation and feedback"/);assert.match(html,/data-inline-feedback/);
+ assert.match(html,/data-public-comment="example"/);
+ assert.ok(html.indexOf('data-conversation-feed')<html.indexOf('data-public-comment'));
 });
 test('a response for a closed app does not overwrite the next app or its draft',async()=>{
  let resolve;const feed={innerHTML:''},count={textContent:''};
@@ -43,13 +42,33 @@ test('failed loading offers retry and successful loading filters to the current 
  await c.CWProjectView.loadProjectConversation(region);assert.equal(count.textContent,1);assert.match(feed.innerHTML,/Visible/);assert.doesNotMatch(feed.innerHTML,/Other app/);
 });
 
-test('tab changes preserve both panel instances and support keyboard navigation',()=>{
- const events={},mounts=[];const panelA={dataset:{conversationPanel:'comments'},hidden:false,draft:'Comment draft'},panelB={dataset:{conversationPanel:'feedback'},hidden:true,draft:'Feedback draft'};
- let tabs;const region={querySelectorAll:s=>s==='[data-conversation-tab]'?tabs:[panelA,panelB],querySelector:()=>panelB};
- const tab=kind=>({dataset:{conversationTab:kind},attributes:{},setAttribute(k,v){this.attributes[k]=v;},closest:s=>s==='[data-conversation]'?region:{querySelectorAll:()=>tabs},focus(){this.focused=true;}});
- tabs=[tab('comments'),tab('feedback')];
- const c=setup({document:{readyState:'loading',addEventListener:(t,f)=>events[t]=f},window:{addEventListener(){},CWGuidedFeedback:{mountInline:p=>mounts.push(p)}}});vm.runInContext(source,c);
- c.CWProjectView.selectConversationTab(tabs[1]);assert.equal(panelA.hidden,true);assert.equal(panelB.hidden,false);assert.equal(tabs[1].attributes['aria-selected'],'true');assert.equal(mounts[0],panelB);
- events.keydown({target:{closest:()=>tabs[1]},key:'Home',preventDefault(){}});
- assert.equal(panelA.hidden,false);assert.equal(panelB.hidden,true);assert.equal(tabs[0].focused,true);assert.equal(panelA.draft,'Comment draft');assert.equal(panelB.draft,'Feedback draft');
+test('structured feedback mounts when expanded, without a tab or eager form load',()=>{
+ const events={},mounts=[],inline={},feed={},count={};
+ const expander={open:false,matches:s=>s==='[data-feedback-expand]',querySelector:()=>inline};
+ const region={dataset:{conversation:'example'},isConnected:true,querySelector:s=>s==='[data-inline-feedback]'?inline:s==='[data-feedback-expand]'?expander:s==='[data-conversation-feed]'?feed:count};
+ const c=setup({document:{readyState:'loading',addEventListener:(t,f)=>events[t]=f,querySelectorAll:()=>[region]},window:{addEventListener(){},CWGuidedFeedback:{mountInline:r=>mounts.push(r)}},fetch:async()=>({ok:false,json:async()=>({})})});
+ vm.runInContext(source,c);events.DOMContentLoaded();events.DOMContentLoaded();assert.equal(mounts.length,0);
+ expander.open=true;events.toggle({target:expander});assert.equal(mounts[0],inline);
+});
+test('a catalog drawer inserted after hydration can expand structured feedback',()=>{
+ const events={},mounts=[],inline={};
+ const c=setup({document:{readyState:'loading',addEventListener:(t,f)=>events[t]=f},window:{addEventListener(){},CWGuidedFeedback:{mountInline:r=>mounts.push(r)}}});
+ vm.runInContext(source,c);
+ const expander={open:false,matches:s=>s==='[data-feedback-expand]',querySelector:()=>inline};
+ events.toggle({target:expander});assert.equal(mounts.length,0);
+ expander.open=true;events.toggle({target:expander});assert.equal(mounts[0],inline);
+});
+test('public reviews and comments share chronological order with a feedback label',()=>{
+ const c=setup();vm.runInContext(source,c);
+ const html=c.CWProjectView.discussionFeed([{author:'Commenter',response:'Older comment',createdAt:'2026-10-08'}],[{author:'Tester',message:'Newer review',createdAt:'2026-10-09',attempt:'stuck',focus:'ease'}]);
+ assert.ok(html.indexOf('Newer review')<html.indexOf('Older comment'));
+ assert.match(html,/App feedback/);assert.match(html,/Tried it and got stuck/);
+});
+test('review updates keep the feed and show a short private review note without duplicate proof',()=>{
+ const c=setup();vm.runInContext(source,c);const feed={},count={setAttribute(){}},label={},evidence={};
+ const region={dataset:{},conversationPosts:[{response:'Existing comment'}],querySelector:s=>({'[data-conversation-feed]':feed,'[data-feedback-count]':count,'[data-review-count-label]':label,'[data-review-evidence]':evidence}[s]||null)};
+ c.CWProjectView.applyReviewEvidence(region,{total:2,publicCount:1,reviews:[{message:'Public feedback'}]});
+ assert.match(feed.innerHTML,/Existing comment/);assert.match(feed.innerHTML,/Public feedback/);
+ assert.match(evidence.innerHTML,/1 review shared privately/);assert.doesNotMatch(evidence.innerHTML,/review-evidence-summary|review-proof/);
+ assert.equal(count.textContent,2);
 });

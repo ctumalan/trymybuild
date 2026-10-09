@@ -4,9 +4,9 @@ import vm from 'node:vm';
 import {workspaceFixtures,moduleFixture,read} from '../scripts/workspace-fixtures.mjs';
 
 const context=slug=>({url:new URL('https://example.invalid/tell/'+slug),params:{slug},cookies:{get(){}}});
-test('recipient feedback uses the shared Conversation and Feedback tabs',async()=>{
+test('recipient feedback uses the shared conversation and feedback flow',async()=>{
  const f=workspaceFixtures(),html=await (await f.routes['/projects/sample-0'](context('sample-0'))).text();
- assert.match(html,/data-conversation-tab="feedback"><span data-feedback-tab-label>Feedback/);
+ assert.match(html,/aria-label="Conversation and feedback"/);
  assert.match(html,/data-feedback-slug="sample-0"/);
  assert.match(html,/data-public-comment="sample-0"/);
  const composer=f.scope.publicCommentComposer("sample-0");assert.match(composer,/Guests appear as Guest/);assert.match(composer,/sign in to update yours/);
@@ -33,7 +33,7 @@ test('invitation context explains the tester return step and keeps the review fo
 test('an open feedback request becomes a focused trial brief and removes the pricing detour',async()=>{
  const f=workspaceFixtures();f.tables.feedback_requests=[{id:f.id,user_id:f.owner,project_slug:'sample-0',question:'Was it clear how to save your first shared list?',status:'queued',created_at:'2026-09-12T15:00:00Z'}];
  const project=await (await f.routes['/projects/sample-0'](context('sample-0'))).text();
- assert.match(project,/A short trial with a real maker/);assert.match(project,/About 5–10 minutes/);assert.match(project,/Was it clear how to save your first shared list/);assert.match(project,/data-feedback-tab-label>Feedback/);
+ assert.match(project,/A short trial with a real maker/);assert.match(project,/About 5–10 minutes/);assert.match(project,/Was it clear how to save your first shared list/);assert.match(project,/aria-label="Conversation and feedback"/);
  const guest=moduleFixture('src/pages/tell/[slug].ts',['GET'],{...f.scope,currentUser:async()=>null}).GET,form=await (await guest(context('sample-0'))).text();
  assert.match(form,/Were you able to complete the task/);assert.match(form,/What did you expect, and what happened/);assert.match(form,/Would you use this app/);assert.match(form,/name="price" value="unsure"/);assert.doesNotMatch(form,/How did the price feel/);
 });

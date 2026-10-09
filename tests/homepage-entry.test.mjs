@@ -68,7 +68,7 @@ test('empty and ambiguous inputs do not search or create drafts',()=>{
 });
 test('the action stays share-only and preserves catalog state while typing',()=>{
  const {c}=setup('');
- for (const [value,label,sharing] of [['','Create your free page',true],['planning','Create your free page',true],['finalprompt.ai','Create your free page',true],['family life','Create your free page',true],['','Create your free page',true]]) {
+ for (const [value,label,sharing] of [['','Get feedback',true],['planning','Get feedback',true],['finalprompt.ai','Get feedback',true],['family life','Get feedback',true],['','Get feedback',true]]) {
   const input={value},button={},status={};
   c.updateHomepageEntry({querySelector:s=>({'[data-app-link-entry]':input,'[data-entry-submit-label]':button,'[data-entry-status]':status}[s])});
   assert.equal(button.textContent,label);

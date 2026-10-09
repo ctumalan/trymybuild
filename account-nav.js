@@ -1,3 +1,18 @@
+// Shared server pages expose the same public destinations beside the account photo.
+document.querySelectorAll('.cw-bar nav').forEach(nav => {
+ const account = nav.querySelector('[data-account-nav]');
+ if (!account || nav.querySelector('.header-menu-links')) return;
+ const links = document.createElement('div'); links.className = 'header-menu-links';
+ for (const anchor of [...nav.querySelectorAll('a:not([data-account-nav])')]) {
+  anchor.classList.add((anchor.hasAttribute('data-guest-listing') || anchor.classList.contains('header-menu-action')) ? 'header-menu-action' : 'header-menu-link');
+  links.append(anchor);
+ }
+ for (const [text,href] of [['Articles','/article'],['About','/?page=about'],['Contact','/?page=contact']]) {
+  const a=document.createElement('a');a.textContent=text;a.href=href;a.className='header-menu-link';
+  const action=links.querySelector('.header-menu-action'); links.insertBefore(a,action);
+ }
+ nav.insertBefore(links,account);
+});
 window.CWAccountMenu = {
  mount(session) {
   document.querySelectorAll('[data-account-nav], .profile-button').forEach(anchor => {

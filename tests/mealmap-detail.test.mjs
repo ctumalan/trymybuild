@@ -26,7 +26,7 @@ test('All eleven projects use the approved presentation with their own action ta
   assert.doesNotMatch(markup, /<summary>Leave a public comment<\/summary>/);
   assert.match(markup, /data-save="mealmap"/);
   assert.ok(markup.includes(product.url));
-  assert.match(markup,/class="project-conversation"/);
+  assert.match(markup,/class="project-conversation conversation-flow"/);
   assert.doesNotMatch(markup,/Had a chance to try it/);
   const slugs = vm.runInContext('Object.keys(projectPresentation)', context);
   assert.equal(slugs.length, 11);
@@ -40,6 +40,6 @@ test('All eleven projects use the approved presentation with their own action ta
     assert.ok(html.includes(`assets/previews/${slug}.png`));
     assert.ok(html.includes(`https://example.com/${slug}`));
     assert.ok(html.indexOf('recipient-art') < html.indexOf('Try this app ↗'));
-    assert.ok(html.indexOf('detail-description-notes') < html.indexOf('recipient-art'));
+    assert.ok(html.indexOf('Try this app ↗') < html.indexOf('detail-description-notes'));
   }
 });

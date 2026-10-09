@@ -28,11 +28,11 @@ function hero(product, options = {}) {
   const launchAction = !product.url ? '' : options.disabledLaunch
     ? '<button class="primary-button preview-try-disabled" type="button" disabled aria-label="Try this app, available after saving">Try this app ↗</button>'
     : `<a class="primary-button" href="${esc(product.url)}" target="_blank" rel="noopener noreferrer" ${options.preview?'':`data-try-app="${esc(product.slug)}"`}>Try this app ↗</a>`;
-  return `<section class="recipient-hero"><div class="detail-signal-grid" aria-hidden="true"></div><div class="detail-orbit detail-orbit-one" aria-hidden="true"></div><div class="detail-orbit detail-orbit-two" aria-hidden="true"></div><div class="recipient-copy"><p class="detail-product-signal"><span class="detail-live-dot" aria-hidden="true"></span><span>Live app</span>${product.category?`<span class="detail-signal-separator" aria-hidden="true">·</span><span class="detail-category-icon">${categoryIcon(product.category)}</span><span>${esc(product.category)}</span>`:''}</p>${product.price?`<p class="detail-product-meta"><span>${esc(product.price)}</span></p>`:''}<h2 ${options.titleId ? `id="${esc(options.titleId)}"` : ""}>${esc(presentation.headline||product.name)}</h2><div class="detail-description-notes"><div><div class="detail-note-label"><span class="detail-note-number">01</span>${helpIcon}<h3>How it helps</h3></div><p>${esc(presentation.help)}</p></div><div><div class="detail-note-label"><span class="detail-note-number">02</span>${tryIcon}<h3>One thing to try first</h3></div><p>${esc(presentation.firstTry)}</p></div></div></div><div class="recipient-preview-column"><div class="detail-creator">${options.creator || ""}</div><div class="recipient-art"><div class="recipient-art-chrome" aria-hidden="true"><span class="recipient-art-controls"><i></i><i></i><i></i></span><strong>Product preview</strong><span class="recipient-art-live"><i></i>Live</span></div><div class="recipient-art-viewport">${product.preview?`<img ${options.preview?'data-listing-screenshot':''} src="${esc(product.preview)}" alt="Preview of ${esc(product.name)}" referrerpolicy="no-referrer">`:''}</div>${product.url?`<span class="external-destination">${esc(product.url)}</span>`:''}</div>${launchAction}${video(product.video)}</div></section>`;
+  return `<section class="recipient-hero"><div class="detail-signal-grid" aria-hidden="true"></div><div class="detail-orbit detail-orbit-one" aria-hidden="true"></div><div class="detail-orbit detail-orbit-two" aria-hidden="true"></div><div class="recipient-copy"><p class="detail-product-signal">${product.category?`<span class="detail-category-icon">${categoryIcon(product.category)}</span><span>${esc(product.category)}</span>`:''}</p>${product.price?`<p class="detail-product-meta"><span>${esc(product.price)}</span></p>`:''}<h2 ${options.titleId ? `id="${esc(options.titleId)}"` : ""}>${esc(presentation.headline||product.name)}</h2></div><div class="recipient-preview-column"><div class="recipient-art"><div class="recipient-art-chrome" aria-hidden="true"><span class="recipient-art-controls"><i></i><i></i><i></i></span><strong>Product preview</strong><span class="recipient-art-live"><i class="detail-live-dot"></i>Live</span></div><div class="recipient-art-viewport">${product.preview?`<img ${options.preview?'data-listing-screenshot':''} src="${esc(product.preview)}" alt="Preview of ${esc(product.name)}" referrerpolicy="no-referrer">`:''}</div>${product.url?`<span class="external-destination">${esc(product.url)}</span>`:''}</div><div class="detail-creator">${options.creator || ""}</div>${launchAction}${video(product.video)}</div><div class="recipient-copy recipient-notes-copy"><div class="detail-description-notes"><div><div class="detail-note-label"><span class="detail-note-number">01</span>${helpIcon}<h3>How it helps</h3></div><p>${esc(presentation.help)}</p></div><div><div class="detail-note-label"><span class="detail-note-number">02</span>${tryIcon}<h3>One thing to try first</h3></div><p>${esc(presentation.firstTry)}</p></div></div></div></section>`;
 }
 function composer(slug) {
  const id = 'public-conversation-' + slug, draft = '', count = 0;
-  return `<form class="detail-comment-form conversation-composer" data-public-comment="${esc(slug)}"><label class="visually-hidden" for="comment-${esc(id)}">Leave a public comment</label><textarea id="comment-${esc(id)}" name="comment" maxlength="800" rows="2" required aria-describedby="comment-count-${esc(id)}" placeholder="Ask the maker a question or share a thought.">${esc(draft)}</textarea><div class="conversation-compose-meta"><small>Posts immediately.</small><details class="conversation-guidelines"><summary>Guidelines</summary><p>Write 7–150 words. Discuss the app, not the person. One comment per app; sign in to update yours. Guests appear as Guest. <a href="/community-guidelines">Community guidelines</a></p></details><button class="comment-send" type="submit" aria-label="Post comment" ${draft.trim()?'':'hidden'}>Post comment</button></div><small id="comment-count-${esc(id)}" data-project-comment-count class="${draft.trim()?'word-counter':'visually-hidden'}">${count} / 7–150 words</small><p data-comment-status role="status" aria-live="polite"></p></form>`;
+  return `<form class="detail-comment-form conversation-composer" data-public-comment="${esc(slug)}"><label class="visually-hidden" for="comment-${esc(id)}">Leave a public comment</label><div class="conversation-input-shell"><textarea id="comment-${esc(id)}" name="comment" maxlength="800" rows="1" required aria-describedby="comment-count-${esc(id)}" placeholder="Ask the maker a question or share a thought.">${esc(draft)}</textarea><button class="comment-send" type="submit" aria-label="Post comment" ${draft.trim()?'':'hidden'}><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="currentColor"><path d="M3 3.7c-.5-.2-1 .3-.8.8l3 6.5 9.5 1-9.5 1-3 6.5c-.2.5.3 1 .8.8l18-8.5a.9.9 0 0 0 0-1.6L3 3.7Z"/></svg></button></div><div class="conversation-compose-meta"><details class="conversation-guidelines"><summary aria-label="Comment guidelines">?</summary><p>Write 7–150 words. Discuss the app, not the person. One comment per app; sign in to update yours. Guests appear as Guest. <a href="/community-guidelines">Community guidelines</a></p></details></div><small id="comment-count-${esc(id)}" data-project-comment-count class="${draft.trim()?'word-counter':'visually-hidden'}">${count} / 7–150 words</small><p data-comment-status role="status" aria-live="polite"></p></form>`;
 }
 function conversationPost(post) {
   const when = new Date(post.createdAt);
@@ -54,30 +54,26 @@ function reviewCard(review) {
   const when = new Date(review.createdAt), dated = Number.isFinite(when.getTime());
   const initials = String(review.author||'Member').split(/\s+/).filter(Boolean).slice(0,2).map(word=>word[0]).join('').toUpperCase();
   const signals = [reviewAttemptLabels[review.attempt],reviewFocusLabels[review.focus]].filter(Boolean);
-  return `<article class="public-review-card"><header><span class="person-avatar small" aria-hidden="true">${review.avatar?`<img src="${esc(review.avatar)}" alt="">`:esc(initials||'M')}</span><span><strong>${esc(review.author||'TryMyBuild member')}</strong><small>Early user review</small></span>${dated?`<time datetime="${esc(when.toISOString())}">${esc(when.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}))}</time>`:''}</header>${signals.length?`<p class="public-review-signals">${signals.map(signal=>`<span>${esc(signal)}</span>`).join('')}</p>`:''}<p>${esc(review.message)}</p></article>`;
+  return `<article class="public-review-card"><header><span class="person-avatar small" aria-hidden="true">${review.avatar?`<img src="${esc(review.avatar)}" alt="">`:esc(initials||'M')}</span><span><strong>${esc(review.author||'TryMyBuild member')}</strong><small>App feedback</small></span>${dated?`<time datetime="${esc(when.toISOString())}">${esc(when.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}))}</time>`:''}</header>${signals.length?`<p class="public-review-signals">${signals.map(signal=>`<span>${esc(signal)}</span>`).join('')}</p>`:''}<p>${esc(review.message)}</p></article>`;
 }
 function reviewEvidenceMarkup(data) {
-  const total = Math.max(0,Number(data.total)||0), publicCount = Math.max(0,Number(data.publicCount)||0), reviews = Array.isArray(data.reviews)?data.reviews:[];
-  if (!total) return '';
-  const privateCount = Math.max(0,total-publicCount);
-  return `<section class="review-evidence-summary" aria-label="Early user reviews"><div class="review-evidence-heading"><span class="review-proof-check" aria-hidden="true">&#10003;</span><div><h2>${reviewQuantity(total)} shared feedback</h2><p>${publicCount?`${publicCount} chose to share ${publicCount===1?'their review':'their reviews'} publicly.`:'Their review is visible to the creator.'}</p></div></div>${reviews.length?`<div class="public-review-list">${reviews.map(reviewCard).join('')}</div>`:''}${publicCount&&privateCount?`<p class="private-review-note">${privateCount} more ${privateCount===1?'review is':'reviews are'} visible to the creator.</p>`:''}</section>`;
+ const total=Math.max(0,Number(data.total)||0),publicCount=Math.max(0,Number(data.publicCount)||0);
+ const privateCount=Math.max(0,total-publicCount);
+ return privateCount ? `<p class="private-review-note">${privateCount} ${privateCount===1?'review shared':'reviews shared'} privately with the creator.</p>` : '';
+}
+function discussionFeed(posts=[],reviews=[]) {
+ const items=[...posts.map(post=>({date:post.createdAt,html:conversationPost(post)})),...reviews.map(review=>({date:review.createdAt,html:reviewCard(review)}))].sort((a,b)=>(Date.parse(b.date)||0)-(Date.parse(a.date)||0));
+ return items.slice(0,3).map(item=>item.html).join('')+(items.length>3?`<details class="conversation-more"><summary>View all ${items.length} comments and reviews</summary>${items.slice(3).map(item=>item.html).join('')}</details>`:'');
+}
+function renderDiscussion(region) {
+ const feed=region.querySelector('[data-conversation-feed]');if(!feed)return;
+ feed.innerHTML=discussionFeed(region.conversationPosts||[],region.reviewEvidence?.reviews||[])+(region.conversationError?'<p class="conversation-empty">Comments couldn’t load. <button type="button" class="text-button" data-conversation-retry>Try again</button></p>':'');
 }
 function conversation(product, options = {}) {
  const posts = options.posts || [], id = esc(product.slug), reviewCount = Math.max(0,Number(product.communityReviewCount)||0);
-  const nudge=reviewCount===0?`<div class="feedback-nudge" data-feedback-nudge><span class="feedback-nudge-copy"><span>Be the first to review this app</span></span><svg class="feedback-nudge-doodle" viewBox="0 0 100 62" aria-hidden="true"><path class="feedback-nudge-line" d="M86 32C66 12 39 12 12 30"/><path class="feedback-nudge-head" d="m24 18-12 12 17 4"/></svg></div>`:reviewProof(reviewCount);
-  return `<section class="project-conversation" data-conversation="${id}" data-review-total="${reviewCount}" aria-label="Comments and feedback"><div class="conversation-tab-row"><div class="conversation-tabs" role="tablist" aria-label="Join in"><button type="button" role="tab" id="conversation-tab-${id}" aria-controls="conversation-panel-${id}" aria-selected="true" tabindex="0" data-conversation-tab="comments">Conversation <span data-conversation-count>${posts.length || ''}</span></button><button type="button" role="tab" id="feedback-tab-${id}" aria-controls="feedback-panel-${id}" aria-selected="false" tabindex="-1" data-conversation-tab="feedback"><span data-feedback-tab-label>Feedback</span><span class="feedback-count" data-feedback-count ${reviewCount?'':'hidden'} aria-label="${reviewCount} ${reviewCount===1?'review':'reviews'}">${reviewCount||''}</span></button></div><div data-review-signal>${nudge}</div></div><div role="tabpanel" id="conversation-panel-${id}" aria-labelledby="conversation-tab-${id}" data-conversation-panel="comments"><div class="conversation-feed" data-conversation-feed aria-live="polite">${options.loading !== false ? '<p class="conversation-empty">Loading conversation…</p>' : conversationFeed(posts)}</div>${options.composer || composer(product.slug)}</div><div role="tabpanel" id="feedback-panel-${id}" aria-labelledby="feedback-tab-${id}" data-conversation-panel="feedback" hidden><div data-review-evidence aria-live="polite">${reviewEvidenceMarkup({total:reviewCount,publicCount:0,reviews:[]})}</div><div class="feedback-tab-intro"><h2>Share your experience</h2><p>Try the app, then share what worked and what could improve.</p></div><div data-inline-feedback data-feedback-slug="${id}"><p role="status">Loading feedback options…</p></div></div></section>`;
+  return `<section class="project-conversation conversation-flow" data-conversation="${id}" data-review-total="${reviewCount}" aria-label="Conversation and feedback"><header class="conversation-flow-heading"><span class="conversation-flow-count"><span data-conversation-count>${posts.length}</span> comments</span><span class="conversation-flow-count">· <span data-feedback-count>${reviewCount}</span> <span data-review-count-label>${reviewCount===1?'review':'reviews'}</span></span></header><div data-review-evidence aria-live="polite">${reviewEvidenceMarkup({total:reviewCount,publicCount:0,reviews:[]})}</div><div class="conversation-feed" data-conversation-feed aria-live="polite">${options.loading !== false ? '<p class="conversation-empty">Loading conversation…</p>' : conversationFeed(posts)}</div>${options.composer || composer(product.slug)}<details class="conversation-feedback-inline" data-feedback-expand><summary>Tried the app? <strong>Give feedback →</strong></summary><div class="feedback-tab-intro"><h2>Share your experience</h2><p>Try the app, then share what worked and what could improve.</p></div><div data-inline-feedback data-feedback-slug="${id}"><p role="status">Loading feedback options…</p></div></details></section>`;
 }
-function selectConversationTab(tab) {
-  const region = tab.closest('[data-conversation]');
-  const selected = tab.dataset.conversationTab;
-  region.querySelectorAll('[data-conversation-tab]').forEach(button => {
-    const active = button === tab;
-    button.setAttribute('aria-selected', String(active));
-    button.tabIndex = active ? 0 : -1;
-  });
-  region.querySelectorAll('[data-conversation-panel]').forEach(panel => { panel.hidden = panel.dataset.conversationPanel !== selected; });
-  if (selected === 'feedback') window.CWGuidedFeedback?.mountInline(region.querySelector('[data-inline-feedback]'));
-}
+
 async function loadProjectConversation(region) {
   if (!region) return;
   const slug = region.dataset.conversation;
@@ -91,22 +87,23 @@ async function loadProjectConversation(region) {
     if (!region.isConnected || region.conversationRequest !== request) return;
     const posts = data.posts.filter(post=>post.projectSlug===slug);
 
-    feed.innerHTML = conversationFeed(posts);
-    region.querySelector('[data-conversation-count]').textContent = posts.length || '';
+    region.conversationPosts=posts;region.conversationError=false;renderDiscussion(region);
+    region.querySelector('[data-conversation-count]').textContent = posts.length;
   } catch {
-    if (region.isConnected && region.conversationRequest === request) feed.innerHTML = '<p class="conversation-empty">Comments couldn’t load. <button type="button" class="text-button" data-conversation-retry>Try again</button></p>';
+    if (region.isConnected && region.conversationRequest === request) {region.conversationError=true;renderDiscussion(region);}
   }
 }
 function applyReviewEvidence(region,data) {
   if (!region || !data) return;
   const total=Math.max(0,Number(data.total)||0);region.dataset.reviewTotal=String(total);
-  const count=region.querySelector('[data-feedback-count]');if(count){count.textContent=total||'';count.hidden=!total;count.setAttribute('aria-label',`${total} ${total===1?'review':'reviews'}`);}
-  const signal=region.querySelector('[data-review-signal]');if(signal)signal.innerHTML=total?reviewProof(total):`<div class="feedback-nudge" data-feedback-nudge><span class="feedback-nudge-copy"><span>Be the first to review this app</span></span><svg class="feedback-nudge-doodle" viewBox="0 0 100 62" aria-hidden="true"><path class="feedback-nudge-line" d="M86 32C66 12 39 12 12 30"/><path class="feedback-nudge-head" d="m24 18-12 12 17 4"/></svg></div>`;
+  const count=region.querySelector('[data-feedback-count]');if(count){count.textContent=total;count.setAttribute('aria-label',`${total} ${total===1?'review':'reviews'}`);}
+  const label=region.querySelector('[data-review-count-label]');if(label)label.textContent=total===1?'review':'reviews';
+  region.reviewEvidence=data;renderDiscussion(region);
   const evidence=region.querySelector('[data-review-evidence]');if(evidence)evidence.innerHTML=reviewEvidenceMarkup(data);
 }
 function recordCommunityReview(region,confirmedTotal) {
   const total=Number.isFinite(Number(confirmedTotal))?Math.max(0,Number(confirmedTotal)):Math.max(0,Number(region?.dataset.reviewTotal)||0)+1;
-  applyReviewEvidence(region,{total,publicCount:0,reviews:[]});
+  applyReviewEvidence(region,{total,publicCount:region?.reviewEvidence?.publicCount||0,reviews:region?.reviewEvidence?.reviews||[]});
 }
 async function loadProjectReviews(region) {
   if (!region) return;
@@ -117,26 +114,18 @@ async function loadProjectReviews(region) {
     if(region.isConnected&&region.reviewRequest===request)applyReviewEvidence(region,data);
   } catch { /* Keep the server-provided aggregate when public evidence is unavailable. */ }
 }
-globalThis.CWProjectView = {theme,hero,video, conversation, conversationFeed, selectConversationTab, loadProjectConversation, loadProjectReviews, recordCommunityReview, applyReviewEvidence};
+globalThis.CWProjectView = {theme,hero,video, conversation, conversationFeed, discussionFeed, loadProjectConversation, loadProjectReviews, recordCommunityReview, applyReviewEvidence};
 if (typeof document === 'undefined') return;
-document.addEventListener('click', event => {
-  const tab = event.target.closest('[data-conversation-tab]');
-  if (tab) selectConversationTab(tab);
-});
-document.addEventListener('keydown', event => {
-  const tab = event.target.closest('[data-conversation-tab]');
-  if (!tab || !['ArrowLeft','ArrowRight','Home','End'].includes(event.key)) return;
-  event.preventDefault();
-  const tabs = [...tab.closest('[role="tablist"]').querySelectorAll('[role="tab"]')];
-  const next = event.key === 'Home' ? tabs[0] : event.key === 'End' ? tabs.at(-1) : tabs[(tabs.indexOf(tab)+1)%tabs.length];
-  selectConversationTab(next);next.focus({preventScroll:true});
-});
-
-
 document.addEventListener('click', event => {
  const retry = event.target.closest('[data-conversation-retry]');
  if (retry) void loadProjectConversation(retry.closest('[data-conversation]'));
 });
+// Native catalog drawers are added after page hydration too.
+document.addEventListener('toggle', event => {
+ const expander=event.target;
+ if(expander.matches?.('[data-feedback-expand]')&&expander.open)
+  void window.CWGuidedFeedback?.mountInline(expander.querySelector('[data-inline-feedback]'));
+},true);
 function hydrate() {
  document.querySelectorAll('[data-public-project] [data-conversation]').forEach(region => {
   if (region.dataset.conversationReady) return;
@@ -148,6 +137,8 @@ function hydrate() {
    }
   } catch {}
   void loadProjectConversation(region);void loadProjectReviews(region);
+  const expander=region.querySelector('[data-feedback-expand]');
+  if(typeof location!=='undefined'&&new URLSearchParams(location.search).get('invite')==='1'&&expander)expander.open=true;
  });
 }
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', hydrate);

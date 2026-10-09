@@ -67,7 +67,7 @@ test('discovery gives heading, categories, and the wish action separate zones',(
  assert.doesNotMatch(app,/<aside class="filter-panel">/);
  assert.match(app,/\$\{discoveryHero\(\)\}<div id="home-panel"[\s\S]*\$\{catalogCategoryNavigation\(\)\}/);
  assert.doesNotMatch(app,/class="catalog-filter-menu"/);
- assert.match(app,/Don’t see what you need\?/);
+ assert.match(app,/Missing an app\?<br>Start the idea\./);
  assert.match(future,/\.discovery-categories \{[^}]*border-block/);
  assert.match(future,/\.results-heading \+ \.discovery-categories \{[^}]*flex-wrap:nowrap/);
  assert.match(future,/\.results-heading \+ \.discovery-categories \{[^}]*overflow:visible/);

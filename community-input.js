@@ -1,8 +1,6 @@
 document.addEventListener('input',event=>{
  const field=event.target.closest('[data-community-field]');if(!field)return;
- const count=(field.value.match(/[\p{L}\p{N}]+(?:['’\-][\p{L}\p{N}]+)*/gu)||[]).length;
- const output=document.getElementById(field.dataset.counterId);if(output){const compact=field.hasAttribute('data-compact-counter');output.textContent=compact?`${count} / 150 words${count>0&&count<7?' · At least 7 words':''}`:`Word count: ${count}`;output.classList.toggle('invalid',count>0&&(count<7||count>150));if(!compact&&!output.nextElementSibling?.classList.contains('word-rules')){const rules=document.createElement('small');rules.className='word-rules';rules.textContent='Minimum: 7 words · Maximum: 150 words';output.after(rules);}}
- field.setCustomValidity(count>=7&&count<=150?'':'Write 7–150 words.');
+ field.setCustomValidity(field.value.trim()?'':'Add your feedback.');
 });
 document.querySelectorAll('[data-community-field]').forEach(field=>field.dispatchEvent(new Event('input',{bubbles:true})));
 const dashboardMenu=document.querySelector('.cw-dashboard-menu');
@@ -77,8 +75,8 @@ document.addEventListener('change',event=>{
  window.addEventListener('cw-feedback-resume',event=>{if(location.pathname.startsWith('/tell/'))return;const region=[...document.querySelectorAll('[data-conversation]')].find(el=>el.dataset.conversation===event.detail),expander=region?.querySelector('[data-feedback-expand]');if(expander){expander.open=true;void mountInline(region.querySelector('[data-inline-feedback]'));}else open(event.detail);});
  document.addEventListener('input',event=>{const form=event.target.closest('[data-guided-feedback]');if(form)save(form);});document.addEventListener('change',event=>{const form=event.target.closest('[data-guided-feedback]');if(form)save(form);});
  document.addEventListener('submit',async event=>{
-  const form=event.target.closest('[data-guided-feedback]');if(!form)return;event.preventDefault();const status=form.querySelector('[data-guided-status]'),count=(form.elements.message.value.match(/[\p{L}\p{N}]+(?:['’\-][\p{L}\p{N}]+)*/gu)||[]).length;
-  if(count<7||count>150){status.textContent='Write 7–150 words about your experience.';form.elements.message.focus();return;}
+  const form=event.target.closest('[data-guided-feedback]');if(!form)return;event.preventDefault();const status=form.querySelector('[data-guided-status]');
+  if(!form.elements.message.value.trim()){status.textContent='Add your feedback.';form.elements.message.focus();return;}
   if(!save(form)){status.textContent='Your browser cannot keep this draft. Enable site storage before joining.';return;}
   const button=form.querySelector('[type="submit"]');button.disabled=true;
   try{const me=await fetch('/api/me').then(r=>{if(!r.ok)throw Error('Unable to check your account. Please try again.');return r.json();});if(!me.authenticated){window.CWJoin.offer({action:'feedback',slug:form.elements.slug.value,project:form.closest('.return-feedback-dialog,.project-conversation')?form.elements.slug.value:undefined,browse:window.CWBrowseContext?.()});return;}

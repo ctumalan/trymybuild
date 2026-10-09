@@ -10,7 +10,7 @@ export function structuredFeedbackInput(data) {
 export const validSlug = value => typeof value === 'string' && /^[a-z0-9-]{1,80}$/.test(value);
 export const validId = value => typeof value === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
 export const wordCount = value => typeof value === 'string' ? (value.match(/[\p{L}\p{N}]+(?:['’\-][\p{L}\p{N}]+)*/gu) || []).length : 0;
-export const thoughtfulComment = value => typeof value === 'string' && value.length <= 800 && wordCount(value) >= 7 && wordCount(value) <= 150;
+export const thoughtfulComment = value => typeof value === 'string' && value.trim().length > 0;
 export function feedbackInput(data) {
   if (!validSlug(data.slug) || !Object.hasOwn(helpfulChoices, data.helpful) || !Object.hasOwn(priceChoices, data.price)
     || !['public','private'].includes(data.visibility) || !thoughtfulComment(data.message)) return null;

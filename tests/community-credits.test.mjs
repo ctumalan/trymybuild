@@ -30,7 +30,7 @@ test('daily discussion is profile-bound, moderated, and cannot earn project cred
  assert.match(api,/eq\('moderation_status','published'\)/);
  assert.doesNotMatch(api,/credit_ledger|feedback_qualifications/);
 });
-test('community writing surfaces retain guidelines and word counters, with compact guided feedback',async()=>{
+test('community writing surfaces retain guidelines without word limits or counters',async()=>{
  const sources=await Promise.all(['../app.js','../src/pages/tell/[slug].ts','../src/server/dashboard-cards.ts'].map(path=>readFile(new URL(path,import.meta.url),'utf8')));
- for(const source of sources){assert.match(source,/Be thoughtful\. Be respectful\.|Feedback guidelines/);assert.match(source,/7–150 words|Minimum: 7 words|data-compact-counter/);assert.match(source,/community-guidelines/);}
+ for(const source of sources){assert.match(source,/Be thoughtful\. Be respectful\.|Feedback guidelines/);assert.doesNotMatch(source,/7–150 words|Minimum: 7 words|data-compact-counter|data-project-comment-count|data-inline-count|data-feedback-word-count/);assert.match(source,/community-guidelines/);}
 });

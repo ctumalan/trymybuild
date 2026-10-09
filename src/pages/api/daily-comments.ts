@@ -30,8 +30,8 @@ export const GET:APIRoute=async context=>{
 export const POST:APIRoute=async context=>{
  if(!sameOrigin(context.request,origin(context)))return json({error:'Request not allowed.'},403);
  const user=await currentUser(context);if(!user)return json({error:'Sign in to join the discussion.'},401);if(!user.emailVerified)return json({error:'Verify your email before posting.'},403);
- try{if(!await allowRequest(user.id,'daily-comment',5))return json({error:'Please wait before posting again.'},429);const raw=await context.request.text();if(raw.length>2000)return json({error:'Request too large.'},413);
-  const body=JSON.parse(raw),category=typeof body.category==='string'?body.category.trim():'',day=validDay(body.day),message=String(body.message||'').trim();if(category.length>80||!day||!thoughtfulComment(message))return json({error:'Write a thoughtful response of 7–150 words.'},400);
+ try{if(!await allowRequest(user.id,'daily-comment',5))return json({error:'Please wait before posting again.'},429);const raw=await context.request.text();if(raw.length>262144)return json({error:'Request too large.'},413);
+  const body=JSON.parse(raw),category=typeof body.category==='string'?body.category.trim():'',day=validDay(body.day),message=String(body.message||'').trim();if(category.length>80||!day||!thoughtfulComment(message))return json({error:'Write a response.'},400);
   const db=database();
   if(category){const known=await db.from('projects').select('id').eq('category',category).eq('listing_status','published').limit(1);if(known.error)throw known.error;if(!known.data?.length)return json({error:'Choose a published category.'},400);}
   const member=await ensureMember(user),existing=await db.from('daily_discussion_comments').select('id').eq('user_id',member.id).eq('day_key',day).eq('category',category).maybeSingle();if(existing.error)throw existing.error;

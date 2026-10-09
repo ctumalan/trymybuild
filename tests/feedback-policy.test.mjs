@@ -8,9 +8,9 @@ test('feedback preserves explicit privacy and separates price from usefulness',(
  assert.equal(feedbackInput({...valid,price:'too_expensive'}).helpful,'yes');
  assert.equal(wordCount(valid.message),8);
 });
-test('rejects unknown choices, unsafe slugs, missing consent and oversized text',()=>{
- for(const changes of [{helpful:'toString'},{price:'__proto__'},{visibility:undefined},{visibility:'published'},{slug:'../admin'},{message:'Only five words are written'},{message:'word '.repeat(151)},{message:'a'.repeat(801)},{message:null}])assert.equal(feedbackInput({...valid,...changes}),null);
- assert.equal(thoughtfulComment('Seven clear words describe this useful project experience.'),true);
+test('rejects unknown choices, unsafe slugs, missing consent and empty text',()=>{
+ for(const changes of [{helpful:'toString'},{price:'__proto__'},{visibility:undefined},{visibility:'published'},{slug:'../admin'},{message:''},{message:'   '},{message:null}])assert.equal(feedbackInput({...valid,...changes}),null);
+ for(const message of ['Cool!', '👍', 'So cool! No issues found', 'word '.repeat(300), 'a'.repeat(5000)]){assert.equal(thoughtfulComment(message),true);assert.equal(feedbackInput({...valid,message}).message,message.trim());}
 });
 test('thread access is exact ownership or authorship, never a display label',()=>{
  assert.equal(threadAccess('author','author','creator'),true);

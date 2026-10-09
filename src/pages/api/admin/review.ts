@@ -11,7 +11,7 @@ export const POST: APIRoute = async context => {
   if (!user) return json({ error: 'Administrator access required.' }, 403);
   try {
     const raw = await context.request.text();
-    if (raw.length > 12000) return json({ error: 'Request too large.' }, 413);
+    if (raw.length > 262144) return json({ error: 'Request too large.' }, 413);
     const data = Object.fromEntries(new URLSearchParams(raw));
     const input = moderationInput(data);
     if (!input || data.confirm !== 'yes') return json({ error: 'Confirm the decision and provide a reason.' }, 400);

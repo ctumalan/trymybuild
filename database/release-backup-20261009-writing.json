@@ -1,0 +1,40 @@
+{
+  "functions": [
+    "CREATE OR REPLACE FUNCTION public.cw_comment_guard()\n RETURNS trigger\n LANGUAGE plpgsql\n SET search_path TO 'public'\nAS $function$\ndeclare msg text; begin\n if tg_table_name='project_experiences' then msg=new.response; else msg=new.message; end if;\n if msg='[Removed by account deletion]' then return new;end if;\n if cw_comment_words(msg) not between 7 and 150 or length(msg)>800 then raise exception 'Write 7–150 words, up to 800 characters.'; end if;\n return new;\nend $function$\n",
+    "CREATE OR REPLACE FUNCTION public.cw_feedback_reply(p_actor uuid, p_id uuid, p_message text, p_request uuid)\n RETURNS void\n LANGUAGE plpgsql\n SET search_path TO 'public'\nAS $function$\ndeclare item public.creator_feedback%rowtype; owner_id uuid;\nbegin\n if p_message is null or length(trim(p_message)) not between 1 and 800 or p_request is null then raise exception 'Invalid reply'; end if;\n select * into item from public.creator_feedback where id=p_id for update;\n if not found then raise exception 'Not found'; end if;\n select owner_user_id into owner_id from public.projects where slug=item.project_slug for share;\n if p_actor is null or (p_actor is distinct from item.author_user_id and p_actor is distinct from owner_id) then raise exception 'Not allowed'; end if;\n if exists(select 1 from public.feedback_replies where request_id=p_request and author_user_id=p_actor and feedback_id=p_id) then return; end if;\n if exists(select 1 from public.feedback_replies where feedback_id=p_id and author_user_id=p_actor and created_at>now()-interval '10 seconds') then raise exception 'Please wait before replying again'; end if;\n insert into public.feedback_replies(feedback_id,author_user_id,message,request_id) values(p_id,p_actor,trim(p_message),p_request);\nend; $function$\n",
+    "CREATE OR REPLACE FUNCTION public.cw_submit_guest_comment(p_id uuid, p_slug text, p_hash text, p_message text)\n RETURNS uuid\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$ declare existing project_experiences%rowtype; begin if p_id is null or p_hash is null or p_hash !~ '^[a-f0-9]{64}$' or p_message is null or length(p_message)>800 or cw_wish_words(p_message) not between 7 and 150 then raise exception 'Invalid comment';end if; perform pg_advisory_xact_lock(hashtextextended(p_hash,0)); perform 1 from projects where slug=p_slug and listing_status='published' for share; if not found then raise exception 'Project unavailable';end if; select * into existing from project_experiences where id=p_id or (project_slug=p_slug and guest_hash=p_hash) limit 1; if found then if existing.guest_hash=p_hash and existing.project_slug=p_slug then if existing.id=p_id and existing.response<>trim(p_message) then raise exception 'Request conflict';end if; return existing.id; end if; raise exception 'Request conflict'; end if; if (select count(*) from project_experiences where guest_hash=p_hash)>=5 then raise exception 'Guest limit reached';end if; insert into project_experiences(id,project_slug,response,guest_hash,guest_expires_at) values(p_id,p_slug,trim(p_message),p_hash,now()+interval '7 days'); return p_id; end $function$\n",
+    "CREATE OR REPLACE FUNCTION public.cw_submit_wish(p_user uuid, p_category text, p_description text)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\ndeclare existing community_wishes%rowtype; wish_id uuid;\nbegin\n perform 1 from users where id=p_user and account_status='active' for update;\n if not found then raise exception 'Active account required';end if;\n if p_category is null or length(trim(p_category)) not between 2 and 48 or p_description is null or length(trim(p_description))>180 or cw_wish_words(p_description) not between 4 and 11 then raise exception 'Invalid wish';end if;\n select * into existing from community_wishes where user_id=p_user and category=p_category and description=trim(p_description);\n if found then return jsonb_build_object('outcome','duplicate','status',existing.moderation_status);end if;\n if (select count(*) from community_wishes where user_id=p_user and moderation_status in ('pending','published'))>=10 then return jsonb_build_object('outcome','limit');end if;\n insert into community_wishes(user_id,category,description) values(p_user,p_category,trim(p_description)) returning id into wish_id;\n return jsonb_build_object('outcome','submitted','status','pending');\nend $function$\n"
+  ],
+  "constraints": [
+    {
+      "name": "community_wishes_description_check",
+      "table": "community_wishes",
+      "definition": "CHECK ((length(description) <= 180))"
+    },
+    {
+      "name": "community_wishes_user_id_category_description_key",
+      "table": "community_wishes",
+      "definition": "UNIQUE (user_id, category, description)"
+    },
+    {
+      "name": "creator_feedback_message_check",
+      "table": "creator_feedback",
+      "definition": "CHECK ((length(message) <= 800))"
+    },
+    {
+      "name": "daily_discussion_comments_message_check",
+      "table": "daily_discussion_comments",
+      "definition": "CHECK ((length(message) <= 800))"
+    },
+    {
+      "name": "feedback_replies_message_check",
+      "table": "feedback_replies",
+      "definition": "CHECK (((length(TRIM(BOTH FROM message)) >= 1) AND (length(TRIM(BOTH FROM message)) <= 800)))"
+    },
+    {
+      "name": "project_experiences_response_check",
+      "table": "project_experiences",
+      "definition": "CHECK (((length(response) >= 1) AND (length(response) <= 800)))"
+    }
+  ]
+}

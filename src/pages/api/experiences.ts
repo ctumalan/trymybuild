@@ -30,9 +30,9 @@ export const POST: APIRoute = async context => {
   const user = await currentUser(context);
   if (!databaseReady()) return json({ error: 'Community sharing is being connected.' }, 503);
   try {
-    const raw=await context.request.text();if(raw.length>4000)return json({error:'Comment too long.'},413);
+    const raw=await context.request.text();if(raw.length>262144)return json({error:'Request too large.'},413);
     const body = JSON.parse(raw);
-    if (!thoughtfulComment(body.response) || typeof body.slug !== 'string') return json({ error: 'Please share a thoughtful observation of 7–150 words.' }, 400);
+    if (!thoughtfulComment(body.response) || typeof body.slug !== 'string') return json({ error: 'Write a comment.' }, 400);
     if(!user){
       if(!validId(body.requestId))return json({error:'Please reload this comment box.'},400);
       const address=context.clientAddress;if(!address)return json({error:'Guest sharing is unavailable. Please sign in.'},503);

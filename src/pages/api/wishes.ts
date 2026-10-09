@@ -28,9 +28,9 @@ export const POST: APIRoute = async context => {
   const m=await memberContext(context);if(!m)return json({error:'Sign in to submit your wish.'},401);
   if(!m.user.emailVerified)return json({error:'Verify your email before submitting a wish.'},403);
   if(!await allowRequest(m.user.id,'community-wishes',5,3600))return json({error:'Please wait before sharing more wishes.'},429);
-  const raw=await context.request.text();if(raw.length>2000)return json({error:'Wish is too long.'},413);
+  const raw=await context.request.text();if(raw.length>262144)return json({error:'Request too large.'},413);
   const body=JSON.parse(raw),category=normalizeWishCategory(body?.category),description=typeof body?.description==='string'?body.description.trim():'';
-  if(!validWish(category,description))return json({error:'Choose a category or enter a new one (2–48 characters), and describe your wish in 4–11 words.'},400);
+  if(!validWish(category,description))return json({error:'Choose a category or enter a new one (2–48 characters), and describe your wish.'},400);
   const result=await m.db.rpc('cw_submit_wish',{p_user:m.member.id,p_category:category,p_description:description});
   if(result.error)throw result.error;
   if(result.data?.outcome==='limit')return json({error:'You can have up to 10 wishes awaiting review or published. Contact us if you need to withdraw an older wish.'},409);

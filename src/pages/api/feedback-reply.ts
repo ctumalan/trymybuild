@@ -11,9 +11,9 @@ export const POST:APIRoute=async context=>{
  try{
   if(!user.emailVerified)return json({error:'Verify your email before posting.'},403);
   if(!await allowRequest(user.id,'feedback-reply'))return json({error:'Please wait a minute before trying again.'},429);
-  const raw=await context.request.text();if(raw.length>12000)return json({error:'Request too large.'},413);
+  const raw=await context.request.text();if(raw.length>262144)return json({error:'Request too large.'},413);
   const body=Object.fromEntries(new URLSearchParams(raw));
-  if(!validId(body.id)||!validId(body.requestId)||!thoughtfulComment(body.message))return json({error:'Write a thoughtful reply of 7–150 words.'},400);
+  if(!validId(body.id)||!validId(body.requestId)||!thoughtfulComment(body.message))return json({error:'Write a reply.'},400);
   id=body.id;const member=await ensureMember(user),db=database();
   const item=await db.from('creator_feedback').select('author_user_id,project_slug').eq('id',id).maybeSingle();
   if(item.error)throw item.error;

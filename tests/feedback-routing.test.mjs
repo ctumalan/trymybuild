@@ -28,7 +28,7 @@ test('owner feedback hierarchy changes after the first response',async()=>{
 test('invitation context explains the tester return step and keeps the review form focused',async()=>{
  const f=workspaceFixtures(),guest=moduleFixture('src/pages/tell/[slug].ts',['GET'],{...f.scope,currentUser:async()=>null}).GET;
  const invited={...context('sample-0'),url:new URL('https://example.invalid/tell/sample-0?invite=1')};
- const html=await (await guest(invited)).text();assert.match(html,/Share your first reaction/);assert.match(html,/then return here/);assert.doesNotMatch(html,/Can this count toward a Verified Creator badge|review-guidance|Be thoughtful/);assert.match(html,/data-compact-counter/);assert.match(html,/Feedback guidelines/);assert.match(html,/Who can see this/);assert.match(html,/Creator only/);assert.match(html,/data-feedback-visibility-note/);
+ const html=await (await guest(invited)).text();assert.match(html,/Share your first reaction/);assert.match(html,/then return here/);assert.doesNotMatch(html,/Can this count toward a Verified Creator badge|review-guidance|Be thoughtful/);assert.doesNotMatch(html,/data-compact-counter|7–150 words|0 \/ 150 words/);assert.match(html,/Feedback guidelines/);assert.match(html,/Who can see this/);assert.match(html,/Creator only/);assert.match(html,/data-feedback-visibility-note/);
 });
 test('an open feedback request becomes a focused trial brief and removes the pricing detour',async()=>{
  const f=workspaceFixtures();f.tables.feedback_requests=[{id:f.id,user_id:f.owner,project_slug:'sample-0',question:'Was it clear how to save your first shared list?',status:'queued',created_at:'2026-09-12T15:00:00Z'}];

@@ -13,8 +13,8 @@ export const POST:APIRoute=async context=>{
  try{
   if(!user.emailVerified)return json({error:'Verify your email before posting.'},403);
   if(!await allowRequest(user.id,'feedback'))return json({error:'Please wait a minute before trying again.'},429);
-  const raw=await context.request.text();if(raw.length>12000)return json({error:'Request too large.'},413);
-  const input=structuredFeedbackInput(Object.fromEntries(new URLSearchParams(raw)));if(!input)return json({error:'Complete the feedback choices and write 7–150 words.'},400);
+  const raw=await context.request.text();if(raw.length>262144)return json({error:'Request too large.'},413);
+  const input=structuredFeedbackInput(Object.fromEntries(new URLSearchParams(raw)));if(!input)return json({error:'Complete the feedback choices and add your feedback.'},400);
   slug=input.project_slug;
   const member=await ensureMember(user),db=database();
   const project=await db.from('projects').select('owner_user_id').eq('slug',slug).eq('visibility','public').eq('listing_status','published').maybeSingle();

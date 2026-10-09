@@ -6,12 +6,13 @@ import {validWish,wishCategories} from '../src/server/wish-policy.mjs';
 import {feedbackDestination} from '../src/server/feedback-policy.mjs';
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 const app=read('app.js'),entry=read('community-entry.js');
-test('wish word limits are enforced at both boundaries',()=>{
- for(const n of [0,1,3,12,20])assert.equal(validWish('Technology',Array(n).fill('word').join(' ')),false);
- for(const n of [4,5,10,11])assert.equal(validWish('Technology',Array(n).fill('word').join(' ')),true);
+test('launch wishes accept nonempty descriptions without word limits',()=>{
+ assert.equal(validWish('Technology',''),false);
+ assert.equal(validWish('Technology','   '),false);
+ for(const n of [1,3,4,5,10,11,12,20,300])assert.equal(validWish('Technology',Array(n).fill('word').join(' ')),true);
  assert.equal(validWish('Invented category','Help me plan my meals'),true);
  assert.equal(validWish('Technology',null),false);
- assert.equal(validWish('Technology','!!! ... --- ???'),false);
+ assert.equal(validWish('Technology','👍'),true);
 });
 test('wish categories include the complete existing category menu',()=>{
  const source=app.slice(app.indexOf('const categoryCatalog'),app.indexOf('const primaryCategoryNames'));

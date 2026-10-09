@@ -11,7 +11,7 @@ export function isFounder(userId, configuredId, email, configuredEmail, emailVer
 export function moderationInput(body) {
   if (!/^[0-9a-f-]{36}$/i.test(body.id || '') || !['published', 'hidden', 'pending'].includes(body.status)
     || typeof body.reason !== 'string' || body.reason.trim().length < 3 || body.reason.length > 300
-    || typeof body.expected !== 'string' || body.expected.length > 800
+    || typeof body.expected !== 'string'
     || !['published', 'hidden', 'pending'].includes(body.previous)) return null;
   return { id: body.id, status: body.status, reason: body.reason.trim(), expected: body.expected, previous: body.previous };
 }

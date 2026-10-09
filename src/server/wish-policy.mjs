@@ -11,6 +11,5 @@ export function normalizeWishCategory(value) {
  return wishCategories.find(name=>name.toLocaleLowerCase()===normalized.toLocaleLowerCase())||normalized;
 }
 export function validWish(category, description) {
- const count=typeof description==='string'?(description.match(/[\p{L}\p{N}]+(?:['’\-][\p{L}\p{N}]+)*/gu)||[]).length:0;
- return Boolean(normalizeWishCategory(category)) && typeof description==='string' && description.length<=180 && count>=4 && count<=11;
+ return Boolean(normalizeWishCategory(category)) && typeof description==='string' && description.trim().length>0;
 }

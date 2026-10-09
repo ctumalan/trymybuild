@@ -2490,3 +2490,50 @@ body.public-site .site-header,.cw-bar { background:#fff; }
 .future-discover .catalog-wish-action { display:inline-flex; align-items:center; gap:12px; min-height:32px; box-sizing:border-box; margin-top:6px; padding:6px 10px; border-radius:7px; background:#e9dbf5; color:#342043; font:500 12px/1.4 "Inter",Arial,sans-serif; }
 .future-discover .catalog-wish-action b { margin:0; font-size:16px; font-weight:400; }
 @media(prefers-reduced-motion:reduce) { .future-discover .catalog-wish-card,.future-discover .catalog-wish-action b { transition:none; transform:none; } }
+
+/* Keep comment help beside the send arrow, inside the composer. */
+.detail-comment-form .comment-composer-tools {
+ position:absolute; right:10px; bottom:8px; display:flex; align-items:center; gap:6px;
+}
+.detail-comment-form :is(.conversation-input-shell,.comment-input-wrap) textarea { padding-right:84px; }
+.detail-comment-form .comment-composer-tools .comment-send {
+ position:static; display:flex; align-items:center; justify-content:center;
+ width:32px; height:32px; min-height:32px; padding:0; margin:0;
+ border:0; border-radius:50%; background:transparent; color:#7545ad;
+}
+.detail-comment-form .comment-composer-tools .comment-send[hidden] { display:none; }
+.detail-comment-form .comment-composer-tools :is(.inline-help,.conversation-guidelines) { position:relative; }
+.detail-comment-form .comment-composer-tools summary {
+ display:flex; align-items:center; justify-content:center; box-sizing:border-box;
+ width:22px; height:22px; min-width:22px; min-height:22px; padding:0;
+ border:1px solid #d8d1df; border-radius:50%; color:#786c80; background:transparent;
+ font:500 .75rem/1 "Inter",Arial,sans-serif; list-style:none; cursor:pointer;
+}
+.detail-comment-form .comment-composer-tools summary:hover { background:#e8e0f1; color:#7545ad; }
+.detail-comment-form .comment-composer-tools details[open]>p {
+ position:absolute; right:0; top:32px; width:min(280px,calc(100vw - 76px)); max-width:none;
+ box-sizing:border-box; padding:12px; margin:0; background:#fff; border:1px solid #e4ddec;
+ border-radius:12px; box-shadow:0 8px 24px #17332a18; z-index:100;
+ color:#786c80; font-size:.8rem; line-height:1.5;
+}
+
+/* Keep the launch update date quietly beside the catalog title. */
+.future-discover .catalog-title-line { display:flex; align-items:baseline; flex-wrap:wrap; gap:6px 12px; }
+.future-discover .catalog-title-line .catalog-updated {
+ color:#737373; font:400 .75rem/1.4 "Inter",Arial,sans-serif; white-space:nowrap;
+}
+
+/* Contact uses two text sizes: one heading and a consistent reading size. */
+.public-info.contact-info { display:grid; justify-items:start; gap:16px; }
+.public-info.contact-info h1 {
+ margin:0; font:600 30px/1.2 "Inter",Arial,sans-serif; letter-spacing:-.025em;
+}
+.public-info.contact-info :is(p,a) { font:400 16px/1.6 "Inter",Arial,sans-serif; }
+.public-info.contact-info p { margin:0; }
+.public-info.contact-info .eyebrow {
+ font-weight:500; letter-spacing:0; text-transform:none; color:#7545ad;
+}
+.public-info.contact-info .privacy-note { color:#5f6763; }
+.public-info.contact-info .primary-button {
+ font-weight:500; line-height:1.4; padding:7px 12px; min-height:36px; border-radius:8px;
+}

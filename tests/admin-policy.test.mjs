@@ -11,5 +11,5 @@ test('admin authority requires an exact explicitly configured identity', () => {
 test('moderation accepts only bounded reviewed decisions', () => {
   const valid = { id:'12345678-1234-1234-1234-123456789012',status:'published',previous:'pending',expected:'A helpful question',reason:'Relevant question' };
   assert.ok(moderationInput(valid));
-  for (const invalid of [{status:'admin'}, {reason:''}, {reason:'x'.repeat(301)}, {id:'not-an-id'}, {previous:'unknown'}, {expected:'x'.repeat(801)}]) assert.equal(moderationInput({...valid,...invalid}),null);
+  for (const invalid of [{status:'admin'}, {reason:''}, {reason:'x'.repeat(301)}, {id:'not-an-id'}, {previous:'unknown'}]) assert.equal(moderationInput({...valid,...invalid}),null);
 });

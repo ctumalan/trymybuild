@@ -2237,11 +2237,16 @@ body.public-site #app[tabindex="-1"]:focus { outline:none; }
 .conversation-flow .review-evidence-summary { margin:8px 0 12px; }
 
 /* Floating public navigation, with the account photo anchored at the right. */
+html { scrollbar-gutter:stable; }
 body.public-site .site-header,.cw-bar {
  box-sizing:border-box; width:min(1240px,calc(100% - 32px)); margin:12px auto 0;
- min-height:64px; padding:12px 20px; border:1px solid #eee9f2; border-radius:18px;
+ height:66px; min-height:66px; padding:12px 20px; border:1px solid #eee9f2; border-radius:18px;
  background:#ffffffed; box-shadow:0 2px 5px #382b4605; gap:24px;
+ display:flex; align-items:center; flex-wrap:nowrap;
 }
+body.public-site .site-header .brand,.cw-bar .cw-brand { padding:0; margin:0; gap:12px; min-height:0; }
+body.public-site .site-header .brand-mark,.cw-bar .brand-mark { width:40px; height:40px; flex:0 0 40px; }
+body.public-site .site-header .brand-name,.cw-bar .brand-name { font:750 1.25rem/1.2 "Inter",Arial,sans-serif; letter-spacing:-.045em; }
 body.public-site .site-nav.account-only-nav,.cw-bar nav {
  display:flex; align-items:center; flex-direction:row; flex-wrap:nowrap; gap:18px;
  margin-left:auto;
@@ -2263,8 +2268,11 @@ body.public-site .site-nav.account-only-nav,.cw-bar nav {
 @media(max-width:820px) {
  body.public-site .site-header,.cw-bar {
   position:relative; z-index:30; display:grid; align-items:center;
-  grid-template-columns:minmax(0,1fr) 40px 40px; gap:10px; padding:10px 14px;
+  grid-template-columns:minmax(0,1fr) 40px 40px; gap:10px; padding:10px 14px; height:64px; min-height:64px;
  }
+ body.public-site .site-header .brand,.cw-bar .cw-brand { gap:8px; }
+ body.public-site .site-header .brand-mark,.cw-bar .brand-mark { width:32px; height:32px; flex-basis:32px; }
+ body.public-site .site-header .brand-name,.cw-bar .brand-name { font-size:1rem; }
  body.public-site .site-nav.account-only-nav,.cw-bar nav { display:contents; }
  :is(.site-header,.cw-bar) :is(.brand,.cw-brand) { grid-column:1; grid-row:1; max-width:none; justify-self:start; }
  :is(.site-header,.cw-bar) .brand-promise { display:none; }

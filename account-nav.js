@@ -13,6 +13,41 @@ document.querySelectorAll('.cw-bar nav').forEach(nav => {
  }
  nav.insertBefore(links,account);
 });
+// Collapse website destinations without moving the account photo to another row.
+document.querySelectorAll('.site-header nav, .cw-bar nav').forEach(nav => {
+ const links = nav.querySelector('.header-menu-links');
+ if (!links) return;
+ links.id ||= 'website-menu-links';
+ let toggle = nav.querySelector('.header-nav-toggle');
+ if (!toggle) {
+  toggle = document.createElement('button');
+  toggle.type = 'button'; toggle.className = 'header-nav-toggle';
+  toggle.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>';
+  nav.insertBefore(toggle, links);
+ }
+ toggle.setAttribute('aria-controls', links.id);
+ const setOpen = open => {
+  links.classList.toggle('is-open', open);
+  toggle.setAttribute('aria-expanded', String(open));
+  toggle.setAttribute('aria-label', open ? 'Close website menu' : 'Open website menu');
+ };
+ setOpen(false);
+ toggle.addEventListener('click', () => {
+  const open = toggle.getAttribute('aria-expanded') !== 'true';
+  if (open) nav.querySelectorAll('.account-menu[open]').forEach(account => account.open = false);
+  setOpen(open);
+ });
+ links.addEventListener('click', event => { if (event.target.closest('a')) setOpen(false); });
+ document.addEventListener('click', event => {
+  if (!links.contains(event.target) && !toggle.contains(event.target)) setOpen(false);
+ });
+ document.addEventListener('keydown', event => {
+  if (event.key === 'Escape' && toggle.getAttribute('aria-expanded') === 'true') {
+   setOpen(false); toggle.focus();
+  }
+ });
+ window.matchMedia('(max-width: 820px)').addEventListener('change', () => setOpen(false));
+});
 window.CWAccountMenu = {
  mount(session) {
   document.querySelectorAll('[data-account-nav], .profile-button').forEach(anchor => {

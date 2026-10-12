@@ -12,8 +12,8 @@ try{
  const response=await fetch(expected+'/rest/v1/',{headers,signal:AbortSignal.timeout(15000)});
  if(!response.ok)throw Error('Schema metadata request failed with HTTP '+response.status);
  const schema=await response.json(),definitions=schema.definitions||{},paths=schema.paths||{};
- const requiredFunctions=['cw_submit_wish','cw_review_wish','cw_workspace_inbox','cw_project_unread','cw_delete_unused_draft','cw_wish_categories'];
- const requiredColumns=[['community_wishes','moderation_status'],['community_wishes','revision'],['account_preferences','selected_interests'],['projects','preview_source'],['projects','preview_source_url'],['projects','preview_captured_at'],['projects','preview_history']];
+ const requiredFunctions=['cw_submit_wish','cw_review_wish','cw_workspace_inbox','cw_project_unread','cw_delete_unused_draft','cw_wish_categories','cw_claim_listing_invitation'];
+ const requiredColumns=[['community_wishes','moderation_status'],['community_wishes','revision'],['account_preferences','selected_interests'],['projects','preview_source'],['projects','preview_source_url'],['projects','preview_captured_at'],['projects','preview_history'],['listing_invitations','recipient_email'],['listing_invitations','claimed_by'],['listing_invitations','project_id'],['listing_invitations','lock_version']];
  const missingFunctions=requiredFunctions.filter(name=>!paths['/rpc/'+name]);
  const missingColumns=requiredColumns.filter(([table,column])=>!definitions[table]?.properties?.[column]).map(parts=>parts.join('.'));
  const ready=missingFunctions.length===0&&missingColumns.length===0;

@@ -95,3 +95,40 @@ Apply `database/032_first_community_review_count.sql` with the same release. It
 adds the review count used by the first-review sticker. The count excludes
 administrator reviews, removed feedback, and responses from people who selected
 “I haven’t tried it yet.”
+
+## Admin-prepared listing invitations
+
+At `/admin/invitations`, the founder can prepare an app's name, URL, description,
+benefit, first task and screenshot for a specific creator email. Creation produces
+a signed preview link and a downloadable 1200×630 email image; it sends no email.
+Place the image in the email and link it to the preview URL. The sample is not a
+published app, account, testimonial or completed review.
+
+Anyone holding the link can view the sample, so include only public app details.
+Links expire after 30 days and can be withdrawn before claim. The creator can edit
+the introduction before sign-in; the same browser tab preserves those edits through
+authentication. Claiming requires the invited verified email, an active account,
+app-management confirmation and agreement to the terms. Claiming atomically creates
+one private, unverified project owned by that creator. Retrying never duplicates
+the app or overwrites later dashboard edits. The existing listing editor provides
+the final screenshot review and explicit publication step. An admin cannot edit
+the invitation after it has been claimed.
+
+Apply `database/034_listing_invitations.sql` after migration 033 before releasing
+the routes. It is additive and transactional, and does not modify existing apps.
+The application service role is the only database role permitted to access the new
+table and claim function. Preview tokens use a purpose-separated HMAC with the
+existing `WORKOS_COOKIE_PASSWORD`; rotating it invalidates outstanding links.
+
+Validation uses disposable, synthetic PostgreSQL only:
+
+```sh
+node --test tests/listing-invitations.test.mjs
+node scripts/test-listing-invitations-database.mjs /private/tmp/trymybuild-invitation-tests
+node scripts/test-listing-invitations-concurrency.mjs /private/tmp/trymybuild-invitation-tests
+node scripts/listing-invitations-qa-server.mjs
+```
+
+The database checks use temporary PGlite, `pg`, and embedded PostgreSQL dependencies.
+The local QA server simulates sign-in and private saving without real accounts or
+emails. It never connects to production.

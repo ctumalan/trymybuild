@@ -17,7 +17,7 @@ export function pages(path:string,page:number,count:number) { return `<nav class
 export const pageNumber = (value:string|null) => value && /^\d{1,5}$/.test(value) ? Number(value) : 0;
 
 export function adminNavigation(active:string) {
- const links=[['overview','/admin/workspace','Overview'],['people','/admin/workspace?tab=people','People & verification'],['projects','/admin?section=projects','Project review'],['comments','/admin?section=comments','Community comments'],['community','/admin/community','Community credits & discussion'],['feedback','/admin/feedback','Creator feedback review'],['cases','/admin/workspace?tab=cases','Support & reports'],['privacy','/admin/workspace?tab=privacy','Privacy requests'],['activity','/admin/workspace?tab=activity','Activity'],['settings','/admin/workspace?tab=settings','Site & analytics']];
+ const links=[['overview','/admin/workspace','Overview'],['people','/admin/workspace?tab=people','People & verification'],['projects','/admin?section=projects','Project review'],['invitations','/admin/invitations','Listing invitations'],['comments','/admin?section=comments','Community comments'],['community','/admin/community','Community credits & discussion'],['feedback','/admin/feedback','Creator feedback review'],['cases','/admin/workspace?tab=cases','Support & reports'],['privacy','/admin/workspace?tab=privacy','Privacy requests'],['activity','/admin/workspace?tab=activity','Activity'],['settings','/admin/workspace?tab=settings','Site & analytics']];
  return '<nav class="cw-admin-nav" aria-label="Administration">'+links.map(([key,url,label])=>`<a href="${url}" ${key===active?'aria-current="page"':''}>${label}</a>`).join('')+'</nav>';
 }
 export function adminSurface(title:string,body:string,active:string,status=200) {

@@ -14,7 +14,7 @@ export function invitationImageUrl(project, base) {
 }
 
 // Raster output works in Messages; a failed screenshot still yields a branded invitation.
-export async function renderInvitationImage(project, screenshot) {
+export async function renderInvitationImage(project, screenshot, options = {}) {
  let artwork;
  if (screenshot) {
   try { artwork = await sharp(screenshot, {limitInputPixels: 25_000_000}).rotate().resize(632, 482, {fit:'contain', background:'#eee8f4'}).png().toBuffer(); } catch {}
@@ -41,13 +41,13 @@ export async function renderInvitationImage(project, screenshot) {
  <rect width="1200" height="630" fill="#f7f3fc"/><circle cx="1150" cy="-30" r="270" fill="#e6dcf7"/>
  <rect x="48" y="42" width="40" height="40" rx="12" fill="#6035aa"/><path d="m59 62 7 7 13-16" fill="none" stroke="white" stroke-width="4" stroke-linecap="round"/>
  ${text('TryMyBuild',102,72,28,'#362449',bold)}
- ${text('YOU’RE INVITED TO TRY',48,132,17,'#6035aa')}
+ ${text(options.listingPreview ? 'YOUR PROPOSED APP LISTING' : 'YOU’RE INVITED TO TRY',48,132,17,'#6035aa')}
  ${names.map((line,i)=>text(line,48,nameY+i*55,46,'#292032',bold)).join('')}
  ${description.map((line,i)=>text(line,48,descriptionY+i*30,23,'#675975')).join('')}
- <rect x="48" y="${buttonY}" width="238" height="56" rx="28" fill="#6035aa"/>${text('Explore app →',76,buttonY+36,21,'#ffffff',bold)}
+ <rect x="48" y="${buttonY}" width="238" height="56" rx="28" fill="#6035aa"/>${text(options.listingPreview ? 'Review your page →' : 'Explore app →',options.listingPreview?68:76,buttonY+36,21,'#ffffff',bold)}
  <rect x="520" y="74" width="632" height="482" rx="22" fill="#eee8f4"/>
  ${!artwork ? `<circle cx="836" cy="288" r="96" fill="#8056bd"/><path d="m786 290 34 34 69-79" fill="none" stroke="#ffb07e" stroke-width="19" stroke-linecap="round" stroke-linejoin="round"/>${text('Discover something new',690,452,25,'#6035aa')}` : ''}
- ${text(shorten('Built by '+project.creator.name,52),48,584,19,'#675975')}${text('trymybuild.com',1002,584,19,'#6035aa')}</svg>`;
+ ${text(options.listingPreview ? 'Private preview · Edit before publishing' : shorten('Built by '+project.creator.name,52),48,584,19,'#675975')}${text('trymybuild.com',1002,584,19,'#6035aa')}</svg>`;
  return sharp(Buffer.from(svg)).composite(artwork ? [{input:artwork,left:520,top:74}] : []).png().toBuffer();
 }
 

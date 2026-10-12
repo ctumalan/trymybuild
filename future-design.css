@@ -2506,6 +2506,12 @@ body.public-site .site-header,.cw-bar { background:#fff; }
 .invitation-detail[data-showcase-theme] .recipient-copy .detail-description-notes .detail-note-label { padding-right:10px; gap:4px; }
 .invitation-detail[data-showcase-theme] .recipient-copy .detail-description-notes .detail-note-icon { width:28px; height:28px; }
 .invitation-detail[data-showcase-theme] .recipient-copy .detail-description-notes p { font-size:13px; line-height:1.5; }
+.detail-description-notes [data-type-guidance].is-typing::after {
+ content:""; display:inline-block; width:1px; height:1em; margin-left:2px; background:currentColor;
+ vertical-align:-.12em; animation:guidance-caret-pulse .7s steps(1,end) infinite;
+}
+@keyframes guidance-caret-pulse { 0%,48% { opacity:1; } 49%,100% { opacity:0; } }
+@media(prefers-reduced-motion:reduce) { .detail-description-notes [data-type-guidance].is-typing::after { animation:none; } }
 
 /* Dark studio: the wish card is an invitation to start the next idea. */
 .future-discover .catalog-wish-card {

@@ -20,6 +20,10 @@ test('detail view uses the invitation screenshot layout and relevant information
  assert.doesNotMatch(drawer,/<small>\$\{esc\(product\.price\)\} · \$\{esc\(product\.category\)\}/);
  assert.match(drawer,/class="recipient-art-chrome"/);
  assert.match(drawer,/class="recipient-art-viewport"/);
+ assert.match(shared,/new IntersectionObserver/);
+ assert.match(shared,/prefers-reduced-motion: reduce/);
+ assert.match(shared,/characters\.length\*18/);
+ assert.match(themeCss,/@keyframes guidance-caret-pulse/);
  assert.match(app,/creator-byline[^`]*\$\{avatar\(creator,'byline-avatar'\)\}/);
  assert.match(themeCss,/\.creator-byline \.byline-avatar \{ width:24px; height:24px/);
  assert.match(app,/name: "Christian Tumalan",[\s\S]*?avatar: "\/assets\/avatars\/chris-nava-founder\.jpg"/);
@@ -31,6 +35,8 @@ test('detail view uses the invitation screenshot layout and relevant information
  assert.match(drawer,/Ask the maker a question or share a thought/);
  assert.doesNotMatch(shared,/>Post comment<|Posts immediately/);
  const html=globalThis.CWProjectView.hero({slug:'layout-check',name:'Test app',url:'https://example.com',presentation:{help:'Helpful',firstTry:'Try a task'}});
+ assert.equal((html.match(/data-type-guidance/g)||[]).length,2);
+ assert.match(html,/aria-label="Helpful"><span data-type-guidance aria-hidden="true">Helpful<\/span>/);
  assert.ok(html.indexOf('</h2>')<html.indexOf('class="recipient-art"'));
  assert.ok(html.indexOf('class="recipient-art"')<html.indexOf('How it helps'));
  assert.ok(html.indexOf('How it helps')<html.indexOf('One thing to try first'));

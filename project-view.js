@@ -28,7 +28,7 @@ function hero(product, options = {}) {
   const launchAction = !product.url ? '' : options.disabledLaunch
     ? '<button class="primary-button preview-try-disabled" type="button" disabled aria-label="Try this app, available after saving">Try this app ↗</button>'
     : `<a class="primary-button" href="${esc(product.url)}" target="_blank" rel="noopener noreferrer" ${options.preview?'':`data-try-app="${esc(product.slug)}"`}>Try this app ↗</a>`;
-  return `<section class="recipient-hero"><div class="detail-signal-grid" aria-hidden="true"></div><div class="detail-orbit detail-orbit-one" aria-hidden="true"></div><div class="detail-orbit detail-orbit-two" aria-hidden="true"></div><div class="recipient-copy"><p class="detail-product-signal">${product.category?`<span class="detail-category-icon">${categoryIcon(product.category)}</span><span>${esc(product.category)}</span>`:''}</p>${product.price?`<p class="detail-product-meta"><span>${esc(product.price)}</span></p>`:''}<h2 ${options.titleId ? `id="${esc(options.titleId)}"` : ""}>${esc(presentation.headline||product.name)}</h2></div><div class="recipient-preview-column"><div class="recipient-art"><div class="recipient-art-chrome" aria-hidden="true"><span class="recipient-art-controls"><i></i><i></i><i></i></span><strong>Product preview</strong><span class="recipient-art-live"><i class="detail-live-dot"></i>Live</span></div><div class="recipient-art-viewport">${product.preview?`<img ${options.preview?'data-listing-screenshot':''} src="${esc(product.preview)}" alt="Preview of ${esc(product.name)}" referrerpolicy="no-referrer">`:''}</div>${product.url?`<span class="external-destination">${esc(product.url)}</span>`:''}</div><div class="detail-creator">${options.creator || ""}</div>${launchAction}${video(product.video)}</div><div class="recipient-copy recipient-notes-copy"><div class="detail-description-notes"><div><div class="detail-note-label"><span class="detail-note-number">01</span>${helpIcon}<h3>How it helps</h3></div><p>${esc(presentation.help)}</p></div><div><div class="detail-note-label"><span class="detail-note-number">02</span>${tryIcon}<h3>One thing to try first</h3></div><p>${esc(presentation.firstTry)}</p></div></div></div></section>`;
+  return `<section class="recipient-hero"><div class="detail-signal-grid" aria-hidden="true"></div><div class="detail-orbit detail-orbit-one" aria-hidden="true"></div><div class="detail-orbit detail-orbit-two" aria-hidden="true"></div><div class="recipient-copy"><p class="detail-product-signal">${product.category?`<span class="detail-category-icon">${categoryIcon(product.category)}</span><span>${esc(product.category)}</span>`:''}</p>${product.price?`<p class="detail-product-meta"><span>${esc(product.price)}</span></p>`:''}<h2 ${options.titleId ? `id="${esc(options.titleId)}"` : ""}>${esc(presentation.headline||product.name)}</h2></div><div class="recipient-preview-column"><div class="recipient-art"><div class="recipient-art-chrome" aria-hidden="true"><span class="recipient-art-controls"><i></i><i></i><i></i></span><strong>Product preview</strong><span class="recipient-art-live"><i class="detail-live-dot"></i>Live</span></div><div class="recipient-art-viewport">${product.preview?`<img ${options.preview?'data-listing-screenshot':''} src="${esc(product.preview)}" alt="Preview of ${esc(product.name)}" referrerpolicy="no-referrer">`:''}</div>${product.url?`<span class="external-destination">${esc(product.url)}</span>`:''}</div><div class="detail-creator">${options.creator || ""}</div>${launchAction}${video(product.video)}</div><div class="recipient-copy recipient-notes-copy"><div class="detail-description-notes"><div><div class="detail-note-label"><span class="detail-note-number">01</span>${helpIcon}<h3>How it helps</h3></div><p aria-label="${esc(presentation.help)}"><span data-type-guidance aria-hidden="true">${esc(presentation.help)}</span></p></div><div><div class="detail-note-label"><span class="detail-note-number">02</span>${tryIcon}<h3>One thing to try first</h3></div><p aria-label="${esc(presentation.firstTry)}"><span data-type-guidance aria-hidden="true">${esc(presentation.firstTry)}</span></p></div></div></div></section>`;
 }
 function composer(slug) {
  const id = 'public-conversation-' + slug, draft = '';
@@ -127,6 +127,7 @@ document.addEventListener('toggle', event => {
   void window.CWGuidedFeedback?.mountInline(expander.querySelector('[data-inline-feedback]'));
 },true);
 function hydrate() {
+ mountGuidanceTyping();
  document.querySelectorAll('[data-public-project] [data-conversation]').forEach(region => {
   if (region.dataset.conversationReady) return;
   region.dataset.conversationReady = 'true';
@@ -141,6 +142,18 @@ function hydrate() {
   if(typeof location!=='undefined'&&new URLSearchParams(location.search).get('invite')==='1'&&expander)expander.open=true;
  });
 }
+const reducedMotion=typeof matchMedia==='function'&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+function typeGuidance(section){
+ if(!section||typeof section.querySelectorAll!=='function')return;
+ const spans=Array.from(section.querySelectorAll('[data-type-guidance]:not([data-typed])'));if(!spans.length)return;
+ const copy=spans.map(span=>span.textContent||'');
+ spans.forEach(span=>{span.dataset.typed='true';span.parentElement.style.minHeight=span.parentElement.getBoundingClientRect().height+'px';});
+ if(reducedMotion)return;
+ let delay=100;
+ spans.forEach((span,index)=>{const characters=Array.from(copy[index]);setTimeout(()=>{if(!span.isConnected)return;let position=0;span.textContent='';span.classList.add('is-typing');const timer=setInterval(()=>{if(!span.isConnected){clearInterval(timer);return;}span.textContent+=characters[position++]||'';if(position>=characters.length){clearInterval(timer);span.classList.remove('is-typing');}},18);},delay);delay+=Math.min(1400,characters.length*18+220);});
+}
+const guidanceObserver=typeof IntersectionObserver==='function'?new IntersectionObserver(entries=>{for(const entry of entries)if(entry.isIntersecting){guidanceObserver.unobserve(entry.target);typeGuidance(entry.target);}},{threshold:.2,rootMargin:'0px 0px -8%'}):null;
+function mountGuidanceTyping(){document.querySelectorAll('.detail-description-notes:not([data-typing-mounted])').forEach(section=>{section.dataset.typingMounted='true';if(guidanceObserver)guidanceObserver.observe(section);else typeGuidance(section);});}
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', hydrate);
 else hydrate();
 window.addEventListener('cw-panel-ready', hydrate);

@@ -2130,7 +2130,7 @@ body.public-site #app[tabindex="-1"]:focus { outline:none; }
  animation:catalog-first-apps-arrive .55s cubic-bezier(.2,.85,.3,1) both;
 }
 .future-discover .catalog-first-apps-arrow {
- position:absolute; z-index:-1; left:22px; top:calc(100% - 1px); width:54px; height:26px;
+ position:absolute; z-index:-1; left:0; top:calc(100% - 1px); width:54px; height:26px;
  overflow:visible; color:#7545ad; filter:drop-shadow(0 1px 0 #fff);
 }
 .future-discover .catalog-first-apps-arrow path {

@@ -2129,16 +2129,33 @@ body.public-site #app[tabindex="-1"]:focus { outline:none; }
  font:700 .7rem/1.2 "Inter",Arial,sans-serif; letter-spacing:.01em; pointer-events:none;
  animation:catalog-first-apps-arrive .55s cubic-bezier(.2,.85,.3,1) both;
 }
-.future-discover .catalog-first-apps-sticker::after {
- content:""; position:absolute; left:25px; bottom:-8px; width:12px; height:12px;
- border-right:2px solid #9b67c4; border-bottom:2px solid #9b67c4; transform:rotate(45deg) skew(-8deg,-8deg);
- background:#fff2b8;
+.future-discover .catalog-first-apps-arrow {
+ position:absolute; z-index:-1; left:22px; top:calc(100% - 1px); width:54px; height:42px;
+ overflow:visible; color:#7545ad; filter:drop-shadow(0 1px 0 #fff);
+}
+.future-discover .catalog-first-apps-arrow path {
+ fill:none; stroke:currentColor; stroke-width:3.4; stroke-linecap:round; stroke-linejoin:round;
+}
+.future-discover .catalog-first-apps-arrow-line {
+ stroke-dasharray:90; animation:catalog-first-apps-arrow-line 3.4s ease-in-out infinite;
+}
+.future-discover .catalog-first-apps-arrow-head {
+ stroke-dasharray:42; animation:catalog-first-apps-arrow-head 3.4s ease-in-out infinite;
 }
 @keyframes catalog-first-apps-arrive {
  from { opacity:0; transform:translateY(-6px) rotate(-4deg) scale(.92); }
  to { opacity:1; transform:translateY(0) rotate(-2deg) scale(1); }
 }
-@media(prefers-reduced-motion:reduce) { .future-discover .catalog-first-apps-sticker { animation:none; } }
+@keyframes catalog-first-apps-arrow-line {
+ 0%,3% { stroke-dashoffset:90; opacity:0; } 7% { opacity:1; } 26%,72% { stroke-dashoffset:0; opacity:1; } 82%,100% { stroke-dashoffset:0; opacity:0; }
+}
+@keyframes catalog-first-apps-arrow-head {
+ 0%,20% { stroke-dashoffset:42; opacity:0; } 28%,72% { stroke-dashoffset:0; opacity:1; } 82%,100% { stroke-dashoffset:0; opacity:0; }
+}
+@media(prefers-reduced-motion:reduce) {
+ .future-discover .catalog-first-apps-sticker { animation:none; }
+ .future-discover .catalog-first-apps-arrow path { animation:none; stroke-dashoffset:0; opacity:1; }
+}
 @media(max-width:620px) {
  .future-discover .results-heading + .discovery-categories,
  .future-discover .catalog-results > .discovery-categories { flex-wrap:wrap; }

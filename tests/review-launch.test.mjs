@@ -64,7 +64,7 @@ test('discovery gives heading, categories, and the wish action separate zones',(
  const app=read('app.js'),css=read('launch-refinements.css'),future=read('future-design.css');
  assert.match(app,/<nav class="discovery-categories" aria-label="Browse apps by category">/);
  assert.match(app,/More categories/);
- assert.match(app,/class="catalog-first-apps-sticker"[^>]*>Explore the first apps<\/span>/);
+ assert.match(app,/class="catalog-first-apps-sticker"[^>]*><span>Explore the first apps<\/span><svg class="catalog-first-apps-arrow"/);
  assert.match(app,/aria-describedby="catalog-first-apps-sticker"/);
  assert.doesNotMatch(app,/<aside class="filter-panel">/);
  assert.match(app,/\$\{discoveryHero\(\)\}<div id="home-panel"[\s\S]*\$\{catalogCategoryNavigation\(\)\}/);
@@ -79,6 +79,8 @@ test('discovery gives heading, categories, and the wish action separate zones',(
  assert.match(future,/\.discovery-categories summary:focus-visible \{[^}]*outline:none/);
  assert.match(future,/\.catalog-first-apps-sticker \{[\s\S]*?bottom:calc\(100% \+ 11px\)/);
  assert.match(future,/@keyframes catalog-first-apps-arrive/);
+ assert.match(future,/\.catalog-first-apps-arrow-line \{[\s\S]*?animation:catalog-first-apps-arrow-line/);
+ assert.match(future,/@keyframes catalog-first-apps-arrow-head/);
  assert.match(future,/\.catalog-wish-card \{[^}]*max-width:300px/);
  assert.match(css,/\.discover-page \.catalog-list,.profile-work \.catalog-list\{display:grid;grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/);
  assert.match(css,/@media\(max-width:1050px\)\{\.discover-page \.catalog-list,.profile-work \.catalog-list\{grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);

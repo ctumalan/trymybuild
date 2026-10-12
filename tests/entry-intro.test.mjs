@@ -49,5 +49,7 @@ test('the empty URL field draws a blinking caret on mobile and honors reduced mo
  assert.match(css,/\.discovery-hero-action \.entry-placeholder-track \{[^}]*text-align:left/);
  assert.match(css,/\.discovery-composer-note \{ color:#b8b3bb/);
  assert.match(css,/input:focus::placeholder \{ color:#b8b3bb/);
+ assert.match(css,/\.discovery-hero-action \.discovery-entry-field input \{[\s\S]*?height:48px; min-height:48px; padding:8px 12px/);
+ assert.match(css,/\.discovery-composer-toolbar \{[\s\S]*?padding-top:8px/);
  assert.match(css,/@media\(prefers-reduced-motion:reduce\)[\s\S]*?\.entry-placeholder-track::after \{ animation:none; \}/);
 });

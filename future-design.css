@@ -901,7 +901,8 @@ body.public-site #app h1[tabindex="-1"]:focus { outline:none; }
 
 /* Dashboard recommendations share the catalog's visual hierarchy. */
 .dashboard-discovery-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr)); gap:20px; justify-items:center; margin:20px 0; }
-.dashboard-discovery-grid > .future-card { width:100%; max-width:300px; min-width:0; background:#fff; }
+.dashboard-discovery-grid > .future-card { width:100%; max-width:300px; min-width:0; background:#f4f4f4; border-color:#e1e1e1; }
+.saved-project-grid > .saved-project-card,.profile-work .catalog-row.future-card { background:#f4f4f4; border-color:#e1e1e1; }
 .dashboard-discovery-grid .row-preview { display:block; }
 .dashboard-discovery-grid .row-title,.dashboard-discovery-grid .creator-link { text-decoration:none; }
 .dashboard-discovery-grid > .future-card .future-card-summary { font-size:.84rem; line-height:1.5; margin-bottom:0; }

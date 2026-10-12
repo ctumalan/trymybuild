@@ -37,6 +37,8 @@ test('catalog cards lead with the project purpose and keep price beside category
  assert.match(css,/\.future-card-meta \{[^}]*display: flex;[^}]*gap: 4px 7px/);
  assert.match(css,/\.future-card-meta \{[^}]*justify-content: space-between/);
  assert.match(css,/\.future-discover \.catalog-list > \.future-card \{[^}]*background:#f4f4f4/);
+ assert.match(css,/\.dashboard-discovery-grid > \.future-card \{[^}]*background:#f4f4f4/);
+ assert.match(css,/\.saved-project-grid > \.saved-project-card,\.profile-work \.catalog-row\.future-card \{[^}]*background:#f4f4f4/);
  assert.doesNotMatch(app,/class="row-copy"><p>\$\{esc\(product\.summary\)\}/);
 });
 

@@ -45,7 +45,8 @@ test('the empty URL field draws a blinking caret on mobile and honors reduced mo
  const css=read('future-design.css');
  assert.match(css,/\.entry-placeholder-track::after \{[^}]*animation:entry-caret-pulse/s);
  assert.match(css,/@keyframes entry-caret-pulse/);
- assert.match(css,/\.discovery-hero-action \.entry-placeholder \{[^}]*inset:0 12px[^}]*text-align:left/);
+ assert.match(css,/\.discovery-hero-action \.entry-placeholder \{[^}]*inset:0 12px[^}]*color:#7b7480[^}]*text-align:left/);
  assert.match(css,/\.discovery-hero-action \.entry-placeholder-track \{[^}]*text-align:left/);
+ assert.match(css,/\.discovery-composer-note \{ color:#7b7480/);
  assert.match(css,/@media\(prefers-reduced-motion:reduce\)[\s\S]*?\.entry-placeholder-track::after \{ animation:none; \}/);
 });

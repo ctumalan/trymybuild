@@ -170,10 +170,21 @@ function typeGuidance(section){
   delay+=420+characters.length*pace+180;
  });
 }
-const guidanceObserver=typeof IntersectionObserver==='function'?new IntersectionObserver(entries=>{for(const entry of entries)if(entry.isIntersecting){guidanceObserver.unobserve(entry.target);typeGuidance(entry.target);}},{threshold:.2,rootMargin:'0px 0px -8%'}):null;
+const guidanceObserver=typeof IntersectionObserver==='function'?new IntersectionObserver(entries=>{for(const entry of entries)if(entry.isIntersecting){guidanceObserver.unobserve(entry.target);typeGuidance(entry.target);}},{threshold:.55,rootMargin:'0px 0px -4%'}):null;
+function watchGuidanceInDrawer(section){
+ const scroller=section.closest?.('.detail-scroll');if(!scroller)return;
+ const check=()=>{
+  if(section.querySelector('[data-type-guidance][data-typed]')){scroller.removeEventListener('scroll',check);return;}
+  const card=section.getBoundingClientRect(),viewport=scroller.getBoundingClientRect();
+  const visible=Math.max(0,Math.min(card.bottom,viewport.bottom)-Math.max(card.top,viewport.top));
+  if(visible>=Math.min(card.height*.55,180)){guidanceObserver?.unobserve(section);scroller.removeEventListener('scroll',check);typeGuidance(section);}
+ };
+ scroller.addEventListener('scroll',check,{passive:true});
+ requestAnimationFrame(check);
+}
 function mountGuidanceTyping(root=document){
  if(!root||typeof root.querySelectorAll!=='function')return;
- root.querySelectorAll('.detail-description-notes:not([data-typing-mounted])').forEach(section=>{section.dataset.typingMounted='true';if(guidanceObserver)guidanceObserver.observe(section);else typeGuidance(section);});
+ root.querySelectorAll('.detail-description-notes:not([data-typing-mounted])').forEach(section=>{section.dataset.typingMounted='true';if(guidanceObserver)guidanceObserver.observe(section);else typeGuidance(section);watchGuidanceInDrawer(section);});
 }
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', hydrate);
 else hydrate();

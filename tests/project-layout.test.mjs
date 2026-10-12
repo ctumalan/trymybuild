@@ -21,6 +21,9 @@ test('detail view uses the invitation screenshot layout and relevant information
  assert.match(drawer,/class="recipient-art-chrome"/);
  assert.match(drawer,/class="recipient-art-viewport"/);
  assert.match(shared,/new IntersectionObserver/);
+ assert.match(shared,/threshold:\.55/);
+ assert.match(shared,/function watchGuidanceInDrawer/);
+ assert.match(shared,/addEventListener\('scroll',check,\{passive:true\}\)/);
  assert.match(shared,/prefers-reduced-motion: reduce/);
  assert.match(shared,/2200\/Math\.max\(1,characters\.length\)/);
  assert.match(shared,/let delay=350/);

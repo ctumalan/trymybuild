@@ -19,7 +19,7 @@ function setup({seen=false,reduced=false,storageBlocked=false}={}) {
 }
 test('the persistent promise is above the search form, not beside the logo',()=>{
  assert.match(read('app.js'),/class="discovery-promise"><span>Stop guessing\. Get <em>human feedback[\s\S]*?<\/em> on your early-stage app\.<\/span><\/h1>/);
- assert.match(read('app.js'),/class="discovery-instrument-copy">Exchange thoughtful reviews with another creator: they try your app, and you try theirs\.<\/p>/);
+ assert.match(read('app.js'),/class="discovery-instrument-copy">Type your app's URL to start exchanging reviews with another creator: they try your app, and you try theirs\. It's completely free\.<\/p>/);
  assert.doesNotMatch(read('index.html'),/class="brand-intro"/);
  assert.ok(read('app.js').indexOf('class="discovery-promise"')<read('app.js').indexOf('class="discovery-entry"'));
 });
@@ -40,4 +40,10 @@ test('unavailable storage still allows one reveal per page',()=>{
 test('the search teleprompter still adapts independently to available width',()=>{
  const s=setup({seen:true});s.mount();assert.equal(s.track.style['--entry-travel'],'-320px');
  s.prompt.clientWidth=700;s.resize();assert.equal(s.prompt.classList['is-scrolling'],false);
+});
+test('the empty URL field draws a blinking caret on mobile and honors reduced motion',()=>{
+ const css=read('future-design.css');
+ assert.match(css,/\.entry-placeholder-track::after \{[^}]*animation:entry-caret-pulse/s);
+ assert.match(css,/@keyframes entry-caret-pulse/);
+ assert.match(css,/@media\(prefers-reduced-motion:reduce\)[\s\S]*?\.entry-placeholder-track::after \{ animation:none; \}/);
 });

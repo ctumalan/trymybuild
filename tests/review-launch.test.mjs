@@ -69,8 +69,8 @@ test('discovery gives heading, categories, and the wish action separate zones',(
  assert.doesNotMatch(app,/class="catalog-filter-menu"/);
  assert.match(app,/Missing an app\?<br>Start the idea\./);
  assert.match(future,/\.discovery-categories \{[^}]*border-block/);
- assert.match(future,/\.results-heading \+ \.discovery-categories \{[^}]*flex-wrap:nowrap/);
- assert.match(future,/\.results-heading \+ \.discovery-categories \{[^}]*overflow:visible/);
+ assert.match(future,/\.catalog-results > \.discovery-categories \{[^}]*flex-wrap:nowrap/);
+ assert.match(future,/\.catalog-results > \.discovery-categories \{[^}]*overflow:visible/);
  assert.match(future,/\.discovery-categories details>div \{[^}]*overflow-y:auto/);
  assert.match(future,/@media\(max-width:620px\) \{[\s\S]*?\.discovery-categories details>div \{ position:absolute; top:calc\(100% \+ 8px\); right:0;/);
  assert.doesNotMatch(future,/\.discovery-categories details>div \{ position:fixed; inset:auto/);

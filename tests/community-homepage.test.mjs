@@ -62,6 +62,7 @@ test('listing navigation stays in the homepage frame and preserves search',()=>{
  let html=ctx.discover();
  assert.match(html,/data-app-link-entry/);
  assert.equal((html.match(/<article>/g)||[]).length,5);
+ assert.doesNotMatch(html,/class="results-heading"|The First Apps On TryMyBuild|Updated October 9, 2026|Newest listings first\./);
  assert.doesNotMatch(html,/COMMUNITY CONTENT|Small contributions/);
  ctx.state.query='App 2';
  ctx.selectHomeView('test');

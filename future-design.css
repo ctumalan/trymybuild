@@ -694,6 +694,7 @@ a.secondary-button,.cw-main a.secondary-button { background: #f2edf8; color: #5e
 .discovery-entry-field input::placeholder { color: transparent; }
 .entry-placeholder { display: flex; align-items: center; position: absolute; inset: 1px 16px; overflow: hidden; color: #68616e; font: 400 14px/1.45 "DM Sans",sans-serif; pointer-events: none; }
 .entry-placeholder-track { display: block; flex: 0 0 auto; width: max-content; white-space: nowrap; }
+.entry-placeholder-track::after { content:""; display:inline-block; width:2px; height:1.15em; margin-left:3px; background:#7545ad; vertical-align:-.18em; animation:entry-caret-pulse 1.05s steps(1,end) infinite; }
 .entry-placeholder.is-scrolling .entry-placeholder-track { animation: entry-teleprompter var(--entry-duration,20s) linear infinite; }
 .discovery-entry-field:hover .entry-placeholder-track { animation-play-state: paused; }
 .discovery-entry-field input:not(:placeholder-shown) + .entry-placeholder,
@@ -708,6 +709,7 @@ a.secondary-button,.cw-main a.secondary-button { background: #f2edf8; color: #5e
   98% { transform: translateX(0); opacity: 0; }
   100% { transform: translateX(0); opacity: 1; }
 }
+@keyframes entry-caret-pulse { 0%,45% { opacity:1; } 46%,100% { opacity:0; } }
 @media(max-width:620px) {
   .discovery-entry-field input { min-height: 64px; }
 }
@@ -715,6 +717,7 @@ a.secondary-button,.cw-main a.secondary-button { background: #f2edf8; color: #5e
   .entry-placeholder.is-scrolling .entry-placeholder-track { animation: none; }
   .entry-placeholder-track { width: 100%; white-space: normal; }
   .discovery-entry-field input::placeholder { color: transparent; }
+  .entry-placeholder-track::after { animation:none; }
 }
 
 /* Discovery cards offer a glimpse; the project view holds the conversation. */
@@ -1989,7 +1992,8 @@ body.public-site #app[tabindex="-1"]:focus { outline:none; }
 /* Give catalog context, browsing and the wish action one clear zone each. */
 .future-discover .results-heading { display:block; margin-bottom:12px; }
 .future-discover .results-heading > div:first-child { width:100%; }
-.future-discover .results-heading + .discovery-categories {
+.future-discover .results-heading + .discovery-categories,
+.future-discover .catalog-results > .discovery-categories {
  display:flex; flex-wrap:nowrap; width:100%; min-width:0; margin:0 0 22px; padding:0 0 12px;
  position:relative; overflow:visible; border-top:0; border-bottom:1px solid #ded3eb;
 }
@@ -2022,7 +2026,8 @@ body.public-site #app[tabindex="-1"]:focus { outline:none; }
 @media(max-width:680px) {
  .future-discover .results-heading { margin-bottom:10px; }
  .future-discover .results-heading h2 { font-size:1.4rem; line-height:1.2; }
- .future-discover .results-heading + .discovery-categories { padding:2px 0 10px; }
+ .future-discover .results-heading + .discovery-categories,
+ .future-discover .catalog-results > .discovery-categories { padding:2px 0 10px; }
  .catalog-wish-card { max-width:none; min-height:190px; }
 }
 @media(max-width:520px) {
@@ -2079,7 +2084,8 @@ body.public-site #app[tabindex="-1"]:focus { outline:none; }
 
 /* Keep readable category labels within the narrowest phone screens. */
 @media(max-width:360px) {
- .future-discover .results-heading + .discovery-categories { flex-wrap:wrap; }
+ .future-discover .results-heading + .discovery-categories,
+ .future-discover .catalog-results > .discovery-categories { flex-wrap:wrap; }
 }
 
 /* Category controls: quiet rectangular tabs with a raised selected state. */
@@ -2106,7 +2112,8 @@ body.public-site #app[tabindex="-1"]:focus { outline:none; }
  background:#fff; border-color:#cabbdb; color:#56317f;
 }
 @media(max-width:620px) {
- .future-discover .results-heading + .discovery-categories { flex-wrap:wrap; }
+ .future-discover .results-heading + .discovery-categories,
+ .future-discover .catalog-results > .discovery-categories { flex-wrap:wrap; }
  .future-discover .discovery-categories button,
  .future-discover .discovery-categories summary { min-height:44px; }
 }

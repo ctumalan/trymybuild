@@ -30,6 +30,8 @@ test('detail view uses the invitation screenshot layout and relevant information
  assert.match(themeCss,/@keyframes guidance-caret-pulse/);
  assert.match(themeCss,/@keyframes guidance-icon-pop[\s\S]*?scale\(1\.22\)/);
  assert.match(themeCss,/\.guidance-waiting>\* \{ opacity:0; \}/);
+ assert.match(themeCss,/\.recipient-art-live \.detail-live-dot \{[\s\S]*?overflow:hidden/);
+ assert.match(themeCss,/\.recipient-art-live \.detail-live-dot::before/);
  assert.match(app,/creator-byline[^`]*\$\{avatar\(creator,'byline-avatar'\)\}/);
  assert.match(themeCss,/\.creator-byline \.byline-avatar \{ width:24px; height:24px/);
  assert.match(app,/name: "Christian Tumalan",[\s\S]*?avatar: "\/assets\/avatars\/chris-nava-founder\.jpg"/);

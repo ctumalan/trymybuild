@@ -2350,13 +2350,18 @@ body.public-site .discovery-hero-action .discovery-entry-row [data-entry-submit]
 
 /* Live status belongs to the preview window, beside its label. */
 .recipient-art-live .detail-live-dot {
- display:inline-block; flex:0 0 7px; width:7px; height:7px; border-radius:50%;
+ display:inline-block; position:relative; overflow:hidden;
+ flex:0 0 14px; width:14px; height:14px; border-radius:50%;
+ background:transparent; box-shadow:none;
+}
+.recipient-art-live .detail-live-dot::before {
+ content:""; position:absolute; inset:4px; border-radius:50%;
  background:var(--signal-accent,#f06f4f);
- box-shadow:0 0 0 5px color-mix(in srgb,var(--signal-accent,#f06f4f) 16%,transparent),0 0 14px color-mix(in srgb,var(--signal-accent,#f06f4f) 35%,transparent);
+ box-shadow:0 0 0 3px color-mix(in srgb,var(--signal-accent,#f06f4f) 16%,transparent);
  animation:detail-signal-pulse 1.8s ease-in-out infinite;
 }
 @media(prefers-reduced-motion:reduce) {
- .recipient-art-live .detail-live-dot { animation:none; }
+ .recipient-art-live .detail-live-dot::before { animation:none; }
 }
 
 /* A single feed and an inline invitation to provide structured feedback. */
@@ -2371,7 +2376,7 @@ body.public-site .discovery-hero-action .discovery-entry-row [data-entry-submit]
 .conversation-flow .conversation-feedback-inline>summary strong { font-weight:500; color:#7545ad; }
 .conversation-flow .conversation-feedback-inline>summary::-webkit-details-marker { display:none; }
 .conversation-flow .conversation-feedback-inline[open]>.feedback-tab-intro { margin-top:16px; }
-.recipient-art-live { gap:11px; padding-left:6px; }
+.recipient-art-live { gap:6px; padding-left:6px; }
 
 /* Plain white site canvas and app surfaces. Color remains in useful controls. */
 :root { --platform-surface:#fff; --white:#fff; }

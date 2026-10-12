@@ -36,6 +36,7 @@ test('catalog cards lead with the project purpose and keep price beside category
  assert.match(app,/class="future-card-creator"><span>By<\/span>\$\{creatorLink\(product, true\)\}<\/div><div class="future-card-meta"><span class="future-card-category">\$\{esc\(product\.category\)\}<\/span><span class="price-badge">\$\{esc\(product\.price\)\}<\/span>/);
  assert.match(css,/\.future-card-meta \{[^}]*display: flex;[^}]*gap: 4px 7px/);
  assert.match(css,/\.future-card-meta \{[^}]*justify-content: space-between/);
+ assert.match(css,/\.future-discover \.catalog-list > \.future-card \{[^}]*background:#f4f4f4/);
  assert.doesNotMatch(app,/class="row-copy"><p>\$\{esc\(product\.summary\)\}/);
 });
 

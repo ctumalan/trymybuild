@@ -733,8 +733,9 @@ a.secondary-button,.cw-main a.secondary-button { background: #f2edf8; color: #5e
 .future-card-foot .card-try-actions { display: block; margin: 0; }
 .future-card-foot .card-try-actions .primary-button { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; min-height: 46px; box-sizing: border-box; font-size: .9rem; border-radius: 10px; }
 
-/* Approved catalog hierarchy: app first, quiet metadata, and a compact action. */
+/* Catalog hierarchy: purpose first, quiet metadata, and a compact action. */
 :is(.future-discover .catalog-list,.dashboard-discovery-grid) > .future-card { align-self: start; border-color: #e4e2df; box-shadow: 0 2px 4px rgb(38 30 48 / 3%), 0 6px 18px rgb(38 30 48 / 4%); }
+.future-discover .catalog-list > .future-card { background:#f4f4f4; border-color:#e1e1e1; }
 :is(.future-discover .catalog-list,.dashboard-discovery-grid) > .future-card:hover { border-color: #cbc5d1; box-shadow: 0 3px 6px rgb(38 30 48 / 4%), 0 8px 22px rgb(38 30 48 / 6%); }
 :is(.future-discover .catalog-list,.dashboard-discovery-grid) > .future-card .future-card-heading { padding: 14px 16px 4px; }
 :is(.future-discover .catalog-list,.dashboard-discovery-grid) > .future-card .future-card-summary { margin: 0; min-height: 0; color: var(--ink); font-size: 1.18rem; font-weight: 650; line-height: 1.32; -webkit-line-clamp: 3; }
@@ -875,7 +876,7 @@ a.secondary-button,.cw-main a.secondary-button { background: #f2edf8; color: #5e
 :is([data-public-project],.detail-dialog) .similar-grid { display:grid; grid-template-columns:1fr; gap:14px; }
 :is([data-public-project],.detail-dialog) .similar-card {
   display:grid; grid-template-columns:minmax(0,42%) minmax(0,1fr); align-items:stretch; gap:14px;
-  width:100%; padding:10px; border-radius:16px; text-align:left; overflow:hidden;
+  width:100%; padding:10px; border-color:#e1e1e1; border-radius:16px; background:#f4f4f4; text-align:left; overflow:hidden;
   transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease;
 }
 :is([data-public-project],.detail-dialog) .similar-card:hover { transform:translateY(-2px); border-color:#bfa8d8; box-shadow:0 15px 34px #382b4617; }

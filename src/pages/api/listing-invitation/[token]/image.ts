@@ -7,7 +7,7 @@ export const GET:APIRoute=async context=>{
   const row=await loadInvitation(context.params.token||'',true);if(!row)return new Response('Preview unavailable',{status:404,headers});
   const screenshot=await invitationScreenshot(row);
   const card=context.url.searchParams.get('card')==='1';
-  const image=card?await renderInvitationImage({name:row.title,category:row.category,presentation:{headline:row.headline||row.summary},creator:{name:''}},screenshot,{listingPreview:true}):screenshot;
+  const image=card?await renderInvitationImage({name:row.title,url:row.external_url,category:row.category,presentation:{headline:row.headline||row.summary},creator:{name:''}},screenshot,{listingPreview:true}):screenshot;
   if(!image)return new Response('Preview unavailable',{status:404,headers});
   return new Response(new Uint8Array(image),{headers:{...headers,'Content-Type':card?'image/png':'image/jpeg',...(context.url.searchParams.get('download')==='1'?{'Content-Disposition':'attachment; filename="trymybuild-listing-preview.png"'}:{})}});
  }catch{return new Response('Preview unavailable',{status:503,headers});}

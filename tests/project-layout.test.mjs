@@ -57,7 +57,7 @@ test('demo belongs inside the app card after the app link, with no player loaded
  const product={slug:'demo',name:'Demo app',url:'https://example.com',video:'https://youtu.be/dQw4w9WgXcQ'};
  const html=globalThis.CWProjectView.hero(product);
  assert.equal((html.match(/Watch demo/g)||[]).length,1);
- assert.match(html,/external-destination[\s\S]*project-video[\s\S]*Watch demo[\s\S]*<\/div><\/div><\/section>$/);
+ assert.match(html,/external-destination[\s\S]*project-video[\s\S]*Watch demo[\s\S]*<\/div><\/div>\s*<\/section>$/);
  assert.match(html,/data-load-video="https:\/\/www.youtube-nocookie.com\/embed\/dQw4w9WgXcQ"/);
  assert.doesNotMatch(html,/<iframe/);
  for(const video of ['', 'javascript:alert(1)', 'https://unapproved.example/video'])assert.doesNotMatch(globalThis.CWProjectView.hero({...product,video}),/Watch demo|project-video/);

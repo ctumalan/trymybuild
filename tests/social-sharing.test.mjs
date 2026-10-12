@@ -10,7 +10,7 @@ test('social headlines lead with the need and editable copy is bounded without c
  assert.match(socialCopy(project).headline,/make every pickup/);
  const custom=socialCopy(project,{headline:'  A\n better\t plan  ',description:'x'.repeat(200)});
  assert.equal(custom.headline,'A better plan');assert.equal(custom.description.length,160);
- assert.equal(socialCopy({...project,slug:'new-app'}).headline,project.summary);
+ assert.equal(socialCopy({...project,slug:'new-app'}).headline,'Give it a try. Share what you think.');
  assert.equal(JSON.stringify(project),original);
 });
 test('social URLs preserve text safely and update when artwork changes',()=>{
@@ -20,13 +20,14 @@ test('social URLs preserve text safely and update when artwork changes',()=>{
  const image=new URL(socialImageUrl(project,page.origin,'story',copy));
  assert.equal(image.searchParams.get('format'),'story');assert.equal(image.searchParams.get('headline'),copy.headline);
  assert.notEqual(image.href,socialImageUrl({...project,preview:'/new.png'},page.origin,'story',copy));
+ assert.notEqual(image.href,socialImageUrl({...project,creator:{name:'Another maker'}},page.origin,'story',copy));
 });
 test('three original compositions export correct dimensions, include screenshots and tolerate bad inputs',async()=>{
  const shot=await sharp({create:{width:30,height:30,channels:3,background:'#ff0000'}}).png().toBuffer();
  for(const [format,size] of Object.entries(socialFormats)){
   const image=await renderSocialImage(project,shot,format),meta=await sharp(image).metadata();
   assert.equal(meta.width,size.width);assert.equal(meta.height,size.height);
-  const point=format==='facebook'?{left:700,top:200}:format==='story'?{left:200,top:1100}:{left:200,top:800};
+  const point=format==='facebook'?{left:370,top:350}:{left:540,top:650};
   const pixel=await sharp(image).extract({...point,width:1,height:1}).removeAlpha().raw().toBuffer();assert.deepEqual([...pixel],[255,0,0]);
  }
  const long={...project,name:'<script>&'.repeat(100),category:'Long category '.repeat(50)};

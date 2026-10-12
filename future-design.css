@@ -28,7 +28,7 @@ body.public-site .site-nav .future-nav-link:hover,
 body.public-site .site-nav .future-nav-link.is-active { background: #f2edf8; color: #7545ad; }
 body.public-site .account-avatar,
 body.public-site .profile-button { background: #f2edf8; color: #17332a; border: 1px solid #ded3eb; }
-body.public-site .site-footer { color: #5e6f68; border-color: #ded3eb; margin-top: 54px; }
+body.public-site .site-footer { color: #5e6f68; border-top:0; margin-top: 54px; }
 body.public-site .site-footer a,
 body.public-site .site-footer button { color: #5e6f68; }
 body.public-site .site-footer .brand-name-works { color: #7545ad; }
@@ -2151,7 +2151,7 @@ body.public-site #app[tabindex="-1"]:focus { outline:none; }
  .future-discover .catalog-results > .discovery-categories { flex-wrap:wrap; }
  .future-discover .discovery-categories button,
  .future-discover .discovery-categories summary { min-height:44px; }
- .future-discover .catalog-first-apps-sticker { left:0; bottom:calc(100% + 28px); font-size:.66rem; }
+ .future-discover .catalog-first-apps-sticker { left:0; bottom:calc(100% + 31px); font-size:.66rem; }
 }
 
 /* Carry the category control shape into app actions and tabs. */
@@ -2260,7 +2260,8 @@ body.public-site #app[tabindex="-1"]:focus { outline:none; }
 }
 
 /* One continuous social discussion, with feedback available in place. */
-.project-conversation.conversation-flow { padding:16px 0; border-top:1px solid #eee9f2; }
+.project-conversation.conversation-flow { padding:16px 0; border-top:0; }
+.invitation-detail .similar-projects { border-top:0; }
 .conversation-flow-heading { display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin-bottom:12px; }
 .conversation-flow-heading h2 { margin:0; font:600 1rem/1.4 "Inter",Arial,sans-serif; letter-spacing:0; }
 .conversation-flow-count { font-size:.75rem; color:#786c80; }
@@ -2286,7 +2287,7 @@ html { scrollbar-gutter:stable; }
 body.public-site .site-header,.cw-bar {
  box-sizing:border-box; width:min(1240px,calc(100% - 32px)); margin:12px auto 0;
  height:66px; min-height:66px; padding:12px 20px; border:1px solid #eee9f2; border-radius:18px;
- background:#ffffffed; box-shadow:0 2px 5px #382b4605; gap:24px;
+ background:#ffffffed; box-shadow:0 1px 2px #382b4610,0 3px 8px #382b4608; gap:24px;
  display:flex; align-items:center; flex-wrap:nowrap;
 }
 body.public-site .site-header .brand,.cw-bar .cw-brand { padding:0; margin:0; gap:12px; min-height:0; }
@@ -2736,4 +2737,202 @@ body.public-site .site-header,.cw-bar { background:#fff; }
  .owned-project-card .owned-project-top { grid-template-columns:104px minmax(0,1fr) 30px; }
  .owned-project-card .project-counts { left:128px; }
  :is([data-public-project],.detail-dialog) .similar-card { grid-template-columns:104px minmax(0,1fr); }
+}
+
+/* Studio app card: the approved plum-and-violet design, shared by every detail view. */
+.invitation-detail[data-showcase-theme] .recipient-hero.studio-app-card {
+ --signal-accent:#7545ad; --app-accent:#7545ad; --app-accent-strong:#623694;
+ display:grid; grid-template-columns:minmax(0,1fr); gap:0;
+ width:100%; max-width:640px; margin-inline:auto;
+ padding:0; min-height:0; overflow:hidden; isolation:isolate;
+ border:1px solid #e5e1e6; border-radius:20px;
+ background:#fcfbfa; background-image:none;
+ box-shadow:0 12px 32px #24172e0b; color:#17332a;
+ font-family:"Inter",Arial,sans-serif;
+}
+.invitation-detail[data-showcase-theme] .studio-app-card>.studio-card-heading {
+ box-sizing:border-box; max-width:none; padding:24px 24px 22px; margin:0;
+ background:#24172e; border-bottom:3px solid #b17bea; text-align:left;
+}
+.invitation-detail[data-showcase-theme] .studio-app-card .studio-card-kicker {
+ display:flex; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:16px;
+}
+.invitation-detail[data-showcase-theme] .studio-app-card .detail-product-signal {
+ display:flex; align-items:center; gap:10px; margin:0; padding:0;
+ color:#faf5ff; font:600 10px/1.5 "Inter",Arial,sans-serif; letter-spacing:.15em;
+}
+.invitation-detail[data-showcase-theme] .studio-app-card .detail-category-icon {
+ display:flex; width:22px; height:22px; color:#d5aff1;
+}
+.invitation-detail[data-showcase-theme] .studio-app-card .detail-category-icon svg { width:100%; height:100%; }
+.invitation-detail[data-showcase-theme] .studio-app-card .detail-product-meta {
+ margin:0; padding-left:10px; border-left:1px solid #9b78b3;
+}
+.invitation-detail[data-showcase-theme] .studio-app-card .detail-product-meta>span {
+ display:block; padding:3px 8px; border:1px solid #9b78b3; border-radius:999px;
+ background:#ffffff08; color:#d5b9ea;
+ font:500 10px/1.3 "Inter",Arial,sans-serif; letter-spacing:.035em;
+}
+.invitation-detail[data-showcase-theme] .studio-app-card .studio-card-heading h2 {
+ max-width:none; width:100%; margin:0; padding:0; color:#fff;
+ font:700 clamp(26px,7cqw,32px)/1.12 "Inter",Arial,sans-serif;
+ letter-spacing:-.04em; text-align:left; text-wrap:pretty; overflow-wrap:anywhere; text-shadow:none;
+}
+.invitation-detail[data-showcase-theme] .studio-app-card>.recipient-preview-column {
+ box-sizing:border-box; max-width:none; margin:0; padding:16px 20px 0;
+ display:grid; grid-template-columns:minmax(0,1fr); gap:0; justify-items:stretch;
+}
+.invitation-detail[data-showcase-theme] .studio-app-card .studio-preview-label {
+ display:flex; align-items:center; justify-content:space-between; gap:12px;
+ padding:0 5px 10px; color:#536360;
+ font:600 10px/1.4 "Inter",Arial,sans-serif; letter-spacing:.12em; text-transform:uppercase;
+}
+.invitation-detail[data-showcase-theme] .studio-app-card .studio-preview-label>strong { font:inherit; }
+.invitation-detail[data-showcase-theme] .studio-app-card .recipient-art-live { gap:7px; padding-left:0; color:#17332a; }
+.invitation-detail[data-showcase-theme] .studio-app-card .recipient-art-live .detail-live-dot { color:#7545ad; background:#7545ad; }
+.invitation-detail[data-showcase-theme] .studio-app-card .recipient-art {
+ width:100%; max-width:none; overflow:visible; padding:0; border:0; border-radius:0;
+ background:none; box-shadow:none; transform:none; transition:none;
+}
+.invitation-detail[data-showcase-theme] .studio-app-card .recipient-art-chrome {
+ display:grid; grid-template-columns:36px minmax(0,1fr) 14px; gap:10px;
+ min-height:34px; padding:7px 12px; border:1px solid #e0dfe0; border-bottom:0;
+ border-radius:12px 12px 0 0; background:#f7f7f6; color:#536360;
+ font:400 11px/1.4 "Inter",Arial,sans-serif; letter-spacing:0; text-transform:none;
+}
+.invitation-detail[data-showcase-theme] .studio-app-card .recipient-art-controls { display:flex; gap:4px; }
+.invitation-detail[data-showcase-theme] .studio-app-card .recipient-art-controls i { width:6px; height:6px; box-shadow:none; }
+.invitation-detail[data-showcase-theme] .studio-app-card .recipient-art-controls i:nth-child(1) { background:#ff625d; }
+.invitation-detail[data-showcase-theme] .studio-app-card .recipient-art-controls i:nth-child(2) { background:#f7c24d; }
+.invitation-detail[data-showcase-theme] .studio-app-card .recipient-art-controls i:nth-child(3) { background:#5bc96b; }
+.invitation-detail[data-showcase-theme] .studio-app-card .studio-browser-address {
+ display:flex; align-items:center; justify-content:center; gap:5px; min-width:0;
+ padding:4px 8px; border-radius:20px; background:#ececeb; overflow:hidden;
+ white-space:nowrap; text-overflow:ellipsis; color:#263a32;
+}
+.invitation-detail[data-showcase-theme] .studio-app-card .studio-browser-address svg { flex-shrink:0; }
+.invitation-detail[data-showcase-theme] .studio-app-card .studio-browser-more { text-align:right; font-size:18px; line-height:1; }
+.invitation-detail[data-showcase-theme] .studio-app-card .recipient-art-viewport {
+ display:grid; min-height:0; padding:0; border:1px solid #e0dfe0; border-top:0;
+ border-radius:0 0 12px 12px; overflow:hidden; background:#fff;
+ box-shadow:0 5px 12px #24172e06;
+}
+.invitation-detail[data-showcase-theme] .studio-app-card .recipient-art-viewport img {
+ display:block; width:100%; height:auto; min-height:0; max-height:none; aspect-ratio:16/9;
+ object-fit:contain; object-position:top; padding:0; margin:0;
+ border:0; border-radius:0; transform:none;
+}
+.invitation-detail[data-showcase-theme] .studio-app-card .recipient-art .external-destination {
+ display:flex; align-items:center; gap:7px; padding:10px 2px 12px; margin:0;
+ color:#697570; font:400 11px/1.4 "Inter",Arial,sans-serif; letter-spacing:0; text-align:left;
+}
+.invitation-detail[data-showcase-theme] .studio-app-card .external-destination svg { flex-shrink:0; }
+.invitation-detail[data-showcase-theme] .studio-app-card .external-destination>span { min-width:0; overflow-wrap:anywhere; }
+.invitation-detail[data-showcase-theme] .studio-app-card .studio-card-actions {
+ display:flex; align-items:center; justify-content:space-between; gap:12px; padding:0 0 16px;
+}
+.invitation-detail[data-showcase-theme] .studio-app-card .detail-creator { min-width:0; margin:0; text-align:left; }
+.invitation-detail[data-showcase-theme] .studio-app-card .detail-creator .creator-byline {
+ display:inline-flex; align-items:center; gap:8px; margin:0; color:#17332a; text-align:left;
+ font:400 12px/1.4 "Inter",Arial,sans-serif;
+}
+.invitation-detail[data-showcase-theme] .studio-app-card .creator-byline>span:last-child { min-width:0; overflow-wrap:anywhere; }
+.invitation-detail[data-showcase-theme] .studio-app-card .creator-byline .byline-avatar { width:30px; height:30px; flex:0 0 30px; font-size:10px; }
+.invitation-detail[data-showcase-theme] .studio-app-card .creator-byline .creator-verified { color:#7545ad; }
+.invitation-detail[data-showcase-theme] .studio-app-card .studio-card-actions>.primary-button {
+ display:inline-flex; align-items:center; justify-content:center; flex:0 0 auto;
+ box-sizing:border-box; min-height:36px; width:auto; margin:0; padding:8px 12px;
+ border:1px solid #7545ad; border-radius:8px; background:linear-gradient(135deg,#8845bd,#6325a0);
+ color:#fff; box-shadow:0 3px 8px #7545ad17;
+ font:600 12px/1.4 "Inter",Arial,sans-serif; letter-spacing:0; text-decoration:none; transform:none;
+}
+.invitation-detail[data-showcase-theme] .studio-app-card .studio-card-actions>.primary-button:hover {
+ background:#623694; border-color:#623694; box-shadow:0 4px 12px #7545ad25; transform:none;
+}
+.invitation-detail[data-showcase-theme] .studio-app-card>.recipient-notes-copy { max-width:none; box-sizing:border-box; margin:0; padding:0 20px; }
+.invitation-detail[data-showcase-theme] .studio-app-card .detail-description-notes { display:grid; grid-template-columns:1fr; gap:0; margin:0; }
+.invitation-detail[data-showcase-theme] .studio-app-card .recipient-copy .detail-description-notes>div {
+ display:grid; grid-template-columns:44px minmax(0,1fr); gap:5px 14px; align-items:start;
+ min-height:0; padding:16px 0; border:0; border-top:1px solid #dedee0; border-radius:0;
+ background:none; background-image:none; box-shadow:none; backdrop-filter:none;
+}
+.invitation-detail[data-showcase-theme] .studio-app-card .detail-description-notes>div::after { display:none; }
+.invitation-detail[data-showcase-theme] .studio-app-card .detail-description-notes .detail-note-label { display:contents; border:0; padding:0; }
+.invitation-detail[data-showcase-theme] .studio-app-card .studio-note-symbol {
+ grid-column:1; grid-row:1/3; display:grid; place-items:center;
+ width:44px; height:44px; border-radius:50%; background:#f0e9f5; color:#7545ad;
+}
+.invitation-detail[data-showcase-theme] .studio-app-card .recipient-copy .detail-description-notes .detail-note-icon {
+ width:25px; height:25px; color:#7545ad; stroke:currentColor; filter:none;
+}
+.invitation-detail[data-showcase-theme] .studio-app-card .recipient-copy .detail-description-notes .detail-note-brand-icon { stroke-width:13; }
+.invitation-detail[data-showcase-theme] .studio-app-card .detail-note-icon-fill { fill:currentColor; }
+.invitation-detail[data-showcase-theme] .studio-app-card .recipient-copy .detail-description-notes h3 {
+ grid-column:2; grid-row:1; margin:0; padding:0; color:#536360;
+ font:600 10px/1.4 "Inter",Arial,sans-serif; letter-spacing:.1em; text-transform:uppercase; text-align:left;
+}
+.invitation-detail[data-showcase-theme] .studio-app-card .recipient-copy .detail-description-notes p {
+ grid-column:2; grid-row:2; margin:0; padding:0; color:#17332a;
+ font:400 13px/1.55 "Inter",Arial,sans-serif; text-align:left;
+}
+.invitation-detail[data-showcase-theme] .studio-app-card .project-video { justify-self:start; margin:0 0 14px; }
+@container (max-width:340px) {
+ .invitation-detail[data-showcase-theme] .studio-app-card>.studio-card-heading { padding:20px 18px; }
+ .invitation-detail[data-showcase-theme] .studio-app-card>.recipient-preview-column { padding-inline:14px; }
+ .invitation-detail[data-showcase-theme] .studio-app-card>.recipient-notes-copy { padding-inline:14px; }
+ .invitation-detail[data-showcase-theme] .studio-app-card .studio-card-actions { gap:8px; }
+ .invitation-detail[data-showcase-theme] .studio-app-card .detail-creator .creator-byline { font-size:11px; gap:6px; }
+ .invitation-detail[data-showcase-theme] .studio-app-card .creator-byline .byline-avatar { width:26px; height:26px; flex-basis:26px; }
+ .invitation-detail[data-showcase-theme] .studio-app-card .studio-card-actions>.primary-button { padding-inline:10px; font-size:11px; }
+}
+/* Invitation previews use the same studio palette as the shared app card. */
+.invitation-dialog,.invitation-dialog.has-social-sharing{background:#fcfbfa;color:#24172e;border-color:#ded9e0}
+.invitation-dialog h2,.invitation-dialog.has-social-sharing h2{font-family:Inter,"DM Sans",sans-serif;font-weight:700;letter-spacing:-.035em}
+.invitation-dialog .invitation-preview-graphic{border:0;background:transparent;overflow:visible}
+.invitation-dialog .invitation-preview-graphic figure{background:#fcfbfa;border:0;border-radius:16px}
+.invitation-dialog .invitation-preview-graphic img{width:100%;height:auto;aspect-ratio:4/3;object-fit:contain;border-radius:16px}
+.invitation-dialog .invitation-preview-graphic figcaption.visually-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
+.invitation-dialog .invitation-trial-details{background:#fcfbfa;border-top:1px solid #ded9e0;padding:12px 0}
+.invitation-dialog .social-art{background:#fcfbfa;border-color:#ded9e0}
+.invitation-dialog .invitation-preview:not(.invitation-preview-graphic) article{background:#fcfbfa;border-color:#ded9e0}
+.invitation-dialog .invitation-preview:not(.invitation-preview-graphic) article>div{background:#24172e;border-bottom:3px solid #b17bea;color:#f7efff;padding:22px}
+.invitation-dialog .invitation-preview:not(.invitation-preview-graphic) h3{font:700 1.5rem/1.2 Inter,"DM Sans",sans-serif;color:#fff}
+.invitation-dialog .invitation-preview:not(.invitation-preview-graphic) p{font:400 .95rem/1.55 Inter,"DM Sans",sans-serif;color:#dac8e8}
+.invitation-dialog .invitation-preview:not(.invitation-preview-graphic) .eyebrow,.invitation-dialog .invitation-preview:not(.invitation-preview-graphic) small{color:#dac8e8}
+
+/* A barely visible matte-paper grain belongs to the canvas around the app card. */
+body.invitation-page,
+body.invitation-page .project-detail-content,
+.invitation-detail.detail-dialog .detail-scroll,
+.invitation-detail.detail-dialog .project-detail-content,
+.cw-overlay.public-project-panel .overlay-content,
+.listing-preview-card.project-detail-content.invitation-detail {
+ background-color:#fcfbfa;
+ background-image:url('/assets/brand/studio-paper-grain.svg');
+ background-size:256px 256px;
+ background-repeat:repeat;
+}
+
+/* Keep category navigation on white; the paper canvas begins around the app cards. */
+body.public-site .future-discover #home-panel:has(>.catalog-results) {
+ border-top:0;
+}
+body.public-site .future-discover .catalog-list {
+ position:relative;
+ isolation:isolate;
+}
+body.public-site .future-discover .catalog-list::before {
+ content:"";
+ position:absolute;
+ z-index:-1;
+ inset:-12px -56px -32px;
+ pointer-events:none;
+ background:#fcfbfa url('/assets/brand/studio-paper-grain.svg') repeat;
+ background-size:256px 256px;
+}
+@media(max-width:1180px) {
+ body.public-site .future-discover .catalog-list::before { inset-inline:-32px; }
+}
+@media(max-width:620px) {
+ body.public-site .future-discover .catalog-list::before { inset-inline:-18px; }
 }

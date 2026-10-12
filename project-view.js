@@ -14,10 +14,11 @@ const categoryPaths = {
  "Personal planning": '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18m-13 5 2 2 4-4"/>',
  "Food & home": '<path d="M3 11 12 3l9 8v10h-6v-6H9v6H3V11Z"/>',
  "Travel": '<path d="m22 2-7 20-4-9-9-4 20-7Z"/>',
+ "Health & wellness": '<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z"/><path d="M4 12h4l2-4 4 8 2-4h4"/>',
  "Creative work": '<path d="m12 3 1.7 4.6L18 9.3 13.7 11 12 16l-1.7-5L6 9.3l4.3-1.7L12 3Zm7 11 .9 2.1L22 17l-2.1.9L19 20l-.9-2.1L16 17l2.1-.9L19 14Z"/>'
 };
-function categoryIcon(category) { return `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${categoryPaths[category] || categoryPaths.Technology}</svg>`; }
-const helpIcon = '<svg class="detail-note-icon detail-note-brand-icon" viewBox="0 0 256 256" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><g stroke-width="10"><path d="M128 22v20M63 43l13 15M193 43l-13 15M35 94h20M201 94h20"/><path d="M79 113a50 50 0 1 1 98 0"/></g><g stroke-width="12"><path d="M35 140c13 44 53 69 95 69 43 0 77-22 91-57"/><path d="M105 185h35v-31l29-17"/></g><circle cx="170" cy="136" r="7" fill="currentColor" stroke="none"/><circle cx="222" cy="151" r="7" fill="currentColor" stroke="none"/></g></svg>';
+function categoryIcon(category) { return `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${categoryPaths[category] || categoryPaths[Object.keys(categoryPaths).find(key => key.toLowerCase() === String(category).toLowerCase())] || categoryPaths.Technology}</svg>`; }
+const helpIcon = '<svg class="detail-note-icon detail-note-brand-icon" viewBox="0 0 256 256" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"><path d="M128 222v-87M128 170C68 173 38 140 38 98c56-3 90 24 90 72ZM128 140c-2-65 31-104 91-111 5 64-25 108-91 111Z"/><path d="m128 140 55-66M128 170l-54-43"/></svg>';
 const tryIcon = '<svg class="detail-note-icon" viewBox="0 0 48 48" aria-hidden="true"><circle cx="22" cy="26" r="13"/><circle cx="22" cy="26" r="7"/><circle class="detail-note-icon-fill" cx="22" cy="26" r="2.5"/><path d="m22 26 11-11M31 9v8h8M33 15l6-6"/></svg>';
 function video(value) {
  const url = globalThis.CWMedia?.videoUrl(value);
@@ -28,7 +29,28 @@ function hero(product, options = {}) {
   const launchAction = !product.url ? '' : options.disabledLaunch
     ? '<button class="primary-button preview-try-disabled" type="button" disabled aria-label="Try this app, available after saving">Try this app ↗</button>'
     : `<a class="primary-button" href="${esc(product.url)}" target="_blank" rel="noopener noreferrer" ${options.preview?'':`data-try-app="${esc(product.slug)}"`}>Try this app ↗</a>`;
-  return `<section class="recipient-hero"><div class="detail-signal-grid" aria-hidden="true"></div><div class="detail-orbit detail-orbit-one" aria-hidden="true"></div><div class="detail-orbit detail-orbit-two" aria-hidden="true"></div><div class="recipient-copy"><p class="detail-product-signal">${product.category?`<span class="detail-category-icon">${categoryIcon(product.category)}</span><span>${esc(product.category)}</span>`:''}</p>${product.price?`<p class="detail-product-meta"><span>${esc(product.price)}</span></p>`:''}<h2 ${options.titleId ? `id="${esc(options.titleId)}"` : ""}>${esc(presentation.headline||product.name)}</h2></div><div class="recipient-preview-column"><div class="recipient-art"><div class="recipient-art-chrome" aria-hidden="true"><span class="recipient-art-controls"><i></i><i></i><i></i></span><strong>Product preview</strong><span class="recipient-art-live"><i class="detail-live-dot"></i>Live</span></div><div class="recipient-art-viewport">${product.preview?`<img ${options.preview?'data-listing-screenshot':''} src="${esc(product.preview)}" alt="Preview of ${esc(product.name)}" referrerpolicy="no-referrer">`:''}</div>${product.url?`<span class="external-destination">${esc(product.url)}</span>`:''}</div><div class="detail-creator">${options.creator || ""}</div>${launchAction}${video(product.video)}</div><div class="recipient-copy recipient-notes-copy"><div class="detail-description-notes"><div><div class="detail-note-label"><span class="detail-note-number">01</span>${helpIcon}<h3>How it helps</h3></div><p aria-label="${esc(presentation.help)}"><span data-type-guidance aria-hidden="true">${esc(presentation.help)}</span></p></div><div><div class="detail-note-label"><span class="detail-note-number">02</span>${tryIcon}<h3>One thing to try first</h3></div><p aria-label="${esc(presentation.firstTry)}"><span data-type-guidance aria-hidden="true">${esc(presentation.firstTry)}</span></p></div></div></div></section>`;
+  let destinationHost = '';
+  try { destinationHost = new URL(product.url).hostname.replace(/^www\./, ''); } catch {}
+  return `<section class="recipient-hero studio-app-card">
+   <div class="recipient-copy studio-card-heading">
+    <div class="studio-card-kicker"><p class="detail-product-signal">${product.category?`<span class="detail-category-icon">${categoryIcon(product.category)}</span><span>${esc(product.category)}</span>`:''}</p>${product.price?`<p class="detail-product-meta"><span>${esc(product.price)}</span></p>`:''}</div>
+    <h2 ${options.titleId ? `id="${esc(options.titleId)}"` : ""}>${esc(presentation.headline||product.name)}</h2>
+   </div>
+   <div class="recipient-preview-column">
+    <div class="studio-preview-label"><strong>Product preview</strong><span class="recipient-art-live"><i class="detail-live-dot" aria-hidden="true"></i>Live</span></div>
+    <div class="recipient-art">
+     <div class="recipient-art-chrome" aria-hidden="true"><span class="recipient-art-controls"><i></i><i></i><i></i></span><span class="studio-browser-address"><svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="7" width="10" height="7" rx="1.5"/><path d="M5 7V5a3 3 0 0 1 6 0v2"/></svg>${esc(destinationHost)}</span><span class="studio-browser-more">⋮</span></div>
+     <div class="recipient-art-viewport">${product.preview?`<img ${options.preview?'data-listing-screenshot':''} src="${esc(product.preview)}" alt="Preview of ${esc(product.name)}" referrerpolicy="no-referrer">`:''}</div>
+     ${product.url?`<span class="external-destination"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="m10 13 4-4M8 16l-1 1a4 4 0 0 1-6-6l5-5a4 4 0 0 1 6 0M16 8l1-1a4 4 0 0 1 6 6l-5 5a4 4 0 0 1-6 0" transform="translate(1 1) scale(.9)"/></svg><span>${esc(product.url)}</span></span>`:''}
+    </div>
+    <div class="studio-card-actions"><div class="detail-creator">${options.creator || ""}</div>${launchAction}</div>
+    ${video(product.video)}
+   </div>
+   <div class="recipient-copy recipient-notes-copy"><div class="detail-description-notes">
+    <div><div class="detail-note-label"><span class="studio-note-symbol">${helpIcon}</span><h3>How it helps</h3></div><p aria-label="${esc(presentation.help)}"><span data-type-guidance aria-hidden="true">${esc(presentation.help)}</span></p></div>
+    <div><div class="detail-note-label"><span class="studio-note-symbol">${tryIcon}</span><h3>One thing to try first</h3></div><p aria-label="${esc(presentation.firstTry)}"><span data-type-guidance aria-hidden="true">${esc(presentation.firstTry)}</span></p></div>
+   </div></div>
+  </section>`;
 }
 function composer(slug) {
  const id = 'public-conversation-' + slug, draft = '';

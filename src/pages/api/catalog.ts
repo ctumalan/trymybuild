@@ -13,7 +13,12 @@ export const GET: APIRoute = async () => {
       const response = await fetch('https://trymybuild.com/api/catalog', { signal: AbortSignal.timeout(10000) });
       if (!response.ok) throw new Error('Public catalog unavailable');
       const catalog = await response.json();
-      return json({ ...catalog, previewSource: 'public-production-catalog' });
+      // Database-backed preview URLs must resolve against the same public source.
+      const projects = catalog.projects.map((project: any) => ({ ...project,
+        preview: typeof project.preview === 'string' && project.preview.startsWith('/api/project-image/')
+          ? new URL(project.preview, 'https://trymybuild.com').href : project.preview,
+      }));
+      return json({ ...catalog, projects, previewSource: 'public-production-catalog' });
     } catch {
       return json({ connected: false, projects: [], error: 'The public catalog could not be loaded for this local preview.' }, 503);
     }

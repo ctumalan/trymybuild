@@ -658,6 +658,13 @@ a.secondary-button,.cw-main a.secondary-button { background: #f2edf8; color: #5e
 .discovery-hero-minimal .discovery-hero-copy { max-width: 760px; margin-inline: auto; }
 .listing-in-place .listing-entry-header { position: sticky; top: 0; z-index: 10; background: #fbfaf6; padding-bottom: 14px; }
 .listing-entry-header .discovery-entry-modes { margin-bottom: 0; }
+.listing-entry-header .listing-catalog-return {
+ display:inline-flex; align-items:center; justify-content:center; gap:9px; width:auto; min-height:44px; padding:0 18px;
+ color:#7545ad; font-weight:700; text-decoration:none;
+}
+.listing-entry-header .listing-catalog-return span { transition:transform .18s ease; }
+.listing-entry-header .listing-catalog-return:hover span { transform:translateX(3px); }
+.catalog-row.catalog-arrival { outline:3px solid #7545ad; outline-offset:5px; box-shadow:0 18px 42px #7545ad26; }
 .listing-entry-panel { max-width: 760px; margin-inline: auto; }
 .listing-entry-panel .inline-listing,.listing-entry-panel>.listing-review { width: 100%; max-width: none; margin: 0; }
 

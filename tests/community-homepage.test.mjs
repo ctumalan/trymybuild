@@ -72,7 +72,7 @@ test('listing navigation stays in the homepage frame and preserves search',()=>{
  assert.doesNotMatch(html,/Small contributions\. Better projects/);
  assert.doesNotMatch(html,/data-app-link-entry/);
  assert.doesNotMatch(html,/discovery-entry-modes/);
- assert.match(html,/data-entry-mode="search"[^>]*>← Back to apps<\/button>/);
+ assert.match(html,/class="secondary-button listing-catalog-return" data-entry-mode="search">View app catalog/);
  ctx.selectHomeView('find');
  assert.equal(ctx.state.query,'App 2');
  assert.equal((ctx.discover().match(/<article>/g)||[]).length,1);

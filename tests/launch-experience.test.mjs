@@ -15,8 +15,10 @@ test('signup and global navigation expose the legal agreement',()=>{
  assert.doesNotMatch(css,/\.listing-preview-conversion \{[^}]*1\.45fr/);
  assert.match(app,/projectDetailContent\(product,true,!editable\)/);
  for(const label of ['Confirm your app’s name','Confirm your app’s link','What’s your app’s category?','What’s your app’s pricing?'])assert.match(app,new RegExp(label.replace(/[?]/g,'\\?')));
- assert.match(app,/href="\/\?project=\$\{encodeURIComponent\(listingDraft\.serverSlug\)\}">View my project in catalog/);
- assert.match(app,/listingDraft\.serverSlug = data\.project\.slug \|\| listingDraft\.serverSlug; saveListingDraft\(\); location\.assign\('\/\?project='\+encodeURIComponent\(listingDraft\.serverSlug\)\); return;/);
+ assert.match(app,/href="\/\?catalog=\$\{encodeURIComponent\(listingDraft\.serverSlug\)\}">View my app in the catalog/);
+ assert.match(app,/listingDraft\.serverSlug = data\.project\.slug \|\| listingDraft\.serverSlug; saveListingDraft\(\); location\.assign\('\/\?catalog='\+encodeURIComponent\(listingDraft\.serverSlug\)\); return;/);
+ assert.match(app,/data-catalog-project="\$\{esc\(product\.slug\)\}" tabindex="-1"/);
+ assert.match(app,/function revealLinkedCatalogProject\(\)[\s\S]*?scrollIntoView/);
  assert.ok(app.indexOf('${publishControls}${importCard}${listingPreview()}')>-1);
  assert.match(read('project-view.js'),/preview-try-disabled[^>]+disabled aria-label="Try this app, available after saving"/);
  const guestDecision=app.slice(app.indexOf('<div class="legal-signup">'),app.indexOf('</div>`}<p data-listing-account-status'));

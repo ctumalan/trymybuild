@@ -36,11 +36,11 @@ test('URL entry, preview and settings retain the same navigation',()=>{
   context.listingStep=step;
   const html=context.discover(true);
   assert.match(html,/future-discover listing-in-place/);
-  assert.match(html,/data-entry-mode="search"[^>]*>← Back to apps<\/button>/);
+  assert.match(html,/class="secondary-button listing-catalog-return" data-entry-mode="search">View app catalog/);
   assert.match(html,/class="listing-entry-panel"/);
  }
  context.listingSettings=true;
- assert.match(context.discover(true),/Back to apps[\s\S]*<h1>Settings<\/h1>/);
+ assert.match(context.discover(true),/View app catalog[\s\S]*<h1>Settings<\/h1>/);
 });
 
 test('browsing mid-listing and returning preserves the draft and current question',()=>{

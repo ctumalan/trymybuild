@@ -369,10 +369,14 @@ function discoveryHero(listing = false) {
   const value = state.entryUrl || '';
   const intent = homepageEntryIntent(value);
   const prompt = 'Paste your app or website URL';
+  const publishedSlug = listing && typeof listingDraft !== 'undefined' && listingDraft.serverStatus === 'published' ? listingDraft.serverSlug : '';
+  const catalogAction = publishedSlug
+    ? `<a class="secondary-button listing-catalog-return" href="/?catalog=${encodeURIComponent(publishedSlug)}">View my app in the catalog <span aria-hidden="true">→</span></a>`
+    : '<button type="button" class="secondary-button listing-catalog-return" data-entry-mode="search">View app catalog <span aria-hidden="true">→</span></button>';
   return `<header class="discovery-hero discovery-hero-minimal discovery-hero-action${listing ? ' listing-entry-header' : ''}" aria-label="Share your app">
     <div class="discovery-hero-copy">
       ${listing ? '' : `<div class="discovery-title-row"><div class="discovery-title-copy"><h1 class="discovery-promise"><span>Stop guessing. Get <em>human feedback<svg class="feedback-hand-underline" viewBox="0 0 420 16" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path d="M3 10C42 5 72 9 111 7S181 9 218 6S288 7 321 5S383 5 417 2L411 5C377 9 351 7 320 10S252 9 218 11S146 10 111 12S41 10 3 13Z" /></svg></em> on your early-stage app.</span></h1><p class="discovery-instrument-copy">Type your app's URL to start exchanging reviews with another creator: they try your app, and you try theirs. It's completely free.</p></div></div>`}
-      ${listing ? '<button type="button" class="text-button" data-entry-mode="search">← Back to apps</button>' : `<form class="discovery-entry" data-discovery-entry>
+      ${listing ? catalogAction : `<form class="discovery-entry" data-discovery-entry>
         <label class="visually-hidden" for="discovery-input">${prompt}</label>
         <div class="discovery-entry-row"><div class="discovery-entry-field"><input id="discovery-input" data-app-link-entry value="${esc(value)}" type="text" maxlength="2048" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="${prompt}" /><span class="entry-placeholder" aria-hidden="true"><span class="entry-placeholder-track">${prompt}</span></span></div><div class="discovery-composer-toolbar"><span class="discovery-composer-note">Share privately first.</span><button type="submit" class="primary-button" data-entry-submit><span data-entry-submit-label>${intent.label}</span><span aria-hidden="true">→</span></button></div></div>
         <p class="discovery-entry-status" data-entry-status role="status"></p>
@@ -461,7 +465,7 @@ function homeCommunity() {
 }
 const openedCatalogApps = new Set();
 function catalogRow(product) {
-  return `<article class="catalog-row future-card">
+  return `<article class="catalog-row future-card" data-catalog-project="${esc(product.slug)}" tabindex="-1">
     <div class="row-media"><button class="row-preview" data-product="${esc(product.slug)}" aria-label="View ${esc(product.name)} details"><img src="${esc(product.preview)}" alt="Preview of the ${esc(product.name)} website" loading="lazy" /></button></div>
     <div class="future-card-heading"><div class="future-card-copy"><p class="future-card-summary">${esc(product.summary)}</p><button class="row-title" data-product="${esc(product.slug)}">${esc(product.name)}</button><div class="future-card-creator"><span>By</span>${creatorLink(product, true)}</div><div class="future-card-meta"><span class="future-card-category">${esc(product.category)}</span><span class="price-badge">${esc(product.price)}</span></div></div></div>
     <div class="future-card-foot"><div class="card-try-actions"><button type="button" class="primary-button" data-product="${esc(product.slug)}" aria-label="Explore ${esc(product.name)}">Explore app</button></div></div>
@@ -995,7 +999,7 @@ function listingSettingsPage() {
     : 'Saved to your account as a private draft. Only you can see it.';
   const importCard = hasServer ? `<section class="cw-panel"><h2>Builds & updates</h2><p>Add release notes and choose which build is active. Announce improvements to people who saved your project.</p><a class="secondary-button" href="/dashboard/builds?project=${encodeURIComponent(listingDraft.serverSlug)}">Manage builds</a></section>` : `<div class="cw-panel listing-import"><h2>Save this draft to your account</h2><p>Your draft is currently on this device only. Save it to your account (${name}) so you can publish it and reach it from any device.</p><button class="primary-button" data-listing-save-server>Save to my account</button><p class="privacy-note">🔒 Nothing is published yet. Your on-device draft is kept until the save is confirmed.</p></div>`;
   const publishControls = !hasServer ? '' : `<div class="cw-panel"><p role="status" data-listing-server-status>${esc(statusNote)}</p><div class="form-actions">${status === 'published'
-      ? `<a class="primary-button" href="/?project=${encodeURIComponent(listingDraft.serverSlug)}">View my project in catalog</a><button class="secondary-button" data-listing-unpublish>Unpublish</button>`
+      ? `<a class="primary-button" href="/?catalog=${encodeURIComponent(listingDraft.serverSlug)}">View my app in the catalog</a><button class="secondary-button" data-listing-unpublish>Unpublish</button>`
       : '<button class="primary-button" data-listing-publish>Publish my app</button>'}<a class="share-browse-link" href="/dashboard?view=creator">Go to My projects →</a></div><p class="privacy-note">Publish instantly to the public catalog. No admin approval needed. You can unpublish anytime.</p></div>`;
   return `<section class="page-shell listing-review"><p class="eyebrow">Your project · Settings</p><h1>Make it yours.</h1><p>Signed in as ${name}.</p><form data-listing-settings>${sharingPreferenceFields()}${listingField('title', 'Confirm your app’s name', 'Your app’s name')}${listingField('url', 'Confirm your app’s link', 'https://your-app.com')}${listingCategoryPicker()}${listingPricingField()}${listingField('does','What does your project do?','Describe your project in a short sentence.',true)}${listingField('helps','How does it help people?','Explain the benefit in a short sentence.',true)}${listingField('firstTry','What should someone try first?','Suggest one action in a short sentence.',true)}${videoField()}<p class="share-name-hint">Keep answers clear and concise. Edit your screenshot in the preview below. Categories appear in homepage filters only when a listing is published. Drafts never create public filters.</p><p data-video-status class="video-status" role="status"></p><div class="form-actions share-start-actions"><button class="primary-button" type="submit">${hasServer ? 'Save changes' : 'Save draft'}</button><button class="secondary-button" type="button" data-listing-review>Back</button><button type="button" class="secondary-button listing-reset-button" data-listing-reset>Start over</button></div><p data-listing-status role="status"></p></form>${publishControls}${importCard}${listingPreview()}${status === 'published' ? `<section class="cw-panel tester-handoff"><p class="eyebrow">Your next step</p><h2>Invite your first testers</h2><p>Start with a few people who might use your app. Ask them to try one task and share what happened.</p><div class="form-actions"><button type="button" class="primary-button" data-invite-project="${esc(listingDraft.serverSlug)}">Prepare invitation</button><a class="secondary-button" href="/projects/${encodeURIComponent(listingDraft.serverSlug)}?invite=1">View your feedback page</a><button type="button" class="secondary-button" data-copy-feedback-link="${esc(listingDraft.serverSlug)}">Copy feedback link</button><p data-copy-feedback-status role="status"></p></div><p><a href="/guides/first-app-testers">No audience yet? Start here →</a></p></section>` : ''}</section>`;
 }
@@ -1173,7 +1177,7 @@ document.addEventListener('click', async event => {
   button.disabled = true;
   try {
     if (saveBtn) { await saveServerListing(statusEl); }
-    else if (publishBtn) { if(listingDraft.sharingPreference && listingDraft.sharingPreference!=='public')throw new Error('Choose Publicly in sharing preferences before publishing.'); await saveServerListing(statusEl); const res = await fetch('/api/projects', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'submit', id: listingDraft.serverId }) }); const data = await res.json(); if (!res.ok) throw new Error(data.error || 'Could not publish your app.'); listingDraft.serverStatus = data.project.status; listingDraft.serverSlug = data.project.slug || listingDraft.serverSlug; saveListingDraft(); location.assign('/?project='+encodeURIComponent(listingDraft.serverSlug)); return; }
+    else if (publishBtn) { if(listingDraft.sharingPreference && listingDraft.sharingPreference!=='public')throw new Error('Choose Publicly in sharing preferences before publishing.'); await saveServerListing(statusEl); const res = await fetch('/api/projects', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'submit', id: listingDraft.serverId }) }); const data = await res.json(); if (!res.ok) throw new Error(data.error || 'Could not publish your app.'); listingDraft.serverStatus = data.project.status; listingDraft.serverSlug = data.project.slug || listingDraft.serverSlug; saveListingDraft(); location.assign('/?catalog='+encodeURIComponent(listingDraft.serverSlug)); return; }
     else if (unpublishBtn) { const res = await fetch('/api/projects', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'unpublish', id: listingDraft.serverId }) }); const data = await res.json(); if (!res.ok) throw new Error(data.error || 'Could not update.'); listingDraft.serverStatus = data.project.status; saveListingDraft(); }
     render();void loadDailyComments();
   } catch (error) { if (statusEl) statusEl.textContent = error.message || 'That did not work. Your draft is safe; please try again.'; button.disabled = false; }
@@ -1562,7 +1566,7 @@ function loadCatalog() {
     hydrateCatalog(data.projects);
     catalogState = 'ready';
     if (['discover', 'community', 'profile'].includes(state.route) && !document.querySelector('.detail-dialog')) render();
-    openLinkedProject();window.dispatchEvent(new Event('cw-catalog-ready'));
+    openLinkedProject();revealLinkedCatalogProject();window.dispatchEvent(new Event('cw-catalog-ready'));
   }).catch(() => {
     catalogState = 'error';
     if (['discover', 'community'].includes(state.route) && !document.querySelector('.detail-dialog')) render();
@@ -1579,7 +1583,7 @@ if (window.CW_SERVER) {
       void syncListingProject().then(project=>{if(continueToDashboard&&project?.slug)location.replace('/dashboard/overview?started='+encodeURIComponent(project.slug));});
       if(listingUrl(listingDraft.url)&&!listingImage()) void ensureListingScreenshot(true);
     }
-    render();openLinkedProject();void window.CWJoin?.restore(session);void loadDailyComments();
+    render();openLinkedProject();revealLinkedCatalogProject();void window.CWJoin?.restore(session);void loadDailyComments();
   }).catch(() => {
     state.session = { authenticated: false, authReady: false };
     render();
@@ -1669,6 +1673,21 @@ function openLinkedProject() {
   if (linkedProject) openProductDetail(linkedProject);
 }
 openLinkedProject();
+
+// A creator returning from publication lands on the public catalog card itself.
+function revealLinkedCatalogProject() {
+  const params = new URLSearchParams(location.search), slug = params.get('catalog');
+  if (!slug || params.get('listing') === 'settings') return;
+  const project = projects.find(item => item.slug === slug);
+  const card = project && [...document.querySelectorAll('[data-catalog-project]')].find(item => item.dataset.catalogProject === project.slug);
+  if (!card) return;
+  card.classList.add('catalog-arrival');
+  requestAnimationFrame(() => {
+    card.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'center' });
+    card.focus({ preventScroll: true });
+  });
+}
+revealLinkedCatalogProject();
 
 function videoField() {
   return `<label class="listing-field">Video link or embed code<textarea data-listing-field="video" placeholder="Paste a YouTube, Vimeo, or Loom URL or iframe embed code" maxlength="5000" aria-describedby="video-help">${esc(listingDraft.video)}</textarea></label><p class="share-name-hint" id="video-help">YouTube, Vimeo, and Loom links or iframe embed codes are supported.</p><div data-listing-video-preview>${videoPlayer(listingDraft.video)}</div>`;

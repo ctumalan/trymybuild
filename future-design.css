@@ -2052,8 +2052,8 @@ body.public-site #app[tabindex="-1"]:focus { outline:none; }
  height:96px; min-height:96px; padding:20px 12px; font:400 18px/1.5 "Inter",Arial,sans-serif;
  border:0; outline:none; background:transparent;
 }
-.discovery-hero-action .entry-placeholder { inset:0 12px; font:400 18px/1.5 "Inter",Arial,sans-serif; }
-.discovery-hero-action .entry-placeholder-track { width:100%; white-space:normal; animation:none; }
+.discovery-hero-action .entry-placeholder { inset:0 12px; font:400 18px/1.5 "Inter",Arial,sans-serif; text-align:left; }
+.discovery-hero-action .entry-placeholder-track { width:100%; white-space:normal; animation:none; text-align:left; }
 .discovery-composer-toolbar {
  display:flex; align-items:center; justify-content:space-between; gap:12px;
  border-top:1px solid #eee9f2; padding-top:12px;

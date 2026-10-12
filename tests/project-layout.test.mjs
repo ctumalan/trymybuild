@@ -23,9 +23,11 @@ test('detail view uses the invitation screenshot layout and relevant information
  assert.match(shared,/new IntersectionObserver/);
  assert.match(shared,/prefers-reduced-motion: reduce/);
  assert.match(shared,/2200\/Math\.max\(1,characters\.length\)/);
- assert.match(shared,/let delay=450/);
+ assert.match(shared,/let delay=350/);
+ assert.match(shared,/is-guidance-pulsing/);
  assert.equal((app.match(/CWProjectView\.mountGuidanceTyping\(document\.querySelector\('\.detail-overlay'\)\)/g)||[]).length,3);
  assert.match(themeCss,/@keyframes guidance-caret-pulse/);
+ assert.match(themeCss,/@keyframes guidance-icon-pop[\s\S]*?scale\(1\.22\)/);
  assert.match(app,/creator-byline[^`]*\$\{avatar\(creator,'byline-avatar'\)\}/);
  assert.match(themeCss,/\.creator-byline \.byline-avatar \{ width:24px; height:24px/);
  assert.match(app,/name: "Christian Tumalan",[\s\S]*?avatar: "\/assets\/avatars\/chris-nava-founder\.jpg"/);

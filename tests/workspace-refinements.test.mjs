@@ -40,7 +40,7 @@ test('overview advertises qualifying reviews and keeps factual activity',async()
 });
 test('saved project review is directly accessible and cannot silently invent qualification answers',async()=>{
  const f=workspaceFixtures(),html=await (await f.routes['/dashboard'](context('/dashboard?view=visitor'))).text();
- assert.match(html,/Give feedback/);assert.match(html,/href="\/tell\/sample-guest"/);assert.doesNotMatch(html,/action="\/api\/feedback"/);
+ assert.match(html,/Give feedback/);assert.match(html,/href="\/tell\/sample-guest"/);assert.match(html,/saved-project-card compact-app-card/);assert.doesNotMatch(html,/action="\/api\/feedback"/);
  f.tables.projects.find(p=>p.slug==='sample-guest').listing_status='draft';
  const hidden=await (await f.routes['/dashboard'](context('/dashboard?view=visitor'))).text();assert.doesNotMatch(hidden,/Daily sketchbook/);assert.match(hidden,/no longer publicly available/);
 });

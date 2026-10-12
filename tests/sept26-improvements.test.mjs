@@ -47,6 +47,8 @@ test('creator profile messaging is expanded and verification uses the compact la
  assert.match(profile,/<section class="cw-panel direct-message-entry"><h2>Message this creator<\/h2>/);
  assert.doesNotMatch(profile,/<details class="cw-panel direct-message-entry">/);
  for(const file of ['app.js','src/server/profile-view.ts','src/server/project-ui.ts','src/server/project-detail-ui.ts','src/server/workspace.ts'])assert.match(read(file),/✓ Verified/);
+ assert.match(read('src/server/project-ui.ts'),/public-project-card compact-app-card/);
+ assert.match(read('future-design.css'),/One compact project-card system everywhere except the homepage catalog/);
 });
 
 test('verified progress notifications are stable milestone messages for eligible creators',()=>{

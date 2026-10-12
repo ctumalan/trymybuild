@@ -97,6 +97,7 @@ test('similar apps use one detailed card per row in the narrow project drawer',(
  assert.match(themeCss,/:is\(\[data-public-project\],\.detail-dialog\) \.similar-grid \{[^}]*grid-template-columns:1fr/);
  assert.match(themeCss,/:is\(\[data-public-project\],\.detail-dialog\) \.similar-card \{[\s\S]*?grid-template-columns:minmax\(0,42%\) minmax\(0,1fr\)/);
  assert.match(themeCss,/:is\(\[data-public-project\],\.detail-dialog\) \.similar-card \{[\s\S]*?background:#f4f4f4/);
+ assert.match(serverDetail,/class="similar-card-copy"[\s\S]*?class="similar-card-summary"[\s\S]*?class="similar-card-meta"/);
 });
 test('light project canvas keeps the accent vectors moving with reduced-motion support',()=>{
  assert.match(themeCss,/linear-gradient\(145deg,#fff,#fbfaf7\)/);

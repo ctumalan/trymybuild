@@ -2120,11 +2120,31 @@ body.public-site #app[tabindex="-1"]:focus { outline:none; }
 .future-discover .discovery-categories details[open]>summary {
  background:#fff; border-color:#cabbdb; color:#56317f;
 }
+.future-discover .all-apps-guide { position:relative; display:inline-flex; flex:0 0 auto; }
+.future-discover .all-apps-guide>button { width:100%; }
+.future-discover .catalog-first-apps-sticker {
+ position:absolute; z-index:4; left:2px; bottom:calc(100% + 11px); width:max-content; max-width:180px;
+ padding:7px 10px; border:1px solid #d5b9eb; border-radius:7px; background:#fff2b8;
+ color:#56317f; box-shadow:0 5px 12px #382b4620; transform:rotate(-2deg);
+ font:700 .7rem/1.2 "Inter",Arial,sans-serif; letter-spacing:.01em; pointer-events:none;
+ animation:catalog-first-apps-arrive .55s cubic-bezier(.2,.85,.3,1) both;
+}
+.future-discover .catalog-first-apps-sticker::after {
+ content:""; position:absolute; left:25px; bottom:-8px; width:12px; height:12px;
+ border-right:2px solid #9b67c4; border-bottom:2px solid #9b67c4; transform:rotate(45deg) skew(-8deg,-8deg);
+ background:#fff2b8;
+}
+@keyframes catalog-first-apps-arrive {
+ from { opacity:0; transform:translateY(-6px) rotate(-4deg) scale(.92); }
+ to { opacity:1; transform:translateY(0) rotate(-2deg) scale(1); }
+}
+@media(prefers-reduced-motion:reduce) { .future-discover .catalog-first-apps-sticker { animation:none; } }
 @media(max-width:620px) {
  .future-discover .results-heading + .discovery-categories,
  .future-discover .catalog-results > .discovery-categories { flex-wrap:wrap; }
  .future-discover .discovery-categories button,
  .future-discover .discovery-categories summary { min-height:44px; }
+ .future-discover .catalog-first-apps-sticker { left:0; bottom:calc(100% + 9px); font-size:.66rem; }
 }
 
 /* Carry the category control shape into app actions and tabs. */

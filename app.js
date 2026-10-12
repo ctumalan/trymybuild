@@ -405,7 +405,7 @@ function catalogCategoryNavigation() {
   const visible=preferred.map(name=>categories.find(item=>item.name===name)).filter(Boolean);
   const button=(category,slot='primary')=>`<button type="button" data-category-slot="${slot}" data-category-filter="${esc(category.name)}" aria-pressed="${state.category===category.name}">${categoryIcon(category.name)}<span>${esc(category.name==='Personal planning'?'Productivity':category.name)}</span></button>`;
   const menu=categories.map(category=>button(category,preferred.includes(category.name)?'responsive-overflow':'overflow'));
-  return `<nav class="discovery-categories" aria-label="Browse apps by category"><button type="button" data-category-filter="All" aria-pressed="${state.category==='All'}">All apps</button>${visible.map(category=>button(category)).join('')}<details><summary>More categories</summary><div>${menu.join('')}</div></details></nav>`;
+  return `<nav class="discovery-categories" aria-label="Browse apps by category"><span class="all-apps-guide"><span class="catalog-first-apps-sticker" id="catalog-first-apps-sticker">Explore the first apps</span><button type="button" data-category-filter="All" aria-describedby="catalog-first-apps-sticker" aria-pressed="${state.category==='All'}">All apps</button></span>${visible.map(category=>button(category)).join('')}<details><summary>More categories</summary><div>${menu.join('')}</div></details></nav>`;
 }
 function discover(communityFocused = false) {
   // Never fall back to the built-in catalog on the server; show loading/unavailable instead.

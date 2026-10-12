@@ -740,6 +740,7 @@ function openProductDetail(product, trigger) {
     detailProjectHistory.push({product: state.selected, scrollTop: current.querySelector('.detail-scroll')?.scrollTop || 0});
     state.selected = product;
     current.outerHTML = detailDrawer(product);
+    CWProjectView.mountGuidanceTyping(document.querySelector('.detail-overlay'));
     void loadProjectConversation();
     document.querySelector('.detail-back')?.focus({preventScroll:true});
     return;
@@ -750,6 +751,7 @@ function openProductDetail(product, trigger) {
   detailReturnFocus = trigger || document.activeElement;
   detailScrollY = window.scrollY;
   document.body.insertAdjacentHTML("beforeend", detailDrawer(product));
+  CWProjectView.mountGuidanceTyping(document.querySelector('.detail-overlay'));
   void loadProjectConversation();
   document.body.classList.add("is-dialog-open");
   document.body.style.position = "fixed";
@@ -764,6 +766,7 @@ function backProductDetail() {
   if (!previous || !current) return;
   state.selected = previous.product;
   current.outerHTML = detailDrawer(previous.product);
+  CWProjectView.mountGuidanceTyping(document.querySelector('.detail-overlay'));
   void loadProjectConversation();
   document.querySelector('.detail-scroll').scrollTop = previous.scrollTop;
   (document.querySelector('.detail-back') || document.querySelector('.detail-close'))?.focus({preventScroll:true});

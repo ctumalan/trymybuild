@@ -114,7 +114,7 @@ async function loadProjectReviews(region) {
     if(region.isConnected&&region.reviewRequest===request)applyReviewEvidence(region,data);
   } catch { /* Keep the server-provided aggregate when public evidence is unavailable. */ }
 }
-globalThis.CWProjectView = {theme,hero,video, conversation, conversationFeed, discussionFeed, loadProjectConversation, loadProjectReviews, recordCommunityReview, applyReviewEvidence};
+globalThis.CWProjectView = {theme,hero,video, conversation, conversationFeed, discussionFeed, loadProjectConversation, loadProjectReviews, recordCommunityReview, applyReviewEvidence, mountGuidanceTyping};
 if (typeof document === 'undefined') return;
 document.addEventListener('click', event => {
  const retry = event.target.closest('[data-conversation-retry]');
@@ -149,11 +149,15 @@ function typeGuidance(section){
  const copy=spans.map(span=>span.textContent||'');
  spans.forEach(span=>{span.dataset.typed='true';span.parentElement.style.minHeight=span.parentElement.getBoundingClientRect().height+'px';});
  if(reducedMotion)return;
- let delay=100;
- spans.forEach((span,index)=>{const characters=Array.from(copy[index]);setTimeout(()=>{if(!span.isConnected)return;let position=0;span.textContent='';span.classList.add('is-typing');const timer=setInterval(()=>{if(!span.isConnected){clearInterval(timer);return;}span.textContent+=characters[position++]||'';if(position>=characters.length){clearInterval(timer);span.classList.remove('is-typing');}},18);},delay);delay+=Math.min(1400,characters.length*18+220);});
+ spans.forEach(span=>{span.textContent='';});
+ let delay=450;
+ spans.forEach((span,index)=>{const characters=Array.from(copy[index]),pace=Math.max(14,Math.min(34,2200/Math.max(1,characters.length)));setTimeout(()=>{if(!span.isConnected)return;let position=0;span.classList.add('is-typing');const timer=setInterval(()=>{if(!span.isConnected){clearInterval(timer);return;}span.textContent+=characters[position++]||'';if(position>=characters.length){clearInterval(timer);span.classList.remove('is-typing');}},pace);},delay);delay+=characters.length*pace+450;});
 }
 const guidanceObserver=typeof IntersectionObserver==='function'?new IntersectionObserver(entries=>{for(const entry of entries)if(entry.isIntersecting){guidanceObserver.unobserve(entry.target);typeGuidance(entry.target);}},{threshold:.2,rootMargin:'0px 0px -8%'}):null;
-function mountGuidanceTyping(){document.querySelectorAll('.detail-description-notes:not([data-typing-mounted])').forEach(section=>{section.dataset.typingMounted='true';if(guidanceObserver)guidanceObserver.observe(section);else typeGuidance(section);});}
+function mountGuidanceTyping(root=document){
+ if(!root||typeof root.querySelectorAll!=='function')return;
+ root.querySelectorAll('.detail-description-notes:not([data-typing-mounted])').forEach(section=>{section.dataset.typingMounted='true';if(guidanceObserver)guidanceObserver.observe(section);else typeGuidance(section);});
+}
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', hydrate);
 else hydrate();
 window.addEventListener('cw-panel-ready', hydrate);

@@ -2123,14 +2123,14 @@ body.public-site #app[tabindex="-1"]:focus { outline:none; }
 .future-discover .all-apps-guide { position:relative; display:inline-flex; flex:0 0 auto; }
 .future-discover .all-apps-guide>button { width:100%; }
 .future-discover .catalog-first-apps-sticker {
- position:absolute; z-index:4; left:2px; bottom:calc(100% + 11px); width:max-content; max-width:180px;
+ position:absolute; z-index:4; left:2px; bottom:calc(100% + 23px); width:max-content; max-width:180px;
  padding:7px 10px; border:1px solid #d5b9eb; border-radius:7px; background:#fff2b8;
  color:#56317f; box-shadow:0 5px 12px #382b4620; transform:rotate(-2deg);
  font:700 .7rem/1.2 "Inter",Arial,sans-serif; letter-spacing:.01em; pointer-events:none;
  animation:catalog-first-apps-arrive .55s cubic-bezier(.2,.85,.3,1) both;
 }
 .future-discover .catalog-first-apps-arrow {
- position:absolute; z-index:-1; left:22px; top:calc(100% - 1px); width:54px; height:42px;
+ position:absolute; z-index:-1; left:22px; top:calc(100% - 1px); width:54px; height:26px;
  overflow:visible; color:#7545ad; filter:drop-shadow(0 1px 0 #fff);
 }
 .future-discover .catalog-first-apps-arrow path {

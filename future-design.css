@@ -701,7 +701,7 @@ a.secondary-button,.cw-main a.secondary-button { background: #f2edf8; color: #5e
 .discovery-entry-field input::placeholder { color: transparent; }
 .entry-placeholder { display: flex; align-items: center; position: absolute; inset: 1px 16px; overflow: hidden; color: #68616e; font: 400 14px/1.45 "DM Sans",sans-serif; pointer-events: none; }
 .entry-placeholder-track { display: block; flex: 0 0 auto; width: max-content; white-space: nowrap; }
-.entry-placeholder-track::after { content:""; display:inline-block; width:2px; height:1.15em; margin-left:3px; background:#7545ad; vertical-align:-.18em; animation:entry-caret-pulse 1.05s steps(1,end) infinite; }
+.entry-placeholder-track::before { content:""; display:inline-block; width:2px; height:1.15em; margin-right:3px; background:#7545ad; vertical-align:-.18em; animation:entry-caret-pulse 1.05s steps(1,end) infinite; }
 .entry-placeholder.is-scrolling .entry-placeholder-track { animation: entry-teleprompter var(--entry-duration,20s) linear infinite; }
 .discovery-entry-field:hover .entry-placeholder-track { animation-play-state: paused; }
 .discovery-entry-field input:not(:placeholder-shown) + .entry-placeholder,
@@ -724,7 +724,7 @@ a.secondary-button,.cw-main a.secondary-button { background: #f2edf8; color: #5e
   .entry-placeholder.is-scrolling .entry-placeholder-track { animation: none; }
   .entry-placeholder-track { width: 100%; white-space: normal; }
   .discovery-entry-field input::placeholder { color: transparent; }
-  .entry-placeholder-track::after { animation:none; }
+  .entry-placeholder-track::before { animation:none; }
 }
 
 /* Discovery cards offer a glimpse; the project view holds the conversation. */
@@ -2049,7 +2049,7 @@ body.public-site #app[tabindex="-1"]:focus { outline:none; }
 }
 .discovery-hero-action .discovery-entry-field { flex:0 0 auto; width:100%; }
 .discovery-hero-action .discovery-entry-field input {
- height:48px; min-height:48px; padding:8px 12px; font:400 18px/1.5 "Inter",Arial,sans-serif;
+ height:48px; min-height:48px; padding:8px 12px 8px 17px; font:400 18px/1.5 "Inter",Arial,sans-serif;
  border:0; outline:none; background:transparent;
 }
 .discovery-hero-action .entry-placeholder { inset:0 12px; color:#b8b3bb; font:300 18px/1.5 "Inter",Arial,sans-serif; text-align:left; }

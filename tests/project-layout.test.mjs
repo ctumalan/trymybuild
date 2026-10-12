@@ -19,6 +19,8 @@ test('detail view uses the invitation screenshot layout and relevant information
  assert.doesNotMatch(drawer,/<small>\$\{esc\(product\.price\)\} · \$\{esc\(product\.category\)\}/);
  assert.match(drawer,/class="recipient-art-chrome"/);
  assert.match(drawer,/class="recipient-art-viewport"/);
+ assert.match(app,/creator-byline[^`]*\$\{avatar\(creator,'byline-avatar'\)\}/);
+ assert.match(themeCss,/\.creator-byline \.byline-avatar \{ width:24px; height:24px/);
  assert.match(drawer,/detail-note-brand-icon[^>]*viewBox="0 0 256 256"/);
  assert.doesNotMatch(drawer,/--project-wallpaper|Good to know/);
  assert.doesNotMatch(drawer,/What saving does|About opening this app/);

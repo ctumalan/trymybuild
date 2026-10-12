@@ -216,7 +216,7 @@ function creatorVerificationBadge(creator) {
 
 function creatorLink(project, compact = false, showVerification = true, byline = false) {
   const creator = creatorFor(project);
-  if (byline) return `<button type="button" class="creator-byline" data-profile="${esc(creator.slug)}">by ${esc(creator.name)}${showVerification ? creatorVerificationBadge(creator) : ''}</button>`;
+  if (byline) return `<button type="button" class="creator-byline" data-profile="${esc(creator.slug)}">${avatar(creator,'byline-avatar')}<span>by ${esc(creator.name)}${showVerification ? creatorVerificationBadge(creator) : ''}</span></button>`;
   return `<button class="creator-link ${compact ? "is-compact" : ""}" data-profile="${esc(creator.slug)}">${avatar(creator)}<span><strong>${esc(creator.name)}</strong>${showVerification ? creatorVerificationBadge(creator) : ''}<small>${esc(creator.label)}</small></span></button>`;
 }
 
@@ -654,7 +654,8 @@ document.addEventListener('visibilitychange', () => {
 function projectDetailContent(product, preview = false, disabledLaunch = false) {
   const copy = projectPresentation[product.slug] || ['', '',product.summary,'',''];
   const presentation = product.presentation || {headline:copy[2],help:copy[3],firstTry:copy[4]};
-  const creator = preview ? `<span class="creator-byline">by ${esc(state.session?.user?.displayName||'You')}</span>` : creatorLink(product,true,true,true);
+  const previewName=state.session?.user?.displayName||'You',previewCreator={name:previewName,avatar:state.session?.user?.avatar||'',initials:String(previewName).split(/\s+/).slice(0,2).map(part=>part[0]).join('').toUpperCase()||'Y'};
+  const creator = preview ? `<span class="creator-byline">${avatar(previewCreator,'byline-avatar')}<span>by ${esc(previewName)}</span></span>` : creatorLink(product,true,true,true);
   return CWProjectView.hero({...product, presentation, url:product.url ? safeProjectUrl(product.url) : ''}, {creator, preview, disabledLaunch, titleId:preview ? '' : 'detail-title-'+product.slug});
 }
 function projectConversation(product) {

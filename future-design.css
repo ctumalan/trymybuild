@@ -617,6 +617,8 @@ a.secondary-button,.cw-main a.secondary-button { background: #f2edf8; color: #5e
 /* Quiet attribution keeps the app title first in the hierarchy. */
 .detail-creator { margin: -6px 0 22px; }
 .detail-creator .creator-byline { display: inline-flex; align-items: center; gap: 5px; padding: 0; border: 0; background: none; box-shadow: none; color: #68616e; font: 400 .78rem/1.5 "DM Sans",sans-serif; text-decoration: none; }
+.detail-creator .creator-byline .byline-avatar { width:24px; height:24px; flex:0 0 24px; border-radius:50%; font-size:.58rem; }
+.detail-creator .creator-byline .byline-avatar img { display:block; width:100%; height:100%; border-radius:inherit; object-fit:cover; }
 .detail-creator button.creator-byline,.detail-creator a.creator-byline { cursor: pointer; }
 .detail-creator button.creator-byline:hover,.detail-creator a.creator-byline:hover { color: #7545ad; text-decoration: underline; }
 .detail-creator .creator-byline .creator-verified { padding: 0; border: 0; border-radius: 0; background: transparent; color: #83728f; font-size: .68rem; opacity: .82; }

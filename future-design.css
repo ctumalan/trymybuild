@@ -1081,7 +1081,7 @@ body.public-site #app[tabindex="-1"]:focus { outline:none; }
 .discovery-hero-action .discovery-entry-row { display:flex; align-items:center; gap:8px; padding:7px; background:#fff; border:1px solid #e9e0f0; border-radius:20px; box-shadow:0 12px 36px #7545ad12; }
 .discovery-hero-action .discovery-entry-field { flex:1; min-width:0; }
 .discovery-hero-action .discovery-entry-field input { border:0; background:transparent; box-shadow:none; border-radius:12px; height:58px; padding-left:20px; caret-color:#7545ad; }
-.discovery-hero-action .discovery-entry-field input:focus::placeholder { color:#68616e; }
+.discovery-hero-action .discovery-entry-field input:focus::placeholder { color:#b8b3bb; }
 .discovery-hero-action .discovery-entry-row .primary-button { min-width:150px; height:58px; border-radius:14px; font-size:1.05rem; }
 .discovery-hero-action .discovery-explore { display:inline-block; margin-top:20px; }
 .hero-steps { display:flex; justify-content:center; align-items:center; gap:28px; color:#7c6d89; font-size:.86rem; margin:32px auto; }
@@ -2052,13 +2052,13 @@ body.public-site #app[tabindex="-1"]:focus { outline:none; }
  height:96px; min-height:96px; padding:20px 12px; font:400 18px/1.5 "Inter",Arial,sans-serif;
  border:0; outline:none; background:transparent;
 }
-.discovery-hero-action .entry-placeholder { inset:0 12px; color:#7b7480; font:400 18px/1.5 "Inter",Arial,sans-serif; text-align:left; }
+.discovery-hero-action .entry-placeholder { inset:0 12px; color:#b8b3bb; font:400 18px/1.5 "Inter",Arial,sans-serif; text-align:left; }
 .discovery-hero-action .entry-placeholder-track { width:100%; white-space:normal; animation:none; text-align:left; }
 .discovery-composer-toolbar {
  display:flex; align-items:center; justify-content:space-between; gap:12px;
  border-top:1px solid #eee9f2; padding-top:12px;
 }
-.discovery-composer-note { color:#7b7480; font-size:.8rem; line-height:1.4; }
+.discovery-composer-note { color:#b8b3bb; font-size:.8rem; line-height:1.4; }
 .discovery-hero-action .discovery-entry-row .primary-button {
  flex:0 0 auto; flex-direction:row; gap:10px; width:auto; min-width:0;
  height:44px; min-height:44px; padding:0 18px; border-radius:99px;

@@ -58,6 +58,11 @@ test('owned project menus can extend beyond compact cards without being covered'
  assert.match(css,/\.owned-project-card \.project-actions\[open\] \{ z-index:60; \}/);
 });
 
+test('app detail frames stand apart from the white site canvas',()=>{
+ const css=read('future-design.css');
+ assert.match(css,/\.detail-dialog\.invitation-detail\[data-showcase-theme\] \.recipient-hero \{[^}]*box-shadow:0 14px 34px #382b4617/);
+});
+
 test('verified progress notifications are stable milestone messages for eligible creators',()=>{
  const notifications=read('src/server/notifications.ts');
  assert.match(notifications,/verified-progress:'\+milestone/);

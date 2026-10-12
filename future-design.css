@@ -2389,7 +2389,7 @@ body.public-site .site-header,.cw-bar { background:#fff; }
 .project-detail-content.invitation-detail[data-showcase-theme] .recipient-hero,
 .detail-dialog.invitation-detail[data-showcase-theme] .recipient-hero {
  background:#fff; background-image:none; animation:none;
- border-color:#e5e5e5; box-shadow:none;
+ border-color:#e5e5e5; box-shadow:0 14px 34px #382b4617;
 }
 .invitation-detail[data-showcase-theme] .detail-signal-grid,
 .invitation-detail[data-showcase-theme] .detail-orbit,

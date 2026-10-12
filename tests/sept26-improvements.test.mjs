@@ -51,6 +51,13 @@ test('creator profile messaging is expanded and verification uses the compact la
  assert.match(read('future-design.css'),/One compact project-card system everywhere except the homepage catalog/);
 });
 
+test('owned project menus can extend beyond compact cards without being covered',()=>{
+ const css=read('future-design.css');
+ assert.match(css,/\.owned-project-card \{[^}]*overflow:visible/);
+ assert.match(css,/\.owned-project-card:has\(\.project-actions\[open\]\) \{ z-index:60; \}/);
+ assert.match(css,/\.owned-project-card \.project-actions\[open\] \{ z-index:60; \}/);
+});
+
 test('verified progress notifications are stable milestone messages for eligible creators',()=>{
  const notifications=read('src/server/notifications.ts');
  assert.match(notifications,/verified-progress:'\+milestone/);

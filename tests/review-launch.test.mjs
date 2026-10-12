@@ -77,10 +77,10 @@ test('discovery gives heading, categories, and the wish action separate zones',(
  assert.match(future,/@media\(max-width:620px\) \{[\s\S]*?\.discovery-categories details>div \{ position:absolute; top:calc\(100% \+ 8px\); right:0;/);
  assert.doesNotMatch(future,/\.discovery-categories details>div \{ position:fixed; inset:auto/);
  assert.match(future,/\.discovery-categories summary:focus-visible \{[^}]*outline:none/);
- assert.match(future,/\.catalog-first-apps-sticker \{[\s\S]*?bottom:calc\(100% \+ 23px\)/);
+ assert.match(future,/\.catalog-first-apps-sticker \{[\s\S]*?bottom:calc\(100% \+ 31px\)/);
  assert.match(future,/@keyframes catalog-first-apps-arrive/);
- assert.match(future,/\.catalog-first-apps-arrow-line \{[\s\S]*?animation:catalog-first-apps-arrow-line/);
- assert.match(future,/@keyframes catalog-first-apps-arrow-head/);
+ assert.match(future,/\.catalog-first-apps-arrow \{[\s\S]*?animation:catalog-first-apps-arrow-bob/);
+ assert.match(future,/@keyframes catalog-first-apps-arrow-bob/);
  assert.match(future,/\.catalog-wish-card \{[^}]*max-width:300px/);
  assert.match(css,/\.discover-page \.catalog-list,.profile-work \.catalog-list\{display:grid;grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/);
  assert.match(css,/@media\(max-width:1050px\)\{\.discover-page \.catalog-list,.profile-work \.catalog-list\{grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);

@@ -2123,45 +2123,35 @@ body.public-site #app[tabindex="-1"]:focus { outline:none; }
 .future-discover .all-apps-guide { position:relative; display:inline-flex; flex:0 0 auto; }
 .future-discover .all-apps-guide>button { width:100%; }
 .future-discover .catalog-first-apps-sticker {
- position:absolute; z-index:4; left:2px; bottom:calc(100% + 23px); width:max-content; max-width:180px;
+ position:absolute; z-index:4; left:2px; bottom:calc(100% + 31px); width:max-content; max-width:180px;
  padding:7px 10px; border:1px solid #d5b9eb; border-radius:7px; background:#fff2b8;
  color:#56317f; box-shadow:0 5px 12px #382b4620; transform:rotate(-2deg);
  font:700 .7rem/1.2 "Inter",Arial,sans-serif; letter-spacing:.01em; pointer-events:none;
  animation:catalog-first-apps-arrive .55s cubic-bezier(.2,.85,.3,1) both;
 }
 .future-discover .catalog-first-apps-arrow {
- position:absolute; z-index:-1; left:0; top:calc(100% - 1px); width:54px; height:26px;
+ position:absolute; z-index:-1; left:0; top:calc(100% - 1px); width:70px; height:32px;
  overflow:visible; color:#7545ad; filter:drop-shadow(0 1px 0 #fff);
+ animation:catalog-first-apps-arrow-bob 1.6s ease-in-out infinite;
 }
 .future-discover .catalog-first-apps-arrow path {
  fill:none; stroke:currentColor; stroke-width:3.4; stroke-linecap:round; stroke-linejoin:round;
-}
-.future-discover .catalog-first-apps-arrow-line {
- stroke-dasharray:90; animation:catalog-first-apps-arrow-line 3.4s ease-in-out infinite;
-}
-.future-discover .catalog-first-apps-arrow-head {
- stroke-dasharray:42; animation:catalog-first-apps-arrow-head 3.4s ease-in-out infinite;
 }
 @keyframes catalog-first-apps-arrive {
  from { opacity:0; transform:translateY(-6px) rotate(-4deg) scale(.92); }
  to { opacity:1; transform:translateY(0) rotate(-2deg) scale(1); }
 }
-@keyframes catalog-first-apps-arrow-line {
- 0%,3% { stroke-dashoffset:90; opacity:0; } 7% { opacity:1; } 26%,72% { stroke-dashoffset:0; opacity:1; } 82%,100% { stroke-dashoffset:0; opacity:0; }
-}
-@keyframes catalog-first-apps-arrow-head {
- 0%,20% { stroke-dashoffset:42; opacity:0; } 28%,72% { stroke-dashoffset:0; opacity:1; } 82%,100% { stroke-dashoffset:0; opacity:0; }
-}
+@keyframes catalog-first-apps-arrow-bob { 0%,100% { transform:translateY(0); } 50% { transform:translateY(4px); } }
 @media(prefers-reduced-motion:reduce) {
  .future-discover .catalog-first-apps-sticker { animation:none; }
- .future-discover .catalog-first-apps-arrow path { animation:none; stroke-dashoffset:0; opacity:1; }
+ .future-discover .catalog-first-apps-arrow { animation:none; }
 }
 @media(max-width:620px) {
  .future-discover .results-heading + .discovery-categories,
  .future-discover .catalog-results > .discovery-categories { flex-wrap:wrap; }
  .future-discover .discovery-categories button,
  .future-discover .discovery-categories summary { min-height:44px; }
- .future-discover .catalog-first-apps-sticker { left:0; bottom:calc(100% + 9px); font-size:.66rem; }
+ .future-discover .catalog-first-apps-sticker { left:0; bottom:calc(100% + 28px); font-size:.66rem; }
 }
 
 /* Carry the category control shape into app actions and tabs. */

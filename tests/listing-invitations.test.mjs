@@ -68,3 +68,14 @@ test('preview renders untrusted creator text as text and offers the two requeste
  assert.match(fields,/>How it helps<textarea name="helps"/);assert.match(fields,/>One thing to try first<textarea name="firstTry"/);
  assert.doesNotMatch(fields,/recipient_email|owner_user_id|listing_status/);
 });
+test('prepared app pages show the opted-in tester directory before the editing flow',async()=>{
+ const [route,client]=await Promise.all([
+  import('node:fs/promises').then(fs=>fs.readFile(new URL('../src/pages/listing-invitation/[token].ts',import.meta.url),'utf8')),
+  import('node:fs/promises').then(fs=>fs.readFile(new URL('../listing-invitations.js',import.meta.url),'utf8'))
+ ]);
+ assert.match(route,/Testers available now to test and give feedback on your app/);
+ assert.match(route,/data-listing-invitation-testers/);
+ assert.match(route,/After you save and publish your app, you can invite them/);
+ assert.match(client,/fetch\('\/api\/tester-preview'\)/);
+ assert.match(client,/Open to early app feedback/);
+});

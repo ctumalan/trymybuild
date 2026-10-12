@@ -1,5 +1,10 @@
 (() => {
  const admin=document.querySelector('[data-listing-invitation-admin]'),claim=document.querySelector('[data-listing-invitation-claim]'),form=admin||claim;
+ const testerTarget=document.querySelector('[data-listing-invitation-testers]'),esc=value=>String(value??'').replace(/[&<>"']/g,character=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[character]));
+ if(testerTarget)fetch('/api/tester-preview').then(response=>response.ok?response.json():Promise.reject()).then(data=>{
+  const testers=Array.isArray(data.testers)?data.testers:[];
+  testerTarget.innerHTML=testers.length?testers.map(tester=>{const name=tester.name||'TryMyBuild member',initials=tester.initials||String(name).slice(0,2).toUpperCase(),details=[tester.label,tester.project?.category].filter(Boolean).join(' · ');return `<article class="listing-invitation-tester"><a href="/people/${encodeURIComponent(String(tester.slug||''))}">${tester.avatar?`<img src="${esc(tester.avatar)}" alt="" loading="lazy">`:`<span aria-hidden="true">${esc(initials)}</span>`}<span><strong>${esc(name)}</strong><small>${esc(details||'Open to early app feedback')}</small></span></a>${tester.bio?`<p>${esc(tester.bio)}</p>`:''}</article>`;}).join(''):'<p>No tester profiles are available right now. You can still invite people you know after publishing.</p>';
+ }).catch(()=>{testerTarget.innerHTML='<p>Tester profiles are temporarily unavailable. You can still continue with your app.</p>';});
  document.querySelector('[data-copy-invitation]')?.addEventListener('click',async()=>{const input=document.querySelector('[data-invitation-link]'),status=document.querySelector('[data-copy-status]');try{await navigator.clipboard.writeText(input.value);status.textContent='Preview link copied.';}catch{input.select();status.textContent='Select and copy the preview link above.';}});
  if(!form)return;
  const status=form.querySelector('[data-invitation-status]'),button=form.querySelector('[type=submit]');

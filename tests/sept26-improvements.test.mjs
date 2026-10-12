@@ -60,6 +60,7 @@ test('owned project menus can extend beyond compact cards without being covered'
 
 test('app detail frames stand apart from the white site canvas',()=>{
  const css=read('future-design.css');
+ assert.match(css,/\.detail-dialog\.invitation-detail\[data-showcase-theme\] \.recipient-hero \{[\s\S]*?background:#f4f4f4/);
  assert.match(css,/\.detail-dialog\.invitation-detail\[data-showcase-theme\] \.recipient-hero \{[^}]*box-shadow:0 14px 34px #382b4617/);
 });
 

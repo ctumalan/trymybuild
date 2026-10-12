@@ -28,6 +28,7 @@ const creators = [
     type: "independent",
     name: "Christian Tumalan",
     initials: "CT",
+    avatar: "/assets/avatars/chris-nava-founder.jpg",
     label: "Musician · Founder of TryMyBuild",
     bio: "I am a working musician building practical tools and a more human way for independent creators to learn from the people they hope to help.",
   },
@@ -35,6 +36,7 @@ const creators = [
 
 // The launch collection is attributed to its actual in-house studio.
 creators.push({ slug: "creatorworks-studio", name: "TryMyBuild Studio", initials: "TMB",
+  avatar: "/assets/avatars/chris-nava-founder.jpg",
   type: "company", verified: true, founderException: true,
   label: "In-house creator · Founded by Christian Tumalan",
   bio: "Our launch collection of practical tools, built in-house at TryMyBuild. Try something useful and tell us what worked, what confused you, and what would make it better." });

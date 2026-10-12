@@ -8,6 +8,7 @@ const css=readFileSync(new URL('../launch-refinements.css',import.meta.url),'utf
 const themeCss=readFileSync(new URL('../future-design.css',import.meta.url),'utf8');
 const shared=readFileSync(new URL('../project-view.js',import.meta.url),'utf8');
 const serverDetail=readFileSync(new URL('../src/pages/projects/[slug].ts',import.meta.url),'utf8');
+const catalogDb=readFileSync(new URL('../src/server/catalog-db.ts',import.meta.url),'utf8');
 const drawer=shared+app.slice(app.indexOf('function projectDetailContent(product'),app.indexOf("document.addEventListener('input'",app.indexOf('function detailDrawer(product)')));
 test('detail view uses the invitation screenshot layout and relevant information',()=>{
  assert.match(drawer,/class="recipient-art"/);
@@ -21,6 +22,8 @@ test('detail view uses the invitation screenshot layout and relevant information
  assert.match(drawer,/class="recipient-art-viewport"/);
  assert.match(app,/creator-byline[^`]*\$\{avatar\(creator,'byline-avatar'\)\}/);
  assert.match(themeCss,/\.creator-byline \.byline-avatar \{ width:24px; height:24px/);
+ assert.match(app,/name: "Christian Tumalan",[\s\S]*?avatar: "\/assets\/avatars\/chris-nava-founder\.jpg"/);
+ assert.match(catalogDb,/p\.avatar_path \|\| \(p\.display_name === 'Christian Tumalan' \? '\/assets\/avatars\/chris-nava-founder\.jpg'/);
  assert.match(drawer,/detail-note-brand-icon[^>]*viewBox="0 0 256 256"/);
  assert.doesNotMatch(drawer,/--project-wallpaper|Good to know/);
  assert.doesNotMatch(drawer,/What saving does|About opening this app/);

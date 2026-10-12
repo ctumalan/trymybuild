@@ -1000,7 +1000,7 @@ function listingSettingsPage() {
   const importCard = hasServer ? `<section class="cw-panel"><h2>Builds & updates</h2><p>Add release notes and choose which build is active. Announce improvements to people who saved your project.</p><a class="secondary-button" href="/dashboard/builds?project=${encodeURIComponent(listingDraft.serverSlug)}">Manage builds</a></section>` : `<div class="cw-panel listing-import"><h2>Save this draft to your account</h2><p>Your draft is currently on this device only. Save it to your account (${name}) so you can publish it and reach it from any device.</p><button class="primary-button" data-listing-save-server>Save to my account</button><p class="privacy-note">🔒 Nothing is published yet. Your on-device draft is kept until the save is confirmed.</p></div>`;
   const publishControls = !hasServer ? '' : `<div class="cw-panel"><p role="status" data-listing-server-status>${esc(statusNote)}</p><div class="form-actions">${status === 'published'
       ? `<a class="primary-button" href="/?catalog=${encodeURIComponent(listingDraft.serverSlug)}">View my app in the catalog</a><button class="secondary-button" data-listing-unpublish>Unpublish</button>`
-      : '<button class="primary-button" data-listing-publish>Publish my app</button>'}<a class="share-browse-link" href="/dashboard?view=creator">Go to My projects →</a></div><p class="privacy-note">Publish instantly to the public catalog. No admin approval needed. You can unpublish anytime.</p></div>`;
+      : '<button class="primary-button" data-listing-publish>Publish my app</button>'}<a class="share-browse-link" href="/dashboard?view=creator">Go to My apps →</a></div><p class="privacy-note">Publish instantly to the public catalog. No admin approval needed. You can unpublish anytime.</p></div>`;
   return `<section class="page-shell listing-review"><p class="eyebrow">Your project · Settings</p><h1>Make it yours.</h1><p>Signed in as ${name}.</p><form data-listing-settings>${sharingPreferenceFields()}${listingField('title', 'Confirm your app’s name', 'Your app’s name')}${listingField('url', 'Confirm your app’s link', 'https://your-app.com')}${listingCategoryPicker()}${listingPricingField()}${listingField('does','What does your project do?','Describe your project in a short sentence.',true)}${listingField('helps','How does it help people?','Explain the benefit in a short sentence.',true)}${listingField('firstTry','What should someone try first?','Suggest one action in a short sentence.',true)}${videoField()}<p class="share-name-hint">Keep answers clear and concise. Edit your screenshot in the preview below. Categories appear in homepage filters only when a listing is published. Drafts never create public filters.</p><p data-video-status class="video-status" role="status"></p><div class="form-actions share-start-actions"><button class="primary-button" type="submit">${hasServer ? 'Save changes' : 'Save draft'}</button><button class="secondary-button" type="button" data-listing-review>Back</button><button type="button" class="secondary-button listing-reset-button" data-listing-reset>Start over</button></div><p data-listing-status role="status"></p></form>${publishControls}${importCard}${listingPreview()}${status === 'published' ? `<section class="cw-panel tester-handoff"><p class="eyebrow">Your next step</p><h2>Invite your first testers</h2><p>Start with a few people who might use your app. Ask them to try one task and share what happened.</p><div class="form-actions"><button type="button" class="primary-button" data-invite-project="${esc(listingDraft.serverSlug)}">Prepare invitation</button><a class="secondary-button" href="/projects/${encodeURIComponent(listingDraft.serverSlug)}?invite=1">View your feedback page</a><button type="button" class="secondary-button" data-copy-feedback-link="${esc(listingDraft.serverSlug)}">Copy feedback link</button><p data-copy-feedback-status role="status"></p></div><p><a href="/guides/first-app-testers">No audience yet? Start here →</a></p></section>` : ''}</section>`;
 }
 function listingAccountPage() {
@@ -1133,7 +1133,7 @@ document.addEventListener('submit', event => {
 // Server-backed listing persistence. The on-device draft is never cleared until the server confirms,
 // and the account is only ever attached after an explicit action by the signed-in creator.
 async function saveServerListing(statusEl) {
-  if (listingDraft.accountOwner && listingDraft.accountOwner !== state.session?.user?.id) throw new Error('This draft belongs to another account. Open a project from My projects or choose Start over.');
+  if (listingDraft.accountOwner && listingDraft.accountOwner !== state.session?.user?.id) throw new Error('This draft belongs to another account. Open a project from My apps or choose Start over.');
   if (listingDraft.video && !CWMedia.videoUrl(listingDraft.video)) throw new Error('Use a YouTube, Vimeo, or Loom video URL or iframe embed.');
   const currentUrl=listingUrl(listingDraft.url);
   // URL changes refresh captured previews, while owner uploads remain untouched unless the owner
@@ -1628,7 +1628,7 @@ async function loadDailyComments(){
 
 // Canonical recipient page; sharing always opens a preview first.
 function productShareUrl(slug) { return new URL('/projects/'+encodeURIComponent(slug),location.origin).href; }
-// Load an existing owned project into the builder (used by "Continue editing" from My projects),
+// Load an existing owned project into the builder (used by "Continue editing" from My apps),
 // or refresh the current draft's server status. Never attaches to an account on its own.
 function loadOwnedProjectIntoDraft(p) {
   listingDraft.pricing = p.pricing || CWPricing.kind(p.price || 'Free');
@@ -1704,7 +1704,7 @@ document.addEventListener('click', event => {
   if (similar) { const p = projects.find(p => p.slug === similar.dataset.similarProject); if (p) openProductDetail(p); }
   const play = event.target.closest('[data-load-video]');
   if (play) { const url = CWMedia.videoUrl(play.dataset.loadVideo); if (url) play.parentElement.innerHTML = `<iframe src="${esc(url)}" title="Project video" loading="lazy" sandbox="allow-scripts allow-same-origin allow-presentation" allow="fullscreen; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>`; }
-  if (event.target.closest('[data-listing-reset]') && confirm('Start over with an empty draft? Projects already saved to your account will remain in My projects.')) {
+  if (event.target.closest('[data-listing-reset]') && confirm('Start over with an empty draft? Projects already saved to your account will remain in My apps.')) {
     invalidateListingCapture(); resetListingDraft(); listingSettings = false; listingStep = 0; state.route = 'share';
     history.replaceState({}, '', '/?listing=settings'); render();
   }

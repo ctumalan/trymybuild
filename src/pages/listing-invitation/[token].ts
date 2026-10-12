@@ -11,7 +11,7 @@ export const GET:APIRoute=async context=>{
   const user=await currentUser(context),sameEmail=user?.emailVerified&&user.email.trim().toLowerCase()===row?.recipient_email;
   if(row?.claimed_by&&sameEmail){
    const member=await ensureMember(user!);
-   if(member.id===row.claimed_by)return privatePage(surface('Your app is saved',`<section class="cw-panel"><h1>Your app is saved.</h1><p>You manage this listing from your dashboard. It was saved as a private draft. Only you can choose to publish it.</p><a class="primary-button" href="/dashboard?view=creator">Open my projects</a></section>`));
+   if(member.id===row.claimed_by)return privatePage(surface('Your app is saved',`<section class="cw-panel"><h1>Your app is saved.</h1><p>You manage this listing from your dashboard. It was saved as a private draft. Only you can choose to publish it.</p><a class="primary-button" href="/dashboard?view=creator">Open my apps</a></section>`));
   }
   if(!invitationOpen(row))return privatePage(surface('Preview unavailable','<section class="cw-panel"><h1>This preview is no longer available.</h1><p>The invitation may have expired, been withdrawn or already been claimed.</p><a href="/?listing=settings">Create your own app listing</a></section>','',410));
   const wrongAccount=!!user&&!sameEmail;

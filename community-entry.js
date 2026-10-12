@@ -10,7 +10,7 @@ let wishesLoading = false;
 let wishesHaveMore = false;
 let wishLoadVersion = 0;
 function sharingPreferenceFields() {
- if(listingDraft.serverStatus==='published')return `<fieldset class="sharing-preference"><legend>Listing visibility</legend><p>${listingDraft.serverStatus==='published'?'Your listing is public.':'Your listing is awaiting public review.'} To change this, use ${listingDraft.serverStatus==='published'?'Unpublish':'Withdraw from review'} ${listingDraft.serverStatus==='published'?'in project settings below':'in the My projects dashboard’s ⋯ menu'}.</p></fieldset>`;
+ if(listingDraft.serverStatus==='published')return `<fieldset class="sharing-preference"><legend>Listing visibility</legend><p>${listingDraft.serverStatus==='published'?'Your listing is public.':'Your listing is awaiting public review.'} To change this, use ${listingDraft.serverStatus==='published'?'Unpublish':'Withdraw from review'} ${listingDraft.serverStatus==='published'?'in project settings below':'in the My apps dashboard’s ⋯ menu'}.</p></fieldset>`;
  const preference=listingDraft.sharingPreference || 'not_sure';
  return `<fieldset class="sharing-preference"><legend>How would you like to share your app?</legend><div>${[['private','Privately'],['public','Publicly'],['not_sure','Not sure yet']].map(([value,label])=>`<label><input type="radio" name="sharingPreference" data-sharing-preference value="${value}" ${preference===value?'checked':''}>${label}</label>`).join('')}</div><p data-sharing-note>${sharingPreferenceNote(preference)}</p></fieldset>`;
 }

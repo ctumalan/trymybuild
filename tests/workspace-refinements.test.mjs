@@ -22,8 +22,9 @@ test('editing a paid listing without changing pricing retains the existing price
  const result=await saveDraft(store,{ownerId:'owner',id:row.id,input:{price_label:'Paid',is_free:false}});
  assert.equal(result.project.price_label,'$5 per month');assert.equal(result.reviewReset,false);
 });
-test('projects are one collection with Add project first and settings behind ellipsis',async()=>{
+test('apps are one collection with Add project first and settings behind ellipsis',async()=>{
  const f=workspaceFixtures(),response=await f.routes['/dashboard'](context('/dashboard?view=creator')),html=await response.text();assert.equal(response.status,200);
+ assert.match(html,/My apps/);assert.doesNotMatch(html,/My projects/);
  assert.equal((html.match(/data-project-card/g)||[]).length,6);assert.ok(html.indexOf('＋ Add project')<html.indexOf('data-project-card'));
  assert.doesNotMatch(html,/Your next insight starts|Manage builds & release notes|project-selector/);
  assert.match(html,/<details class="project-actions">/);assert.match(html,/2 unread conversations/);assert.match(html,/mini-preview/);

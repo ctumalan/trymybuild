@@ -150,12 +150,15 @@ function typeGuidance(section){
  spans.forEach(span=>{span.dataset.typed='true';span.parentElement.style.minHeight=span.parentElement.getBoundingClientRect().height+'px';});
  if(reducedMotion)return;
  spans.forEach(span=>{span.textContent='';});
+ spans.slice(1).forEach(span=>span.parentElement?.parentElement?.classList.add('guidance-waiting'));
  let delay=350;
  spans.forEach((span,index)=>{
   const characters=Array.from(copy[index]),pace=Math.max(14,Math.min(34,2200/Math.max(1,characters.length)));
   setTimeout(()=>{
    if(!span.isConnected)return;
-   const icon=span.parentElement?.parentElement?.querySelector('.detail-note-icon');
+   const card=span.parentElement?.parentElement;
+   card?.classList.remove('guidance-waiting');
+   const icon=card?.querySelector('.detail-note-icon');
    icon?.classList.add('is-guidance-pulsing');
    setTimeout(()=>{
     if(!span.isConnected)return;
@@ -164,7 +167,7 @@ function typeGuidance(section){
     const timer=setInterval(()=>{if(!span.isConnected){clearInterval(timer);return;}span.textContent+=characters[position++]||'';if(position>=characters.length){clearInterval(timer);span.classList.remove('is-typing');}},pace);
    },420);
   },delay);
-  delay+=420+characters.length*pace+450;
+  delay+=420+characters.length*pace+180;
  });
 }
 const guidanceObserver=typeof IntersectionObserver==='function'?new IntersectionObserver(entries=>{for(const entry of entries)if(entry.isIntersecting){guidanceObserver.unobserve(entry.target);typeGuidance(entry.target);}},{threshold:.2,rootMargin:'0px 0px -8%'}):null;

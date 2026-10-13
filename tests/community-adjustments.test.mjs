@@ -19,7 +19,7 @@ test('wish categories include the complete existing category menu',()=>{
  assert.deepEqual(wishCategories,[...source.matchAll(/name: "([^"]+)"/g)].map(x=>x[1]));
  assert.equal(wishCategories.length,33);
 });
-test('compact comments have unique labels, contextual placeholders and hidden empty send arrow',()=>{
+test('compact comments have unique labels, contextual placeholders and an always-visible send arrow',()=>{
  const ctx=vm.createContext({projectCommentDraft:()=>'',commentWordCount:()=>0,state:{communityPosts:[]},esc:String});
  vm.runInContext(app.slice(app.indexOf('function projectCommentComposer('),app.indexOf('// A return is an invitation')),ctx);
  const p={slug:'example'};
@@ -27,11 +27,12 @@ test('compact comments have unique labels, contextual placeholders and hidden em
  assert.match(ctx.projectCommentComposer(p,true),/id="comment-card-example"/);
  assert.match(ctx.projectCommentComposer(p),/id="comment-detail-example"/);
  assert.match(ctx.projectCommentComposer(p),/Mention one or two improvements/);
- assert.match(ctx.projectCommentComposer(p),/aria-label="Send comment" hidden/);
+ assert.match(ctx.projectCommentComposer(p),/aria-label="Send comment">/);
+ assert.doesNotMatch(ctx.projectCommentComposer(p),/class="comment-send"[^>]*hidden/);
  assert.doesNotMatch(ctx.projectCommentComposer(p),/>Post comment</);
  const conversation=ctx.projectCommentComposer(p,false,'conversation-');
  assert.match(conversation,/class="conversation-input-shell"/);
- assert.match(conversation,/aria-label="Post comment" hidden><svg/);
+ assert.match(conversation,/aria-label="Post comment"><svg/);
  assert.match(conversation,/<summary aria-label="Comment guidelines">\?<\/summary>/);
  assert.doesNotMatch(conversation,/>Post comment<|Posts immediately|<summary>Guidelines/);
  ctx.projectCommentDraft=()=>'<script>bad</script>';

@@ -568,8 +568,8 @@ function projectCommentComposer(product, compact = false, context = '') {
   const empty = !state.communityPosts.some(post=>post.projectSlug===product.slug);
   const conversation = context === 'conversation-';
   const placeholder = conversation ? 'Ask the maker a question, share an idea, or tell us what you tried…' : compact && empty ? 'Be the first to leave a public comment' : 'What is the first thing you liked? Was the price right? What was confusing? Mention one or two improvements.';
-  if (conversation) return `<form class="detail-comment-form conversation-composer" data-project-comment="${esc(product.slug)}"><label class="visually-hidden" for="comment-${esc(id)}">Leave a public comment</label><div class="conversation-input-shell"><textarea id="comment-${esc(id)}" name="comment" rows="1" required data-project-comment-field placeholder="Ask the maker a question or share a thought.">${esc(draft)}</textarea><div class="comment-composer-tools"><details class="conversation-guidelines"><summary aria-label="Comment guidelines">?</summary><p>Discuss the app, not the person. One comment per app; sign in to update yours. Guests appear as Guest. <a href="/community-guidelines">Community guidelines</a></p></details><button class="comment-send" type="submit" aria-label="Post comment" ${draft.trim()?'':'hidden'}><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="currentColor"><path d="M3 3.7c-.5-.2-1 .3-.8.8l3 6.5 9.5 1-9.5 1-3 6.5c-.2.5.3 1 .8.8l18-8.5a.9.9 0 0 0 0-1.6L3 3.7Z"/></svg></button></div></div><p data-comment-status role="status" aria-live="polite"></p></form>`;
-  return `<form class="detail-comment-form compact-comment${conversation ? ' conversation-composer' : ''}" data-project-comment="${esc(product.slug)}"><div class="comment-input-wrap"><label class="visually-hidden" for="comment-${esc(id)}">Leave a public comment</label><textarea id="comment-${esc(id)}" name="comment" rows="2" required data-project-comment-field placeholder="${placeholder}">${esc(draft)}</textarea><button class="comment-send" type="submit" aria-label="${conversation?'Post comment':'Send comment'}" ${draft.trim()?'':'hidden'}>➤</button></div><details class="inline-help"><summary aria-label="Comment guidelines">?</summary><p><strong>Be thoughtful. Be respectful.</strong> Discuss the app, not the person. Use clear, considerate language. <a href="/community-guidelines">Guidelines</a>. Guests appear as Guest.</p></details><p data-comment-status role="status" aria-live="polite"></p></form>`;
+  if (conversation) return `<form class="detail-comment-form conversation-composer" data-project-comment="${esc(product.slug)}"><label class="visually-hidden" for="comment-${esc(id)}">Leave a public comment</label><div class="conversation-input-shell"><textarea id="comment-${esc(id)}" name="comment" rows="1" required data-project-comment-field placeholder="Ask the maker a question or share a thought.">${esc(draft)}</textarea><div class="comment-composer-tools"><details class="conversation-guidelines"><summary aria-label="Comment guidelines">?</summary><p>Discuss the app, not the person. One comment per app; sign in to update yours. Guests appear as Guest. <a href="/community-guidelines">Community guidelines</a></p></details><button class="comment-send" type="submit" aria-label="Post comment"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="currentColor"><path d="M3 3.7c-.5-.2-1 .3-.8.8l3 6.5 9.5 1-9.5 1-3 6.5c-.2.5.3 1 .8.8l18-8.5a.9.9 0 0 0 0-1.6L3 3.7Z"/></svg></button></div></div><p data-comment-status role="status" aria-live="polite"></p></form>`;
+  return `<form class="detail-comment-form compact-comment${conversation ? ' conversation-composer' : ''}" data-project-comment="${esc(product.slug)}"><div class="comment-input-wrap"><label class="visually-hidden" for="comment-${esc(id)}">Leave a public comment</label><textarea id="comment-${esc(id)}" name="comment" rows="2" required data-project-comment-field placeholder="${placeholder}">${esc(draft)}</textarea><button class="comment-send" type="submit" aria-label="${conversation?'Post comment':'Send comment'}">➤</button></div><details class="inline-help"><summary aria-label="Comment guidelines">?</summary><p><strong>Be thoughtful. Be respectful.</strong> Discuss the app, not the person. Use clear, considerate language. <a href="/community-guidelines">Guidelines</a>. Guests appear as Guest.</p></details><p data-comment-status role="status" aria-live="polite"></p></form>`;
 }
 
 // A return is an invitation to comment, never proof that an app was used.
@@ -658,7 +658,9 @@ function projectDetailContent(product, preview = false, disabledLaunch = false) 
   const presentation = product.presentation || {headline:copy[2],help:copy[3],firstTry:copy[4]};
   const previewName=state.session?.user?.displayName||'You',previewCreator={name:previewName,avatar:state.session?.user?.avatar||'',initials:String(previewName).split(/\s+/).slice(0,2).map(part=>part[0]).join('').toUpperCase()||'Y'};
   const creator = preview ? `<span class="creator-byline">${avatar(previewCreator,'byline-avatar')}<span>by ${esc(previewName)}</span></span>` : creatorLink(product,true,true,true);
-  return CWProjectView.hero({...product, presentation, url:product.url ? safeProjectUrl(product.url) : ''}, {creator, preview, disabledLaunch, titleId:preview ? '' : 'detail-title-'+product.slug});
+  const saved = state.saved.has(product.slug);
+  const headingActions = preview ? '' : `<div class="invite-actions"><button class="secondary-button detail-save ${saved?'is-saved':''}" data-save="${esc(product.slug)}">${saved?'♥ Saved':'♡ Save'}</button><button class="secondary-button detail-share" data-share-product="${esc(product.slug)}">Share</button><span class="detail-share-status" data-share-status role="status"></span></div>`;
+  return CWProjectView.hero({...product, presentation, url:product.url ? safeProjectUrl(product.url) : ''}, {creator, preview, disabledLaunch, headingActions, titleId:preview ? '' : 'detail-title-'+product.slug});
 }
 function projectConversation(product) {
   return CWProjectView.conversation(product, {posts:state.communityPosts.filter(post=>post.projectSlug===product.slug), loading:!!window.CW_SERVER, composer:projectCommentComposer(product,false,'conversation-')});
@@ -667,16 +669,14 @@ function loadProjectConversation(root = document.querySelector('.detail-overlay'
   if (window.CW_SERVER) return CWProjectView.loadProjectConversation(root?.querySelector('[data-conversation]'));
 }
 function projectPanel(product) {
-  const saved = state.saved.has(product.slug);
-  return `<main class="recipient-main project-detail-content invitation-detail mealmap-detail" data-showcase-theme="${CWProjectView.theme(product)}" data-public-project="${esc(product.slug)}"><header class="public-detail-header"><div><strong>${esc(product.name)}</strong></div><div class="invite-actions"><button class="secondary-button detail-save ${saved?'is-saved':''}" data-save="${esc(product.slug)}">${saved?'♥ Saved':'♡ Save'}</button><button class="secondary-button detail-share" data-share-product="${esc(product.slug)}">Share</button><span class="detail-share-status" data-share-status role="status"></span></div></header>${projectDetailContent(product)}<div class="mealmap-after">${projectConversation(product)}</div>${similarSection(product)}</main>`;
+  return `<main class="recipient-main project-detail-content invitation-detail mealmap-detail" data-showcase-theme="${CWProjectView.theme(product)}" data-public-project="${esc(product.slug)}"><header class="public-detail-header"><div><strong>${esc(product.name)}</strong></div></header>${projectDetailContent(product)}<div class="mealmap-after">${projectConversation(product)}</div>${similarSection(product)}</main>`;
 }
 function detailDrawer(product) {
-  const saved = state.saved.has(product.slug);
   return `<div class="detail-overlay" data-detail-overlay>
     <button class="detail-backdrop" data-detail-close aria-label="Close app details"></button>
     <section class="detail-dialog mealmap-detail invitation-detail" data-showcase-theme="${CWProjectView.theme(product)}" role="dialog" aria-modal="true" aria-labelledby="detail-title-${esc(product.slug)}" tabindex="-1">
       <div class="detail-scroll">
-        <header class="project-panel-bar"><span class="overlay-brand" aria-label="TryMyBuild"><img class="brand-mark" src="/assets/brand/trymybuild-mark.svg" width="40" height="40" alt=""><span class="brand-name">TryMy<span class="brand-name-works">Build</span></span></span><button class="detail-close" data-detail-close aria-label="Close ${esc(product.name)} details">×</button></header><div class="project-detail-content"><header class="public-detail-header">${detailProjectHistory.length ? `<button type="button" class="detail-back" data-detail-back aria-label="Previous project">←</button>` : ''}<div><strong>${esc(product.name)}</strong></div><div class="invite-actions"><button class="secondary-button detail-save ${saved?'is-saved':''}" data-save="${esc(product.slug)}">${saved?'♥ Saved':'♡ Save'}</button><button class="secondary-button detail-share" data-share-product="${esc(product.slug)}">Share</button><span class="detail-share-status" data-share-status role="status"></span></div></header>${projectDetailContent(product)}
+        <header class="project-panel-bar"><span class="overlay-brand" aria-label="TryMyBuild"><img class="brand-mark" src="/assets/brand/trymybuild-mark.svg" width="40" height="40" alt=""><span class="brand-name">TryMy<span class="brand-name-works">Build</span></span></span><button class="detail-close" data-detail-close aria-label="Close ${esc(product.name)} details">×</button></header><div class="project-detail-content"><header class="public-detail-header">${detailProjectHistory.length ? `<button type="button" class="detail-back" data-detail-back aria-label="Previous project">←</button>` : ''}<div><strong>${esc(product.name)}</strong></div></header>${projectDetailContent(product)}
         <div class="mealmap-after">${projectConversation(product)}</div>${similarSection(product)}</div>
       </div>
     </section>
@@ -685,7 +685,7 @@ function detailDrawer(product) {
 
 document.addEventListener('input', event => {
   const projectField=event.target.closest('[data-project-comment-field]');
-  if(projectField){const form=projectField.closest('[data-project-comment]');saveProjectCommentDraft(form.dataset.projectComment,projectField.value);form.querySelector('[type="submit"]').hidden=!projectField.value.trim();projectField.setCustomValidity(projectField.value.trim()?'':'Write a comment.');return;}
+  if(projectField){const form=projectField.closest('[data-project-comment]');saveProjectCommentDraft(form.dataset.projectComment,projectField.value);projectField.setCustomValidity(projectField.value.trim()?'':'Write a comment.');return;}
   const field=event.target.closest('[data-daily-discussion] textarea');if(!field)return;
   saveDiscussionDraft(field.closest('form').dataset.discussionCategory,field.value);field.setCustomValidity(field.value.trim()?'':'Write a response.');
 });
@@ -724,7 +724,7 @@ document.addEventListener('submit', async event => {
     saveProjectCommentDraft(form.dataset.projectComment,'');status.textContent = data.message||'Your comment is now public.';
     if(data.guest)window.CWGuestComment?.offer(status);
     delete form.dataset.requestId;
-    form.reset();field.value='';button.hidden=true;
+    form.reset();field.value='';
     field.setCustomValidity('');
     const conversation=form.closest('[data-conversation]');if(conversation)await window.CWProjectView?.loadProjectConversation(conversation);
     if(form.closest('.return-feedback-dialog'))setTimeout(()=>form.closest('.return-feedback-dialog')?.dispatchEvent(new Event('cw-feedback-complete')),350);
@@ -807,7 +807,7 @@ function communityPage() { return discover(true); }
 function profilePage() {
   const creator = creators.find(item => item.slug === state.profileSlug) || creators[0];
   const creatorProjects = projects.filter(project => project.creatorSlug === creator.slug);
-  return `<section class="page-shell profile-page"><header class="profile-hero">${avatar(creator, "large")}<div><p class="eyebrow">Creator profile</p><h1>${esc(creator.name)}</h1>${creatorVerificationBadge(creator)}<strong>${esc(creator.label)}</strong><p>${esc(creator.bio)}</p></div></header><div class="profile-trust"><span>${creatorProjects.length} ${creatorProjects.length === 1 ? 'project' : 'projects'}</span><span>Public creator profile</span></div>${creator.slug === "creatorworks-studio" ? `<p class="verification-explanation">${esc(studioVerification)}</p>` : ""}<section class="profile-work"><div class="section-heading"><div><p class="eyebrow">Creator’s Collection</p><h2>Practical tools, ready to explore.</h2></div></div><div class="catalog-list">${creatorProjects.map(catalogRow).join("")}</div></section></section>`;
+  return `<section class="page-shell profile-page"><header class="profile-hero profile-identity-card"><div class="profile-identity-row">${avatar(creator, "large")}<div class="profile-identity-copy"><p class="eyebrow">Creator profile</p><div class="profile-name-line"><h1>${esc(creator.name)}</h1>${creatorVerificationBadge(creator)}</div></div></div><p class="profile-identity-meta">${esc(creator.label)}</p><p class="profile-bio">${esc(creator.bio)}</p></header><div class="profile-trust"><span>${creatorProjects.length} ${creatorProjects.length === 1 ? 'project' : 'projects'}</span><span>Public creator profile</span></div><section class="profile-work"><div class="section-heading"><div><p class="eyebrow">Creator’s Collection</p><h2>Practical tools, ready to explore.</h2></div></div><div class="catalog-list">${creatorProjects.map(catalogRow).join("")}</div></section></section>`;
 }
 
 function feedbackPage() {
@@ -1298,6 +1298,36 @@ function focusHomepageEntry() {
     input.focus({preventScroll:true});
   });
 }
+let catalogGuideShown = false;
+let catalogGuideCleanup = () => {};
+function mountCatalogGuide() {
+  catalogGuideCleanup();
+  const sticker = app.querySelector('.catalog-first-apps-sticker');
+  if (!sticker || catalogGuideShown) return;
+  const categories = sticker.closest('.discovery-categories');
+  const quote = app.querySelector('.founder-banner') || app.querySelector('.discovery-hero');
+  const startScroll = window.scrollY;
+  let previousScroll = startScroll;
+  let hideTimer;
+  const onScroll = () => {
+    const currentScroll = window.scrollY;
+    const scrollingDown = currentScroll > previousScroll;
+    previousScroll = currentScroll;
+    if (!scrollingDown || currentScroll - startScroll < 24 || document.querySelector('dialog[open], .detail-dialog')) return;
+    const categoryTop = categories.getBoundingClientRect().top;
+    if (categoryTop < 72 || categoryTop > window.innerHeight - 36) return;
+    if (quote && quote.getBoundingClientRect().bottom > window.innerHeight * .75) return;
+    catalogGuideShown = true;
+    window.removeEventListener('scroll', onScroll);
+    sticker.classList.add('is-revealed');
+    hideTimer = window.setTimeout(() => sticker.classList.remove('is-revealed'), 2000);
+  };
+  window.addEventListener('scroll', onScroll, {passive:true});
+  catalogGuideCleanup = () => {
+    window.removeEventListener('scroll', onScroll);
+    window.clearTimeout(hideTimer);
+  };
+}
 function render(preserveScroll = false) {
   const focusedSearch = document.activeElement?.matches('[data-app-link-entry]') ? { start: document.activeElement.selectionStart, end: document.activeElement.selectionEnd } : null;
   closeProductDetail(false);
@@ -1331,6 +1361,7 @@ function render(preserveScroll = false) {
   window.CWEntryIntro?.mount(app);
   loadGuestTesterPreview();
   focusHomepageEntry();
+  mountCatalogGuide();
 }
 
 document.addEventListener('keydown', event => {
@@ -1446,7 +1477,7 @@ document.addEventListener("click", async event => {
     localStorage.setItem("creatorworks-saved", JSON.stringify([...state.saved]));
     if (save.closest(".detail-dialog")) {
       const isSaved = state.saved.has(save.dataset.save);
-      save.textContent = isSaved ? "♥ Saved" : "♡ Save for later";
+      save.textContent = isSaved ? "♥ Saved" : "♡ Save";
       save.classList.toggle("is-saved", isSaved);
       document.querySelectorAll(`[data-save="${save.dataset.save}"]:not(.detail-dialog *)`).forEach(button => {
         button.classList.toggle("is-saved", isSaved);

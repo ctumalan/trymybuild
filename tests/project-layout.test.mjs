@@ -53,11 +53,11 @@ test('detail view uses the invitation screenshot layout and relevant information
  assert.ok(html.indexOf('How it helps')<html.indexOf('One thing to try first'));
 
 });
-test('demo belongs inside the app card after the app link, with no player loaded until clicked',()=>{
+test('demo belongs inside the app card after the launch action, with no player loaded until clicked',()=>{
  const product={slug:'demo',name:'Demo app',url:'https://example.com',video:'https://youtu.be/dQw4w9WgXcQ'};
  const html=globalThis.CWProjectView.hero(product);
  assert.equal((html.match(/Watch demo/g)||[]).length,1);
- assert.match(html,/external-destination[\s\S]*project-video[\s\S]*Watch demo[\s\S]*<\/div><\/div>\s*<\/section>$/);
+ assert.match(html,/Try this app ↗[\s\S]*project-video[\s\S]*Watch demo[\s\S]*<\/div><\/div>\s*<\/section>$/);
  assert.match(html,/data-load-video="https:\/\/www.youtube-nocookie.com\/embed\/dQw4w9WgXcQ"/);
  assert.doesNotMatch(html,/<iframe/);
  for(const video of ['', 'javascript:alert(1)', 'https://unapproved.example/video'])assert.doesNotMatch(globalThis.CWProjectView.hero({...product,video}),/Watch demo|project-video/);
@@ -73,13 +73,16 @@ test('project destination shows the exact destination URL',()=>{
  assert.equal(context.destination('https://example.com/tool'),'https://example.com/tool');
 });
 test('the signup preview shows the launch action without making it clickable',()=>{
- const product={slug:'preview-app',name:'Preview app',url:'https://example.com'};
+ const product={slug:'preview-app',name:'Preview app',url:'https://example.com',preview:'/assets/previews/example.png'};
  const disabled=globalThis.CWProjectView.hero(product,{preview:true,disabledLaunch:true});
  assert.match(disabled,/<button class="primary-button preview-try-disabled"[^>]+disabled[^>]*>Try this app ↗<\/button>/);
  assert.doesNotMatch(disabled,/href="https:\/\/example\.com"/);
  const published=globalThis.CWProjectView.hero(product);
  assert.match(published,/<a class="primary-button" href="https:\/\/example\.com"/);
  assert.doesNotMatch(published,/preview-try-disabled/);
+ assert.match(published,/<a class="studio-preview-link" href="https:\/\/example\.com" target="_blank" rel="noopener noreferrer" data-try-app="preview-app"[^>]*><img/);
+ assert.doesNotMatch(disabled,/studio-preview-link/);
+ assert.doesNotMatch(globalThis.CWProjectView.hero(product,{preview:true}),/studio-preview-link/);
 });
 test('categories wrap and violet accents apply to navigation and illustration panels',()=>{
  assert.match(css,/\.category-strip-scroll\{flex-wrap:wrap;overflow:visible/);
@@ -118,7 +121,7 @@ test('similar apps use one detailed card per row in the narrow project drawer',(
  assert.match(app,/\$\{esc\(p\.summary \|\| p\.purpose\)\}/);
  assert.match(themeCss,/:is\(\[data-public-project\],\.detail-dialog\) \.similar-grid \{[^}]*grid-template-columns:1fr/);
  assert.match(themeCss,/:is\(\[data-public-project\],\.detail-dialog\) \.similar-card \{[\s\S]*?grid-template-columns:minmax\(0,42%\) minmax\(0,1fr\)/);
- assert.match(themeCss,/:is\(\[data-public-project\],\.detail-dialog\) \.similar-card \{[\s\S]*?background:#f4f4f4/);
+ assert.match(themeCss,/:is\(\[data-public-project\],\.detail-dialog\) \.similar-card \{[\s\S]*?background:#fff/);
  assert.match(serverDetail,/class="similar-card-copy"[\s\S]*?class="similar-card-summary"[\s\S]*?class="similar-card-meta"/);
 });
 test('light project canvas keeps the accent vectors moving with reduced-motion support',()=>{

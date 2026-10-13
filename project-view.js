@@ -31,17 +31,20 @@ function hero(product, options = {}) {
     : `<a class="primary-button" href="${esc(product.url)}" target="_blank" rel="noopener noreferrer" ${options.preview?'':`data-try-app="${esc(product.slug)}"`}>Try this app ↗</a>`;
   let destinationHost = '';
   try { destinationHost = new URL(product.url).hostname.replace(/^www\./, ''); } catch {}
+  const previewImage = product.preview ? `<img ${options.preview?'data-listing-screenshot':''} src="${esc(product.preview)}" alt="Preview of ${esc(product.name)}" referrerpolicy="no-referrer">` : '';
+  const previewContent = previewImage && product.url && !options.preview && !options.disabledLaunch
+    ? `<a class="studio-preview-link" href="${esc(product.url)}" target="_blank" rel="noopener noreferrer" data-try-app="${esc(product.slug)}" aria-label="Open ${esc(product.name)} website (opens in a new tab)">${previewImage}</a>`
+    : previewImage;
   return `<section class="recipient-hero studio-app-card">
    <div class="recipient-copy studio-card-heading">
-    <div class="studio-card-kicker"><p class="detail-product-signal">${product.category?`<span class="detail-category-icon">${categoryIcon(product.category)}</span><span>${esc(product.category)}</span>`:''}</p>${product.price?`<p class="detail-product-meta"><span>${esc(product.price)}</span></p>`:''}</div>
+    <div class="studio-card-toolbar">${options.headingActions || ""}<div class="studio-card-kicker"><p class="detail-product-signal">${product.category?`<span class="detail-category-icon">${categoryIcon(product.category)}</span><span>${esc(product.category)}</span>`:''}</p>${product.price?`<p class="detail-product-meta"><span>${esc(product.price)}</span></p>`:''}</div></div>
     <h2 ${options.titleId ? `id="${esc(options.titleId)}"` : ""}>${esc(presentation.headline||product.name)}</h2>
    </div>
    <div class="recipient-preview-column">
     <div class="studio-preview-label"><strong>Product preview</strong><span class="recipient-art-live"><i class="detail-live-dot" aria-hidden="true"></i>Live</span></div>
     <div class="recipient-art">
      <div class="recipient-art-chrome" aria-hidden="true"><span class="recipient-art-controls"><i></i><i></i><i></i></span><span class="studio-browser-address"><svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="7" width="10" height="7" rx="1.5"/><path d="M5 7V5a3 3 0 0 1 6 0v2"/></svg>${esc(destinationHost)}</span><span class="studio-browser-more">⋮</span></div>
-     <div class="recipient-art-viewport">${product.preview?`<img ${options.preview?'data-listing-screenshot':''} src="${esc(product.preview)}" alt="Preview of ${esc(product.name)}" referrerpolicy="no-referrer">`:''}</div>
-     ${product.url?`<span class="external-destination"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="m10 13 4-4M8 16l-1 1a4 4 0 0 1-6-6l5-5a4 4 0 0 1 6 0M16 8l1-1a4 4 0 0 1 6 6l-5 5a4 4 0 0 1-6 0" transform="translate(1 1) scale(.9)"/></svg><span>${esc(product.url)}</span></span>`:''}
+     <div class="recipient-art-viewport">${previewContent}</div>
     </div>
     <div class="studio-card-actions"><div class="detail-creator">${options.creator || ""}</div>${launchAction}</div>
     ${video(product.video)}
@@ -54,7 +57,7 @@ function hero(product, options = {}) {
 }
 function composer(slug) {
  const id = 'public-conversation-' + slug, draft = '';
-  return `<form class="detail-comment-form conversation-composer" data-public-comment="${esc(slug)}"><label class="visually-hidden" for="comment-${esc(id)}">Leave a public comment</label><div class="conversation-input-shell"><textarea id="comment-${esc(id)}" name="comment" rows="1" required placeholder="Ask the maker a question or share a thought.">${esc(draft)}</textarea><div class="comment-composer-tools"><details class="conversation-guidelines"><summary aria-label="Comment guidelines">?</summary><p>Discuss the app, not the person. One comment per app; sign in to update yours. Guests appear as Guest. <a href="/community-guidelines">Community guidelines</a></p></details><button class="comment-send" type="submit" aria-label="Post comment" ${draft.trim()?'':'hidden'}><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="currentColor"><path d="M3 3.7c-.5-.2-1 .3-.8.8l3 6.5 9.5 1-9.5 1-3 6.5c-.2.5.3 1 .8.8l18-8.5a.9.9 0 0 0 0-1.6L3 3.7Z"/></svg></button></div></div><p data-comment-status role="status" aria-live="polite"></p></form>`;
+  return `<form class="detail-comment-form conversation-composer" data-public-comment="${esc(slug)}"><label class="visually-hidden" for="comment-${esc(id)}">Leave a public comment</label><div class="conversation-input-shell"><textarea id="comment-${esc(id)}" name="comment" rows="1" required placeholder="Ask the maker a question or share a thought.">${esc(draft)}</textarea><div class="comment-composer-tools"><details class="conversation-guidelines"><summary aria-label="Comment guidelines">?</summary><p>Discuss the app, not the person. One comment per app; sign in to update yours. Guests appear as Guest. <a href="/community-guidelines">Community guidelines</a></p></details><button class="comment-send" type="submit" aria-label="Post comment"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="currentColor"><path d="M3 3.7c-.5-.2-1 .3-.8.8l3 6.5 9.5 1-9.5 1-3 6.5c-.2.5.3 1 .8.8l18-8.5a.9.9 0 0 0 0-1.6L3 3.7Z"/></svg></button></div></div><p data-comment-status role="status" aria-live="polite"></p></form>`;
 }
 function conversationPost(post) {
   const when = new Date(post.createdAt);

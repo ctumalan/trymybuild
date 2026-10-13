@@ -15,6 +15,7 @@ http.createServer(async(req,res)=>{
   const context={url,params:{section:url.pathname.split('/').at(-1),slug:url.pathname.split('/').at(-1),id},cookies:{get(){}},redirect:(href,status)=>new Response(null,{status,headers:{Location:href}})};
   let response;
   if(routes[url.pathname])response=await routes[url.pathname](context);
+  else if(/^\/projects\/[a-z0-9-]+$/.test(url.pathname))response=await routes['/projects/sample-0'](context);
   else if(url.pathname.startsWith('/people/'))response=scope.surface('Sample Creator','<div data-panel-content><h1>Sample Creator</h1><p>Local profile preview. All interactions remain inside TryMyBuild.</p><a href="/dashboard/profile">Edit my profile</a></div>');
   else if(url.pathname==='/api/saved')response=Response.json({saved:[]});
   else if(url.pathname==='/api/catalog')response=Response.json({connected:true,projects:await scope.listPublished()});

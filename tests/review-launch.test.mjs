@@ -78,7 +78,9 @@ test('discovery gives heading, categories, and the wish action separate zones',(
  assert.doesNotMatch(future,/\.discovery-categories details>div \{ position:fixed; inset:auto/);
  assert.match(future,/\.discovery-categories summary:focus-visible \{[^}]*outline:none/);
  assert.match(future,/\.catalog-first-apps-sticker \{[\s\S]*?bottom:calc\(100% \+ 34px\)/);
- assert.match(future,/@keyframes catalog-first-apps-arrive/);
+ assert.match(future,/\.catalog-first-apps-sticker \{[^}]*opacity:0; visibility:hidden/);
+ assert.match(future,/\.catalog-first-apps-sticker\.is-revealed \{[^}]*opacity:1; visibility:visible/);
+ assert.match(future,/@media\(prefers-reduced-motion:reduce\) \{\s*\.future-discover \.catalog-first-apps-sticker \{ transition:none/);
  assert.match(future,/\.catalog-first-apps-arrow \{[\s\S]*?animation:catalog-first-apps-arrow-bob/);
  assert.match(future,/@keyframes catalog-first-apps-arrow-bob/);
  assert.match(future,/\.catalog-wish-card \{[^}]*max-width:300px/);

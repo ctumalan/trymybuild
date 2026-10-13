@@ -1,12 +1,12 @@
 import '../../project-view.js';
 import '../../project-media.js';
 import {e} from './feedback-ui';
-export function projectDetailContent(p:any){
+export function projectDetailContent(p:any,headingActions = ''){
  const c=p.creator||{},note=c.founderException?'Founder exception—not earned through feedback. Not a product-quality guarantee.':c.verificationNote||'Qualifying contribution and app ownership confirmed';
  const name=c.name||'You',initials=String(name).split(/\s+/).filter(Boolean).slice(0,2).map((part:string)=>part[0]).join('').toUpperCase()||'Y';
  const picture=`<span class="person-avatar byline-avatar" aria-hidden="true">${c.avatar?`<img src="${e(c.avatar)}" alt="">`:e(initials)}</span>`;
  const creator = `${c.slug?`<a class="creator-byline" href="/people/${e(encodeURIComponent(c.slug))}">`:'<span class="creator-byline">'}${picture}<span>by ${e(name)}${c.verified?`<span class="creator-verified" title="${e(note)}">✓ Verified</span>`:''}</span>${c.slug?'</a>':'</span>'}`;
- return (globalThis as any).CWProjectView.hero(p, {creator, titleId:'detail-title-'+p.slug});
+ return (globalThis as any).CWProjectView.hero(p, {creator, headingActions, titleId:'detail-title-'+p.slug});
 }
 export function projectConversation(p:any){return (globalThis as any).CWProjectView.conversation(p);}
 export function projectTheme(p:any){return (globalThis as any).CWProjectView.theme(p);}

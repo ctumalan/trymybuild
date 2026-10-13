@@ -50,5 +50,5 @@ test('feedback conversation opens on demand after a two-second loading state',()
  assert.match(app,/Loading sample conversation[\s\S]*?await pause\(2000\)/);
  assert.doesNotMatch(app,/await pause\(6000\)/);
  assert.match(app,/close\.onclick = \(\) =>[\s\S]*?trigger\.hidden = false/);
- assert.match(css,/\.conversation-sample-trigger \{[^}]*font-size:\.78rem/);
+ assert.match(css,/\.conversation-sample-trigger \{[^}]*font-size:inherit/);
 });

@@ -377,7 +377,7 @@ function discoveryHero(listing = false) {
     : '<button type="button" class="secondary-button listing-catalog-return" data-entry-mode="search">View app catalog <span aria-hidden="true">→</span></button>';
   return `<header class="discovery-hero discovery-hero-minimal discovery-hero-action${listing ? ' listing-entry-header' : ''}" aria-label="Share your app">
     <div class="discovery-hero-copy">
-      ${listing ? '' : `<div class="discovery-title-row"><div class="discovery-title-copy"><h1 class="discovery-promise"><span>Stop guessing. Get <em>human feedback<svg class="feedback-hand-underline" viewBox="0 0 420 16" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path d="M3 10C42 5 72 9 111 7S181 9 218 6S288 7 321 5S383 5 417 2L411 5C377 9 351 7 320 10S252 9 218 11S146 10 111 12S41 10 3 13Z" /></svg></em> on your early-stage app.</span></h1><p class="discovery-instrument-copy">Type your app's URL to start exchanging reviews with another creator: they try your app, and you try theirs. It's completely free.</p></div></div>`}
+      ${listing ? '' : `<div class="discovery-title-row"><div class="discovery-title-copy"><h1 class="discovery-promise"><span>Stop guessing. Get <em>human feedback<svg class="feedback-hand-underline" viewBox="0 0 420 16" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path d="M3 10C42 5 72 9 111 7S181 9 218 6S288 7 321 5S383 5 417 2L411 5C377 9 351 7 320 10S252 9 218 11S146 10 111 12S41 10 3 13Z" /></svg></em> on your early-stage app.</span></h1><p class="discovery-instrument-copy">Type your app's URL to start exchanging reviews with another creator: they try your app, and you try theirs. <span class="discovery-intro-ending">It's completely free.</span></p></div></div>`}
       ${listing ? catalogAction : `<form class="discovery-entry" data-discovery-entry>
         <label class="visually-hidden" for="discovery-input">${prompt}</label>
         <div class="discovery-entry-row"><div class="discovery-entry-field"><input id="discovery-input" data-app-link-entry value="${esc(value)}" type="text" maxlength="2048" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="${prompt}" /><span class="entry-placeholder" aria-hidden="true"><span class="entry-placeholder-track">${prompt}</span></span></div><div class="discovery-composer-toolbar"><span class="discovery-composer-note">Share privately first.</span><button type="submit" class="primary-button" data-entry-submit><span data-entry-submit-label>${intent.label}</span><span aria-hidden="true">→</span></button></div></div>
@@ -1905,7 +1905,9 @@ function prepareConversationAnimations() {
     const trigger = document.createElement('button');
     trigger.type = 'button'; trigger.className = 'conversation-sample-trigger text-button';
     trigger.textContent = 'See sample'; trigger.setAttribute('aria-controls', card.id); trigger.setAttribute('aria-expanded', 'false');
-    card.before(trigger);
+    const introduction = card.parentElement.querySelector('.discovery-intro-ending') || card.parentElement.querySelector('.discovery-instrument-copy');
+    if (introduction) introduction.append(' ', trigger);
+    else card.before(trigger);
     const close = document.createElement('button');
     close.type = 'button'; close.className = 'conversation-demo-close';
     close.setAttribute('aria-label', 'Close feedback example'); close.textContent = '×';

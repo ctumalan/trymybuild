@@ -1273,24 +1273,24 @@ body.public-site #app[tabindex="-1"]:focus { outline:none; }
 @media(max-width:620px) { .founder-social-links { align-items:flex-start; flex-direction:column; } }
 
 /* The illustrative exchange has its own visible space outside the founder note. */
-.discovery-hero-action>.sample-conversation { max-width:600px; margin:28px auto 0; text-align:left; }
+.discovery-hero-action .sample-conversation { max-width:600px; margin:28px auto 0; text-align:left; }
 .founder-speech>.discovery-explore { display:inline-block; margin-top:10px; }
 
 /* Compact example: preserve the exchange, reduce its vertical footprint. */
-.discovery-hero-action>.sample-conversation .sample-project-header { padding:12px 16px; gap:8px 12px; }
-.discovery-hero-action>.sample-conversation .sample-project-icon { width:36px; height:36px; }
-.discovery-hero-action>.sample-conversation .sample-project-header h3 { font-size:1rem; }
-.discovery-hero-action>.sample-conversation .sample-task { padding-left:48px; margin:0; }
-.discovery-hero-action>.sample-conversation .sample-task .sample-label { display:inline; }
-.discovery-hero-action>.sample-conversation .sample-task p { display:inline; margin:0 0 0 6px; font-size:.78rem; }
-.discovery-hero-action>.sample-conversation .sample-conversation-body { padding:12px 16px; }
-.discovery-hero-action>.sample-conversation .sample-message { margin:0 0 10px; gap:8px; max-width:94%; }
-.discovery-hero-action>.sample-conversation .sample-message:last-child { margin-bottom:0; }
-.discovery-hero-action>.sample-conversation .sample-avatar { width:30px; height:30px; }
-.discovery-hero-action>.sample-conversation .sample-bubble { padding:9px 12px; }
-.discovery-hero-action>.sample-conversation .sample-bubble p { margin-top:3px; font-size:.82rem; line-height:1.45; }
-.discovery-hero-action>.sample-conversation .sample-label { font-size:.65rem; }
-@media(max-width:620px) { .discovery-hero-action>.sample-conversation .sample-example-badge { margin-left:0; } .discovery-hero-action>.sample-conversation .sample-task { padding-left:0; } }
+.discovery-hero-action .sample-conversation .sample-project-header { padding:12px 16px; gap:8px 12px; }
+.discovery-hero-action .sample-conversation .sample-project-icon { width:36px; height:36px; }
+.discovery-hero-action .sample-conversation .sample-project-header h3 { font-size:1rem; }
+.discovery-hero-action .sample-conversation .sample-task { padding-left:48px; margin:0; }
+.discovery-hero-action .sample-conversation .sample-task .sample-label { display:inline; }
+.discovery-hero-action .sample-conversation .sample-task p { display:inline; margin:0 0 0 6px; font-size:.78rem; }
+.discovery-hero-action .sample-conversation .sample-conversation-body { padding:12px 16px; }
+.discovery-hero-action .sample-conversation .sample-message { margin:0 0 10px; gap:8px; max-width:94%; }
+.discovery-hero-action .sample-conversation .sample-message:last-child { margin-bottom:0; }
+.discovery-hero-action .sample-conversation .sample-avatar { width:30px; height:30px; }
+.discovery-hero-action .sample-conversation .sample-bubble { padding:9px 12px; }
+.discovery-hero-action .sample-conversation .sample-bubble p { margin-top:3px; font-size:.82rem; line-height:1.45; }
+.discovery-hero-action .sample-conversation .sample-label { font-size:.65rem; }
+@media(max-width:620px) { .discovery-hero-action .sample-conversation .sample-example-badge { margin-left:0; } .discovery-hero-action .sample-conversation .sample-task { padding-left:0; } }
 
 /* A small founder greeting arriving from the right. */
 .founder-popout-close { position:absolute; right:2px; top:-7px; width:24px; height:24px; border:0; border-radius:50%; background:#eee5f5; color:#7545ad; cursor:pointer; font-size:18px; }
@@ -1361,24 +1361,24 @@ body.public-site #app[tabindex="-1"]:focus { outline:none; }
 .discovery-hero-action .hero-loop-visual { max-width:360px; margin:20px auto 0; }
 .discovery-hero-action .discovery-instrument-copy { margin:20px auto 0; }
 .discovery-hero-action .discovery-entry { max-width:640px; margin:24px auto 0; }
-.discovery-hero-action>.sample-conversation { max-width:640px; width:100%; box-sizing:border-box; margin:24px auto 0; }
-.discovery-hero-action>.sample-conversation .sample-project-header { display:grid; grid-template-columns:36px minmax(0,1fr) auto; align-items:center; gap:8px 10px; padding:12px; }
-.discovery-hero-action>.sample-conversation .sample-project-header .sample-project-icon { grid-column:1; grid-row:1 / 3; }
-.discovery-hero-action>.sample-conversation .sample-project-header>div:not(.sample-project-icon):not(.sample-task) { grid-column:2; grid-row:1; }
-.discovery-hero-action>.sample-conversation .sample-example-badge { grid-column:3; grid-row:1; margin:0; align-self:center; }
-.discovery-hero-action>.sample-conversation .sample-project-header .sample-task { grid-column:2 / -1; grid-row:2; padding:0; margin:0; }
-.discovery-hero-action>.sample-conversation .sample-task .sample-label { font-size:.72rem; }
-.discovery-hero-action>.sample-conversation .sample-task p { font-size:.82rem; }
-.discovery-hero-action>.sample-conversation .sample-conversation-body { padding:12px; }
-.discovery-hero-action>.sample-conversation .sample-bubble { padding:12px; }
-.discovery-hero-action>.sample-conversation .sample-bubble p { font-size:.92rem; line-height:1.5; }
-.discovery-hero-action>.sample-conversation .sample-bubble .sample-label { font-size:.72rem; }
+.discovery-hero-action .sample-conversation { max-width:640px; width:100%; box-sizing:border-box; margin:24px auto 0; }
+.discovery-hero-action .sample-conversation .sample-project-header { display:grid; grid-template-columns:36px minmax(0,1fr) auto; align-items:center; gap:8px 10px; padding:12px; }
+.discovery-hero-action .sample-conversation .sample-project-header .sample-project-icon { grid-column:1; grid-row:1 / 3; }
+.discovery-hero-action .sample-conversation .sample-project-header>div:not(.sample-project-icon):not(.sample-task) { grid-column:2; grid-row:1; }
+.discovery-hero-action .sample-conversation .sample-example-badge { grid-column:3; grid-row:1; margin:0; align-self:center; }
+.discovery-hero-action .sample-conversation .sample-project-header .sample-task { grid-column:2 / -1; grid-row:2; padding:0; margin:0; }
+.discovery-hero-action .sample-conversation .sample-task .sample-label { font-size:.72rem; }
+.discovery-hero-action .sample-conversation .sample-task p { font-size:.82rem; }
+.discovery-hero-action .sample-conversation .sample-conversation-body { padding:12px; }
+.discovery-hero-action .sample-conversation .sample-bubble { padding:12px; }
+.discovery-hero-action .sample-conversation .sample-bubble p { font-size:.92rem; line-height:1.5; }
+.discovery-hero-action .sample-conversation .sample-bubble .sample-label { font-size:.72rem; }
 @media(max-width:620px) {
- .discovery-hero-action>.sample-conversation .sample-project-header { grid-template-columns:30px minmax(0,1fr); }
- .discovery-hero-action>.sample-conversation .sample-project-header .sample-project-icon { width:30px; height:30px; grid-row:1; }
- .discovery-hero-action>.sample-conversation .sample-example-badge { grid-column:2; grid-row:2; justify-self:start; }
- .discovery-hero-action>.sample-conversation .sample-project-header .sample-task { grid-column:1 / -1; grid-row:3; }
- .discovery-hero-action>.sample-conversation .sample-bubble p { font-size:.86rem; }
+ .discovery-hero-action .sample-conversation .sample-project-header { grid-template-columns:30px minmax(0,1fr); }
+ .discovery-hero-action .sample-conversation .sample-project-header .sample-project-icon { width:30px; height:30px; grid-row:1; }
+ .discovery-hero-action .sample-conversation .sample-example-badge { grid-column:2; grid-row:2; justify-self:start; }
+ .discovery-hero-action .sample-conversation .sample-project-header .sample-task { grid-column:1 / -1; grid-row:3; }
+ .discovery-hero-action .sample-conversation .sample-bubble p { font-size:.86rem; }
 }
 
 .founder-banner .founder-speech>p .founder-conversation-name { display:inline; margin-left:6px; white-space:nowrap; }
@@ -1421,7 +1421,7 @@ body.public-site #app[tabindex="-1"]:focus { outline:none; }
 
 .replay-introduction { display:block; margin:16px auto 0; padding:0; font-size:.72rem; color:#7c6d89; }
 
-.discovery-hero-action>.sample-conversation .sample-project-header .sample-project-icon { grid-row:1; }
+.discovery-hero-action .sample-conversation .sample-project-header .sample-project-icon { grid-row:1; }
 
 /* Begin the founder entrance after the welcome overlay has closed. */
 .founder-conversation.founder-banner { animation:none; }
@@ -1475,7 +1475,7 @@ body.public-site #app[tabindex="-1"]:focus { outline:none; }
   cursor:pointer;
   z-index:2;
 }
-.discovery-hero-action>.sample-conversation .sample-project-header { padding-right:44px; }
+.discovery-hero-action .sample-conversation .sample-project-header { padding-right:44px; }
 
 /* The category bar already supplies the boundary above discovery. */
 .future-discover .discovery-categories + #home-panel { border-top:0; }
@@ -1484,9 +1484,9 @@ body.public-site #app[tabindex="-1"]:focus { outline:none; }
 .future-discover .discovery-categories { border-bottom:0; }
 
 /* Give the example app name room to read at mobile sizes. */
-.discovery-hero-action>.sample-conversation .sample-project-header { grid-template-columns:76px minmax(0,1fr) auto; }
-.discovery-hero-action>.sample-conversation .sample-project-header .sample-project-domain { display:grid; place-items:center; width:76px; height:40px; border-radius:12px; color:#fff; font-size:10px; font-weight:800; letter-spacing:-.03em; }
-@media(max-width:620px) { .discovery-hero-action>.sample-conversation .sample-project-header { grid-template-columns:76px minmax(0,1fr); } }
+.discovery-hero-action .sample-conversation .sample-project-header { grid-template-columns:76px minmax(0,1fr) auto; }
+.discovery-hero-action .sample-conversation .sample-project-header .sample-project-domain { display:grid; place-items:center; width:76px; height:40px; border-radius:12px; color:#fff; font-size:10px; font-weight:800; letter-spacing:-.03em; }
+@media(max-width:620px) { .discovery-hero-action .sample-conversation .sample-project-header { grid-template-columns:76px minmax(0,1fr); } }
 
 /* Let the page itself read like a conversation instead of centering every beat. */
 .discovery-hero-action>.founder-banner {
@@ -1494,7 +1494,7 @@ body.public-site #app[tabindex="-1"]:focus { outline:none; }
   max-width:680px;
   margin:52px auto 0 0;
 }
-.discovery-hero-action>.sample-conversation {
+.discovery-hero-action .sample-conversation {
   width:min(640px,100%);
   max-width:640px;
   margin:28px auto 0;
@@ -1511,7 +1511,7 @@ body.public-site #app[tabindex="-1"]:focus { outline:none; }
 .welcome-animation-dialog img { width:112%; max-width:none; margin-inline:-6%; }
 @media(max-width:620px) {
   .discovery-hero-action>.founder-banner,
-  .discovery-hero-action>.sample-conversation { width:96%; }
+  .discovery-hero-action .sample-conversation { width:96%; }
   .discovery-hero-action>.founder-banner { margin-top:40px; }
   .founder-banner .founder-speech>p { font-size:.86rem; line-height:1.5; }
   .welcome-animation-dialog { padding-inline:14px; }
@@ -2837,14 +2837,6 @@ body.public-site .site-header,.cw-bar { background:#fff; }
  display:flex; width:22px; height:22px; color:#d5aff1;
 }
 .invitation-detail[data-showcase-theme] .studio-app-card .detail-category-icon svg { width:100%; height:100%; }
-.invitation-detail[data-showcase-theme] .studio-app-card .detail-product-meta {
- margin:0; padding-left:10px; border-left:1px solid #9b78b3;
-}
-.invitation-detail[data-showcase-theme] .studio-app-card .detail-product-meta>span {
- display:block; padding:0; border:0; border-radius:0;
- background:transparent; color:#faf5ff;
- font:600 10px/1.5 "Inter",Arial,sans-serif; letter-spacing:.15em;
-}
 .invitation-detail[data-showcase-theme] .studio-app-card .studio-card-heading h2 {
  max-width:none; width:100%; margin:0; padding:0; color:#fff;
  font:700 clamp(26px,7cqw,32px)/1.12 "Inter",Arial,sans-serif;
@@ -3053,4 +3045,11 @@ body.public-site .future-discover .catalog-list::before {
 .detail-dialog.invitation-detail .project-panel-bar .detail-close:focus-visible,
 .cw-overlay:is(.public-project-panel,.profile-panel) .overlay-toolbar button:focus-visible {
  outline:2px solid #7545ad; outline-offset:1px;
+}
+
+/* Pricing belongs to the app identity, quietly above the feature card. */
+.public-detail-header .detail-app-pricing {
+ display:block; margin:4px 0 0; padding:0; border:0; background:transparent;
+ color:#8a818f; font:400 12px/1.4 "Inter",Arial,sans-serif;
+ letter-spacing:0; text-transform:none;
 }

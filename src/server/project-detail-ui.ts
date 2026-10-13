@@ -10,3 +10,5 @@ export function projectDetailContent(p:any,headingActions = ''){
 }
 export function projectConversation(p:any){return (globalThis as any).CWProjectView.conversation(p);}
 export function projectTheme(p:any){return (globalThis as any).CWProjectView.theme(p);}
+
+export function projectDetailTitle(p:any){return (globalThis as any).CWProjectView.title(p);}

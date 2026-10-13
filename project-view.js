@@ -24,6 +24,9 @@ function video(value) {
  const url = globalThis.CWMedia?.videoUrl(value);
  return url ? `<div class="project-video project-video-compact"><button type="button" class="project-video-trigger" data-load-video="${esc(url)}"><span class="project-video-play" aria-hidden="true"><svg viewBox="0 0 20 20" width="16" height="16" fill="currentColor"><path d="M6 3.8a.8.8 0 0 1 1.2-.7l9 6.2a.8.8 0 0 1 0 1.4l-9 6.2a.8.8 0 0 1-1.2-.7z"/></svg></span><span>Watch demo</span></button></div>` : '';
 }
+function title(product) {
+ return `<div class="detail-app-identity"><strong>${esc(product.name||'Untitled draft')}</strong>${product.price?`<small class="detail-app-pricing">${esc(product.price)}</small>`:''}</div>`;
+}
 function hero(product, options = {}) {
  const presentation = product.presentation || {};
   const launchAction = !product.url ? '' : options.disabledLaunch
@@ -37,7 +40,7 @@ function hero(product, options = {}) {
     : previewImage;
   return `<section class="recipient-hero studio-app-card">
    <div class="recipient-copy studio-card-heading">
-    <div class="studio-card-toolbar">${options.headingActions || ""}<div class="studio-card-kicker"><p class="detail-product-signal">${product.category?`<span class="detail-category-icon">${categoryIcon(product.category)}</span><span>${esc(product.category)}</span>`:''}</p>${product.price?`<p class="detail-product-meta"><span>${esc(product.price)}</span></p>`:''}</div></div>
+    <div class="studio-card-toolbar">${options.headingActions || ""}<div class="studio-card-kicker"><p class="detail-product-signal">${product.category?`<span class="detail-category-icon">${categoryIcon(product.category)}</span><span>${esc(product.category)}</span>`:''}</p></div></div>
     <h2 ${options.titleId ? `id="${esc(options.titleId)}"` : ""}>${esc(presentation.headline||product.name)}</h2>
    </div>
    <div class="recipient-preview-column">
@@ -139,7 +142,7 @@ async function loadProjectReviews(region) {
     if(region.isConnected&&region.reviewRequest===request)applyReviewEvidence(region,data);
   } catch { /* Keep the server-provided aggregate when public evidence is unavailable. */ }
 }
-globalThis.CWProjectView = {theme,hero,video, conversation, conversationFeed, discussionFeed, loadProjectConversation, loadProjectReviews, recordCommunityReview, applyReviewEvidence, mountGuidanceTyping};
+globalThis.CWProjectView = {theme,title,hero,video, conversation, conversationFeed, discussionFeed, loadProjectConversation, loadProjectReviews, recordCommunityReview, applyReviewEvidence, mountGuidanceTyping};
 if (typeof document === 'undefined') return;
 document.addEventListener('click', event => {
  const retry = event.target.closest('[data-conversation-retry]');

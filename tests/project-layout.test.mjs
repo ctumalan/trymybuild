@@ -15,8 +15,9 @@ test('detail view uses the invitation screenshot layout and relevant information
  assert.match(drawer,/class="detail-product-signal"/);
  assert.match(shared,/class="detail-category-icon"/);
  assert.match(shared,/categoryPaths\[category\]/);
- assert.match(shared,/class="detail-product-meta"/);
- assert.doesNotMatch(shared,/detail-product-meta[^\n]*product\.stage/);
+ assert.match(shared,/class="detail-app-pricing"/);
+ assert.doesNotMatch(CWProjectView.hero({name:'Sample',price:'Free + paid options'}),/Free \+ paid options|detail-product-meta/);
+ assert.match(CWProjectView.title({name:'Sample',price:'Free + paid options'}),/<strong>Sample<\/strong><small class="detail-app-pricing">Free \+ paid options<\/small>/);
  assert.doesNotMatch(drawer,/<small>\$\{esc\(product\.price\)\} · \$\{esc\(product\.category\)\}/);
  assert.match(drawer,/class="recipient-art-chrome"/);
  assert.match(drawer,/class="recipient-art-viewport"/);

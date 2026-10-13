@@ -10,7 +10,9 @@ test('dashboard app details retain the shared card, pricing, media, and owner to
  const response=await f.routes['/dashboard/project'](context(p.slug)),html=await response.text();
  assert.equal(response.status,200);
  assert.match(html,/class="recipient-main project-detail-content invitation-detail mealmap-detail owner-app-detail" data-showcase-theme="coral" data-panel-content data-project-card/);
- assert.match(html,/studio-card-kicker[\s\S]*detail-product-meta"><span>Paid<\/span>/);
+ assert.match(html,/<header class="public-detail-header"><div class="detail-app-identity"><strong>Grocery planner<\/strong><small class="detail-app-pricing">Paid<\/small><\/div>/);
+ assert.ok(html.indexOf('detail-app-pricing')<html.indexOf('studio-app-card'));
+ assert.doesNotMatch(html,/detail-product-meta/);
  assert.match(html,/studio-preview-link" href="https:\/\/example.com\/tool"/);
  assert.match(html,/data-load-video="https:\/\/www.youtube-nocookie.com\/embed\/dQw4w9WgXcQ"/);
  assert.match(html,/Plan a week/);

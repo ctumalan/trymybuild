@@ -378,13 +378,14 @@ function discoveryHero(listing = false) {
   return `<header class="discovery-hero discovery-hero-minimal discovery-hero-action${listing ? ' listing-entry-header' : ''}" aria-label="Share your app">
     <div class="discovery-hero-copy">
       ${listing ? '' : `<div class="discovery-title-row"><div class="discovery-title-copy"><h1 class="discovery-promise"><span>Stop guessing. Get <em>human feedback<svg class="feedback-hand-underline" viewBox="0 0 420 16" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path d="M3 10C42 5 72 9 111 7S181 9 218 6S288 7 321 5S383 5 417 2L411 5C377 9 351 7 320 10S252 9 218 11S146 10 111 12S41 10 3 13Z" /></svg></em> on your early-stage app.</span></h1><p class="discovery-instrument-copy">Type your app's URL to start exchanging reviews with another creator: they try your app, and you try theirs. <span class="discovery-intro-ending">It's completely free.</span></p></div></div>`}
+      ${listing ? '' : feedbackConversationExample()}
       ${listing ? catalogAction : `<form class="discovery-entry" data-discovery-entry>
         <label class="visually-hidden" for="discovery-input">${prompt}</label>
         <div class="discovery-entry-row"><div class="discovery-entry-field"><input id="discovery-input" data-app-link-entry value="${esc(value)}" type="text" maxlength="2048" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="${prompt}" /><span class="entry-placeholder" aria-hidden="true"><span class="entry-placeholder-track">${prompt}</span></span></div><div class="discovery-composer-toolbar"><span class="discovery-composer-note">Share privately first.</span><button type="submit" class="primary-button" data-entry-submit><span data-entry-submit-label>${intent.label}</span><span aria-hidden="true">→</span></button></div></div>
         <p class="discovery-entry-status" data-entry-status role="status"></p>
       </form>${state.listingInProgress ? '<button type="button" class="text-button entry-resume" data-entry-mode="list">Continue your draft →</button>' : ''}`}
     </div>
-    ${listing ? '' : feedbackConversationExample() + founderConversation()}
+    ${listing ? '' : founderConversation()}
   </header>`;
 }
 function feedbackConversationExample() {
@@ -669,14 +670,14 @@ function loadProjectConversation(root = document.querySelector('.detail-overlay'
   if (window.CW_SERVER) return CWProjectView.loadProjectConversation(root?.querySelector('[data-conversation]'));
 }
 function projectPanel(product) {
-  return `<main class="recipient-main project-detail-content invitation-detail mealmap-detail" data-showcase-theme="${CWProjectView.theme(product)}" data-public-project="${esc(product.slug)}"><header class="public-detail-header"><div><strong>${esc(product.name)}</strong></div></header>${projectDetailContent(product)}<div class="mealmap-after">${projectConversation(product)}</div>${similarSection(product)}</main>`;
+  return `<main class="recipient-main project-detail-content invitation-detail mealmap-detail" data-showcase-theme="${CWProjectView.theme(product)}" data-public-project="${esc(product.slug)}"><header class="public-detail-header">${CWProjectView.title(product)}</header>${projectDetailContent(product)}<div class="mealmap-after">${projectConversation(product)}</div>${similarSection(product)}</main>`;
 }
 function detailDrawer(product) {
   return `<div class="detail-overlay" data-detail-overlay>
     <button class="detail-backdrop" data-detail-close aria-label="Close app details"></button>
     <section class="detail-dialog mealmap-detail invitation-detail" data-showcase-theme="${CWProjectView.theme(product)}" role="dialog" aria-modal="true" aria-labelledby="detail-title-${esc(product.slug)}" tabindex="-1">
       <div class="detail-scroll">
-        <header class="project-panel-bar"><span class="overlay-brand" aria-label="TryMyBuild"><img class="brand-mark" src="/assets/brand/trymybuild-mark.svg" width="40" height="40" alt=""><span class="brand-name">TryMy<span class="brand-name-works">Build</span></span></span><button class="detail-close" data-detail-close aria-label="Close ${esc(product.name)} details">×</button></header><div class="project-detail-content"><header class="public-detail-header">${detailProjectHistory.length ? `<button type="button" class="detail-back" data-detail-back aria-label="Previous project">←</button>` : ''}<div><strong>${esc(product.name)}</strong></div></header>${projectDetailContent(product)}
+        <header class="project-panel-bar"><span class="overlay-brand" aria-label="TryMyBuild"><img class="brand-mark" src="/assets/brand/trymybuild-mark.svg" width="40" height="40" alt=""><span class="brand-name">TryMy<span class="brand-name-works">Build</span></span></span><button class="detail-close" data-detail-close aria-label="Close ${esc(product.name)} details">×</button></header><div class="project-detail-content"><header class="public-detail-header">${detailProjectHistory.length ? `<button type="button" class="detail-back" data-detail-back aria-label="Previous project">←</button>` : ''}${CWProjectView.title(product)}</header>${projectDetailContent(product)}
         <div class="mealmap-after">${projectConversation(product)}</div>${similarSection(product)}</div>
       </div>
     </section>
@@ -980,8 +981,8 @@ function listingPreview(editable = true) {
   const image = listingImage();
   queueMicrotask(() => { void ensureListingScreenshot(); });
   const title=listingDraft.title||'Your project';
-  const product={slug:'listing-preview',name:title,category:listingDraft.category,stage:listingDraft.stage,preview:image,url,presentation:{headline:listingDraft.does||title,help:listingDraft.helps||'Add the benefit people should understand in your dashboard.',firstTry:listingDraft.firstTry||'Give visitors one clear place to begin after you save this app.'}};
-  return `<div data-listing-preview-region data-listing-preview-editable="${editable}"><article class="listing-preview-card project-detail-content invitation-detail mealmap-detail" data-showcase-theme="${esc(CWProjectView.theme(product))}"><header class="public-detail-header"><div><strong>${esc(product.name)}</strong><small>${esc(product.category)} · ${esc(product.stage)}</small></div></header>${projectDetailContent(product,true,!editable)}</article>${editable?listingImageControls():''}</div>`;
+  const product={slug:'listing-preview',name:title,price:CWPricing.labels[listingDraft.pricing]||'',category:listingDraft.category,stage:listingDraft.stage,preview:image,url,presentation:{headline:listingDraft.does||title,help:listingDraft.helps||'Add the benefit people should understand in your dashboard.',firstTry:listingDraft.firstTry||'Give visitors one clear place to begin after you save this app.'}};
+  return `<div data-listing-preview-region data-listing-preview-editable="${editable}"><article class="listing-preview-card project-detail-content invitation-detail mealmap-detail" data-showcase-theme="${esc(CWProjectView.theme(product))}"><header class="public-detail-header">${CWProjectView.title(product)}</header>${projectDetailContent(product,true,!editable)}</article>${editable?listingImageControls():''}</div>`;
 }
 function listingIdentityConfirmation() {
   const image = listingImage();
@@ -1891,7 +1892,7 @@ function prepareConversationAnimations() {
       }, 2000);
     });
   }
-  document.querySelectorAll('.discovery-hero-action>.sample-conversation:not([data-animation-ready])').forEach(card => {
+  document.querySelectorAll('.discovery-hero-action .sample-conversation:not([data-animation-ready])').forEach(card => {
     card.dataset.animationReady = 'true';
     let runId = 0;
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;

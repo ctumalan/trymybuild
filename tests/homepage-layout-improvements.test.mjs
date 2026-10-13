@@ -20,8 +20,8 @@ test('homepage pairs its title with a compact founder trust note',()=>{
  assert.match(css,/\.discovery-title-row[\s\S]*?grid-template-columns:minmax\(0,1\.2fr\) minmax\(390px,\.8fr\)/);
  assert.match(css,/\.discovery-title-row:not\(:has\(\.founder-banner:not\(\[hidden\]\)\)\)[\s\S]*?grid-template-columns:minmax\(0,1fr\); text-align:center/);
  assert.match(css,/\.discovery-title-row:not\(:has\(\.founder-banner:not\(\[hidden\]\)\)\) \.discovery-instrument-copy \{ margin-inline:auto/);
- assert.match(css,/\.discovery-hero-action>\.sample-conversation[\s\S]*?width:min\(640px,100%\)[\s\S]*?margin:28px auto 0/);
- assert.match(css,/\.discovery-hero-action>\.sample-conversation[\s\S]*?background:transparent/);
+ assert.match(css,/\.discovery-hero-action \.sample-conversation[\s\S]*?width:min\(640px,100%\)[\s\S]*?margin:28px auto 0/);
+ assert.match(css,/\.discovery-hero-action \.sample-conversation[\s\S]*?background:transparent/);
  assert.match(css,/\.discovery-title-row \.founder-quote \{ margin:0; font-size:\.86rem/);
 });
 
@@ -47,6 +47,9 @@ test('feedback conversation opens on demand after a two-second loading state',()
  const app=read('app.js'),css=read('future-design.css');
  assert.match(app,/id="feedback-sample" class="sample-conversation"[^>]*hidden/);
  assert.match(app,/trigger\.textContent = 'See sample'/);
+ const hero=app.slice(app.indexOf('function discoveryHero('),app.indexOf('function feedbackConversationExample('));
+ assert.ok(hero.indexOf('feedbackConversationExample()')<hero.indexOf('<form class="discovery-entry"'));
+ assert.match(app,/querySelectorAll\('\.discovery-hero-action \.sample-conversation:not\(\[data-animation-ready\]\)'\)/);
  assert.match(app,/Loading sample conversation[\s\S]*?await pause\(2000\)/);
  assert.doesNotMatch(app,/await pause\(6000\)/);
  assert.match(app,/close\.onclick = \(\) =>[\s\S]*?trigger\.hidden = false/);

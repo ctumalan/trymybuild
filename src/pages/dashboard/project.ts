@@ -1,4 +1,4 @@
-import {projectDetailContent,projectTheme} from '../../server/project-detail-ui';
+import {projectDetailTitle,projectDetailContent,projectTheme} from '../../server/project-detail-ui';
 import {STUDIO,toClientProject} from '../../server/catalog-db';
 import {quickFeedbackPanel} from '../../server/quick-feedback-view';
 import type {APIRoute} from 'astro';
@@ -11,7 +11,7 @@ export const GET:APIRoute=async context=>{
  const app=toClientProject(p,()=>p.is_studio?STUDIO:{name:m.user.firstName||'You',label:'Your app'});
  const headingActions=p.listing_status==='published'?`<div class="invite-actions"><button type="button" class="secondary-button" data-invite-project="${e(p.slug)}">Share</button></div>`:'';
  return workspace(p.title||'Project',`<div class="recipient-main project-detail-content invitation-detail mealmap-detail owner-app-detail" data-showcase-theme="${e(projectTheme(app))}" data-panel-content data-project-card>
- <header class="public-detail-header"><div><strong>${e(app.name||'Untitled draft')}</strong></div>${projectActions(p)}</header>
+ <header class="public-detail-header">${projectDetailTitle(app)}${projectActions(p)}</header>
  ${projectDetailContent(app,headingActions)}
  <section class="owner-app-management" aria-label="Manage your app"><p><span class="project-status ${e(p.listing_status)}">${e(shortStatus(p.listing_status))}</span></p>
  ${p.listing_status==='published'?`<section class="cw-panel trial-owner-actions"><h2>Invite your first testers</h2><p>Ask one specific question, then send a personal invitation. Commit to replying so testers know a real person is listening.</p><div class="cw-row">${feedbackRequestAction(p)}<button type="button" class="secondary-button" data-invite-project="${e(p.slug)}">Prepare invitation</button></div><p><a href="/guides/first-app-testers">No audience yet? Start here →</a></p></section>`:''}

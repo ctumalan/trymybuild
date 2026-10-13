@@ -304,7 +304,7 @@ function catalogSortLabel(sort = state.sort) {
 }
 let homeView = 'find';
 function homeViewTabs(active) {
-  return `<div class="home-view-tabs" role="tablist" aria-label="What would you like to do?">${[['find','Explore apps'],['test','Share your app']].map(([key,label])=>`<button type="button" role="tab" id="home-tab-${key}" data-home-view="${key}" aria-controls="home-panel" aria-selected="${active===key}" tabindex="${active===key?'0':'-1'}">${label}</button>`).join('')}</div>`;
+  return `<div class="home-view-tabs" role="tablist" aria-label="What would you like to do?">${[['find','Explore apps'],['test','Get feedback']].map(([key,label])=>`<button type="button" role="tab" id="home-tab-${key}" data-home-view="${key}" aria-controls="home-panel" aria-selected="${active===key}" tabindex="${active===key?'0':'-1'}">${label}</button>`).join('')}</div>`;
 }
 function selectHomeView(view) {
   const previous=homeView;
@@ -357,7 +357,7 @@ function homepageAppUrl(value) {
 }
 function homepageEntryIntent(value) {
   const url = homepageAppUrl(value);
-  return { url, label: 'Get my app tested' };
+  return { url, label: 'Get feedback on my app' };
 }
 function updateHomepageEntry(form) {
   const value = form.querySelector('[data-app-link-entry]').value;

@@ -17,8 +17,10 @@
 .invitation-signup-action { margin:16px 0 0; padding:18px; background:#f4eef9; border:1px solid #e2d4ef; border-radius:16px; text-align:center; }
 .invitation-signup-action>.primary-button,.invitation-signup-action form>.primary-button { display:flex; justify-content:center; width:100%; }
 .invitation-signup-action p { font-size:.8rem; line-height:1.5; margin:9px 0 0; color:#756580; }
+.invitation-signup-action>h3 { margin:0 0 14px; font-size:1.05rem; color:#17332a; }
+.invitation-native-detail .detail-notes-heading { margin:24px 0 10px; font-size:1.05rem; color:#17332a; }
 .invitation-native-feedback { scroll-margin-top:64px; }
-.invitation-native-feedback>h3 { font-size:1.1rem; margin:16px 0; }
+.invitation-native-feedback>h3 { font-size:1.1rem; line-height:1.4; margin:16px 0; color:#17332a; }
 .invitation-native-feedback .public-review-card { margin-top:12px; }
 .invitation-native-feedback .public-review-card>p { white-space:pre-line; font-size:.9rem; line-height:1.65; }
 .invitation-native-feedback .public-review-card header small { display:block; }
@@ -37,5 +39,3 @@
  .invitation-native-detail .public-detail-header .invitation-provisional-badge { font-size:.68rem!important; }
 }
 @media(max-width:620px) { .invitation-landing-page .cw-main { width:calc(100% - 36px); } }
-
-.invitation-signup-action .invitation-expiry-notice { margin:0 0 12px; color:#b42318; font-size:.78rem; font-weight:600; line-height:1.5; }

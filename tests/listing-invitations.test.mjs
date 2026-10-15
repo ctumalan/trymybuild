@@ -34,9 +34,10 @@ test('a readable preview requires an active, unclaimed invitation',()=>{
  for(const patch of [{claimed_by:memberId},{revoked_at:new Date().toISOString()},{expires_at:new Date(Date.now()-1000).toISOString()}])assert.equal(invitationOpen({...row(),...patch}),false);
  assert.equal(invitationOpen(null),false);
 });
-test('unclaimed previews close at the 48-hour boundary, including legacy invitations; edits never extend the deadline',()=>{
+test('unclaimed previews remain available for 30 days; earlier stored expiry and revocation remain authoritative',()=>{
  const created=Date.parse('2026-10-15T18:00:00Z');
- const legacy={...row(),created_at:new Date(created).toISOString(),updated_at:new Date(created+INVITATION_TTL_MS).toISOString(),expires_at:new Date(created+30*86400000).toISOString()};
+ assert.equal(INVITATION_TTL_MS,30*86400000);
+ const legacy={...row(),created_at:new Date(created).toISOString(),updated_at:new Date(created+INVITATION_TTL_MS).toISOString(),expires_at:new Date(created+60*86400000).toISOString()};
  assert.equal(invitationExpiresAt(legacy),created+INVITATION_TTL_MS);
  assert.equal(invitationOpen(legacy,created+INVITATION_TTL_MS-1),true);
  assert.equal(invitationOpen(legacy,created+INVITATION_TTL_MS),false);
@@ -53,7 +54,7 @@ test('expired legacy previews cannot be claimed, while an already saved draft re
  store.find=async()=>({...expired,claimed_by:memberId,project_id:project.id});
  assert.equal((await claimInvitation(store,args)).project.slug,project.slug);assert.equal(writes,0);
 });
-test('creating an invitation stores a server-controlled 48-hour deadline instead of the legacy database default',async()=>{
+test('creating an invitation stores a server-controlled 30-day expiry',async()=>{
  let inserted;
  const q={select(){return q;},eq(){return q;},maybeSingle:async()=>({data:null}),insert(value){inserted=value;return {select:()=>({single:async()=>({data:{id}})})};}};
  const db={from:()=>q,storage:{from:()=>({upload:async()=>({})})}};

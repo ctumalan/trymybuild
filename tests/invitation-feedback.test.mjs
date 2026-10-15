@@ -24,7 +24,12 @@ test('feedback stays behind the invitation lifecycle checks and is below its app
  const open=await route(request),html=await open.text();
  assert.ok(html.indexOf('studio-app-card')<html.indexOf('id="invitation-review"'));
  assert.match(html,/Public website review/);
- assert.match(html,/Save and list your app/);
+ assert.match(html,/Save your preview/);
+ assert.match(html,/Christian’s review of your app/);
+ assert.match(html,/Public website review · No signup needed/);
+ assert.ok(html.indexOf('id="invitation-review"')<html.indexOf('Your listing details'));
+ assert.ok(html.indexOf('Your listing details')<html.indexOf('class="invitation-signup-action"'));
+ assert.doesNotMatch(html,/invitation-expiry-notice|expires 48 hours|data-invitation-review/);
  assert.match(html,/aria-expanded="false" aria-label="Try this app, available after signup"/);
  assert.match(html,/<p class="preview-launch-note" role="status" hidden>/);
  assert.doesNotMatch(html,/data-try-app=/);
@@ -34,13 +39,13 @@ test('feedback stays behind the invitation lifecycle checks and is below its app
  assert.match(matched,/data-invitation-edit/);assert.match(matched,/<a class="primary-button" href="https:\/\/example.com\/"/);assert.doesNotMatch(matched,/disabled aria-label="Try this app|data-try-app=/);
  scope.currentUser=async()=>({email:'other@example.com',emailVerified:true});
  const other=await(await route(request)).text();
- assert.match(other,/<form action="\/auth\/sign-out" method="post">/);assert.match(other,/Switch account &amp; claim/);assert.doesNotMatch(other,/data-try-app=/);
+ assert.match(other,/<form action="\/auth\/sign-out" method="post">/);assert.match(other,/Switch account &amp; save your preview/);assert.doesNotMatch(other,/data-try-app=/);
  scope.currentUser=async()=>({email:'maker@example.com',emailVerified:false});
  assert.doesNotMatch(await(await route(request)).text(),/data-try-app=/);
  scope.currentUser=async()=>null;
  scope.listPublished=async()=>{throw Error('Catalog unavailable');};
- assert.match(await(await route(request)).text(),/Save and list your app/);
- for(const patch of [{revoked_at:new Date().toISOString()},{expires_at:new Date(0).toISOString()},{created_at:new Date(Date.now()-49*3600000).toISOString()},{claimed_by:'different-owner'}]){
+ assert.match(await(await route(request)).text(),/Save your preview/);
+ for(const patch of [{revoked_at:new Date().toISOString()},{expires_at:new Date(0).toISOString()},{created_at:new Date(Date.now()-31*86400000).toISOString()},{claimed_by:'different-owner'}]){
   const original=row;row={...original,...patch};
   const closed=await route(request);assert.equal(closed.status,410);assert.doesNotMatch(await closed.text(),/Public website review|604decordesign/);row=original;
  }

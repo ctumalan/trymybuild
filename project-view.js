@@ -55,7 +55,7 @@ function hero(product, options = {}) {
     ${options.afterPreview||''}
     ${video(product.video)}
    </div>
-   <div class="recipient-copy recipient-notes-copy"><div class="detail-description-notes">
+   <div class="recipient-copy recipient-notes-copy">${options.notesHeading?`<h3 class="detail-notes-heading">${esc(options.notesHeading)}</h3>`:''}<div class="detail-description-notes">
     <div><div class="detail-note-label"><span class="studio-note-symbol">${helpIcon}</span><h3>How it helps</h3></div><p aria-label="${esc(presentation.help)}"><span data-type-guidance aria-hidden="true">${esc(presentation.help)}</span></p></div>
     <div><div class="detail-note-label"><span class="studio-note-symbol">${tryIcon}</span><h3>One thing to try first</h3></div><p aria-label="${esc(presentation.firstTry)}"><span data-type-guidance aria-hidden="true">${esc(presentation.firstTry)}</span></p></div>
    </div></div>

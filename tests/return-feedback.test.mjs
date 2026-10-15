@@ -2,13 +2,15 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
+import '../project-view.js';
 const source=readFileSync(new URL('../app.js',import.meta.url),'utf8');
 test('project detail try links retain the return-feedback hook',()=>{
- for(const [start,end] of [['function projectDetailContent(', "document.addEventListener('input'"]]){
-  const section=readFileSync(new URL('../project-view.js',import.meta.url),'utf8');
-  assert.match(section,/data-try-app="\$\{esc\(product.slug\)\}"/);
-  assert.match(section,/data-try-app="\$\{esc\(product.slug\)\}"[^>]*>Try (?:this (?:app|project) ↗|(?:this )?app <span aria-hidden="true">↗<\/span>)<\/a>/);
- }
+ const product={slug:'one',name:'One',url:'https://example.com/'};
+ const live=globalThis.CWProjectView.hero(product);
+ assert.match(live,/data-try-app="one"[^>]*>Try this app ↗<\/a>/);
+ const ownPreview=globalThis.CWProjectView.hero(product,{preview:true,launchLabel:'Open your site ↗'});
+ assert.match(ownPreview,/>Open your site ↗<\/a>/);
+ assert.doesNotMatch(ownPreview,/data-try-app/);
  assert.match(source,/armReturnFeedback\(tryApp.dataset.tryApp\)/);
 });
 function setup(){

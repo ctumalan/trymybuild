@@ -33,7 +33,7 @@ function hero(product, options = {}) {
  const presentation = product.presentation || {};
   const launchAction = !product.url ? '' : options.disabledLaunch
     ? `<button class="primary-button preview-try-disabled" type="button" data-preview-launch aria-expanded="false" aria-label="${esc(options.disabledLaunchLabel||'Try this app, available after saving')}">Try this app ↗</button>`
-    : `<a class="primary-button" href="${esc(product.url)}" target="_blank" rel="noopener noreferrer" ${options.preview?'':`data-try-app="${esc(product.slug)}"`}>Try this app ↗</a>`;
+    : `<a class="primary-button" href="${esc(product.url)}" target="_blank" rel="noopener noreferrer" ${options.preview?'':`data-try-app="${esc(product.slug)}"`}>${esc(options.launchLabel||'Try this app ↗')}</a>`;
   const launchNote = product.url && options.disabledLaunch
     ? `<p class="preview-launch-note" role="status" hidden>Other users will be able to preview and review your app after you <a href="${esc(options.signupHref||'/auth/sign-in?signup=1&next=listing-dashboard')}"${options.listingSignup?' data-listing-create-account':''}>sign up</a> and publish it.</p>` : '';
   let destinationHost = '';

@@ -1,16 +1,24 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {feedbackPanel,invitationFeedback,renderInvitationFeedback} from '../src/server/invitation-feedback.mjs';
+import {feedbackPanel,invitationFeedback,renderInvitationFeedback,reviewText} from '../src/server/invitation-feedback.mjs';
 import {invitationOpen} from '../src/server/listing-invitation.mjs';
 import {moduleFixture} from '../scripts/workspace-fixtures.mjs';
 const id='87829b6d-f5bb-4a3d-afd1-c823a3d812f0';
-test('feedback is invitation-specific and safely renders prose with a stable email destination',()=>{
+test('feedback is invitation-specific and safely renders prose without personal contact details',()=>{
  assert.equal(renderInvitationFeedback('another-invitation'),'');
  assert.match(renderInvitationFeedback(id),/id="founder-feedback"/);
  assert.match(renderInvitationFeedback(id),/haven’t tested the signed-in/);
+ assert.doesNotMatch(renderInvitationFeedback(id),/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i);
+ assert.equal(reviewText('Email maker@example.com or call +1 (415) 555-0123.'),'Email [email address omitted] or call [phone number omitted].');
+ assert.equal(reviewText('$9.99/month · 2026-10-15'),'$9.99/month · 2026-10-15');
+ assert.ok(renderInvitationFeedback(id).indexOf('Let contractors try a sample job')<renderInvitationFeedback(id).indexOf('What works well'));
+ assert.match(renderInvitationFeedback(id),/<details class="invitation-feedback-more">/);
  const html=feedbackPanel({...invitationFeedback(id),headline:'<script>bad()</script>',notes:[{title:'<img>',text:'<a href="evil">click</a>'}]});
  assert.doesNotMatch(html,/<script>|<img>|<a href="evil"/);
  assert.match(html,/&lt;script&gt;/);
+ const contact=feedbackPanel({...invitationFeedback(id),headline:'Contact maker@example.test on +14155550123',notes:[]});
+ assert.doesNotMatch(contact,/maker@example.test|14155550123/);
+ assert.match(contact,/email address omitted/);
 });
 test('feedback stays behind the invitation lifecycle checks and is below its app preview',async()=>{
  let row={id,created_at:new Date().toISOString(),expires_at:new Date(Date.now()+86400000).toISOString(),title:'Fir & Field',external_url:'https://example.com/',recipient_email:'maker@example.com'};
@@ -26,14 +34,16 @@ test('feedback stays behind the invitation lifecycle checks and is below its app
  assert.match(html,/Public website review/);
  assert.match(html,/Save your preview/);
  assert.match(html,/Christian’s review of your app/);
- assert.match(html,/Public website review · No signup needed/);
+ assert.match(html,/No signup needed/);
  assert.ok(html.indexOf('id="invitation-review"')<html.indexOf('Your listing details'));
  assert.ok(html.indexOf('Your listing details')<html.indexOf('class="invitation-signup-action"'));
  assert.doesNotMatch(html,/invitation-expiry-notice|expires 48 hours|data-invitation-review/);
- assert.match(html,/aria-expanded="false" aria-label="Try this app, available after signup"/);
- assert.match(html,/<p class="preview-launch-note" role="status" hidden>/);
+ assert.match(html,/<a class="primary-button" href="https:\/\/example.com\/"[^>]*>Open your site ↗<\/a>/);
+ assert.match(html,/Creator profile is optional/);
+ assert.doesNotMatch(html,/preview-try-disabled|preview-launch-note|maker@example.com/);
  assert.doesNotMatch(html,/data-try-app=/);
- assert.match(html,/template id="invitation-app-panel"/);
+ assert.match(html,/data-invitation-page/);
+ assert.doesNotMatch(html,/invitation-app-panel|invitation-catalog-grid|App catalog|Explore apps/);
  scope.currentUser=async()=>({email:'maker@example.com',emailVerified:true});
  const matched=await(await route(request)).text();
  assert.match(matched,/data-invitation-edit/);assert.match(matched,/<a class="primary-button" href="https:\/\/example.com\/"/);assert.doesNotMatch(matched,/disabled aria-label="Try this app|data-try-app=/);
@@ -47,6 +57,6 @@ test('feedback stays behind the invitation lifecycle checks and is below its app
  assert.match(await(await route(request)).text(),/Save your preview/);
  for(const patch of [{revoked_at:new Date().toISOString()},{expires_at:new Date(0).toISOString()},{created_at:new Date(Date.now()-12*86400000).toISOString()},{claimed_by:'different-owner'}]){
   const original=row;row={...original,...patch};
-  const closed=await route(request);assert.equal(closed.status,410);assert.doesNotMatch(await closed.text(),/Public website review|604decordesign/);row=original;
+  const closed=await route(request);assert.equal(closed.status,410);assert.doesNotMatch(await closed.text(),/Public website review|invitation-founder-feedback/);row=original;
  }
 });

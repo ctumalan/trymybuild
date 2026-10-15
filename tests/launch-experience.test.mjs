@@ -21,7 +21,7 @@ test('signup and global navigation expose the legal agreement',()=>{
  assert.match(app,/data-catalog-project="\$\{esc\(product\.slug\)\}" tabindex="-1"/);
  assert.match(app,/function revealLinkedCatalogProject\(\)[\s\S]*?scrollIntoView/);
  assert.ok(app.indexOf('${publishControls}${importCard}${listingPreview()}')>-1);
- assert.match(globalThis.CWProjectView.hero({url:'https://example.com/'},{disabledLaunch:true}),/preview-try-disabled[^>]+disabled aria-label="Try this app, available after saving"/);
+ assert.match(globalThis.CWProjectView.hero({url:'https://example.com/'},{disabledLaunch:true}),/preview-try-disabled[^>]+aria-expanded="false" aria-label="Try this app, available after saving"/);
  const guestDecision=app.slice(app.indexOf('<div class="legal-signup">'),app.indexOf('</div>`}<p data-listing-account-status'));
  assert.ok(guestDecision.indexOf('listing-save-hero')<guestDecision.indexOf('legal-agreement'));
  assert.match(guestDecision,/Already have an account\? <a[^>]+>Sign in<\/a>/);assert.doesNotMatch(guestDecision,/secondary-button/);

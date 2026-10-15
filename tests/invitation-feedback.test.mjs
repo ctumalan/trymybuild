@@ -25,7 +25,8 @@ test('feedback stays behind the invitation lifecycle checks and is below its app
  assert.ok(html.indexOf('studio-app-card')<html.indexOf('id="invitation-review"'));
  assert.match(html,/Public website review/);
  assert.match(html,/Sign up &amp; list your app/);
- assert.match(html,/disabled aria-label="Try this app, available after signup"/);
+ assert.match(html,/aria-expanded="false" aria-label="Try this app, available after signup"/);
+ assert.match(html,/<p class="preview-launch-note" role="status" hidden>/);
  assert.doesNotMatch(html,/data-try-app=/);
  assert.match(html,/template id="invitation-app-panel"/);
  scope.currentUser=async()=>({email:'maker@example.com',emailVerified:true});

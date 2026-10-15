@@ -30,10 +30,10 @@ function title(product) {
 function hero(product, options = {}) {
  const presentation = product.presentation || {};
   const launchAction = !product.url ? '' : options.disabledLaunch
-    ? `<button class="primary-button preview-try-disabled" type="button" disabled aria-label="${esc(options.disabledLaunchLabel||'Try this app, available after saving')}">Try this app ↗</button>`
+    ? `<button class="primary-button preview-try-disabled" type="button" data-preview-launch aria-expanded="false" aria-label="${esc(options.disabledLaunchLabel||'Try this app, available after saving')}">Try this app ↗</button>`
     : `<a class="primary-button" href="${esc(product.url)}" target="_blank" rel="noopener noreferrer" ${options.preview?'':`data-try-app="${esc(product.slug)}"`}>Try this app ↗</a>`;
   const launchNote = product.url && options.disabledLaunch
-    ? '<p class="preview-launch-note">Other users will be able to preview and review your app after you sign up and publish it.</p>' : '';
+    ? '<p class="preview-launch-note" role="status" hidden>Other users will be able to preview and review your app after you sign up and publish it.</p>' : '';
   let destinationHost = '';
   try { destinationHost = new URL(product.url).hostname.replace(/^www\./, ''); } catch {}
   const previewImage = product.preview ? `<img ${options.preview?'data-listing-screenshot':''} src="${esc(product.preview)}" alt="Preview of ${esc(product.name)}" referrerpolicy="no-referrer">` : '';
@@ -148,6 +148,12 @@ async function loadProjectReviews(region) {
 globalThis.CWProjectView = {theme,title,hero,video,reviewCard, conversation, conversationFeed, discussionFeed, loadProjectConversation, loadProjectReviews, recordCommunityReview, applyReviewEvidence, mountGuidanceTyping};
 if (typeof document === 'undefined') return;
 document.addEventListener('click', event => {
+ const launch = event.target.closest('[data-preview-launch]');
+ if (launch) {
+  const note = launch.closest('.studio-card-actions')?.querySelector('.preview-launch-note');
+  if (note) { note.hidden = !note.hidden; launch.setAttribute('aria-expanded', String(!note.hidden)); }
+  return;
+ }
  const retry = event.target.closest('[data-conversation-retry]');
  if (retry) void loadProjectConversation(retry.closest('[data-conversation]'));
 });

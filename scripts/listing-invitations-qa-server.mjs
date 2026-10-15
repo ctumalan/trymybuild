@@ -24,7 +24,7 @@ const creator=moduleFixture('src/pages/listing-invitation/[token].ts',['GET'],sc
 http.createServer(async(req,res)=>{
  try{
   const url=new URL(req.url,base);let response;
-  user=req.headers.cookie?.includes('fixture_creator=1')?{email:'maker@example.invalid',emailVerified:true}:null;
+  user=url.searchParams.get('guest')!=='1'&&req.headers.cookie?.includes('fixture_creator=1')?{email:'maker@example.invalid',emailVerified:true}:null;
   const context={url,params:{token},redirect:(href,status)=>new Response(null,{status,headers:{location:href}})};
   if(url.pathname==='/responsive-qa')response=new Response(`<!doctype html><html><head><title>Invitation 390px layout check</title></head><body><p>Local 390px layout check</p><iframe title="390px invitation preview" src="/listing-invitation/${token}#founder-feedback" width="390" height="844" style="border:1px solid #ddd"></iframe></body></html>`,{headers:{'Content-Type':'text/html'}});
   else if(url.pathname==='/admin/invitations')response=await admin(context);

@@ -12,7 +12,7 @@
 .invitation-provisional-badge { font-size:.76rem!important; line-height:1.4!important; color:#7645a5; background:#f1e9f8; padding:5px 9px; border-radius:9px; display:inline-block; margin:8px 0!important; }
 .invitation-native-detail .public-detail-header { align-items:center; }
 .invitation-native-detail .public-detail-header .invitation-provisional-badge { flex-shrink:0; }
-.invitation-native-detail .preview-try-disabled { opacity:.5; cursor:not-allowed; box-shadow:none; }
+.invitation-native-detail .preview-try-disabled { opacity:.5; cursor:help; box-shadow:none; }
 .invitation-creator-placeholder { font-size:.8rem; color:#81738d; }
 .invitation-signup-action { margin:16px 0 0; padding:18px; background:#f4eef9; border:1px solid #e2d4ef; border-radius:16px; text-align:center; }
 .invitation-signup-action>.primary-button,.invitation-signup-action form>.primary-button { display:flex; justify-content:center; width:100%; }

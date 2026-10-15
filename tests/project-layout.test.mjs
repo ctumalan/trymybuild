@@ -73,10 +73,12 @@ test('project destination shows the exact destination URL',()=>{
  assert.equal(context.destination('/projects/example'),'https://trymybuild.com/projects/example');
  assert.equal(context.destination('https://example.com/tool'),'https://example.com/tool');
 });
-test('the signup preview shows the launch action without making it clickable',()=>{
+test('the signup preview explains the unavailable launch action on request',()=>{
  const product={slug:'preview-app',name:'Preview app',url:'https://example.com',preview:'/assets/previews/example.png'};
  const disabled=globalThis.CWProjectView.hero(product,{preview:true,disabledLaunch:true});
- assert.match(disabled,/<button class="primary-button preview-try-disabled"[^>]+disabled[^>]*>Try this app ↗<\/button>/);
+ assert.match(disabled,/<button class="primary-button preview-try-disabled"[^>]+data-preview-launch aria-expanded="false"[^>]*>Try this app ↗<\/button>/);
+ assert.doesNotMatch(disabled,/<button[^>]*\sdisabled(?:\s|>)/);
+ assert.match(disabled,/<p class="preview-launch-note" role="status" hidden>/);
  assert.doesNotMatch(disabled,/href="https:\/\/example\.com"/);
  const published=globalThis.CWProjectView.hero(product);
  assert.match(published,/<a class="primary-button" href="https:\/\/example\.com"/);

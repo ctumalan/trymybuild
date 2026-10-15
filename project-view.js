@@ -24,8 +24,10 @@ function video(value) {
  const url = globalThis.CWMedia?.videoUrl(value);
  return url ? `<div class="project-video project-video-compact"><button type="button" class="project-video-trigger" data-load-video="${esc(url)}"><span class="project-video-play" aria-hidden="true"><svg viewBox="0 0 20 20" width="16" height="16" fill="currentColor"><path d="M6 3.8a.8.8 0 0 1 1.2-.7l9 6.2a.8.8 0 0 1 0 1.4l-9 6.2a.8.8 0 0 1-1.2-.7z"/></svg></span><span>Watch demo</span></button></div>` : '';
 }
-function title(product) {
- return `<div class="detail-app-identity"><strong>${esc(product.name||'Untitled draft')}</strong>${product.price?`<small class="detail-app-pricing">${esc(product.price)}</small>`:''}</div>`;
+function title(product, options = {}) {
+ const price=String(product.price||'').trim();
+ const label=price.toLowerCase()==='paid'?'Paid options':price;
+ return `<div class="detail-app-identity"><strong>${esc(product.name||'Untitled draft')}</strong>${price?`<small class="detail-app-pricing">Website pricing: ${esc(label)}</small>${options.preview?'<small class="detail-app-listing-note">Listing on TryMyBuild is free.</small>':''}`:''}</div>`;
 }
 function hero(product, options = {}) {
  const presentation = product.presentation || {};
@@ -33,7 +35,7 @@ function hero(product, options = {}) {
     ? `<button class="primary-button preview-try-disabled" type="button" data-preview-launch aria-expanded="false" aria-label="${esc(options.disabledLaunchLabel||'Try this app, available after saving')}">Try this app ↗</button>`
     : `<a class="primary-button" href="${esc(product.url)}" target="_blank" rel="noopener noreferrer" ${options.preview?'':`data-try-app="${esc(product.slug)}"`}>Try this app ↗</a>`;
   const launchNote = product.url && options.disabledLaunch
-    ? '<p class="preview-launch-note" role="status" hidden>Other users will be able to preview and review your app after you sign up and publish it.</p>' : '';
+    ? `<p class="preview-launch-note" role="status" hidden>Other users will be able to preview and review your app after you <a href="${esc(options.signupHref||'/auth/sign-in?signup=1&next=listing-dashboard')}"${options.listingSignup?' data-listing-create-account':''}>sign up</a> and publish it.</p>` : '';
   let destinationHost = '';
   try { destinationHost = new URL(product.url).hostname.replace(/^www\./, ''); } catch {}
   const previewImage = product.preview ? `<img ${options.preview?'data-listing-screenshot':''} src="${esc(product.preview)}" alt="Preview of ${esc(product.name)}" referrerpolicy="no-referrer">` : '';

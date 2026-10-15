@@ -661,7 +661,7 @@ function projectDetailContent(product, preview = false, disabledLaunch = false) 
   const creator = preview ? `<span class="creator-byline">${avatar(previewCreator,'byline-avatar')}<span>by ${esc(previewName)}</span></span>` : creatorLink(product,true,true,true);
   const saved = state.saved.has(product.slug);
   const headingActions = preview ? '' : `<div class="invite-actions"><button class="secondary-button detail-save ${saved?'is-saved':''}" data-save="${esc(product.slug)}">${saved?'♥ Saved':'♡ Save'}</button><button class="secondary-button detail-share" data-share-product="${esc(product.slug)}">Share</button><span class="detail-share-status" data-share-status role="status"></span></div>`;
-  return CWProjectView.hero({...product, presentation, url:product.url ? safeProjectUrl(product.url) : ''}, {creator, preview, disabledLaunch, headingActions, titleId:preview ? '' : 'detail-title-'+product.slug});
+  return CWProjectView.hero({...product, presentation, url:product.url ? safeProjectUrl(product.url) : ''}, {creator, preview, disabledLaunch, listingSignup:preview, headingActions, titleId:preview ? '' : 'detail-title-'+product.slug});
 }
 function projectConversation(product) {
   return CWProjectView.conversation(product, {posts:state.communityPosts.filter(post=>post.projectSlug===product.slug), loading:!!window.CW_SERVER, composer:projectCommentComposer(product,false,'conversation-')});
@@ -982,7 +982,7 @@ function listingPreview(editable = true) {
   queueMicrotask(() => { void ensureListingScreenshot(); });
   const title=listingDraft.title||'Your project';
   const product={slug:'listing-preview',name:title,price:CWPricing.labels[listingDraft.pricing]||'',category:listingDraft.category,stage:listingDraft.stage,preview:image,url,presentation:{headline:listingDraft.does||title,help:listingDraft.helps||'Add the benefit people should understand in your dashboard.',firstTry:listingDraft.firstTry||'Give visitors one clear place to begin after you save this app.'}};
-  return `<div data-listing-preview-region data-listing-preview-editable="${editable}"><article class="listing-preview-card project-detail-content invitation-detail mealmap-detail" data-showcase-theme="${esc(CWProjectView.theme(product))}"><header class="public-detail-header">${CWProjectView.title(product)}</header>${projectDetailContent(product,true,!editable)}</article>${editable?listingImageControls():''}</div>`;
+  return `<div data-listing-preview-region data-listing-preview-editable="${editable}"><article class="listing-preview-card project-detail-content invitation-detail mealmap-detail" data-showcase-theme="${esc(CWProjectView.theme(product))}"><header class="public-detail-header">${CWProjectView.title(product,{preview:true})}</header>${projectDetailContent(product,true,!editable)}</article>${editable?listingImageControls():''}</div>`;
 }
 function listingIdentityConfirmation() {
   const image = listingImage();
@@ -1244,6 +1244,7 @@ function optionButtons(options, selected, field) {
 }
 
 function accountPage() {
+  if (window.CW_SERVER && state.session?.authenticated && new URLSearchParams(location.search).get('welcome') === '1') return optionalRecommendationsPage();
   if (window.CW_SERVER) return (state.session?.authenticated ? '<nav class="page-shell account-actions" aria-label="My workspaces"><a class="primary-button" href="/dashboard">For me →</a><a class="secondary-button" href="/dashboard?view=creator">Creator workspace →</a></nav>' : '') + serverAccountPage();
   return welcomeAccountPage();
 }
@@ -1374,6 +1375,7 @@ document.addEventListener('keydown', event => {
 document.addEventListener("click", async event => {
   const createAccount = event.target.closest('[data-listing-create-account]');
   if (createAccount) {
+    event.preventDefault();
     const terms = document.querySelector('[data-listing-terms]');
     const status = document.querySelector('[data-listing-account-status]');
     if (!state.session?.authenticated && !terms?.checked) { status.textContent = 'Agree to the Terms of Service and Privacy Policy to continue.'; terms?.focus(); return; }
@@ -1595,6 +1597,7 @@ if (window.CW_SERVER) projects.length = 0;
 // Resolve information pages before the first paint so they never flash the URL hero.
 const initialInfoPage = new URLSearchParams(location.search).get('page');
 if (['about', 'contact'].includes(initialInfoPage)) state.route = initialInfoPage;
+if (new URLSearchParams(location.search).has('welcome')) state.route = 'account';
 render();
 function loadCatalog() {
   catalogState = 'loading';

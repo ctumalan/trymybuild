@@ -91,9 +91,23 @@ function listingJourneyVisibility(){
  const preference=['private','public'].includes(listingDraft.sharingPreference)?listingDraft.sharingPreference:'private';
  return `<fieldset class="journey-visibility"><legend class="sr-only">Choose who should see your app</legend>${[['private','Keep it private while I finish','Only you can see the saved draft.'],['public','Make it public when it’s ready','Finish the required details, then publish it yourself.']].map(([value,title,copy])=>`<label class="visibility-card"><input type="radio" name="sharingPreference" data-sharing-preference value="${value}" ${preference===value?'checked':''} required><span><strong>${title}</strong><small>${copy}</small></span></label>`).join('')}</fieldset>`;
 }
+function accountSignupJourney() {
+ const visitor=new URLSearchParams(location.search).get('journey')==='visitor';
+ const draft=!visitor&&listingDraft.title?.trim()&&listingUrl(listingDraft.url);
+ return {visitor,appName:draft?listingDraft.title.trim():'',destination:visitor?'/?welcome=1':draft?'listing-dashboard':'/dashboard?view=creator'};
+}
 function welcomeAccountPage() {
- let selected=[],alerts=false;try{selected=JSON.parse(localStorage.getItem('trymybuild-signup-interests')||'[]');alerts=localStorage.getItem('trymybuild-signup-alerts')==='true';}catch{}
- return `<section class="page-shell account-page"><section class="welcome-account"><h1>Welcome to TryMyBuild.</h1><p>Create your account to save useful projects and receive notifications when new apps match your interests.</p><form data-welcome-signup><fieldset><legend>What interests you? <small>Click as many as you want</small></legend><div class="interest-options">${categoryCatalog.map(c=>`<label><input type="checkbox" name="interest" value="${esc(c.name)}" ${selected.includes(c.name)?'checked':''}>${esc(c.name)}</label>`).join('')}</div></fieldset><label><input type="checkbox" name="alerts" ${alerts?'checked':''}> Notify me about new apps matching these interests</label><label class="legal-agreement"><input type="checkbox" required><span>I agree to the <a href="/terms">Terms of Service</a> and <a href="/privacy">Privacy Policy</a>.</span></label><button class="primary-button">Create my account</button><a href="/auth/sign-in">Already a member? Sign in</a><p data-signup-status role="status"></p></form><p>Are you a creator? <button class="text-button" data-home-view="test">List your project—it’s free!</button></p></section></section>`;
+ const journey=accountSignupJourney();
+ const heading=journey.appName?`Create your account to save ${esc(journey.appName)}.`:'Create your free account.';
+ const copy=journey.visitor?'Save apps, share feedback, and support creators. You can choose recommendations after you join.':journey.appName?'Your preview is ready. Save it as a private draft, then publish when you’re ready.':'List your app and get feedback from real people. Start privately and publish when you’re ready.';
+ return `<section class="page-shell account-page"><section class="welcome-account account-signup"><p class="eyebrow">${journey.visitor?'Discover useful apps':'For creators'}</p><h1>${heading}</h1><p class="account-signup-copy">${copy}</p><form data-welcome-signup><label class="legal-agreement"><input type="checkbox" name="terms" required><span>I agree to the <a href="/terms" target="_blank" rel="noopener">Terms of Service</a> and <a href="/privacy" target="_blank" rel="noopener">Privacy Policy</a>.</span></label><button type="submit" class="primary-button">Create my account →</button><p class="privacy-note">Choose how to sign in on the next screen. Free to join.</p><p data-signup-status role="status"></p></form><p class="account-signin">Already a member? <a href="/auth/sign-in?next=${encodeURIComponent(journey.destination)}">Sign in</a></p><p class="account-journey-switch">${journey.visitor?'<a href="/?welcome=1">Building an app? Create a creator account →</a>':'<a href="/?welcome=1&journey=visitor">Here to discover apps? Join as a visitor →</a>'}</p></section></section>`;
+}
+function optionalRecommendationsPage() {
+ let selected=state.session?.preferences?.selected_interests;
+ if(!Array.isArray(selected)){try{selected=JSON.parse(localStorage.getItem('trymybuild-signup-interests')||'[]');}catch{selected=[];}}
+ if(!Array.isArray(selected))selected=[];
+ const options=categories=>categories.map(c=>`<label><input type="checkbox" name="interest" value="${esc(c.name)}" ${selected.includes(c.name)?'checked':''}>${esc(c.name)}</label>`).join('');
+ return `<section class="page-shell account-page"><section class="welcome-account account-recommendations"><p class="eyebrow">Your account is ready · Optional</p><h1>Want recommendations?</h1><p>Pick a few interests—or skip for now. You can change these in <a href="/dashboard/preferences">your preferences</a> anytime.</p><form data-recommendation-preferences><fieldset><legend>What interests you?</legend><div class="interest-options">${options(categoryCatalog.slice(0,8))}</div><details class="recommendation-more"><summary>More interests</summary><div class="interest-options">${options(categoryCatalog.slice(8))}</div></details></fieldset><label class="recommendation-alerts"><input type="checkbox" name="alerts"> Notify me about new apps matching these interests</label><div class="recommendation-actions"><button class="primary-button" type="submit">Save preferences</button><a href="/" class="secondary-button" data-skip-recommendations>Skip for now →</a></div><p data-recommendation-status role="status" aria-live="polite"></p></form></section></section>`;
 }
 function canonicalWishCategory(value) {
  if(typeof value!=='string')return '';
@@ -182,19 +196,8 @@ document.addEventListener('change',event=>{
 });
 
 document.addEventListener('change',event=>{
- const form=event.target.closest('[data-welcome-signup]');
- if(form){try{localStorage.setItem('trymybuild-signup-interests',JSON.stringify(new FormData(form).getAll('interest')));localStorage.setItem('trymybuild-signup-alerts',String(form.elements.alerts.checked));}catch{}}
  const wish=event.target.closest('[data-wish-form]');
  if(wish){try{saveWishDraft(wish);}catch{}}
-});
-document.addEventListener('cw:account-ready',async event=>{
- if(!event.detail?.authenticated)return;
- try{
-  if(localStorage.getItem('trymybuild-signup-pending')!=='1')return;
-  const r=await fetch('/api/onboarding',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({interests:JSON.parse(localStorage.getItem('trymybuild-signup-interests')||'[]'),alerts:localStorage.getItem('trymybuild-signup-alerts')==='true'})});
-  if(!r.ok)throw Error();
-  localStorage.removeItem('trymybuild-signup-pending');
- }catch{const note=document.createElement('p');note.setAttribute('role','status');note.textContent='Your account is ready, but your interests could not be saved. You can update them in account preferences.';document.querySelector('main')?.prepend(note);}
 });
 document.addEventListener('input',event=>{
  const form=event.target.closest('[data-wish-form]');if(!form)return;
@@ -206,7 +209,31 @@ document.addEventListener('input',event=>{
 });
 document.addEventListener('submit',async event=>{
  const signup=event.target.closest('[data-welcome-signup]');
- if(signup){event.preventDefault();try{localStorage.setItem('trymybuild-signup-interests',JSON.stringify(new FormData(signup).getAll('interest')));localStorage.setItem('trymybuild-signup-alerts',String(signup.elements.alerts.checked));localStorage.setItem('trymybuild-signup-pending','1');}catch{}if(!window.CW_SERVER){signup.querySelector('[data-signup-status]').textContent='Account creation is available on the connected site. Your choices are saved locally.';return;}location.href='/auth/sign-in?signup=1&next='+encodeURIComponent('/?welcome=1');return;}
+ if(signup){
+  event.preventDefault();
+  if(!signup.reportValidity())return;
+  if(!window.CW_SERVER){signup.querySelector('[data-signup-status]').textContent='Account creation is available on the connected site.';return;}
+  const journey=accountSignupJourney();
+  if(journey.appName&&!saveListingDraft()){signup.querySelector('[data-signup-status]').textContent='Your preview could not be saved for sign-in. Enable site storage and try again.';return;}
+  signup.querySelector('button[type="submit"]').disabled=true;
+  location.assign('/auth/sign-in?signup=1&next='+encodeURIComponent(journey.destination));return;
+ }
+ const recommendations=event.target.closest('[data-recommendation-preferences]');
+ if(recommendations){
+  event.preventDefault();
+  const status=recommendations.querySelector('[data-recommendation-status]'),button=recommendations.querySelector('button[type="submit"]');
+  if(!state.session?.authenticated){status.textContent='Sign in before saving preferences.';return;}
+  button.disabled=true;status.textContent='Saving…';
+  try{
+   const interests=new FormData(recommendations).getAll('interest'),alerts=recommendations.elements.alerts.checked;
+   const response=await fetch('/api/onboarding',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({interests,alerts})});
+   if(!response.ok)throw Error('Your preferences could not be saved. Try again, or skip for now.');
+   try{localStorage.removeItem('trymybuild-signup-pending');}catch{}
+   location.assign('/');
+  }catch(error){status.textContent=error.message||'Your preferences could not be saved. You can skip for now.';}
+  finally{button.disabled=false;}
+  return;
+ }
  const form=event.target.closest('[data-wish-form]');if(!form)return;event.preventDefault();
  const selection=form.elements.category.value,category=canonicalWishCategory(selection==='__other__'?form.elements.customCategory.value:selection),description=form.elements.description.value.trim(),status=form.querySelector('[data-wish-status]');
  if(!category){status.textContent=selection==='All'?'Choose a category for your wish, or select Other… to add one.':'Enter a clear category name using 2–48 characters.';const field=selection==='__other__'?form.elements.customCategory:form.elements.category;field.setCustomValidity(status.textContent);field.reportValidity();return;}

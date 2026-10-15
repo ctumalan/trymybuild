@@ -57,15 +57,22 @@ test('guest information is available without account creation',()=>{
  const menu=read('account-nav.js').split('let root=anchor.closest')[0];assert.doesNotMatch(menu,/data-route="(?:contact|about)"/);
  assert.match(read('index.html'),/data-route="about">About/);
 });
-test('signup interests stay visible and retain multiple saved choices',()=>{
- const ctx=scope();ctx.categoryCatalog=[{name:'Music & audio'},{name:'Technology'},{name:'Family life'}];
- ctx.localStorage={getItem:key=>key==='trymybuild-signup-interests'?'["Music & audio","Technology"]':'false'};
+test('signup focuses on creating an account and leaves interests until afterward',()=>{
+ const ctx=scope();ctx.URLSearchParams=URLSearchParams;ctx.location={search:''};
  const html=ctx.welcomeAccountPage();
- assert.match(html,/<div class="interest-options">/);
- assert.doesNotMatch(html,/interest-select|data-interest-summary/);
- assert.equal((html.match(/name="interest"/g)||[]).length,3);
- assert.equal((html.match(/ checked/g)||[]).length,2);
- assert.doesNotMatch(html,/<details[^>]*\bopen\b/);
+ assert.match(html,/For creators/);
+ assert.match(html,/List your app and get feedback/);
+ assert.match(html,/name="terms" required/);
+ assert.match(html,/Create my account/);
+ assert.doesNotMatch(html,/name="interest"|name="alerts"|interest-options/);
+ ctx.categoryCatalog=Array.from({length:12},(_,i)=>({name:'Category '+i}));
+ ctx.state.session={authenticated:true,preferences:{selected_interests:['Category 10']}};
+ const optional=ctx.optionalRecommendationsPage();
+ assert.equal((optional.split('<details')[0].match(/name="interest"/g)||[]).length,8);
+ assert.match(optional,/<details class="recommendation-more">/);
+ assert.match(optional,/value="Category 10" checked/);
+ assert.match(optional,/Skip for now/);
+ assert.doesNotMatch(optional,/name="alerts" checked/);
 });
 test('category picker includes the full menu and custom category input',()=>{
  const ctx=vm.createContext({categoryCatalog:[{name:'Technology'},{name:'Science & research'}],listingDraft:{category:'Science & research'},listingCategoryOtherOpen:false,normalizeCategory:s=>s,esc:String});

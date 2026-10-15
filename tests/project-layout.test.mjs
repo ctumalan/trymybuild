@@ -16,8 +16,10 @@ test('detail view uses the invitation screenshot layout and relevant information
  assert.match(shared,/class="detail-category-icon"/);
  assert.match(shared,/categoryPaths\[category\]/);
  assert.match(shared,/class="detail-app-pricing"/);
+ assert.match(CWProjectView.title({name:'Sample',price:'Paid'},{preview:true}),/Website pricing: Paid options<\/small><small class="detail-app-listing-note">Listing on TryMyBuild is free/);
+ assert.doesNotMatch(CWProjectView.title({name:'Sample',price:'Paid'}),/detail-app-listing-note/);
  assert.doesNotMatch(CWProjectView.hero({name:'Sample',price:'Free + paid options'}),/Free \+ paid options|detail-product-meta/);
- assert.match(CWProjectView.title({name:'Sample',price:'Free + paid options'}),/<strong>Sample<\/strong><small class="detail-app-pricing">Free \+ paid options<\/small>/);
+ assert.match(CWProjectView.title({name:'Sample',price:'Free + paid options'}),/<strong>Sample<\/strong><small class="detail-app-pricing">Website pricing: Free \+ paid options<\/small>/);
  assert.doesNotMatch(drawer,/<small>\$\{esc\(product\.price\)\} · \$\{esc\(product\.category\)\}/);
  assert.match(drawer,/class="recipient-art-chrome"/);
  assert.match(drawer,/class="recipient-art-viewport"/);
@@ -79,6 +81,11 @@ test('the signup preview explains the unavailable launch action on request',()=>
  assert.match(disabled,/<button class="primary-button preview-try-disabled"[^>]+data-preview-launch aria-expanded="false"[^>]*>Try this app ↗<\/button>/);
  assert.doesNotMatch(disabled,/<button[^>]*\sdisabled(?:\s|>)/);
  assert.match(disabled,/<p class="preview-launch-note" role="status" hidden>/);
+ assert.match(disabled,/<a href="\/auth\/sign-in\?signup=1&amp;next=listing-dashboard">sign up<\/a>/);
+ const invitation=globalThis.CWProjectView.hero(product,{disabledLaunch:true,signupHref:'/auth/sign-in?signup=1&next=%2Flisting-invitation%2Fexample'});
+ assert.match(invitation,/href="\/auth\/sign-in\?signup=1&amp;next=%2Flisting-invitation%2Fexample">sign up/);
+ const listing=globalThis.CWProjectView.hero(product,{disabledLaunch:true,listingSignup:true});
+ assert.match(listing,/data-listing-create-account>sign up/);
  assert.doesNotMatch(disabled,/href="https:\/\/example\.com"/);
  const published=globalThis.CWProjectView.hero(product);
  assert.match(published,/<a class="primary-button" href="https:\/\/example\.com"/);

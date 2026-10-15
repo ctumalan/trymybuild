@@ -112,7 +112,9 @@ The preview uses the normal catalog card and app screenshot, with signup as its
 primary action. Its external launch button stays disabled until the verified
 invited account signs in. Founder notes use the normal review-card presentation
 below the app; the in-panel review link jumps to `#invitation-review`. Existing
-email links ending in `#founder-feedback` still open the app preview first.
+email links ending in `#founder-feedback` and `#invitation-review` show the app
+first, pause briefly, then scroll down to its review. Visitor input cancels the
+animation, and reduced-motion preferences skip it.
 Notes are server-side content, not catalog reviews, and do not count toward review badges. They are readable
 before signup while the invitation is open and remain available to its verified
 recipient after claim. Expired or withdrawn unclaimed links do not reveal them.

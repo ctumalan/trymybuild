@@ -24,7 +24,7 @@ test('feedback stays behind the invitation lifecycle checks and is below its app
  const open=await route(request),html=await open.text();
  assert.ok(html.indexOf('studio-app-card')<html.indexOf('id="invitation-review"'));
  assert.match(html,/Public website review/);
- assert.match(html,/Sign up &amp; claim your app/);
+ assert.match(html,/Sign up &amp; list your app/);
  assert.match(html,/disabled aria-label="Try this app, available after signup"/);
  assert.doesNotMatch(html,/data-try-app=/);
  assert.match(html,/template id="invitation-app-panel"/);
@@ -38,7 +38,7 @@ test('feedback stays behind the invitation lifecycle checks and is below its app
  assert.doesNotMatch(await(await route(request)).text(),/data-try-app=/);
  scope.currentUser=async()=>null;
  scope.listPublished=async()=>{throw Error('Catalog unavailable');};
- assert.match(await(await route(request)).text(),/Sign up &amp; claim your app/);
+ assert.match(await(await route(request)).text(),/Sign up &amp; list your app/);
  for(const patch of [{revoked_at:new Date().toISOString()},{expires_at:new Date(0).toISOString()},{claimed_by:'different-owner'}]){
   const original=row;row={...original,...patch};
   const closed=await route(request);assert.equal(closed.status,410);assert.doesNotMatch(await closed.text(),/Public website review|604decordesign/);row=original;

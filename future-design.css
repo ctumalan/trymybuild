@@ -2984,11 +2984,11 @@ body.invitation-page .project-detail-content,
 body.public-site .future-discover #home-panel:has(>.catalog-results) {
  border-top:0;
 }
-body.public-site .future-discover .catalog-list {
+body.public-site .future-discover .catalog-list,.invitation-catalog-grid {
  position:relative;
  isolation:isolate;
 }
-body.public-site .future-discover .catalog-list::before {
+body.public-site .future-discover .catalog-list::before,.invitation-catalog-grid::before {
  content:"";
  position:absolute;
  z-index:-1;
@@ -2998,10 +2998,10 @@ body.public-site .future-discover .catalog-list::before {
  background-size:256px 256px;
 }
 @media(max-width:1180px) {
- body.public-site .future-discover .catalog-list::before { inset-inline:-32px; }
+ body.public-site .future-discover .catalog-list::before,.invitation-catalog-grid::before { inset-inline:-32px; }
 }
 @media(max-width:620px) {
- body.public-site .future-discover .catalog-list::before { inset-inline:-18px; }
+ body.public-site .future-discover .catalog-list::before,.invitation-catalog-grid::before { inset-inline:-18px; }
 }
 
 /* The owner view presents the same app card before its private dashboard tools. */

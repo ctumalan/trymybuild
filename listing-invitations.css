@@ -30,7 +30,6 @@
 .invitation-native-claim .cw-choice { display:flex; margin:12px 0; }
 .invitation-landing-page .cw-overlay::backdrop { backdrop-filter:none; background:rgb(20 40 35 / .24); }
 .invitation-review-jump { display:inline-block; margin-top:9px; font-size:.82rem; color:#7645a5; font-weight:600; }
-.invitation-native-detail .invitation-launch-note { margin:8px 0 0; color:#756580; font-size:.78rem; line-height:1.5; }
 @media(max-width:1180px) { .invitation-landing-page .cw-main { width:calc(100% - 64px); } }
 @media(max-width:760px) {
  .invitation-landing-page .cw-bar { position:static; }

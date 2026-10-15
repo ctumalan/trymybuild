@@ -32,6 +32,8 @@ function hero(product, options = {}) {
   const launchAction = !product.url ? '' : options.disabledLaunch
     ? `<button class="primary-button preview-try-disabled" type="button" disabled aria-label="${esc(options.disabledLaunchLabel||'Try this app, available after saving')}">Try this app ↗</button>`
     : `<a class="primary-button" href="${esc(product.url)}" target="_blank" rel="noopener noreferrer" ${options.preview?'':`data-try-app="${esc(product.slug)}"`}>Try this app ↗</a>`;
+  const launchNote = product.url && options.disabledLaunch
+    ? '<p class="preview-launch-note">Other users will be able to preview and review your app after you sign up and publish it.</p>' : '';
   let destinationHost = '';
   try { destinationHost = new URL(product.url).hostname.replace(/^www\./, ''); } catch {}
   const previewImage = product.preview ? `<img ${options.preview?'data-listing-screenshot':''} src="${esc(product.preview)}" alt="Preview of ${esc(product.name)}" referrerpolicy="no-referrer">` : '';
@@ -49,7 +51,7 @@ function hero(product, options = {}) {
      <div class="recipient-art-chrome" aria-hidden="true"><span class="recipient-art-controls"><i></i><i></i><i></i></span><span class="studio-browser-address"><svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="7" width="10" height="7" rx="1.5"/><path d="M5 7V5a3 3 0 0 1 6 0v2"/></svg>${esc(destinationHost)}</span><span class="studio-browser-more">⋮</span></div>
      <div class="recipient-art-viewport">${previewContent}</div>
     </div>
-    <div class="studio-card-actions"><div class="detail-creator">${options.creator || ""}</div>${launchAction}</div>
+    <div class="studio-card-actions"><div class="detail-creator">${options.creator || ""}</div>${launchAction}${launchNote}</div>
     ${options.afterPreview||''}
     ${video(product.video)}
    </div>

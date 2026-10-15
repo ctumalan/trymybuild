@@ -2896,6 +2896,12 @@ body.public-site .site-header,.cw-bar { background:#fff; }
 .invitation-detail[data-showcase-theme] .studio-app-card .studio-card-actions {
  display:flex; align-items:center; justify-content:space-between; gap:12px; padding:16px 0;
 }
+.invitation-detail[data-showcase-theme] .studio-app-card .studio-card-actions:has(.preview-launch-note) {
+ display:grid; grid-template-columns:minmax(0,1fr) auto; row-gap:8px;
+}
+.invitation-detail[data-showcase-theme] .studio-app-card .studio-card-actions .preview-launch-note {
+ grid-column:1/-1; margin:0; color:#756580; font:400 12px/1.5 "Inter",Arial,sans-serif; text-align:right;
+}
 .invitation-detail[data-showcase-theme] .studio-app-card .detail-creator { min-width:0; margin:0; text-align:left; }
 .invitation-detail[data-showcase-theme] .studio-app-card .detail-creator .creator-byline {
  display:inline-flex; align-items:center; gap:8px; margin:0; color:#17332a; text-align:left;

@@ -105,6 +105,12 @@ Place the image in the email and link it to the preview URL. The sample is not a
 published app, account, testimonial or completed review.
 
 Anyone holding the link can view the sample, so include only public app details.
+Founder-authored first-look notes can be associated with an invitation ID in
+`src/server/invitation-feedback.mjs`. They render directly beneath its app preview,
+with `#founder-feedback` as the email destination. Notes are server-side content,
+not catalog reviews, and do not count toward review badges. They are readable
+before signup while the invitation is open and remain available to its verified
+recipient after claim. Expired or withdrawn unclaimed links do not reveal them.
 Links expire after 30 days and can be withdrawn before claim. The creator can edit
 the introduction before sign-in; the same browser tab preserves those edits through
 authentication. Claiming requires the invited verified email, an active account,

@@ -30,7 +30,6 @@
 .invitation-native-claim label { display:block; margin-bottom:12px; }
 .invitation-native-claim textarea { min-height:90px; }
 .invitation-native-claim .cw-choice { display:flex; margin:12px 0; }
-.invitation-landing-page .cw-overlay::backdrop { backdrop-filter:none; background:rgb(20 40 35 / .24); }
 .invitation-review-jump { display:inline-block; margin-top:9px; font-size:.82rem; color:#7645a5; font-weight:600; }
 @media(max-width:1180px) { .invitation-landing-page .cw-main { width:calc(100% - 64px); } }
 @media(max-width:760px) {
@@ -40,39 +39,16 @@
 }
 @media(max-width:620px) { .invitation-landing-page .cw-main { width:calc(100% - 36px); } }
 
-/* Recipient invitations are a single page, with no catalog underneath. */
-body.invitation-landing-page {
- background:#fcfbfa url('/assets/brand/studio-paper-grain.svg') repeat;
- background-size:256px 256px;
-}
-.invitation-landing-page .cw-main { width:100%; max-width:820px; padding:24px 20px 64px; box-sizing:border-box; }
-.invitation-focused-page { width:100%; min-width:0; }
-.invitation-focused-page [hidden] { display:none!important; }
-.invitation-focused-page .invitation-native-detail { width:100%; max-width:none; margin:0; padding:0; box-sizing:border-box; }
-.invitation-focused-page .invitation-native-detail[data-showcase-theme] .studio-app-card { max-width:none; }
-.invitation-focused-page .invitation-founder-feedback { margin:24px 0 0; padding:24px 0; background:transparent; border:0; border-top:1px solid #e5dced; border-radius:0; box-shadow:none; text-align:left; }
-.invitation-focused-page .invitation-founder-feedback header { padding:0; }
-.invitation-focused-page .invitation-founder-feedback h2 { font-size:1.35rem; line-height:1.25; margin:8px 0; }
-.invitation-focused-page .invitation-feedback-lead { color:#17332a; font-size:1.1rem; line-height:1.5; margin:18px 0 12px; }
-.invitation-feedback-primary { font-size:.94rem; line-height:1.7; margin:0; }
+/* Keep the review easy to scan inside the invitation drawer. */
+.invitation-native-detail .invitation-founder-feedback { margin:24px 0 0; padding:24px 0; background:transparent; border:0; border-top:1px solid #e5dced; border-radius:0; box-shadow:none; text-align:left; }
+.invitation-native-detail .invitation-founder-feedback header { padding:0; }
+.invitation-native-detail .invitation-founder-feedback h2 { font-size:1.25rem; line-height:1.3; margin:8px 0; }
+.invitation-native-detail .invitation-feedback-lead { color:#17332a; font-size:1.05rem; line-height:1.5; margin:18px 0 12px; }
+.invitation-feedback-primary { font-size:.9rem; line-height:1.65; margin:0; }
 .invitation-feedback-more { margin-top:18px; }
-.invitation-feedback-more summary { color:#7545ad; font-size:.88rem; font-weight:600; cursor:pointer; }
+.invitation-feedback-more summary { color:#7545ad; font-size:.85rem; font-weight:600; cursor:pointer; }
 .invitation-feedback-more section { margin-top:18px; }
 .invitation-feedback-more h3 { font-size:.95rem; }
 .invitation-feedback-more section p { font-size:.9rem; }
 .invitation-feedback-footer { font-size:.8rem; }
-#invitation-review,#founder-feedback { scroll-margin-top:100px; }
-.invitation-focused-page .invitation-signup-action { padding:24px; margin-top:24px; }
 .invitation-signup-action>h2 { font-size:1.2rem; line-height:1.3; margin:0 0 16px; }
-.invitation-focused-page .invitation-native-claim { max-width:760px; margin:0 auto; }
-.invitation-explore-link { text-align:center; margin:28px 0 0; font-size:.85rem; }
-@media(max-width:620px) {
- .invitation-landing-page .cw-main { width:100%; padding:20px 14px 48px; }
- .invitation-native-detail .public-detail-header { align-items:flex-start; gap:8px; }
- .invitation-native-detail .public-detail-header .invitation-provisional-badge { white-space:nowrap; }
- .invitation-focused-page .studio-card-actions { align-items:flex-start; flex-wrap:wrap; gap:12px; }
- .invitation-focused-page .studio-card-actions .detail-creator { flex:1 1 160px; }
- .invitation-focused-page .invitation-creator-placeholder { line-height:1.5; }
- .invitation-focused-page .invitation-founder-feedback { padding:20px 0; }
- .invitation-focused-page .invitation-founder-feedback h2 { font-size:1.2rem; }
-}

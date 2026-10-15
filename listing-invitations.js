@@ -1,27 +1,60 @@
 (() => {
  const reviewHashes=new Set(['#invitation-review','#founder-feedback']);
- function showInvitationView(kind='preview'){
-  const preview=document.querySelector('[data-invitation-preview]'),claim=document.querySelector('[data-invitation-claim-view]');
-  if(!preview||!claim)return;
-  preview.hidden=kind==='claim';claim.hidden=kind!=='claim';
-  const heading=(kind==='claim'?claim:preview).querySelector('h1,h2');
-  if(heading){heading.tabIndex=-1;heading.focus({preventScroll:true});}
-  (kind==='claim'?claim:preview).scrollIntoView({block:'start'});
+ const arrivalHash=document.querySelector('#invitation-app-panel')&&reviewHashes.has(location.hash)?location.hash:'';
+ let cancelReviewArrival=()=>{};
+ // Suppress the browser's immediate fragment jump while the drawer is mounted.
+ if(arrivalHash)history.replaceState(history.state,'',location.pathname+location.search);
+ function reviewArrival(hash){
+  cancelReviewArrival();
+  const panel=document.querySelector('.cw-overlay[open]'),review=panel?.querySelector('#invitation-review');
+  if(!panel||!review)return;
+  const path=location.pathname+location.search,oldBehavior=panel.style.scrollBehavior;
+  let delay,frame,stopped=false;
+  panel.style.scrollBehavior='auto';panel.scrollTop=0;
+  const destination=()=>Math.max(0,Math.min(panel.scrollHeight-panel.clientHeight,review.getBoundingClientRect().top-panel.getBoundingClientRect().top+panel.scrollTop-24));
+  const restoreHash=()=>{if(location.pathname+location.search===path&&!location.hash)history.replaceState(history.state,'',path+hash);};
+  const stop=()=>{
+   if(stopped)return;stopped=true;clearTimeout(delay);cancelAnimationFrame(frame);
+   window.removeEventListener('load',begin);
+   for(const type of ['wheel','touchstart','pointerdown','keydown'])panel.removeEventListener(type,stop,true);
+   panel.removeEventListener('close',stop);panel.style.scrollBehavior=oldBehavior;
+   if(document.readyState==='complete')restoreHash();else window.addEventListener('load',restoreHash,{once:true});
+   if(cancelReviewArrival===stop)cancelReviewArrival=()=>{};
+  };
+  const begin=()=>{
+   if(stopped)return;
+   if(matchMedia('(prefers-reduced-motion: reduce)').matches){panel.scrollTop=destination();stop();return;}
+   delay=setTimeout(()=>{
+    const start=performance.now();
+    const step=now=>{
+     if(stopped)return;if(!panel.open||!review.isConnected){stop();return;}
+     const progress=Math.min(1,(now-start)/2400),eased=progress<.5?4*progress**3:1-(-2*progress+2)**3/2;
+     panel.scrollTop=destination()*eased;
+     if(progress<1)frame=requestAnimationFrame(step);else stop();
+    };
+    frame=requestAnimationFrame(step);
+   },900);
+  };
+  cancelReviewArrival=stop;
+  for(const type of ['wheel','touchstart','pointerdown','keydown'])panel.addEventListener(type,stop,{capture:true,passive:true});
+  panel.addEventListener('close',stop,{once:true});
+  if(document.readyState==='complete')begin();else window.addEventListener('load',begin,{once:true});
  }
+ const openInvitationPanel=(kind='app')=>{
+  cancelReviewArrival();
+  const template=document.querySelector(kind==='claim'?'#invitation-claim-panel':'#invitation-app-panel');
+  if(!template||!window.CWPanels)return;
+  window.CWPanels.show(template.innerHTML,'project');window.dispatchEvent(new Event('cw-panel-ready'));
+ };
  document.addEventListener('click',event=>{
-  if(event.target.closest('[data-invitation-open]')){event.preventDefault();showInvitationView();}
-  if(event.target.closest('[data-invitation-edit]')){event.preventDefault();showInvitationView('claim');}
+  if(event.target.closest('[data-invitation-open]')){event.preventDefault();openInvitationPanel();}
+  if(event.target.closest('[data-invitation-edit]')){event.preventDefault();openInvitationPanel('claim');}
+  if(event.target.closest('[data-invitation-review]')){event.preventDefault();cancelReviewArrival();document.querySelector('.cw-overlay #invitation-review')?.scrollIntoView({block:'start',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});}
  });
- const boot=()=>{mountInvitationForm();};
- if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
- // Both current and older email anchors are native targets in the full-page preview.
- window.addEventListener('hashchange',()=>{
-  if(reviewHashes.has(location.hash)){
-   const preview=document.querySelector('[data-invitation-preview]');
-   if(preview?.hidden)showInvitationView();
-   document.querySelector(location.hash)?.scrollIntoView({block:'start'});
-  }
- });
+ const boot=()=>{if(document.querySelector('#invitation-app-panel')){openInvitationPanel();if(arrivalHash)reviewArrival(arrivalHash);}mountInvitationForm();};
+ if(document.readyState==='complete')boot();else document.addEventListener('DOMContentLoaded',boot,{once:true});
+ window.addEventListener('cw-panel-ready',mountInvitationForm);
+ window.addEventListener('hashchange',()=>{if(reviewHashes.has(location.hash)){const hash=location.hash;history.replaceState(history.state,'',location.pathname+location.search);openInvitationPanel();reviewArrival(hash);}});
  function mountInvitationForm(){
  const admin=document.querySelector('[data-listing-invitation-admin]'),claim=document.querySelector('[data-listing-invitation-claim]'),form=admin||claim;
  const testerTarget=document.querySelector('[data-listing-invitation-testers]'),esc=value=>String(value??'').replace(/[&<>"']/g,character=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[character]));

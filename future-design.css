@@ -3106,3 +3106,15 @@ body.public-site .future-discover .catalog-list::before,.invitation-catalog-grid
  display:block; margin:4px 0 0; color:#8a818f;
  font:400 11px/1.4 "Inter",Arial,sans-serif; letter-spacing:0;
 }
+
+/* Quiet the page behind app drawers on the right and creator drawers on the left. */
+:root { --drawer-background-blur:6px; --drawer-background-shade:rgb(23 24 36 / .30); }
+.cw-overlay::backdrop,
+.detail-backdrop { background:var(--drawer-background-shade); }
+.cw-overlay::backdrop,
+.detail-overlay {
+ -webkit-backdrop-filter:blur(var(--drawer-background-blur));
+ backdrop-filter:blur(var(--drawer-background-blur));
+}
+/* Blur the native overlay itself so its entrance animation cannot isolate the backdrop. */
+.detail-backdrop { -webkit-backdrop-filter:none; backdrop-filter:none; }

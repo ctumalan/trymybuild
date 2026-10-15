@@ -42,8 +42,8 @@ test('feedback stays behind the invitation lifecycle checks and is below its app
  assert.match(html,/Creator profile is optional/);
  assert.doesNotMatch(html,/preview-try-disabled|preview-launch-note|maker@example.com/);
  assert.doesNotMatch(html,/data-try-app=/);
- assert.match(html,/data-invitation-page/);
- assert.doesNotMatch(html,/invitation-app-panel|invitation-catalog-grid|App catalog|Explore apps/);
+ assert.match(html,/template id="invitation-app-panel"/);
+ assert.match(html,/invitation-catalog-grid/);
  scope.currentUser=async()=>({email:'maker@example.com',emailVerified:true});
  const matched=await(await route(request)).text();
  assert.match(matched,/data-invitation-edit/);assert.match(matched,/<a class="primary-button" href="https:\/\/example.com\/"/);assert.doesNotMatch(matched,/disabled aria-label="Try this app|data-try-app=/);

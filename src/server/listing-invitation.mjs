@@ -2,7 +2,7 @@ import { createHmac, timingSafeEqual } from 'node:crypto';
 import { normalizeDraft } from './listing-policy.mjs';
 
 const ID = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/;
-export const INVITATION_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+export const INVITATION_TTL_MS = 11 * 24 * 60 * 60 * 1000;
 export function invitationExpiresAt(row) {
   const created = Date.parse(row?.created_at), stored = Date.parse(row?.expires_at);
   return Number.isFinite(created) && Number.isFinite(stored)

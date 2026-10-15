@@ -45,7 +45,7 @@ test('feedback stays behind the invitation lifecycle checks and is below its app
  scope.currentUser=async()=>null;
  scope.listPublished=async()=>{throw Error('Catalog unavailable');};
  assert.match(await(await route(request)).text(),/Save your preview/);
- for(const patch of [{revoked_at:new Date().toISOString()},{expires_at:new Date(0).toISOString()},{created_at:new Date(Date.now()-31*86400000).toISOString()},{claimed_by:'different-owner'}]){
+ for(const patch of [{revoked_at:new Date().toISOString()},{expires_at:new Date(0).toISOString()},{created_at:new Date(Date.now()-12*86400000).toISOString()},{claimed_by:'different-owner'}]){
   const original=row;row={...original,...patch};
   const closed=await route(request);assert.equal(closed.status,410);assert.doesNotMatch(await closed.text(),/Public website review|604decordesign/);row=original;
  }

@@ -30,7 +30,7 @@ function title(product) {
 function hero(product, options = {}) {
  const presentation = product.presentation || {};
   const launchAction = !product.url ? '' : options.disabledLaunch
-    ? '<button class="primary-button preview-try-disabled" type="button" disabled aria-label="Try this app, available after saving">Try this app ↗</button>'
+    ? `<button class="primary-button preview-try-disabled" type="button" disabled aria-label="${esc(options.disabledLaunchLabel||'Try this app, available after saving')}">Try this app ↗</button>`
     : `<a class="primary-button" href="${esc(product.url)}" target="_blank" rel="noopener noreferrer" ${options.preview?'':`data-try-app="${esc(product.slug)}"`}>Try this app ↗</a>`;
   let destinationHost = '';
   try { destinationHost = new URL(product.url).hostname.replace(/^www\./, ''); } catch {}
@@ -44,12 +44,13 @@ function hero(product, options = {}) {
     <h2 ${options.titleId ? `id="${esc(options.titleId)}"` : ""}>${esc(presentation.headline||product.name)}</h2>
    </div>
    <div class="recipient-preview-column">
-    <div class="studio-preview-label"><strong>Product preview</strong><span class="recipient-art-live"><i class="detail-live-dot" aria-hidden="true"></i>Live</span></div>
+    <div class="studio-preview-label"><strong>Product preview</strong><span class="recipient-art-live"><i class="detail-live-dot" aria-hidden="true"></i>${esc(options.previewStatus||'Live')}</span></div>
     <div class="recipient-art">
      <div class="recipient-art-chrome" aria-hidden="true"><span class="recipient-art-controls"><i></i><i></i><i></i></span><span class="studio-browser-address"><svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="7" width="10" height="7" rx="1.5"/><path d="M5 7V5a3 3 0 0 1 6 0v2"/></svg>${esc(destinationHost)}</span><span class="studio-browser-more">⋮</span></div>
      <div class="recipient-art-viewport">${previewContent}</div>
     </div>
     <div class="studio-card-actions"><div class="detail-creator">${options.creator || ""}</div>${launchAction}</div>
+    ${options.afterPreview||''}
     ${video(product.video)}
    </div>
    <div class="recipient-copy recipient-notes-copy"><div class="detail-description-notes">
@@ -82,7 +83,7 @@ function reviewCard(review) {
   const when = new Date(review.createdAt), dated = Number.isFinite(when.getTime());
   const initials = String(review.author||'Member').split(/\s+/).filter(Boolean).slice(0,2).map(word=>word[0]).join('').toUpperCase();
   const signals = [reviewAttemptLabels[review.attempt],reviewFocusLabels[review.focus]].filter(Boolean);
-  return `<article class="public-review-card"><header><span class="person-avatar small" aria-hidden="true">${review.avatar?`<img src="${esc(review.avatar)}" alt="">`:esc(initials||'M')}</span><span><strong>${esc(review.author||'TryMyBuild member')}</strong><small>App feedback</small></span>${dated?`<time datetime="${esc(when.toISOString())}">${esc(when.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}))}</time>`:''}</header>${signals.length?`<p class="public-review-signals">${signals.map(signal=>`<span>${esc(signal)}</span>`).join('')}</p>`:''}<p>${esc(review.message)}</p></article>`;
+  return `<article class="public-review-card"><header><span class="person-avatar small" aria-hidden="true">${review.avatar?`<img src="${esc(review.avatar)}" alt="">`:esc(initials||'M')}</span><span><strong>${esc(review.author||'TryMyBuild member')}</strong><small>${esc(review.label||'App feedback')}</small></span>${dated?`<time datetime="${esc(when.toISOString())}">${esc(when.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}))}</time>`:''}</header>${signals.length?`<p class="public-review-signals">${signals.map(signal=>`<span>${esc(signal)}</span>`).join('')}</p>`:''}<p>${esc(review.message)}</p></article>`;
 }
 function reviewEvidenceMarkup(data) {
  const total=Math.max(0,Number(data.total)||0),publicCount=Math.max(0,Number(data.publicCount)||0);
@@ -142,7 +143,7 @@ async function loadProjectReviews(region) {
     if(region.isConnected&&region.reviewRequest===request)applyReviewEvidence(region,data);
   } catch { /* Keep the server-provided aggregate when public evidence is unavailable. */ }
 }
-globalThis.CWProjectView = {theme,title,hero,video, conversation, conversationFeed, discussionFeed, loadProjectConversation, loadProjectReviews, recordCommunityReview, applyReviewEvidence, mountGuidanceTyping};
+globalThis.CWProjectView = {theme,title,hero,video,reviewCard, conversation, conversationFeed, discussionFeed, loadProjectConversation, loadProjectReviews, recordCommunityReview, applyReviewEvidence, mountGuidanceTyping};
 if (typeof document === 'undefined') return;
 document.addEventListener('click', event => {
  const retry = event.target.closest('[data-conversation-retry]');

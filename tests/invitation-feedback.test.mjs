@@ -13,16 +13,34 @@ test('feedback is invitation-specific and safely renders prose with a stable ema
  assert.match(html,/&lt;script&gt;/);
 });
 test('feedback stays behind the invitation lifecycle checks and is below its app preview',async()=>{
- let row={id,expires_at:new Date(Date.now()+86400000).toISOString(),title:'Fir & Field',recipient_email:'maker@example.com'};
+ let row={id,expires_at:new Date(Date.now()+86400000).toISOString(),title:'Fir & Field',external_url:'https://example.com/',recipient_email:'maker@example.com'};
  const surface=(_title,body,_unused,status=200)=>new Response(body,{status});
- const scope={Response,invitationOpen,loadInvitation:async()=>row,currentUser:async()=>null,ensureMember:async()=>null,renderInvitationFeedback,invitationAssets:'',surface,e:String,unavailable:()=>new Response('Unavailable'),invitationFields:()=>'',invitationPreview:()=>'<article>App preview</article>'};
+ const scope={CWProjectView:globalThis.CWProjectView,invitationFeedback,listPublished:async()=>[],Response,invitationOpen,loadInvitation:async()=>row,currentUser:async()=>null,ensureMember:async()=>null,renderInvitationFeedback,invitationAssets:'',surface,e:String,unavailable:()=>new Response('Unavailable'),invitationFields:()=>'',invitationPreview:()=>'<article>App preview</article>'};
+ Object.assign(scope,moduleFixture('src/server/project-ui.ts',['discoveryCard'],scope));
+ Object.assign(scope,moduleFixture('src/server/project-detail-ui.ts',['projectDetailContent','projectDetailTitle','projectTheme','projectReviewCard'],scope));
+ Object.assign(scope,moduleFixture('src/server/invitation-catalog-view.ts',['invitationCatalogPage'],scope));
  const route=moduleFixture('src/pages/listing-invitation/[token].ts',['GET'],scope).GET;
  const request={params:{token:'fixture'},url:new URL('https://example.com/')};
  const open=await route(request),html=await open.text();
- assert.ok(html.indexOf('App preview')<html.indexOf('id="founder-feedback"'));
- assert.match(html,/My feedback on your app/);
+ assert.ok(html.indexOf('studio-app-card')<html.indexOf('id="invitation-review"'));
+ assert.match(html,/Public website review/);
+ assert.match(html,/Sign up &amp; claim your app/);
+ assert.match(html,/disabled aria-label="Try this app, available after signup"/);
+ assert.doesNotMatch(html,/data-try-app=/);
+ assert.match(html,/template id="invitation-app-panel"/);
+ scope.currentUser=async()=>({email:'maker@example.com',emailVerified:true});
+ const matched=await(await route(request)).text();
+ assert.match(matched,/data-invitation-edit/);assert.match(matched,/<a class="primary-button" href="https:\/\/example.com\/"/);assert.doesNotMatch(matched,/disabled aria-label="Try this app|data-try-app=/);
+ scope.currentUser=async()=>({email:'other@example.com',emailVerified:true});
+ const other=await(await route(request)).text();
+ assert.match(other,/<form action="\/auth\/sign-out" method="post">/);assert.match(other,/Switch account &amp; claim/);assert.doesNotMatch(other,/data-try-app=/);
+ scope.currentUser=async()=>({email:'maker@example.com',emailVerified:false});
+ assert.doesNotMatch(await(await route(request)).text(),/data-try-app=/);
+ scope.currentUser=async()=>null;
+ scope.listPublished=async()=>{throw Error('Catalog unavailable');};
+ assert.match(await(await route(request)).text(),/Sign up &amp; claim your app/);
  for(const patch of [{revoked_at:new Date().toISOString()},{expires_at:new Date(0).toISOString()},{claimed_by:'different-owner'}]){
   const original=row;row={...original,...patch};
-  const closed=await route(request);assert.equal(closed.status,410);assert.doesNotMatch(await closed.text(),/My feedback|604decordesign/);row=original;
+  const closed=await route(request);assert.equal(closed.status,410);assert.doesNotMatch(await closed.text(),/Public website review|604decordesign/);row=original;
  }
 });

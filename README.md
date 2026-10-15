@@ -106,14 +106,19 @@ published app, account, testimonial or completed review.
 
 Anyone holding the link can view the sample, so include only public app details.
 Founder-authored first-look notes can be associated with an invitation ID in
-`src/server/invitation-feedback.mjs`. They render directly beneath its app preview,
-with `#founder-feedback` as the email destination. Notes are server-side content,
-not catalog reviews, and do not count toward review badges. They are readable
+`src/server/invitation-feedback.mjs`. The signed link opens the shared app-detail
+panel over a catalog containing the private preview alongside published apps.
+The preview uses the normal catalog card and app screenshot, with signup as its
+primary action. Its external launch button stays disabled until the verified
+invited account signs in. Founder notes use the normal review-card presentation
+below the app; the in-panel review link jumps to `#invitation-review`. Existing
+email links ending in `#founder-feedback` still open the app preview first.
+Notes are server-side content, not catalog reviews, and do not count toward review badges. They are readable
 before signup while the invitation is open and remain available to its verified
 recipient after claim. Expired or withdrawn unclaimed links do not reveal them.
-Links expire after 30 days and can be withdrawn before claim. The creator can edit
-the introduction before sign-in; the same browser tab preserves those edits through
-authentication. Claiming requires the invited verified email, an active account,
+Links expire after 30 days and can be withdrawn before claim. The creator signs in
+before opening the introduction editor; the same browser tab preserves edits.
+Switching accounts returns to the signed invitation. Claiming requires the invited verified email, an active account,
 app-management confirmation and agreement to the terms. Claiming atomically creates
 one private, unverified project owned by that creator. Retrying never duplicates
 the app or overwrites later dashboard edits. The existing listing editor provides

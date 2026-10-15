@@ -37,3 +37,5 @@
  .invitation-native-detail .public-detail-header .invitation-provisional-badge { font-size:.68rem!important; }
 }
 @media(max-width:620px) { .invitation-landing-page .cw-main { width:calc(100% - 36px); } }
+
+.invitation-signup-action .invitation-expiry-notice { color:#b42318; font-size:.78rem; font-weight:600; line-height:1.5; }

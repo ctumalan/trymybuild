@@ -116,7 +116,11 @@ email links ending in `#founder-feedback` still open the app preview first.
 Notes are server-side content, not catalog reviews, and do not count toward review badges. They are readable
 before signup while the invitation is open and remain available to its verified
 recipient after claim. Expired or withdrawn unclaimed links do not reveal them.
-Links expire after 30 days and can be withdrawn before claim. The creator signs in
+Unclaimed preview links expire 48 hours after creation and can be withdrawn before
+claim. Reading, signing in, or editing a preview does not reset the timer. Saving
+it to the invited account completes the claim and preserves the private app draft.
+The application also caps older invitations at 48 hours from their original
+creation time; it does not delete saved app drafts. The creator signs in
 before opening the introduction editor; the same browser tab preserves edits.
 Switching accounts returns to the signed invitation. Claiming requires the invited verified email, an active account,
 app-management confirmation and agreement to the terms. Claiming atomically creates

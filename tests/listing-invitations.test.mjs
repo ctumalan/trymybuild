@@ -1,13 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {randomUUID} from 'node:crypto';
-import {invitationToken,invitationId,invitationOpen,normalizeInvitation,claimInvitation} from '../src/server/listing-invitation.mjs';
+import {invitationToken,invitationId,invitationOpen,invitationExpiresAt,INVITATION_TTL_MS,normalizeInvitation,claimInvitation} from '../src/server/listing-invitation.mjs';
 import {feedbackDestination} from '../src/server/feedback-policy.mjs';
 import {moduleFixture} from '../scripts/workspace-fixtures.mjs';
 
 const secret='a-private-test-secret-longer-than-thirty-two-characters';
 const id=randomUUID(),memberId=randomUUID(),email='maker@example.com';
-const row=()=>({id,recipient_email:email,expires_at:new Date(Date.now()+86400000).toISOString(),lock_version:2,claimed_by:null,revoked_at:null});
+const row=()=>({id,recipient_email:email,created_at:new Date().toISOString(),expires_at:new Date(Date.now()+86400000).toISOString(),lock_version:2,claimed_by:null,revoked_at:null});
 const input={title:'Example app',url:'https://example.com/',category:'Technology',does:'Keep your plans together',helps:'Make the next step easier to see.',firstTry:'Create one plan.',pricing:'freemium'};
 test('preview tokens cannot be guessed, modified or reused for a different invitation or secret',()=>{
  const token=invitationToken(id,secret);
@@ -33,6 +33,35 @@ test('a readable preview requires an active, unclaimed invitation',()=>{
  assert.equal(invitationOpen(row()),true);
  for(const patch of [{claimed_by:memberId},{revoked_at:new Date().toISOString()},{expires_at:new Date(Date.now()-1000).toISOString()}])assert.equal(invitationOpen({...row(),...patch}),false);
  assert.equal(invitationOpen(null),false);
+});
+test('unclaimed previews close at the 48-hour boundary, including legacy invitations; edits never extend the deadline',()=>{
+ const created=Date.parse('2026-10-15T18:00:00Z');
+ const legacy={...row(),created_at:new Date(created).toISOString(),updated_at:new Date(created+INVITATION_TTL_MS).toISOString(),expires_at:new Date(created+30*86400000).toISOString()};
+ assert.equal(invitationExpiresAt(legacy),created+INVITATION_TTL_MS);
+ assert.equal(invitationOpen(legacy,created+INVITATION_TTL_MS-1),true);
+ assert.equal(invitationOpen(legacy,created+INVITATION_TTL_MS),false);
+ assert.equal(invitationOpen(legacy,created+INVITATION_TTL_MS+1),false);
+ assert.equal(invitationExpiresAt({...legacy,expires_at:new Date(created+1000).toISOString()}),created+1000);
+ for(const patch of [{created_at:null},{created_at:'invalid'},{expires_at:'invalid'}])assert.equal(invitationOpen({...legacy,...patch},created),false);
+});
+test('expired legacy previews cannot be claimed, while an already saved draft remains available',async()=>{
+ const expired={...row(),created_at:new Date(Date.now()-INVITATION_TTL_MS-1000).toISOString(),expires_at:new Date(Date.now()+30*86400000).toISOString()};
+ let writes=0;const project={id:randomUUID(),slug:'saved-before-expiry'};
+ const store={find:async()=>expired,claim:async()=>writes++,findProject:async()=>project};
+ const args={id,memberId,user:{email,emailVerified:true},version:2,input};
+ assert.equal((await claimInvitation(store,args)).status,410);assert.equal(writes,0);
+ store.find=async()=>({...expired,claimed_by:memberId,project_id:project.id});
+ assert.equal((await claimInvitation(store,args)).project.slug,project.slug);assert.equal(writes,0);
+});
+test('creating an invitation stores a server-controlled 48-hour deadline instead of the legacy database default',async()=>{
+ let inserted;
+ const q={select(){return q;},eq(){return q;},maybeSingle:async()=>({data:null}),insert(value){inserted=value;return {select:()=>({single:async()=>({data:{id}})})};}};
+ const db={from:()=>q,storage:{from:()=>({upload:async()=>({})})}};
+ const scope={Response,URL,Buffer,Date,randomUUID,normalizeInvitation,invitationOpen,INVITATION_TTL_MS,sameOrigin:()=>true,origin:()=> 'https://example.com',json:(body,status=200)=>new Response(JSON.stringify(body),{status}),validId:()=>true,allowRequest:async()=>true,memberContext:async()=>({admin:true,user:{id:'admin',emailVerified:true},member:{id:memberId},db}),reencodeImage:async()=>({bytes:Buffer.from('test image'),contentType:'image/jpeg'}),INVITATION_BUCKET:'project-previews',signedInvitation:()=> 'signed-token'};
+ const POST=moduleFixture('src/pages/api/admin/listing-invitations.ts',['POST'],scope).POST;
+ const response=await POST({request:{text:async()=>JSON.stringify({...input,id,recipientEmail:email,image:'data:image/png;base64,dGVzdA==',expires_at:'2099-01-01T00:00:00Z'})}});
+ assert.equal(response.status,200);
+ assert.equal(Date.parse(inserted.expires_at)-Date.parse(inserted.created_at),INVITATION_TTL_MS);
 });
 test('claim uses the verified invited identity and preserves recipient edits, without trusting client authority',async()=>{
  let called=0;

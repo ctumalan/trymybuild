@@ -3,7 +3,7 @@ import {randomUUID} from 'node:crypto';
 import {memberContext} from '../../../server/workspace';
 import {json,origin} from '../../../server/auth';
 import {sameOrigin} from '../../../server/security.mjs';
-import {normalizeInvitation} from '../../../server/listing-invitation.mjs';
+import {normalizeInvitation,invitationOpen,INVITATION_TTL_MS} from '../../../server/listing-invitation.mjs';
 import {signedInvitation,INVITATION_BUCKET} from '../../../server/listing-invitation-store';
 import {reencodeImage} from '../../../server/listing-store';
 import {validId} from '../../../server/feedback-policy.mjs';
@@ -25,7 +25,7 @@ export const POST:APIRoute=async context=>{
    return r.data?json({ok:true,revoked:true}):json({error:'The invitation changed or was claimed. Reload to check.'},409);
   }
   if(before.data&&body.version===undefined)return links(body.id,context); // Retried creation, never duplicate/overwrite.
-  if(before.data&&(before.data.claimed_by||before.data.revoked_at||Date.parse(before.data.expires_at)<=Date.now()))return json({error:'This invitation is closed. Create a new one if needed.'},409);
+  if(before.data&&!invitationOpen(before.data))return json({error:'This invitation is closed. Create a new one if needed.'},409);
   if(before.data&&body.version!==before.data.lock_version)return json({error:'This preview changed. Reload before saving.'},409);
   if(!before.data&&body.version!==undefined)return json({error:'Invitation not found.'},404);
   const normalized=normalizeInvitation(body);if('error' in normalized)return json({error:normalized.error},400);
@@ -45,7 +45,10 @@ export const POST:APIRoute=async context=>{
   if(before.data){
    saved=await m.db.from('listing_invitations').update({...fields,lock_version:body.version+1,updated_at:new Date().toISOString()})
     .eq('id',body.id).eq('created_by',m.member.id).eq('lock_version',body.version).is('claimed_by',null).is('revoked_at',null).gt('expires_at',new Date().toISOString()).select('id').maybeSingle();
-  }else saved=await m.db.from('listing_invitations').insert({...fields,id:body.id,created_by:m.member.id}).select('id').single();
+  }else {
+   const created=Date.now();
+   saved=await m.db.from('listing_invitations').insert({...fields,id:body.id,created_by:m.member.id,created_at:new Date(created).toISOString(),expires_at:new Date(created+INVITATION_TTL_MS).toISOString()}).select('id').single();
+  }
   if(saved.error){
    // A retried insert may race with its first request. Return only this admin's existing invitation.
    if(!before.data&&saved.error.code==='23505'){

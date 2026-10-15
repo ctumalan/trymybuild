@@ -13,7 +13,7 @@ test('feedback is invitation-specific and safely renders prose with a stable ema
  assert.match(html,/&lt;script&gt;/);
 });
 test('feedback stays behind the invitation lifecycle checks and is below its app preview',async()=>{
- let row={id,expires_at:new Date(Date.now()+86400000).toISOString(),title:'Fir & Field',external_url:'https://example.com/',recipient_email:'maker@example.com'};
+ let row={id,created_at:new Date().toISOString(),expires_at:new Date(Date.now()+86400000).toISOString(),title:'Fir & Field',external_url:'https://example.com/',recipient_email:'maker@example.com'};
  const surface=(_title,body,_unused,status=200)=>new Response(body,{status});
  const scope={CWProjectView:globalThis.CWProjectView,invitationFeedback,listPublished:async()=>[],Response,invitationOpen,loadInvitation:async()=>row,currentUser:async()=>null,ensureMember:async()=>null,renderInvitationFeedback,invitationAssets:'',surface,e:String,unavailable:()=>new Response('Unavailable'),invitationFields:()=>'',invitationPreview:()=>'<article>App preview</article>'};
  Object.assign(scope,moduleFixture('src/server/project-ui.ts',['discoveryCard'],scope));
@@ -39,7 +39,7 @@ test('feedback stays behind the invitation lifecycle checks and is below its app
  scope.currentUser=async()=>null;
  scope.listPublished=async()=>{throw Error('Catalog unavailable');};
  assert.match(await(await route(request)).text(),/Sign up &amp; list your app/);
- for(const patch of [{revoked_at:new Date().toISOString()},{expires_at:new Date(0).toISOString()},{claimed_by:'different-owner'}]){
+ for(const patch of [{revoked_at:new Date().toISOString()},{expires_at:new Date(0).toISOString()},{created_at:new Date(Date.now()-49*3600000).toISOString()},{claimed_by:'different-owner'}]){
   const original=row;row={...original,...patch};
   const closed=await route(request);assert.equal(closed.status,410);assert.doesNotMatch(await closed.text(),/Public website review|604decordesign/);row=original;
  }

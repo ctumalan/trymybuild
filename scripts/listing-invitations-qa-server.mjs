@@ -2,15 +2,15 @@
 import http from 'node:http';
 import {readFile} from 'node:fs/promises';
 import {moduleFixture,mockDatabase} from './workspace-fixtures.mjs';
-import {invitationToken,invitationOpen,claimInvitation} from '../src/server/listing-invitation.mjs';
+import {invitationToken,invitationOpen,invitationExpiresAt,claimInvitation} from '../src/server/listing-invitation.mjs';
 import {renderInvitationImage} from '../src/server/invitation-image.mjs';
 import {pricingKind} from '../src/server/listing-policy.mjs';
 import {feedbackPanel,invitationFeedback} from '../src/server/invitation-feedback.mjs';
 const root=new URL('../',import.meta.url),port=Number(process.argv[2]||4396),base='http://127.0.0.1:'+port;
 const id='77777777-7777-4777-8777-777777777777',member='88888888-8888-4888-8888-888888888888',secret='synthetic-fixture-not-a-production-secret-12345',token=invitationToken(id,secret);
-const row={id,created_by:member,recipient_email:'maker@example.invalid',title:'Trip Notebook',external_url:'https://example.com/',category:'Travel',stage:'Ready for a first try',headline:'Keep the useful details of your next trip together.',help_text:'Spend less time hunting through tabs when you are away.',first_try:'Create one trip and add the first place you want to visit.',preview_path:'sample.jpg',price_label:'Free',lock_version:0,expires_at:new Date(Date.now()+30*86400000).toISOString(),created_at:new Date().toISOString(),claimed_by:null,revoked_at:null};
+const row={id,created_by:member,recipient_email:'maker@example.invalid',title:'Trip Notebook',external_url:'https://example.com/',category:'Travel',stage:'Ready for a first try',headline:'Keep the useful details of your next trip together.',help_text:'Spend less time hunting through tabs when you are away.',first_try:'Create one trip and add the first place you want to visit.',preview_path:'sample.jpg',price_label:'Free',lock_version:0,expires_at:new Date(Date.now()+2*86400000).toISOString(),created_at:new Date().toISOString(),claimed_by:null,revoked_at:null};
 const e=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const scope={e,Response,URL,Date,pricingKind,console,CWProjectView:globalThis.CWProjectView,invitationFeedback:()=>invitationFeedback('87829b6d-f5bb-4a3d-afd1-c823a3d812f0'),origin:()=>base,validId:()=>true,signedInvitation:()=>token,invitationOpen,loadInvitation:async()=>row,ensureMember:async()=>({id:member}),renderInvitationFeedback:()=>feedbackPanel({...invitationFeedback('87829b6d-f5bb-4a3d-afd1-c823a3d812f0'),headline:'The sample trip makes the idea easy to understand.'})};
+const scope={e,Response,URL,Date,pricingKind,console,CWProjectView:globalThis.CWProjectView,invitationFeedback:()=>invitationFeedback('87829b6d-f5bb-4a3d-afd1-c823a3d812f0'),origin:()=>base,validId:()=>true,signedInvitation:()=>token,invitationOpen,invitationExpiresAt,loadInvitation:async()=>row,ensureMember:async()=>({id:member}),renderInvitationFeedback:()=>feedbackPanel({...invitationFeedback('87829b6d-f5bb-4a3d-afd1-c823a3d812f0'),headline:'The sample trip makes the idea easy to understand.'})};
 Object.assign(scope,moduleFixture('src/server/feedback-ui.ts',['surface','adminSurface','unavailable','signIn'],scope));
 Object.assign(scope,moduleFixture('src/server/listing-invitation-view.ts',['invitationFields','invitationPreview','invitationAssets'],scope));
 Object.assign(scope,moduleFixture('src/server/project-ui.ts',['discoveryCard'],scope));

@@ -2,6 +2,12 @@ import { createHmac, timingSafeEqual } from 'node:crypto';
 import { normalizeDraft } from './listing-policy.mjs';
 
 const ID = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/;
+export const INVITATION_TTL_MS = 48 * 60 * 60 * 1000;
+export function invitationExpiresAt(row) {
+  const created = Date.parse(row?.created_at), stored = Date.parse(row?.expires_at);
+  return Number.isFinite(created) && Number.isFinite(stored)
+    ? Math.min(stored, created + INVITATION_TTL_MS) : NaN;
+}
 export function invitationToken(id, secret) {
   if (!ID.test(id || '') || typeof secret !== 'string' || secret.length < 32) throw Error('Invitation signing unavailable');
   return id + '.' + createHmac('sha256', secret).update('listing-invitation-v1:' + id).digest('hex');
@@ -14,7 +20,7 @@ export function invitationId(token, secret) {
   } catch { return null; }
 }
 export function invitationOpen(row, now = Date.now()) {
-  return !!row && !row.revoked_at && !row.claimed_by && Date.parse(row.expires_at) > now;
+  return !!row && !row.revoked_at && !row.claimed_by && invitationExpiresAt(row) > now;
 }
 export function normalizeInvitation(body) {
   const email = typeof body.recipientEmail === 'string' ? body.recipientEmail.trim().toLowerCase() : '';

@@ -45,6 +45,8 @@ test('guests can preview sharing choices while only the invited account can use 
  const context={params:{token:'fixture'}};
  const guest=await GET(context),guestData=await guest.json();
  assert.equal(guest.status,200);assert.equal(guestData.canShare,false);assert.equal(guestData.social.headline,'Plan one job clearly');
+ assert.equal(guestData.image,'https://trymybuild.com/api/listing-invitation/fixture/image?card=1');
+ assert.equal(guestData.social.image,guestData.image);
  user={email:'other@example.com',emailVerified:true};
  assert.equal((await (await GET(context)).json()).canShare,false);
  user={email:'maker@example.com',emailVerified:true};

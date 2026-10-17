@@ -88,6 +88,37 @@ textarea,.cw-main textarea,.detail-comment-form textarea{resize:none!important;m
 .tester-preview-panel{margin-top:0}.tester-preview-panel .public-tester>.primary-button{grid-column:2;grid-row:1/3;align-self:center;text-align:center;text-decoration:none;white-space:nowrap}.tester-preview-panel .public-tester>p{font-size:.88rem;color:#61576b}.tester-preview-panel .public-tester>small{line-height:1.4}
 .creator-profile-card{border:1px solid var(--line);border-radius:24px;background:#fff;overflow:hidden}.creator-profile-card .profile-hero{border-radius:0;margin:0;padding:28px}.creator-profile-card .profile-tools{padding:18px 24px;margin:0}.profile-tabs{display:flex;gap:8px;padding:0 24px;border-bottom:1px solid var(--line);overflow-x:auto}.profile-tabs button{border:0;background:transparent;color:var(--muted);font-family:inherit;font-size:.85rem;font-weight:600;line-height:1.4;padding:14px 8px;border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap}.profile-tabs button[aria-selected=true]{color:var(--brand-violet);border-color:var(--brand-violet)}.creator-profile-card>[data-profile-pane]{padding:24px;margin:0}.creator-profile-card .cw-panel{border:0;padding:0;margin:0}.creator-profile-card .public-project-card{max-width:none;margin:16px 0}.profile-location{font-size:.85rem}.creator-profile-card .workspace-summary{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.project-comment-message{border-top:1px solid var(--line);padding:18px 0}.project-comment-message>small{display:block;margin:6px 0}.project-comment-message p{white-space:pre-wrap;overflow-wrap:anywhere}.return-feedback-dialog:has([data-guided-feedback]){max-height:90dvh;overflow:auto;width:min(660px,calc(100vw - 32px))}.return-feedback-dialog .cw-choices{display:flex;flex-wrap:wrap;gap:8px}.return-feedback-dialog .cw-choice{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:10px;padding:10px;font-size:.85rem}.return-feedback-dialog fieldset{border:0;margin:18px 0;padding:0}.return-feedback-dialog legend{font-weight:700;margin-bottom:8px}.return-feedback-dialog textarea{box-sizing:border-box;width:100%;padding:12px;font:inherit;border:1px solid var(--line);border-radius:12px}.return-feedback-dialog input{accent-color:var(--brand-violet)}
 @media(max-width:560px){.invitation-preview-graphic figcaption{align-items:flex-start;flex-direction:column;gap:3px}.invitation-preview-graphic figcaption span{text-align:left}.suggested-testers{padding:15px}.suggested-tester{grid-template-columns:1fr}.suggested-tester>button,.suggested-tester>small,.tester-preview-panel .public-tester>.primary-button{grid-column:1;grid-row:auto;width:100%}.share-modes button{flex:1 1 95px}}
+
+/* Profile secondary tabs use the same considered card language as Projects. */
+.creator-profile-card>[data-profile-pane="activity"],
+.creator-profile-card>[data-profile-pane="message"]{
+ background:linear-gradient(145deg,#faf7fc 0%,#f2ecf7 100%);
+}
+.creator-profile-card>[data-profile-pane="activity"]>.profile-statistics,
+.creator-profile-card>[data-profile-pane="message"]>.direct-message-entry{
+ box-sizing:border-box; margin:0; padding:22px; border:1px solid #e1d5eb; border-radius:20px;
+ background:rgb(255 255 255 / .78); box-shadow:0 12px 30px #382b460d;
+}
+.creator-profile-card .profile-statistics>h2,
+.creator-profile-card .direct-message-entry>h2{
+ margin:0 0 18px; color:#17332a; font-size:1.25rem; line-height:1.25; letter-spacing:-.025em;
+}
+.creator-profile-card .profile-statistics .workspace-summary{gap:10px;margin:0 0 18px}
+.creator-profile-card .profile-statistics .workspace-summary>div{
+ min-height:112px; padding:14px; border:1px solid #ddcde9; border-radius:14px;
+ background:#fff; box-shadow:0 5px 14px #382b4608;
+}
+.creator-profile-card .profile-statistics .workspace-summary strong{color:#7545ad;font-size:1.75rem;line-height:1}
+.creator-profile-card .profile-statistics details{padding-top:14px;border-top:1px solid #e5dbea}
+.creator-profile-card .profile-statistics details>summary{color:#17332a;font-weight:700;cursor:pointer}
+.creator-profile-card .profile-statistics>.cw-meta{margin:14px 0 0;color:#6e6277;line-height:1.5}
+.creator-profile-card .direct-message-entry>p{max-width:42ch;margin:0 0 16px;color:#514659;line-height:1.55}
+.creator-profile-card .direct-message-entry>.primary-button{width:max-content;box-shadow:0 8px 18px #7545ad22}
+@media(max-width:620px){
+ .creator-profile-card>[data-profile-pane="activity"]>.profile-statistics,
+ .creator-profile-card>[data-profile-pane="message"]>.direct-message-entry{padding:18px;border-radius:16px}
+ .creator-profile-card .profile-statistics .workspace-summary>div{min-height:auto}
+}
 @media(max-width:620px){.creator-profile-card .profile-hero{padding:22px;gap:16px}.creator-profile-card>[data-profile-pane]{padding:18px}.creator-profile-card .profile-tools,.profile-tabs{padding-left:18px;padding-right:18px}.creator-profile-card .public-project-card{grid-template-columns:76px minmax(0,1fr);gap:10px}.creator-profile-card .public-project-image{width:76px;height:100px}.creator-profile-card .workspace-summary{grid-template-columns:1fr}.creator-profile-card .invite-actions{gap:6px}.listing-review>.cw-panel{padding:20px}.profile-tabs button{font-size:.8rem}}
 .cw-overlay:not(.profile-panel){margin:0 0 0 auto;height:100dvh;max-height:100dvh;width:min(700px,95vw);border-radius:24px 0 0 24px}.cw-overlay .recipient-main{padding:0;margin:0}.cw-overlay .recipient-hero{grid-template-columns:1fr;gap:22px;padding:28px;background:linear-gradient(130deg,#fff6ee,#ece7f5,#e3ece0);border-radius:18px}.cw-overlay .recipient-copy h1{font-size:clamp(2rem,4vw,3.1rem);margin-top:0}.cw-overlay .recipient-art{padding:14px}.cw-overlay .recipient-art img{aspect-ratio:1.4;object-fit:contain}.public-detail-header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px}.public-detail-header small{display:block;color:var(--muted);margin-top:5px}.public-detail-header .invite-actions{margin:0}.public-detail-header [data-save-status]:empty{display:none}.similar-grid a.similar-card{text-decoration:none}.verification-progress .cw-meta{margin-top:18px}
 /* Guided reviews reuse the existing feedback page and retain the project underneath. */

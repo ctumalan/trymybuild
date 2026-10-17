@@ -51,7 +51,7 @@ test('feedback stays behind the invitation lifecycle checks and is below its app
  assert.ok(html.indexOf('Your listing details')<html.indexOf('class="invitation-signup-action"'));
  assert.ok(html.indexOf('class="invitation-signup-action"')<html.indexOf('class="invitation-opt-out"'));
  assert.match(html,/data-decline-invitation="fixture"/);
- assert.match(html,/No thanks — remove this preview from TryMyBuild/);
+ assert.match(html,/No thanks — delete this preview and opt my app out of TryMyBuild reviews/);
  assert.doesNotMatch(html,/invitation-expiry-notice|expires 48 hours|data-invitation-review/);
  assert.match(html,/<a class="primary-button" href="https:\/\/example.com\/"[^>]*>Open your site ↗<\/a>/);
  assert.match(html,/Creator profile is optional/);

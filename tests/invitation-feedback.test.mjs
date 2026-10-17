@@ -23,6 +23,7 @@ test('feedback is invitation-specific and safely renders prose without personal 
  assert.equal(reviewText('$9.99/month · 2026-10-15'),'$9.99/month · 2026-10-15');
  assert.ok(renderInvitationFeedback(id).indexOf('Let contractors try a sample job')<renderInvitationFeedback(id).indexOf('What works well'));
  assert.match(renderInvitationFeedback(id),/<article class="public-review-card">/);
+ assert.ok(renderInvitationFeedback(id).indexOf('This app has 1 review')<renderInvitationFeedback(id).indexOf('<article class="public-review-card">'));
  assert.match(renderInvitationFeedback(id),/<a class="invitation-reviewer-profile" href="\/people\/christian-tumalan">/);
  assert.match(renderInvitationFeedback(id),/<strong id="invitation-review">Christian Tumalan<\/strong><small>Founder of TryMyBuild<\/small>/);
  assert.match(renderInvitationFeedback(id),/chris-nava-founder.jpg/);

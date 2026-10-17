@@ -23,13 +23,13 @@ test('feedback is invitation-specific and safely renders prose without personal 
  assert.equal(reviewText('$9.99/month · 2026-10-15'),'$9.99/month · 2026-10-15');
  assert.ok(renderInvitationFeedback(id).indexOf('Let contractors try a sample job')<renderInvitationFeedback(id).indexOf('What works well'));
  assert.match(renderInvitationFeedback(id),/<article class="public-review-card">/);
- assert.ok(renderInvitationFeedback(id).indexOf('This app has 1 review')<renderInvitationFeedback(id).indexOf('<article class="public-review-card">'));
+ assert.ok(renderInvitationFeedback(id).indexOf('Christian’s review of your app')<renderInvitationFeedback(id).indexOf('<article class="public-review-card">'));
  assert.match(renderInvitationFeedback(id),/<a class="invitation-reviewer-profile" href="\/people\/christian-tumalan">/);
  assert.match(renderInvitationFeedback(id),/<strong id="invitation-review">Christian Tumalan<\/strong><small>Founder of TryMyBuild<\/small>/);
  assert.match(renderInvitationFeedback(id),/chris-nava-founder.jpg/);
  assert.match(renderInvitationFeedback(id),/<time datetime="2026-10-15">/);
  assert.match(renderInvitationFeedback(id),/<details class="invitation-feedback-more"><summary>Read the full review<\/summary>/);
- assert.doesNotMatch(renderInvitationFeedback(id),/Christian’s review of your app|A personal first look|Public website review · No signup needed/);
+ assert.doesNotMatch(renderInvitationFeedback(id),/A personal first look|Public website review · No signup needed/);
  for(const title of ['What works well','A small trust detail','A useful first test'])assert.ok(renderInvitationFeedback(id).includes(title));
  const html=feedbackPanel({...invitationFeedback(id),headline:'<script>bad()</script>',notes:[{title:'<img>',text:'<a href="evil">click</a>'}]});
  assert.doesNotMatch(html,/<script>|<img>|<a href="evil"/);
@@ -54,7 +54,7 @@ test('guests can preview sharing choices while only the invited account can use 
  assert.equal((await (await GET(context)).json()).canShare,true);
 });
 test('feedback stays behind the invitation lifecycle checks and is below its app preview',async()=>{
- let row={id,created_at:new Date().toISOString(),expires_at:new Date(Date.now()+86400000).toISOString(),title:'Fir & Field',external_url:'https://example.com/',recipient_email:'maker@example.com'};
+ let row={id,created_at:new Date().toISOString(),expires_at:new Date(Date.now()+86400000).toISOString(),title:'Fir & Field',price_label:'Free',external_url:'https://example.com/',recipient_email:'maker@example.com'};
  const surface=(_title,body,_unused,status=200)=>new Response(body,{status});
  const scope={CWProjectView:globalThis.CWProjectView,invitationFeedback,listPublished:async()=>[],Response,invitationOpen,loadInvitation:async()=>row,currentUser:async()=>null,ensureMember:async()=>null,renderInvitationFeedback,invitationAssets:'',surface,e:String,unavailable:()=>new Response('Unavailable'),invitationFields:()=>'',invitationPreview:()=>'<article>App preview</article>'};
  Object.assign(scope,moduleFixture('src/server/project-ui.ts',['discoveryCard'],scope));
@@ -65,6 +65,9 @@ test('feedback stays behind the invitation lifecycle checks and is below its app
  const open=await route(request),html=await open.text();
  assert.ok(html.indexOf('studio-app-card')<html.indexOf('id="invitation-review"'));
  assert.match(html,/Public website review/);
+ assert.match(html,/This is your preview of Fir & Field/);
+ assert.ok(html.indexOf('id="invitation-review-heading"')<html.indexOf('Website pricing:'));
+ assert.ok(html.indexOf('Website pricing:')>html.indexOf('class="invitation-signup-action"'));
  assert.ok(html.indexOf('Only listed apps receive reviews from other users.')<html.indexOf('Save your preview'));
  assert.match(html,/Save your preview/);
  assert.match(html,/data-invitation-share="fixture"/);

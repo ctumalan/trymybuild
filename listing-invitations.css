@@ -12,6 +12,7 @@
 .invitation-provisional-badge { font-size:.76rem!important; line-height:1.4!important; color:#7645a5; background:#f1e9f8; padding:5px 9px; border-radius:9px; display:inline-block; margin:8px 0!important; }
 .invitation-native-detail .public-detail-header { align-items:center; }
 .invitation-native-detail .public-detail-header .invitation-provisional-badge { flex-shrink:0; }
+.invitation-app-identity small { display:block; margin-top:4px; color:#74687f; font-size:.75rem; font-weight:500; }
 .invitation-preview-access { position:relative; display:flex; flex:0 0 auto; align-items:center; gap:6px; }
 .invitation-access-help { position:relative; }
 .invitation-access-help summary { display:grid; place-items:center; width:22px; height:22px; box-sizing:border-box; border:1px solid #cdb9df; border-radius:50%; background:#fff; color:#7545ad; font:700 .75rem/1 system-ui,sans-serif; cursor:pointer; list-style:none; }
@@ -73,6 +74,7 @@
 .invitation-signup-action>h2 { font-size:1.05rem; line-height:1.4; margin:0 0 12px; }
 .invitation-signup-action { padding:18px; border-radius:14px; }
 .invitation-signup-action>.invitation-review-eligibility { margin:0 0 13px; color:#17332a; font-size:.9rem; line-height:1.45; }
+.invitation-signup-action>.invitation-pricing-context { display:flex; justify-content:center; flex-wrap:wrap; gap:3px 12px; margin-top:12px; padding-top:12px; border-top:1px solid #e2d7ea; font-size:.76rem; }
 .invitation-opt-out { margin:18px 0 4px; text-align:center; }
 .invitation-opt-out .text-button { padding:8px; min-height:44px; border:0; background:transparent; color:#65556f; font-size:.875rem; font-weight:500; line-height:1.5; text-decoration:underline; text-underline-offset:3px; box-shadow:none; }
 .invitation-opt-out .text-button:hover { color:#5e356f; }

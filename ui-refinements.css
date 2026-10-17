@@ -182,7 +182,9 @@ textarea,.cw-main textarea,.detail-comment-form textarea{resize:none!important;m
 .invitation-dialog.has-social-sharing h2{font-family:"Newsreader",Georgia,serif;font-size:clamp(1.6rem,4vw,2.1rem);padding-right:35px;overflow-wrap:anywhere;margin-bottom:18px}
 .share-modes,.social-formats{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 20px}
 .share-modes{padding-bottom:16px;border-bottom:1px solid #ded1eb}
-.share-modes .share-preview-note{flex:1 0 100%;margin:8px 0 0;padding:12px 14px;border-radius:10px;background:#f6f0fb;color:#55465f;line-height:1.45}
+.invitation-dialog .share-preview-note{display:grid;justify-items:start;gap:5px;margin:22px 0 0;padding:14px;border-radius:10px;background:#f6f0fb;color:#55465f;line-height:1.45}
+.invitation-dialog .share-preview-note p{margin:0}
+.invitation-dialog .share-preview-note .secondary-button{margin-top:5px;padding:9px 12px;font-size:.84rem}
 .share-modes button,.social-formats button{border:1px solid transparent;border-radius:10px;background:transparent;padding:10px 14px;color:#66576f;font:600 .88rem "DM Sans",sans-serif;cursor:pointer;min-height:42px}
 .share-modes button[aria-pressed=true],.social-formats button[aria-pressed=true]{background:#eee5f8;border-color:#d7c4ed;color:#6035aa}
 .social-intro{font-size:.94rem;color:#66576f;line-height:1.5;margin:0 0 16px}

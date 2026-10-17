@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {feedbackPanel,invitationFeedback,renderInvitationFeedback,reviewText} from '../src/server/invitation-feedback.mjs';
 import {invitationOpen} from '../src/server/listing-invitation.mjs';
-import {moduleFixture} from '../scripts/workspace-fixtures.mjs';
+import {moduleFixture,read} from '../scripts/workspace-fixtures.mjs';
 const id='87829b6d-f5bb-4a3d-afd1-c823a3d812f0';
 test('all pilot previews have bounded feedback with visible scope and no personal contact details',()=>{
  for(const invitationId of [id,'426ff309-33bd-4188-9f05-9a8be9ef59f5','efbe74b2-e9de-4de7-9aa6-4f8703678d02']){
@@ -52,6 +52,17 @@ test('guests can preview sharing choices while only the invited account can use 
  assert.equal((await (await GET(context)).json()).canShare,false);
  user={email:'maker@example.com',emailVerified:true};
  assert.equal((await (await GET(context)).json()).canShare,true);
+});
+test('guest sharing reveals the real tools before claim-gating final actions',()=>{
+ const share=read('share-invitation.js');
+ assert.match(share,/Preview your real sharing options\./);
+ assert.match(share,/Your preview stays unlisted while you explore\./);
+ assert.match(share,/Once you claim and publish, you’ll get the shareable link and cards shown above\./);
+ assert.match(share,/Claim your preview to get your shareable link →/);
+ assert.match(share,/mountSocialShare\(panel,p,controller\.signal\)/);
+ assert.ok(share.indexOf("testerPanel.insertAdjacentHTML('afterend'")>share.indexOf("dialog.append(testerPanel)"));
+ assert.ok(share.indexOf('mountSocialShare(panel,p,controller.signal)')<share.indexOf("panel.querySelector('[data-social-link]')?.click()"));
+ assert.doesNotMatch(share,/Sign up to ask/);
 });
 test('feedback stays behind the invitation lifecycle checks and is below its app preview',async()=>{
  let row={id,created_at:new Date().toISOString(),expires_at:new Date(Date.now()+86400000).toISOString(),title:'Fir & Field',price_label:'Free',external_url:'https://example.com/',recipient_email:'maker@example.com'};

@@ -39,16 +39,29 @@
 }
 @media(max-width:620px) { .invitation-landing-page .cw-main { width:calc(100% - 36px); } }
 
-/* Keep the review easy to scan inside the invitation drawer. */
-.invitation-native-detail .invitation-founder-feedback { margin:24px 0 0; padding:24px 0; background:transparent; border:0; border-top:1px solid #e5dced; border-radius:0; box-shadow:none; text-align:left; }
-.invitation-native-detail .invitation-founder-feedback header { padding:0; }
-.invitation-native-detail .invitation-founder-feedback h2 { font-size:1.25rem; line-height:1.3; margin:8px 0; }
-.invitation-native-detail .invitation-feedback-lead { color:#17332a; font-size:1.05rem; line-height:1.5; margin:18px 0 12px; }
-.invitation-feedback-primary { font-size:.9rem; line-height:1.65; margin:0; }
-.invitation-feedback-more { margin-top:18px; }
-.invitation-feedback-more summary { color:#7545ad; font-size:.85rem; font-weight:600; cursor:pointer; }
-.invitation-feedback-more section { margin-top:18px; }
-.invitation-feedback-more h3 { font-size:.95rem; }
-.invitation-feedback-more section p { font-size:.9rem; }
-.invitation-feedback-footer { font-size:.8rem; }
-.invitation-signup-action>h2 { font-size:1.2rem; line-height:1.3; margin:0 0 16px; }
+/* A compact reviewer card lets the photo and profile carry the attribution. */
+.invitation-native-detail .invitation-founder-feedback {
+ margin:22px 0 0; padding:0; background:transparent; border:0; border-radius:0;
+ box-shadow:none; text-align:left;
+}
+.invitation-native-feedback .public-review-card { margin:0; padding:16px; }
+.invitation-native-feedback .public-review-card header { align-items:center; padding:0 0 13px; border-bottom:1px solid #ece5f1; }
+.invitation-reviewer-profile { display:flex; align-items:center; gap:10px; min-width:0; color:inherit; text-decoration:none; }
+.invitation-reviewer-profile>span:last-child { display:grid; min-width:0; }
+.invitation-reviewer-profile strong { color:#2d2035; font-size:.86rem; }
+.invitation-reviewer-profile small { color:#786c80; font-size:.7rem; }
+.invitation-reviewer-profile:hover strong { color:#7545ad; text-decoration:underline; text-underline-offset:2px; }
+.invitation-native-feedback .public-review-card .byline-avatar { width:40px; height:40px; flex:0 0 40px; }
+.invitation-native-feedback .public-review-card time { display:block; }
+.invitation-native-detail .invitation-feedback-lead {
+ margin:15px 0 8px; color:#17332a; font-size:1rem; font-weight:700; line-height:1.5;
+}
+.invitation-native-feedback .invitation-feedback-primary { margin:0; color:#403746; font-size:.9rem; line-height:1.65; }
+.invitation-native-feedback .invitation-feedback-more { margin-top:14px; }
+.invitation-native-feedback .invitation-feedback-more summary { color:#7545ad; font-size:.84rem; font-weight:700; cursor:pointer; }
+.invitation-native-feedback .invitation-feedback-more section { margin-top:18px; }
+.invitation-native-feedback .invitation-feedback-more h3 { margin:0 0 4px; color:#716779; font-size:.82rem; font-weight:600; line-height:1.5; }
+.invitation-native-feedback .invitation-feedback-more section p { margin:0; color:#403746; font-size:.9rem; line-height:1.65; }
+.invitation-native-feedback .invitation-feedback-more .invitation-feedback-scope { margin:18px 0 0; padding:0; border:0; background:transparent; color:#716779; font-size:.78rem; line-height:1.55; }
+.invitation-signup-action>h2 { font-size:1.05rem; line-height:1.4; margin:0 0 12px; }
+.invitation-signup-action { padding:18px; border-radius:14px; }

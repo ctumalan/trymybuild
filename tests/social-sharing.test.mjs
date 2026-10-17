@@ -43,6 +43,18 @@ test('social artwork endpoint never renders private listings and rejects unknown
  assert.equal((await route({url:new URL('https://trymybuild.com/api/social-image/private.png?format=bad'),params:{slug:'private'}})).status,400);
  assert.equal(rendered,0);
 });
+test('unlisted invitation artwork honors each social format',async()=>{
+ const calls=[];
+ const scope={Response,Uint8Array,socialFormats,loadInvitation:async()=>({title:'WordRNG',external_url:'https://wordrng.com',category:'Games',headline:'Roll random words.'}),invitationScreenshot:async()=>Buffer.from('shot'),renderInvitationImage:async(_project,_shot,options)=>{calls.push(options);return Buffer.from('image');}};
+ const route=moduleFixture('src/pages/api/listing-invitation/[token]/image.ts',['GET'],scope).GET;
+ for(const [format,size] of Object.entries(socialFormats)){
+  const response=await route({url:new URL(`https://trymybuild.com/api/listing-invitation/token/image?card=1&format=${format}`),params:{token:'token'}});
+  assert.equal(response.status,200);
+  assert.equal(calls.at(-1).listingPreview,true);
+  assert.equal(calls.at(-1).width,size.width);
+  assert.equal(calls.at(-1).height,size.height);
+ }
+});
 test('custom social link metadata is escaped while recipient content stays unchanged',async()=>{
  const f=workspaceFixtures();
  const url=new URL('https://example.invalid/projects/sample-0?social=1');url.searchParams.set('headline','Need "this" <script>?');url.searchParams.set('description','One & two');

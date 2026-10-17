@@ -81,6 +81,8 @@ test('feedback stays behind the invitation lifecycle checks and is below its app
  assert.match(html,/No thanks — remove this preview/);
  assert.match(html,/Anyone with this link can view it\. Only the invited email can save and publish this listing\./);
  assert.match(html,/Unlisted preview/);
+ assert.match(html,/<details class="invitation-access-help"><summary aria-label="What does unlisted preview mean\?"/);
+ assert.doesNotMatch(html,/class="invitation-access-note"/);
  assert.doesNotMatch(html,/Private preview|opt my app out of TryMyBuild reviews/);
  assert.doesNotMatch(html,/invitation-expiry-notice|expires 48 hours|data-invitation-review/);
  assert.match(html,/<a class="primary-button" href="https:\/\/example.com\/"[^>]*>Open your site ↗<\/a>/);

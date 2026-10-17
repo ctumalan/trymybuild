@@ -12,6 +12,13 @@
 .invitation-provisional-badge { font-size:.76rem!important; line-height:1.4!important; color:#7645a5; background:#f1e9f8; padding:5px 9px; border-radius:9px; display:inline-block; margin:8px 0!important; }
 .invitation-native-detail .public-detail-header { align-items:center; }
 .invitation-native-detail .public-detail-header .invitation-provisional-badge { flex-shrink:0; }
+.invitation-preview-access { position:relative; display:flex; flex:0 0 auto; align-items:center; gap:6px; }
+.invitation-access-help { position:relative; }
+.invitation-access-help summary { display:grid; place-items:center; width:22px; height:22px; box-sizing:border-box; border:1px solid #cdb9df; border-radius:50%; background:#fff; color:#7545ad; font:700 .75rem/1 system-ui,sans-serif; cursor:pointer; list-style:none; }
+.invitation-access-help summary::-webkit-details-marker { display:none; }
+.invitation-access-help summary:hover,.invitation-access-help summary:focus-visible { border-color:#7545ad; background:#f4eef9; outline:none; }
+.invitation-access-help[open] summary { background:#7545ad; border-color:#7545ad; color:#fff; }
+.invitation-access-help p { position:absolute; z-index:5; top:calc(100% + 9px); right:0; width:min(300px,calc(100vw - 64px)); box-sizing:border-box; margin:0; padding:12px 14px; border:1px solid #dfd1ea; border-radius:12px; background:#fff; color:#554a5f; box-shadow:0 12px 32px #24172e24; font-size:.78rem; line-height:1.5; }
 .invitation-native-detail .preview-try-disabled { opacity:.5; cursor:help; box-shadow:none; }
 .invitation-creator-placeholder { font-size:.8rem; color:#81738d; }
 .invitation-signup-action { margin:16px 0 0; padding:18px; background:#f4eef9; border:1px solid #e2d4ef; border-radius:16px; text-align:center; }
@@ -72,5 +79,4 @@
 .invitation-opt-out [role=status]:empty { display:none; }
 .invitation-declined { display:grid; justify-items:start; gap:12px; min-height:55vh; align-content:center; padding:32px; }
 .invitation-declined h1,.invitation-declined p { margin:0; }
-.invitation-access-note { margin:0 0 16px; color:#675b70; font-size:.82rem; line-height:1.6; }
 .invitation-native-feedback .public-review-card>.invitation-feedback-scope { margin:13px 0 0; padding:0; border:0; background:transparent; color:#716779; font-size:.82rem; line-height:1.6; }

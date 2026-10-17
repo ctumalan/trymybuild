@@ -48,7 +48,7 @@ function hero(product, options = {}) {
     <h2 ${options.titleId ? `id="${esc(options.titleId)}"` : ""}>${esc(presentation.headline||product.name)}</h2>
    </div>
    <div class="recipient-preview-column">
-    <div class="studio-preview-label"><strong>Product preview</strong><span class="recipient-art-live"><i class="detail-live-dot" aria-hidden="true"></i>${esc(options.previewStatus||'Live')}</span></div>
+    <div class="studio-preview-label"><strong>Product preview</strong>${options.previewStatus===false?'':`<span class="recipient-art-live"><i class="detail-live-dot" aria-hidden="true"></i>${esc(options.previewStatus||'Live')}</span>`}</div>
     <div class="recipient-art">
      <div class="recipient-art-chrome" aria-hidden="true"><span class="recipient-art-controls"><i></i><i></i><i></i></span><span class="studio-browser-address"><svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="7" width="10" height="7" rx="1.5"/><path d="M5 7V5a3 3 0 0 1 6 0v2"/></svg>${esc(destinationHost)}</span><span class="studio-browser-more">⋮</span></div>
      <div class="recipient-art-viewport">${previewContent}</div>

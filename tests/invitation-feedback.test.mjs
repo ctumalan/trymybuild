@@ -45,6 +45,8 @@ test('feedback stays behind the invitation lifecycle checks and is below its app
  assert.match(html,/<div class="invite-actions"><button[^>]+aria-label="Share this app">Share<\/button>/);
  assert.match(html,/data-signup-href="\/auth\/sign-in\?signup=1&next=%2Flisting-invitation%2Ffixture%3Fshare%3Dmenu"/);
  assert.doesNotMatch(html,/invitation-preview-sharing|Copy app link|<h2>Share your app<\/h2>/);
+ assert.match(html,/<div class="studio-preview-label"><strong>Product preview<\/strong><\/div>/);
+ assert.doesNotMatch(html,/recipient-art-live[^>]*>[\s\S]*?Preview<\/span>/);
  assert.match(html,/Founder of TryMyBuild/);
  assert.match(html,/chris-nava-founder.jpg/);
  assert.ok(html.indexOf('id="invitation-review"')<html.indexOf('Your listing details'));

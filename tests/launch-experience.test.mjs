@@ -25,8 +25,8 @@ test('signup and global navigation expose the legal agreement',()=>{
  assert.match(app,/function revealLinkedCatalogProject\(\)[\s\S]*?scrollIntoView/);
  assert.match(app,/listing-settings-layout/);assert.match(app,/listing-live-preview/);assert.match(app,/Updates as you type/);
  assert.match(globalThis.CWProjectView.hero({url:'https://example.com/'},{disabledLaunch:true}),/preview-try-disabled[^>]+aria-expanded="false" aria-label="Try this app, available after saving"/);
- const guestDecision=app.slice(app.indexOf('<div class="legal-signup">'),app.indexOf('</div>`}<p data-listing-account-status'));
- assert.ok(guestDecision.indexOf('listing-save-hero')<guestDecision.indexOf('legal-agreement'));
+ const guestDecision=app.slice(app.indexOf('<div class="legal-signup listing-save-block">'),app.indexOf('</div>`;\n  const testerPreview'));
+ assert.ok(guestDecision.indexOf('legal-agreement')<guestDecision.indexOf('listing-save-hero'));
  assert.match(guestDecision,/Already have an account\? <a[^>]+>Sign in<\/a>/);assert.doesNotMatch(guestDecision,/secondary-button/);
  assert.match(app,/Agree to the Terms of Service and Privacy Policy to continue\./);
  assert.match(app,/location\.assign\('\/dashboard\/overview\?started='/);

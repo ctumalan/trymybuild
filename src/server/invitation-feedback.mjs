@@ -14,6 +14,28 @@ const reviews = {
       {title: 'A useful first test', text: 'Ask a contractor to plan one real job’s next two weeks, add a daily note, and prepare the next handoff to a GC or owner. Watch where they hesitate. That would test the practical workflow rather than just whether the landing page sounds appealing.'},
     ],
   },
+  '426ff309-33bd-4188-9f05-9a8be9ef59f5': {
+    author: 'Christian Tumalan',
+    date: 'October 16, 2026',
+    scope: 'A quick look based on your changelog and our earlier visual feedback. I haven’t run through the updated lesson or tested a signed-in account.',
+    headline: 'Check the first tutorial step with a new learner.',
+    notes: [
+      {title: 'What I noticed', text: 'Your changelog describes shorter tutorial cards and a folding checklist. Those are the areas we discussed in the earlier feedback. I haven’t run through the update, so I can’t say how the new flow feels in use.'},
+      {title: 'One improvement I would try first', text: 'Ask a new learner to follow just the first tutorial step without hints, then tell you where they hesitated. That gives you a focused way to check whether the new guidance is helping.'},
+      {title: 'A useful first test', text: 'Watch whether the learner can find the instruction, see the relevant controls, and explain what to do next. Note where you need to help. This would test the clarity of the lesson, not validate electrical safety or technical accuracy.'},
+    ],
+  },
+  'efbe74b2-e9de-4de7-9aa6-4f8703678d02': {
+    author: 'Christian Tumalan',
+    date: 'October 16, 2026',
+    scope: 'A quick look at the public pages only. I haven’t played through a session or tested a signed-in account.',
+    headline: 'Show what makes a word roll interesting before the first roll.',
+    notes: [
+      {title: 'What I noticed', text: 'The About page explains how badges add up to EP and affect rarity. A new visitor could benefit from seeing a concrete example alongside the roll button, before opening the longer explanation.'},
+      {title: 'One improvement I would try first', text: 'Show a sample word with its badges and EP breakdown beside the roll button. That would help a new player understand what makes a roll interesting before opening the longer explanation.'},
+      {title: 'A useful first test', text: 'Ask a first-time visitor to look at the sample and explain what its badges and EP mean. Note which parts are clear and which need an explanation before asking them to try a roll.'},
+    ],
+  },
 };
 // Reviews are authored from public product observations, never recipient contact records.
 // Keep contact details out of both the full-page review and the saved-app view.
@@ -41,6 +63,6 @@ export function feedbackPanel(input) {
  const picture=review.author==='Christian Tumalan'?'<img src="/assets/avatars/chris-nava-founder.jpg" alt="">':escape(review.author.split(/\s+/).filter(Boolean).slice(0,2).map(part=>part[0]).join(''));
  const noteMarkup=note=>`<section><h3>${escape(note.title)}</h3><p>${escape(note.text)}</p></section>`;
  const reviewer=review.author==='Christian Tumalan'?`<a class="invitation-reviewer-profile" href="/people/christian-tumalan"><span class="person-avatar byline-avatar" aria-hidden="true">${picture}</span><span><strong id="invitation-review">${escape(review.author)}</strong><small>Founder of TryMyBuild</small></span></a>`:`<span class="invitation-reviewer-profile"><span class="person-avatar byline-avatar" aria-hidden="true">${picture}</span><span><strong id="invitation-review">${escape(review.author)}</strong><small>App reviewer</small></span></span>`;
- return `<section class="invitation-founder-feedback invitation-native-feedback" id="founder-feedback" aria-labelledby="invitation-review"><article class="public-review-card"><header>${reviewer}<time${dateAttribute}>${escape(dateLabel)}</time></header><p class="invitation-feedback-lead">${escape(review.headline)}</p>${primary?`<p class="invitation-feedback-primary">${escape(primary.text)}</p>`:''}<details class="invitation-feedback-more"><summary>Read the full review</summary>${remaining.map(noteMarkup).join('')}<p class="invitation-feedback-scope">${escape(review.scope)}</p></details></article></section>`;
+ return `<section class="invitation-founder-feedback invitation-native-feedback" id="founder-feedback" aria-labelledby="invitation-review"><article class="public-review-card"><header>${reviewer}<time${dateAttribute}>${escape(dateLabel)}</time></header><p class="invitation-feedback-scope">${escape(review.scope)}</p><p class="invitation-feedback-lead">${escape(review.headline)}</p>${primary?`<p class="invitation-feedback-primary">${escape(primary.text)}</p>`:''}<details class="invitation-feedback-more"><summary>Read the full review</summary>${remaining.map(noteMarkup).join('')}</details></article></section>`;
 }
 export const renderInvitationFeedback = id => feedbackPanel(invitationFeedback(id));

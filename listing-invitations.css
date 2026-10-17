@@ -66,9 +66,11 @@
 .invitation-signup-action>h2 { font-size:1.05rem; line-height:1.4; margin:0 0 12px; }
 .invitation-signup-action { padding:18px; border-radius:14px; }
 .invitation-opt-out { margin:18px 0 4px; text-align:center; }
-.invitation-opt-out .text-button { padding:4px; border:0; background:transparent; color:#796f82; font-size:.532rem; font-weight:500; text-decoration:underline; text-underline-offset:3px; box-shadow:none; }
+.invitation-opt-out .text-button { padding:8px; min-height:44px; border:0; background:transparent; color:#65556f; font-size:.875rem; font-weight:500; line-height:1.5; text-decoration:underline; text-underline-offset:3px; box-shadow:none; }
 .invitation-opt-out .text-button:hover { color:#5e356f; }
 .invitation-opt-out [role=status] { margin:6px 0 0; color:#796f82; font-size:.76rem; }
 .invitation-opt-out [role=status]:empty { display:none; }
 .invitation-declined { display:grid; justify-items:start; gap:12px; min-height:55vh; align-content:center; padding:32px; }
 .invitation-declined h1,.invitation-declined p { margin:0; }
+.invitation-access-note { margin:0 0 16px; color:#675b70; font-size:.82rem; line-height:1.6; }
+.invitation-native-feedback .public-review-card>.invitation-feedback-scope { margin:13px 0 0; padding:0; border:0; background:transparent; color:#716779; font-size:.82rem; line-height:1.6; }

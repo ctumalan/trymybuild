@@ -54,14 +54,14 @@
   if(decline){event.preventDefault();void declineInvitation(decline);}
  });
  async function declineInvitation(button){
-  if(button.disabled||!confirm('Remove this private preview from TryMyBuild? This invitation link will stop working. Your own website will not be affected.'))return;
+  if(button.disabled||!confirm('Remove this unlisted preview from TryMyBuild? This invitation link will stop working. Your own website will not be affected.'))return;
   const status=button.parentElement.querySelector('[data-decline-status]');button.disabled=true;status.textContent='Removing preview…';
   try{
    const response=await fetch('/api/listing-invitation/'+encodeURIComponent(button.dataset.declineInvitation)+'/decline',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'}),data=await response.json();
    if(!response.ok)throw Error(data.error||'This preview could not be removed.');
    cancelReviewArrival();
    const panel=button.closest('[data-panel-content]');
-   panel.innerHTML='<section class="invitation-declined"><p class="eyebrow">Invitation declined</p><h1>This preview has been removed.</h1><p>TryMyBuild will no longer show this private preview. Your own website has not been changed.</p><a class="secondary-button" href="/">Explore TryMyBuild</a></section>';
+   panel.innerHTML='<section class="invitation-declined"><p class="eyebrow">Invitation declined</p><h1>This preview has been removed.</h1><p>This invitation link is no longer available. Your own website has not been changed.</p><a class="secondary-button" href="/">Explore TryMyBuild</a></section>';
   }catch(error){status.textContent=error.message;button.disabled=false;}
  }
  const boot=()=>{if(document.querySelector('#invitation-app-panel')){openInvitationPanel();if(arrivalHash)reviewArrival(arrivalHash);}mountInvitationForm();};
@@ -108,7 +108,7 @@
   const payload={...details};let url;
   if(admin){if(!form.dataset.id)form.dataset.id=crypto.randomUUID();payload.id=form.dataset.id;if(form.dataset.version!==undefined)payload.version=Number(form.dataset.version);if(image){payload.image=image;payload.source=source;}url='/api/admin/listing-invitations';}
   else{payload.version=Number(form.dataset.version);url='/api/listing-invitation/'+claim.dataset.token+'/claim';}
-  status.textContent='Saving private preview…';
+  status.textContent='Saving preview…';
   try{const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}),data=await r.json();if(!r.ok)throw Error(data.error||'Saving was not confirmed. Reload to check before retrying.');if(claim){try{sessionStorage.removeItem(storageKey);}catch{}}location.href=admin?data.adminUrl+'&saved=1':data.href;}catch(error){status.textContent=error.message;}
  });});
  }

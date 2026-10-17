@@ -18,7 +18,7 @@ test('a signed recipient can withdraw an unclaimed preview, while a claimed prev
 });
 
 test('decline explains its effect, requires confirmation and leaves the creator website unchanged',()=>{
- assert.match(client,/Remove this private preview from TryMyBuild\?/);
+ assert.match(client,/Remove this unlisted preview from TryMyBuild\?/);
  assert.match(client,/Your own website will not be affected\./);
  assert.match(client,/\/api\/listing-invitation\/.*\/decline/);
  assert.match(client,/This preview has been removed\./);

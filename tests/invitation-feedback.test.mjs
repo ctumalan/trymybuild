@@ -4,6 +4,16 @@ import {feedbackPanel,invitationFeedback,renderInvitationFeedback,reviewText} fr
 import {invitationOpen} from '../src/server/listing-invitation.mjs';
 import {moduleFixture} from '../scripts/workspace-fixtures.mjs';
 const id='87829b6d-f5bb-4a3d-afd1-c823a3d812f0';
+test('all pilot previews have bounded feedback with visible scope and no personal contact details',()=>{
+ for(const invitationId of [id,'426ff309-33bd-4188-9f05-9a8be9ef59f5','efbe74b2-e9de-4de7-9aa6-4f8703678d02']){
+  const review=invitationFeedback(invitationId),html=renderInvitationFeedback(invitationId);
+  assert.equal(review.author,'Christian Tumalan');
+  assert.ok(review.notes.length>=2);
+  assert.ok(html.indexOf('class="invitation-feedback-scope"')<html.indexOf('<details'));
+  assert.doesNotMatch(html,/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i);
+  assert.match(review.scope,/haven’t/i);
+ }
+});
 test('feedback is invitation-specific and safely renders prose without personal contact details',()=>{
  assert.equal(renderInvitationFeedback('another-invitation'),'');
  assert.match(renderInvitationFeedback(id),/id="founder-feedback"/);
@@ -66,7 +76,10 @@ test('feedback stays behind the invitation lifecycle checks and is below its app
  assert.ok(html.indexOf('Your listing details')<html.indexOf('class="invitation-signup-action"'));
  assert.ok(html.indexOf('class="invitation-signup-action"')<html.indexOf('class="invitation-opt-out"'));
  assert.match(html,/data-decline-invitation="fixture"/);
- assert.match(html,/No thanks — delete this preview and opt my app out of TryMyBuild reviews/);
+ assert.match(html,/No thanks — remove this preview/);
+ assert.match(html,/Anyone with this link can view it\. Only the invited email can save and publish this listing\./);
+ assert.match(html,/Unlisted preview/);
+ assert.doesNotMatch(html,/Private preview|opt my app out of TryMyBuild reviews/);
  assert.doesNotMatch(html,/invitation-expiry-notice|expires 48 hours|data-invitation-review/);
  assert.match(html,/<a class="primary-button" href="https:\/\/example.com\/"[^>]*>Open your site ↗<\/a>/);
  assert.match(html,/Creator profile is optional/);

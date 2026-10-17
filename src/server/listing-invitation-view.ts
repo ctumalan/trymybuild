@@ -15,7 +15,7 @@ export function invitationFields(row:any={},admin=false){
  <input type="hidden" name="video" value="${e(row.video_url||'')}"></details>`;
 }
 export function invitationPreview(row:any,image:string){
- return `<article class="listing-invitation-card" aria-label="Proposed app listing"><header><span class="eyebrow" data-preview-category>${e(row.category||'Your app')}</span><span class="listing-invitation-badge">Private preview</span><h2 data-preview-title>${e(row.title||'Your app name')}</h2><p class="listing-invitation-headline" data-preview-does>${e(row.headline||'A clear introduction to your app')}</p></header>
+ return `<article class="listing-invitation-card" aria-label="Proposed app listing"><header><span class="eyebrow" data-preview-category>${e(row.category||'Your app')}</span><span class="listing-invitation-badge">Unlisted preview</span><h2 data-preview-title>${e(row.title||'Your app name')}</h2><p class="listing-invitation-headline" data-preview-does>${e(row.headline||'A clear introduction to your app')}</p></header>
  <div class="listing-invitation-art">${image?`<img data-invitation-screenshot src="${e(image)}" alt="Website screenshot for ${e(row.title||'your app')}">`:'<p data-image-placeholder>Capture or upload a screenshot to see your app here.</p><img data-invitation-screenshot alt="Your app screenshot" hidden>'}</div>
  <div class="listing-invitation-notes"><section><span aria-hidden="true">01</span><h3>How it helps</h3><p data-preview-helps>${e(row.help_text||'Explain what someone will gain from using your app.')}</p></section>
  <section><span aria-hidden="true">02</span><h3>One thing to try first</h3><p data-preview-firstTry>${e(row.first_try||'Give someone one simple action to start with.')}</p></section></div></article>`;

@@ -43,7 +43,7 @@ export async function renderStudioInvitation(project,screenshot,{width=1200,heig
  const messageX=portrait?margin:margin+previewWidth+64,messageWidth=portrait?contentWidth:width-margin-messageX;
  const messageY=portrait?previewBottom+(story?160:140):bodyTop+(compact?48:76);
  const heading=listingPreview?'Your app’s next chapter starts here.':copy?.headline||'Give it a try. Share what you think.';
- const message=listingPreview?'Review your private preview and make it yours before publishing.':copy?.description||project.presentation?.help||project.summary||'Explore the app and let the maker know what you think.';
+ const message=listingPreview?'Review your unlisted preview and make it yours before publishing.':copy?.description||project.presentation?.help||project.summary||'Explore the app and let the maker know what you think.';
  let headingSize=portrait?(story?54:38):compact?28:36;
  const headingMax=portrait?(story?3:2):compact?4:3;
  const headingMin=portrait?(story?42:30):compact?22:28;
@@ -71,7 +71,7 @@ export async function renderStudioInvitation(project,screenshot,{width=1200,heig
  const kickerSize=portrait?17:compact?13:16;
  const kickerX=width-margin-measure(kicker,bold,kickerSize);
  const footerY=footerTop+(portrait?58:46),avatarSize=portrait?48:compact?32:42;
- const footerLabel=listingPreview?'Private preview · Edit before publishing':'Built by '+creator;
+ const footerLabel=listingPreview?'Unlisted preview · Edit before publishing':'Built by '+creator;
  const footerSize=portrait?23:compact?17:20;
  const signoff='trymybuild.com',signoffSize=portrait?23:compact?17:20;
  const signoffWidth=measure(signoff,sans,signoffSize);

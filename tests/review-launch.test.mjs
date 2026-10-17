@@ -77,6 +77,7 @@ test('discovery gives heading, categories, and the wish action separate zones',(
  assert.match(future,/@media\(max-width:620px\) \{[\s\S]*?\.discovery-categories details>div \{ position:absolute; top:calc\(100% \+ 8px\); right:0;/);
  assert.doesNotMatch(future,/\.discovery-categories details>div \{ position:fixed; inset:auto/);
  assert.match(future,/\.discovery-categories summary:focus-visible \{[^}]*outline:none/);
+ assert.match(future,/@media\(min-width:1280px\) \{[\s\S]*?\.discovery-categories>details>summary \{ display:none; \}[\s\S]*?button\[data-category-slot="overflow"\] \{ display:inline-flex; width:auto; \}/);
  assert.match(future,/\.catalog-first-apps-sticker \{[\s\S]*?bottom:calc\(100% \+ 34px\)/);
  assert.match(future,/\.catalog-first-apps-sticker \{[^}]*opacity:0; visibility:hidden/);
  assert.match(future,/\.catalog-first-apps-sticker\.is-revealed \{[^}]*opacity:1; visibility:visible/);

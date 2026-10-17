@@ -2055,6 +2055,14 @@ body.public-site #app[tabindex="-1"]:focus { outline:none; }
  .future-discover .discovery-categories>button[data-category-filter="Technology"] { display:none; }
  .future-discover .discovery-categories details>div button[data-category-filter="Technology"] { display:inline-flex; }
 }
+@media(min-width:1280px) {
+ .future-discover .results-heading + .discovery-categories,
+ .future-discover .catalog-results > .discovery-categories { flex-wrap:wrap; }
+ .future-discover .discovery-categories>details { display:contents; }
+ .future-discover .discovery-categories>details>summary { display:none; }
+ .future-discover .discovery-categories>details>div { display:contents; }
+ .future-discover .discovery-categories>details>div button[data-category-slot="overflow"] { display:inline-flex; width:auto; }
+}
 
 /* Shared lettering palette for both site logos. */
 .discovery-hero-action .discovery-entry-row {

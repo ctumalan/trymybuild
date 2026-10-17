@@ -69,7 +69,8 @@ if (legacySections.has(location.hash.slice(1))) location.replace('/article/find-
   .month-heading { font-size:12px; text-transform:uppercase; letter-spacing:.12em; color:#8a7d8e; margin:28px 0 18px; }
   .post-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:28px; }
   .post-card { border:1px solid #e5dfe8; border-radius:14px; overflow:hidden; background:white; display:flex; flex-direction:column; }
-  .card-image img { display:block; width:100%; aspect-ratio:16/9; object-fit:cover; }
+  .card-image { display:block; aspect-ratio:16/9; overflow:hidden; }
+  .card-image img { display:block; width:100%; height:100%; object-fit:cover; }
   .card-copy { padding:28px; display:flex; flex-direction:column; flex:1; }
   .card-copy h4 { font:400 28px/1.2 Georgia,serif; letter-spacing:-.025em; margin:16px 0 14px; }
   .card-copy .post-bottom { margin-top:auto; padding-top:28px; }

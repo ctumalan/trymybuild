@@ -3118,3 +3118,78 @@ body.public-site .future-discover .catalog-list::before,.invitation-catalog-grid
 }
 /* Blur the native overlay itself so its entrance animation cannot isolate the backdrop. */
 .detail-backdrop { -webkit-backdrop-filter:none; backdrop-filter:none; }
+
+/* Listing editor: the form and its real catalog card stay visible together. */
+.listing-settings-page { width:min(1320px,100%); max-width:none; }
+.listing-settings-heading { max-width:760px; margin-bottom:28px; }
+.listing-settings-heading h1 { margin:.3rem 0 .55rem; font-size:clamp(2.35rem,4vw,4rem); }
+.listing-settings-heading>p:last-child { margin:0; color:var(--muted); }
+.listing-settings-layout { display:grid; grid-template-columns:minmax(0,1.02fr) minmax(390px,.98fr); align-items:start; gap:34px; }
+.listing-settings-editor { display:grid; min-width:0; gap:18px; }
+.listing-settings-editor>form { display:grid; gap:16px; padding:26px; border:1px solid var(--line); border-radius:22px; background:var(--platform-surface); box-shadow:0 14px 38px #2c1d3b0b; }
+.listing-settings-editor .listing-field,.listing-settings-editor .listing-category-field { margin:0; }
+.listing-settings-editor .listing-field-help { display:block; margin:4px 0 9px; color:var(--muted); font-size:.82rem; font-weight:400; line-height:1.45; }
+.listing-settings-editor .video-status:empty,.listing-settings-editor [data-listing-status]:empty { display:none; }
+.listing-live-preview { position:sticky; top:20px; min-width:0; max-height:calc(100vh - 40px); overflow:auto; overscroll-behavior:contain; padding:20px; border:1px solid var(--line); border-radius:24px; background:linear-gradient(145deg,#fff,#faf7fc); box-shadow:0 18px 48px #2d1d3d12; scrollbar-width:thin; }
+.listing-live-preview-heading { display:flex; align-items:baseline; justify-content:space-between; gap:16px; margin-bottom:14px; }
+.listing-live-preview-heading p { margin:0; }
+.listing-live-preview-heading span { color:var(--muted); font-size:.78rem; }
+.listing-live-preview [data-listing-preview-region] { margin:0; }
+.listing-live-preview .listing-preview-card { box-shadow:0 12px 32px #2d1d3d10; }
+.listing-app-updates { box-shadow:none; }
+.listing-app-updates h2 { margin-top:0; }
+.listing-final-actions { padding:24px; border:1px solid #d9cae7; border-radius:22px; background:linear-gradient(145deg,#fff,#f7f1fb); text-align:center; box-shadow:0 16px 40px #2c1d3b10; }
+.listing-final-actions>[data-listing-server-status] { margin:0 0 14px; color:var(--muted); font-size:.86rem; }
+.listing-final-actions>.primary-button { width:100%; min-height:56px; justify-content:center; font-size:1rem; }
+.listing-final-actions [hidden] { display:none!important; }
+.listing-more-actions { margin-top:14px; text-align:left; }
+.listing-more-actions>summary { width:max-content; margin:auto; color:var(--muted); cursor:pointer; font-size:.82rem; list-style:none; text-decoration:underline; text-underline-offset:3px; }
+.listing-more-actions>summary::-webkit-details-marker { display:none; }
+.listing-more-actions>div { display:grid; gap:8px; margin-top:12px; padding:12px; border:1px solid var(--line); border-radius:12px; background:#fff; }
+.listing-more-actions button,.listing-more-actions a { border:0; background:transparent; color:#654481; padding:8px; font:600 .82rem/1.3 "DM Sans",sans-serif; text-align:left; text-decoration:none; cursor:pointer; }
+.listing-more-actions button:hover,.listing-more-actions a:hover { background:#f4eef9; border-radius:8px; }
+
+/* Screenshot controls use the same deliberate button language as the rest of TryMyBuild. */
+.listing-image-drop { display:flex; align-items:center; flex-wrap:wrap; gap:10px 14px; margin:14px 0 12px; padding:16px; border:1px dashed #cdb8de; border-radius:14px; background:#f8f3fb; }
+.listing-image-drop>span { color:var(--muted); font-size:.78rem; }
+.listing-upload-button { display:inline-flex; align-items:center; justify-content:center; min-height:40px; padding:0 15px; border:1px solid #cdb8de; border-radius:10px; background:#fff; color:#7545ad; font-size:.82rem; font-weight:750; cursor:pointer; box-shadow:0 4px 14px #2d1d3d0b; }
+.listing-upload-button:hover { border-color:#a985c8; background:#fdfbff; }
+.listing-refresh-button { width:100%; justify-content:center; }
+
+/* The preview explains that generated copy is editable without stopping the flow. */
+.listing-copy-assurance { display:grid; gap:3px; margin:14px 0 0; padding:13px 15px; border:1px solid #e1d6ea; border-radius:13px; background:#faf7fc; color:#5e516a; font-size:.8rem; line-height:1.45; }
+.listing-copy-assurance strong { color:#382b46; }
+.listing-preview-heading .listing-founder-note { max-width:680px; margin:20px auto 0; text-align:left; }
+.listing-preview-heading .listing-founder-note .founder-quote { margin:0; }
+.listing-change-url { display:inline-flex; width:100%; justify-content:center; margin-top:10px; }
+
+/* One invitation control opens the available sending choices. */
+.tester-handoff { box-shadow:none; }
+.tester-handoff h2 { margin:.25rem 0 .55rem; }
+.tester-handoff-actions { display:flex; align-items:center; flex-wrap:wrap; gap:12px 18px; margin-top:18px; }
+.invite-send-menu { position:relative; }
+.invite-send-menu>summary { display:inline-flex; align-items:center; justify-content:center; min-height:44px; padding:0 18px; cursor:pointer; list-style:none; }
+.invite-send-menu>summary::-webkit-details-marker { display:none; }
+.invite-send-menu>summary::after { content:"⌄"; margin-left:9px; font-size:.9rem; }
+.invite-send-options { position:absolute; z-index:12; top:calc(100% + 8px); left:0; display:grid; width:250px; padding:8px; border:1px solid var(--line); border-radius:14px; background:#fff; box-shadow:0 18px 42px #2d1d3d20; }
+.invite-send-options button { padding:11px 12px; border:0; border-radius:9px; background:transparent; color:#382b46; font:600 .84rem/1.3 "DM Sans",sans-serif; text-align:left; cursor:pointer; }
+.invite-send-options button:hover { background:#f4eef9; color:#7545ad; }
+.tester-feedback-link { color:#7545ad; font-size:.85rem; font-weight:650; }
+.tester-handoff-actions [data-copy-feedback-status]:empty { display:none; }
+.tester-audience-help { margin:14px 0 0; font-size:.82rem; }
+
+@media(max-width:960px) {
+ .listing-settings-layout { grid-template-columns:1fr; }
+ .listing-live-preview { position:static; max-height:none; }
+}
+@media(max-width:620px) {
+ .listing-settings-heading h1 { font-size:2.35rem; }
+ .listing-settings-editor>form,.listing-final-actions,.listing-live-preview { padding:18px; border-radius:18px; }
+ .listing-live-preview { order:2; }
+ .listing-image-drop { align-items:stretch; flex-direction:column; }
+ .listing-upload-button { width:100%; box-sizing:border-box; }
+ .tester-handoff-actions { align-items:stretch; flex-direction:column; }
+ .invite-send-menu,.invite-send-menu>summary,.tester-feedback-link { width:100%; box-sizing:border-box; text-align:center; }
+ .invite-send-options { position:static; width:100%; margin-top:8px; box-sizing:border-box; }
+ .listing-preview-heading .listing-founder-note { margin-top:16px; }
+}

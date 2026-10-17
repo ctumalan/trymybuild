@@ -397,9 +397,9 @@ function displayPreference(key) {
 function rememberDisplayDismissal(key) {
   try { localStorage.setItem(key, 'true'); } catch {}
 }
-function founderConversation() {
-  if (displayPreference('tmb-founder-dismissed')) return '';
-  return `<section class="founder-conversation founder-banner" aria-label="A note from Christian Tumalan"><div class="founder-identity"><img class="founder-conversation-avatar" src="/assets/avatars/chris-nava-founder.jpg" alt="Christian Tumalan" width="48" height="48"><span class="founder-conversation-name"><strong>Christian Tumalan</strong><button type="button" class="founder-about-link" data-founder-about>Founder</button></span></div><div class="founder-conversation-messages"><div class="founder-speech"><p class="founder-quote">“I built my apps with AI—but AI can’t tell me what confuses a <em>real person.</em> I personally check all new apps and give them your first review.”</p><button type="button" class="founder-banner-close" data-close-founder-quote aria-label="Close founder quote">×</button></div></div></section>`;
+function founderConversation(message = '“I built my apps with AI—but AI can’t tell me what confuses a <em>real person.</em> I personally check all new apps and give them your first review.”', storageKey = 'tmb-founder-dismissed', extraClass = '') {
+  if (displayPreference(storageKey)) return '';
+  return `<section class="founder-conversation founder-banner ${esc(extraClass)}" aria-label="A note from Christian Tumalan"><div class="founder-identity"><img class="founder-conversation-avatar" src="/assets/avatars/chris-nava-founder.jpg" alt="Christian Tumalan" width="48" height="48"><span class="founder-conversation-name"><strong>Christian Tumalan</strong><button type="button" class="founder-about-link" data-founder-about>Founder</button></span></div><div class="founder-conversation-messages"><div class="founder-speech"><p class="founder-quote">${message}</p><button type="button" class="founder-banner-close" data-close-founder-quote="${esc(storageKey)}" aria-label="Close founder quote">×</button></div></div></section>`;
 }
 function catalogCategoryNavigation() {
   const categories=publishedCategories(),preferred=['Family life','Technology','Food & home','Personal planning','Creative work'];
@@ -941,7 +941,7 @@ function listingImageControls() {
   const busy = ['loading','uploading'].includes(listingCapture.state);
   const history=listingImageHistory();
   const versions=history.length?`<div class="listing-preview-history"><h4>Earlier previews</h4>${history.map((item,index)=>`<div><span>${item.source==='captured'?'Website capture':'Your upload'}${item.replacedAt?' · '+esc(new Date(item.replacedAt).toLocaleDateString()):''}</span><button type="button" class="secondary-button" data-listing-preview-restore="${esc(item.id)}">Restore</button></div>`).join('')}</div>`:'';
-  return `<section class="listing-image-tools" aria-label="Website screenshot"><div class="listing-image-heading"><div><h3>Website screenshot</h3>${listingImage()?`<small class="listing-preview-source">${esc(listingImageSourceLabel())}</small>`:''}</div><details class="listing-image-help"><summary aria-label="About website screenshots">?</summary><p class="listing-image-note">Automatic capture reads only the public website, never a page signed in to your app. An image you upload stays in place until you choose to replace or refresh it. Failed captures keep the last good preview.</p></details></div><p role="status" aria-live="polite">${esc(listingCapture.message || (listingImage() ? 'Your website preview is ready.' : 'Add a screenshot of the page people will try.'))}</p><div class="listing-image-drop" data-listing-image-drop><label> ${listingImage() ? 'Replace screenshot' : 'Upload a screenshot'}<input type="file" data-listing-image-upload accept="image/png,image/jpeg,image/webp"></label><span>Or drop it here · PNG, JPG, WebP · up to 5 MB</span></div><button type="button" class="secondary-button" data-listing-capture ${busy?'disabled':''}>${busy?'Preparing image…':'Refresh preview'}</button>${versions}</section>`;
+  return `<section class="listing-image-tools" aria-label="Website screenshot"><div class="listing-image-heading"><div><h3>Website screenshot</h3>${listingImage()?`<small class="listing-preview-source">${esc(listingImageSourceLabel())}</small>`:''}</div><details class="listing-image-help"><summary aria-label="About website screenshots">?</summary><p class="listing-image-note">Automatic capture reads only the public website, never a page signed in to your app. An image you upload stays in place until you choose to replace or refresh it. Failed captures keep the last good preview.</p></details></div><p role="status" aria-live="polite">${esc(listingCapture.message || (listingImage() ? 'Your website preview is ready.' : 'Add a screenshot of the page people will try.'))}</p><div class="listing-image-drop" data-listing-image-drop><label class="listing-upload-button"><span>${listingImage() ? 'Replace screenshot' : 'Upload a screenshot'}</span><input class="sr-only" type="file" data-listing-image-upload accept="image/png,image/jpeg,image/webp"></label><span>or drop a PNG, JPG, or WebP here · up to 5 MB</span></div><button type="button" class="secondary-button listing-refresh-button" data-listing-capture ${busy?'disabled':''}>${busy?'Preparing image…':'Capture a fresh website preview'}</button>${versions}</section>`;
 }
 document.addEventListener('click', event => { if(event.target.closest('[data-listing-capture]')) void ensureListingScreenshot(true); });
 document.addEventListener('click', async event => {
@@ -982,7 +982,8 @@ function listingPreview(editable = true) {
   queueMicrotask(() => { void ensureListingScreenshot(); });
   const title=listingDraft.title||'Your project';
   const product={slug:'listing-preview',name:title,price:CWPricing.labels[listingDraft.pricing]||'',category:listingDraft.category,stage:listingDraft.stage,preview:image,url,presentation:{headline:listingDraft.does||title,help:listingDraft.helps||'Add the benefit people should understand in your dashboard.',firstTry:listingDraft.firstTry||'Give visitors one clear place to begin after you save this app.'}};
-  return `<div data-listing-preview-region data-listing-preview-editable="${editable}"><article class="listing-preview-card project-detail-content invitation-detail mealmap-detail" data-showcase-theme="${esc(CWProjectView.theme(product))}"><header class="public-detail-header">${CWProjectView.title(product,{preview:true})}</header>${projectDetailContent(product,true,!editable)}</article>${editable?listingImageControls():''}</div>`;
+  const assurance=!editable?`<div class="listing-copy-assurance"><strong>This wording is only a starting point.</strong><span>You can edit the description, “How it helps,” and “One thing to try first” after you save.</span></div>`:'';
+  return `<div data-listing-preview-region data-listing-preview-editable="${editable}"><article class="listing-preview-card project-detail-content invitation-detail mealmap-detail" data-showcase-theme="${esc(CWProjectView.theme(product))}"><header class="public-detail-header">${CWProjectView.title(product,{preview:true})}</header>${projectDetailContent(product,true,!editable)}</article>${assurance}${editable?listingImageControls():''}</div>`;
 }
 function listingIdentityConfirmation() {
   const image = listingImage();
@@ -1004,11 +1005,15 @@ function listingSettingsPage() {
     : status === 'published' ? 'Published and publicly discoverable.'
     : status === 'unpublished' ? 'Unpublished. Hidden from the catalog until you submit it again.'
     : 'Saved to your account as a private draft. Only you can see it.';
-  const importCard = hasServer ? `<section class="cw-panel"><h2>Builds & updates</h2><p>Add release notes and choose which build is active. Announce improvements to people who saved your project.</p><a class="secondary-button" href="/dashboard/builds?project=${encodeURIComponent(listingDraft.serverSlug)}">Manage builds</a></section>` : `<div class="cw-panel listing-import"><h2>Save this draft to your account</h2><p>Your draft is currently on this device only. Save it to your account (${name}) so you can publish it and reach it from any device.</p><button class="primary-button" data-listing-save-server>Save to my account</button><p class="privacy-note">🔒 Nothing is published yet. Your on-device draft is kept until the save is confirmed.</p></div>`;
-  const publishControls = !hasServer ? '' : `<div class="cw-panel"><p role="status" data-listing-server-status>${esc(statusNote)}</p><div class="form-actions">${status === 'published'
-      ? `<a class="primary-button" href="/?catalog=${encodeURIComponent(listingDraft.serverSlug)}">View my app in the catalog</a><button class="secondary-button" data-listing-unpublish>Unpublish</button>`
-      : '<button class="primary-button" data-listing-publish>Publish my app</button>'}<a class="share-browse-link" href="/dashboard?view=creator">Go to My apps →</a></div><p class="privacy-note">Publish instantly to the public catalog. No admin approval needed. You can unpublish anytime.</p></div>`;
-  return `<section class="page-shell listing-review"><p class="eyebrow">Your project · Settings</p><h1>Make it yours.</h1><p>Signed in as ${name}.</p><form data-listing-settings>${sharingPreferenceFields()}${listingField('title', 'Confirm your app’s name', 'Your app’s name')}${listingField('url', 'Confirm your app’s link', 'https://your-app.com')}${listingCategoryPicker()}${listingPricingField()}${listingField('does','What does your project do?','Describe your project in a short sentence.',true)}${listingField('helps','How does it help people?','Explain the benefit in a short sentence.',true)}${listingField('firstTry','What should someone try first?','Suggest one action in a short sentence.',true)}${videoField()}<p class="share-name-hint">Keep answers clear and concise. Edit your screenshot in the preview below. Categories appear in homepage filters only when a listing is published. Drafts never create public filters.</p><p data-video-status class="video-status" role="status"></p><div class="form-actions share-start-actions"><button class="primary-button" type="submit">${hasServer ? 'Save changes' : 'Save draft'}</button><button class="secondary-button" type="button" data-listing-review>Back</button><button type="button" class="secondary-button listing-reset-button" data-listing-reset>Start over</button></div><p data-listing-status role="status"></p></form>${publishControls}${importCard}${listingPreview()}${status === 'published' ? `<section class="cw-panel tester-handoff"><p class="eyebrow">Your next step</p><h2>Invite your first testers</h2><p>Start with a few people who might use your app. Ask them to try one task and share what happened.</p><div class="form-actions"><button type="button" class="primary-button" data-invite-project="${esc(listingDraft.serverSlug)}">Prepare invitation</button><a class="secondary-button" href="/projects/${encodeURIComponent(listingDraft.serverSlug)}?invite=1">View your feedback page</a><button type="button" class="secondary-button" data-copy-feedback-link="${esc(listingDraft.serverSlug)}">Copy feedback link</button><p data-copy-feedback-status role="status"></p></div><p><a href="/guides/first-app-testers">No audience yet? Start here →</a></p></section>` : ''}</section>`;
+  const appUpdates = hasServer ? `<section class="cw-panel listing-app-updates"><h2>App updates</h2><p>Share what changed and let visitors know which version they should try.</p><a class="secondary-button" href="/dashboard/builds?project=${encodeURIComponent(listingDraft.serverSlug)}">Manage updates</a></section>` : '';
+  const invitePanel = status === 'published' ? `<section class="cw-panel tester-handoff"><p class="eyebrow">Your next step</p><h2>Invite friends or specific people to try your app</h2><p>Choose how you want to reach someone. Ask them to try one clear task and tell you what happened.</p><div class="tester-handoff-actions"><details class="invite-send-menu"><summary class="primary-button">Send an invite</summary><div class="invite-send-options"><button type="button" data-invite-project="${esc(listingDraft.serverSlug)}" data-invite-mode="email">Send by email</button><button type="button" data-copy-feedback-link="${esc(listingDraft.serverSlug)}">Copy invitation link</button><button type="button" data-invite-project="${esc(listingDraft.serverSlug)}" data-invite-mode="member">Ask a TryMyBuild member</button></div></details><a class="tester-feedback-link" href="/projects/${encodeURIComponent(listingDraft.serverSlug)}?invite=1">View feedback</a><p data-copy-feedback-status role="status"></p></div><p class="tester-audience-help"><a href="/guides/first-app-testers">Not sure whom to invite? Start here →</a></p></section>` : '';
+  const publishes = status === 'published' || listingDraft.sharingPreference === 'public';
+  const primaryAction = status === 'published'
+    ? `<button class="primary-button listing-final-publish" type="submit" form="listing-settings-form" data-listing-save-publish>Save changes and view my app</button>`
+    : `<button class="primary-button listing-final-save" type="submit" form="listing-settings-form" ${publishes?'hidden':''}>Save my app as a private draft</button><button class="primary-button listing-final-publish" type="submit" form="listing-settings-form" data-listing-save-publish ${publishes?'':'hidden'}>Publish my app and view it in the catalog</button>`;
+  const finalActions = `<section class="listing-final-actions" data-listing-settings-actions><p role="status" data-listing-server-status>${esc(statusNote)}</p>${primaryAction}<details class="listing-more-actions"><summary>More options</summary><div><button type="button" data-listing-review>Return to the previous step</button><button type="button" data-listing-reset>Start over with a different app</button>${hasServer?`<a href="/dashboard?view=creator">Go to My apps</a>`:''}${status==='published'?'<button type="button" data-listing-unpublish>Unpublish this app</button>':''}</div></details><p class="privacy-note">${publishes?'Publishing adds the app to the public catalog and opens its catalog page. You can unpublish later.':'Your app stays private until you choose to publish it.'}</p></section>`;
+  const editor = `<div class="listing-settings-editor"><form id="listing-settings-form" data-listing-settings>${sharingPreferenceFields()}${listingField('title', 'Confirm your app’s name', 'Your app’s name')}${listingField('url', 'Confirm your app’s link', 'https://your-app.com')}${listingCategoryPicker()}${listingPricingField()}${listingField('does','What does your app do?','Describe your app in a short sentence.',true)}${listingField('helps','How does it help people?','Explain the benefit in a short sentence.',true)}${listingField('firstTry','What should someone try first?','Suggest one action in a short sentence.',true)}${videoField()}<p data-video-status class="video-status" role="status"></p><p data-listing-status role="status"></p></form>${appUpdates}${invitePanel}${finalActions}</div>`;
+  return `<section class="page-shell listing-review listing-settings-page"><header class="listing-settings-heading"><p class="eyebrow">Your app · Settings</p><h1>A few details before you share</h1><p>Signed in as ${name}. Everything here can be changed later.</p></header><div class="listing-settings-layout">${editor}<aside class="listing-live-preview" aria-label="Live app preview"><div class="listing-live-preview-heading"><p class="eyebrow">Live preview</p><span>Updates as you type</span></div>${listingPreview()}</aside></div></section>`;
 }
 function listingAccountPage() {
   if (state.session?.authenticated) return listingSettingsPage();
@@ -1027,7 +1032,8 @@ function listingSignupPreview() {
   listingDraft.sharingPreference=preference;
   const signIn='/auth/sign-in?next='+encodeURIComponent('listing-dashboard');
   const testerPreview=!state.session?.authenticated?`<section class="guest-tester-preview" aria-labelledby="guest-tester-title"><div><p class="eyebrow">People ready to help</p><h2 id="guest-tester-title">Invite TryMyBuild members to test your app</h2><p>After you publish, you can invite members who volunteered to exchange thoughtful feedback. You choose who to contact.</p></div><div class="guest-tester-list" data-guest-tester-preview><p role="status">Finding available testers…</p></div><small>Profiles shown here are public and opted in. Sending invitations requires an account.</small></section>`:'';
-  return `<section class="page-shell listing-review listing-signup-preview"><header class="listing-preview-heading"><p class="eyebrow">Your app preview</p><h1>Congratulations—your app has started.</h1><p>Sharing your app with the world takes courage, and it matters. Taking the first step is usually the hardest.</p></header><div class="listing-preview-conversion"><div>${listingPreview(false)}</div><aside class="listing-preview-decision"><p class="eyebrow">Before you save</p><h2>Who should see it?</h2>${listingJourneyVisibility()}<p class="listing-visibility-assurance">${preference==='public'?'You chose public when ready. Your app stays private until you finish the required details and publish it.':'Private is selected. Only you can see this draft in your dashboard.'}</p>${state.session?.authenticated?`<button class="primary-button listing-save-hero" type="button" data-listing-create-account>Save this app</button>`:`<div class="legal-signup"><button class="primary-button listing-save-hero" type="button" data-listing-create-account>Save this app</button><label class="legal-agreement"><input type="checkbox" data-listing-terms> <span>I agree to the <a href="/terms" target="_blank" rel="noopener">Terms of Service</a> and <a href="/privacy" target="_blank" rel="noopener">Privacy Policy</a>.</span></label><p class="listing-account-signin">Already have an account? <a href="${signIn}">Sign in</a></p></div>`}<p data-listing-account-status role="status" aria-live="polite"></p><p class="privacy-note">Your URL and preview are saved as a private draft first. Nothing is published automatically.</p><button class="share-browse-link" type="button" data-listing-back>Use a different URL</button></aside></div>${testerPreview}</section>`;
+  const founderNote=founderConversation('“Sharing your app with the world takes courage, and it matters. Taking the first step is usually the hardest.”','tmb-listing-founder-dismissed','listing-founder-note');
+  return `<section class="page-shell listing-review listing-signup-preview"><header class="listing-preview-heading"><p class="eyebrow">Your app preview</p><h1>Congratulations—your app has started.</h1>${founderNote}</header><div class="listing-preview-conversion"><div>${listingPreview(false)}</div><aside class="listing-preview-decision"><p class="eyebrow">Before you save</p><h2>Who should see it?</h2>${listingJourneyVisibility()}<p class="listing-visibility-assurance">${preference==='public'?'You chose public when ready. Your app stays private until you finish the required details and publish it.':'Private is selected. Only you can see this draft in your dashboard.'}</p>${state.session?.authenticated?`<button class="primary-button listing-save-hero" type="button" data-listing-create-account>Save this app</button>`:`<div class="legal-signup"><button class="primary-button listing-save-hero" type="button" data-listing-create-account>Save this app</button><label class="legal-agreement"><input type="checkbox" data-listing-terms> <span>I agree to the <a href="/terms" target="_blank" rel="noopener">Terms of Service</a> and <a href="/privacy" target="_blank" rel="noopener">Privacy Policy</a>.</span></label><p class="listing-account-signin">Already have an account? <a href="${signIn}">Sign in</a></p></div>`}<p data-listing-account-status role="status" aria-live="polite"></p><p class="privacy-note">Your URL and preview are saved as a private draft first. Nothing is published automatically.</p><button class="secondary-button listing-change-url" type="button" data-listing-back>Use a different URL</button></aside></div>${testerPreview}</section>`;
 }
 
 function loadGuestTesterPreview(){
@@ -1040,13 +1046,13 @@ function loadGuestTesterPreview(){
 }
 document.addEventListener('input', event => {
   const field = event.target.closest('[data-listing-field]');
-  if (field) { const changed = listingDraft[field.dataset.listingField] !== field.value; listingDraft[field.dataset.listingField] = field.value; if (changed && field.dataset.listingField === 'url') invalidateListingCapture(); if(changed && field.dataset.listingField === 'image') listingDraft.imageData = ''; saveListingDraft(); if (changed && field.dataset.listingField === 'video') refreshListingPreview(); }
+  if (field) { const changed = listingDraft[field.dataset.listingField] !== field.value; listingDraft[field.dataset.listingField] = field.value; if (changed && field.dataset.listingField === 'url') invalidateListingCapture(); if(changed && field.dataset.listingField === 'image') listingDraft.imageData = ''; saveListingDraft(); if (changed) refreshListingPreview(); }
   const category = event.target.closest('[data-listing-category-custom]');
-  if (category) { listingDraft.category = category.value; category.setCustomValidity(normalizeCategory(category.value)?'':'Enter a short, recognizable category name.'); saveListingDraft(); }
+  if (category) { listingDraft.category = category.value; category.setCustomValidity(normalizeCategory(category.value)?'':'Enter a short, recognizable category name.'); saveListingDraft(); refreshListingPreview(); }
 });
 document.addEventListener('change', event => {
   const field = event.target.closest('[data-listing-field]');
-  if (field) { const changed = listingDraft[field.dataset.listingField] !== field.value; listingDraft[field.dataset.listingField] = field.value; if (changed && field.dataset.listingField === 'url') invalidateListingCapture(); if(changed && field.dataset.listingField === 'image') listingDraft.imageData = ''; saveListingDraft(); if (changed && field.dataset.listingField === 'video') refreshListingPreview(); }
+  if (field) { const changed = listingDraft[field.dataset.listingField] !== field.value; listingDraft[field.dataset.listingField] = field.value; if (changed && field.dataset.listingField === 'url') invalidateListingCapture(); if(changed && field.dataset.listingField === 'image') listingDraft.imageData = ''; saveListingDraft(); if (changed) refreshListingPreview(); }
   const choice = event.target.closest('[data-listing-category-choice]');
   if (choice) {
     listingCategoryOtherOpen = choice.value === '__other__';
@@ -1099,6 +1105,7 @@ document.addEventListener('submit', event => {
   if (!saveListingDraft()) { form.querySelector('[data-entry-status]').textContent = 'This browser cannot keep your draft through sign-in. Open TryMyBuild in Safari or Chrome, or enable site storage, then try again.'; return; }
   if (!['private','public'].includes(listingDraft.sharingPreference)) listingDraft.sharingPreference='private';
   listingSettings = false; listingStep = 1; state.route = 'share'; state.listingInProgress = true; state.entryMode = 'list';
+  const publishAfterSave = Boolean(event.submitter?.matches?.('[data-listing-save-publish]'));
   void ensureListingScreenshot(); render(true);
 });
 document.addEventListener('submit', event => {
@@ -1121,12 +1128,13 @@ document.addEventListener('submit', event => {
   if (form.hasAttribute('data-listing-settings')) {
     if (window.CW_SERVER && state.session?.authenticated) {
       // Material changes return a live listing to a private draft — warn first.
-      if ((listingDraft.serverStatus === 'published' || listingDraft.serverStatus === 'in_review') &&
+      if (!publishAfterSave && (listingDraft.serverStatus === 'published' || listingDraft.serverStatus === 'in_review') &&
           !confirm('Saving changes takes this listing out of the public catalog. Choose Publish my app afterward to make the update public immediately. Continue?')) {
         status.textContent = 'No changes saved.'; return;
       }
-      status.textContent = 'Saving to your account…';
-      saveServerListing(status).then(() => { status.textContent = 'Saved to your account. This listing is a private draft; publish it when you’re ready.'; render(); })
+      status.textContent = publishAfterSave ? 'Saving and publishing your app…' : 'Saving to your account…';
+      const action = publishAfterSave ? publishServerListing(status) : saveServerListing(status);
+      action.then(() => { if (!publishAfterSave) { status.textContent = 'Saved to your account. This listing is a private draft; publish it when you’re ready.'; render(); } })
         .catch(error => { status.textContent = error.message || 'Could not save to your account. Your on-device draft is kept.'; });
     } else {
       status.textContent = 'Draft settings saved on this device. Your project has not been published.';
@@ -1167,6 +1175,20 @@ async function saveServerListing(statusEl) {
     listingFailedImage='';listingDraft.image=upData.preview||listingDraft.image;listingDraft.imageData='';listingDraft.imageMode=upData.previewSource==='captured'?'automatic':upData.previewSource==='studio'?'studio':'upload';listingDraft.imageSourceUrl=upData.previewSourceUrl||listingDraft.imageSourceUrl;listingDraft.imageCapturedAt=upData.previewCapturedAt||listingDraft.imageCapturedAt;setListingImageHistory(upData.previewHistory);
     listingDraft.imageUploadedFor = data.project.slug; saveListingDraft();
   }
+async function publishServerListing(statusEl) {
+  if (listingDraft.sharingPreference && listingDraft.sharingPreference !== 'public' && listingDraft.serverStatus !== 'published') throw new Error('Choose Publicly in sharing preferences before publishing.');
+  await saveServerListing(statusEl);
+  if (statusEl) statusEl.textContent = 'Publishing your app…';
+  const res = await fetch('/api/projects', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'submit', id: listingDraft.serverId }) });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Could not publish your app.');
+  listingDraft.serverStatus = data.project.status;
+  listingDraft.serverSlug = data.project.slug || listingDraft.serverSlug;
+  saveListingDraft();
+  location.assign('/?catalog=' + encodeURIComponent(listingDraft.serverSlug));
+  return data.project;
+}
+
   // Trigger the one-time welcome only after the draft and any captured preview are safely stored,
   // so its completion numbers match the dashboard the creator is about to see.
   await fetch('/api/projects', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'welcome', id: data.project.id }), keepalive: true }).catch(() => {});
@@ -1184,7 +1206,7 @@ document.addEventListener('click', async event => {
   button.disabled = true;
   try {
     if (saveBtn) { await saveServerListing(statusEl); }
-    else if (publishBtn) { if(listingDraft.sharingPreference && listingDraft.sharingPreference!=='public')throw new Error('Choose Publicly in sharing preferences before publishing.'); await saveServerListing(statusEl); const res = await fetch('/api/projects', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'submit', id: listingDraft.serverId }) }); const data = await res.json(); if (!res.ok) throw new Error(data.error || 'Could not publish your app.'); listingDraft.serverStatus = data.project.status; listingDraft.serverSlug = data.project.slug || listingDraft.serverSlug; saveListingDraft(); location.assign('/?catalog='+encodeURIComponent(listingDraft.serverSlug)); return; }
+    else if (publishBtn) { await publishServerListing(statusEl); return; }
     else if (unpublishBtn) { const res = await fetch('/api/projects', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'unpublish', id: listingDraft.serverId }) }); const data = await res.json(); if (!res.ok) throw new Error(data.error || 'Could not update.'); listingDraft.serverStatus = data.project.status; saveListingDraft(); }
     render();void loadDailyComments();
   } catch (error) { if (statusEl) statusEl.textContent = error.message || 'That did not work. Your draft is safe; please try again.'; button.disabled = false; }
@@ -1731,7 +1753,7 @@ function revealLinkedCatalogProject() {
 revealLinkedCatalogProject();
 
 function videoField() {
-  return `<label class="listing-field">Video link or embed code<textarea data-listing-field="video" placeholder="Paste a YouTube, Vimeo, or Loom URL or iframe embed code" maxlength="5000" aria-describedby="video-help">${esc(listingDraft.video)}</textarea></label><p class="share-name-hint" id="video-help">YouTube, Vimeo, and Loom links or iframe embed codes are supported.</p><div data-listing-video-preview>${videoPlayer(listingDraft.video)}</div>`;
+  return `<label class="listing-field listing-video-field">Optional demo video<span class="listing-field-help" id="video-help">Show visitors how your app works before they try it.</span><textarea data-listing-field="video" placeholder="Paste a YouTube, Vimeo, or Loom link" maxlength="5000" aria-describedby="video-help">${esc(listingDraft.video)}</textarea></label><div data-listing-video-preview>${videoPlayer(listingDraft.video)}</div>`;
 }
 function videoPlayer(value) {
   return CWProjectView.video(value);
@@ -1982,5 +2004,5 @@ prepareConversationAnimations();
 
 document.addEventListener('click', event => {
  const close=event.target.closest('[data-close-founder-quote]');
- if(close) { rememberDisplayDismissal('tmb-founder-dismissed'); close.closest('.founder-banner').hidden=true; }
+ if(close) { rememberDisplayDismissal(close.dataset.closeFounderQuote || 'tmb-founder-dismissed'); close.closest('.founder-banner').hidden=true; }
 });

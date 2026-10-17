@@ -16,11 +16,12 @@ test('signup and global navigation expose the legal agreement',()=>{
  assert.doesNotMatch(css,/\.listing-preview-conversion \{[^}]*1\.45fr/);
  assert.match(app,/projectDetailContent\(product,true,!editable\)/);
  for(const label of ['Confirm your app’s name','Confirm your app’s link','What’s your app’s category?','What’s your app’s pricing?'])assert.match(app,new RegExp(label.replace(/[?]/g,'\\?')));
- assert.match(app,/href="\/\?catalog=\$\{encodeURIComponent\(listingDraft\.serverSlug\)\}">View my app in the catalog/);
- assert.match(app,/listingDraft\.serverSlug = data\.project\.slug \|\| listingDraft\.serverSlug; saveListingDraft\(\); location\.assign\('\/\?catalog='\+encodeURIComponent\(listingDraft\.serverSlug\)\); return;/);
+ assert.match(app,/Publish my app and view it in the catalog/);
+ assert.match(app,/async function publishServerListing/);
+ assert.match(app,/location\.assign\('\/\?catalog=' \+ encodeURIComponent\(listingDraft\.serverSlug\)\)/);
  assert.match(app,/data-catalog-project="\$\{esc\(product\.slug\)\}" tabindex="-1"/);
  assert.match(app,/function revealLinkedCatalogProject\(\)[\s\S]*?scrollIntoView/);
- assert.ok(app.indexOf('${publishControls}${importCard}${listingPreview()}')>-1);
+ assert.match(app,/listing-settings-layout/);assert.match(app,/listing-live-preview/);assert.match(app,/Updates as you type/);
  assert.match(globalThis.CWProjectView.hero({url:'https://example.com/'},{disabledLaunch:true}),/preview-try-disabled[^>]+aria-expanded="false" aria-label="Try this app, available after saving"/);
  const guestDecision=app.slice(app.indexOf('<div class="legal-signup">'),app.indexOf('</div>`}<p data-listing-account-status'));
  assert.ok(guestDecision.indexOf('listing-save-hero')<guestDecision.indexOf('legal-agreement'));

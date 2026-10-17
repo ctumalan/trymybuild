@@ -14,7 +14,7 @@ export const GET:APIRoute=async context=>{
  <header class="public-detail-header">${projectDetailTitle(app)}${projectActions(p)}</header>
  ${projectDetailContent(app,headingActions)}
  <section class="owner-app-management" aria-label="Manage your app"><p><span class="project-status ${e(p.listing_status)}">${e(shortStatus(p.listing_status))}</span></p>
- ${p.listing_status==='published'?`<section class="cw-panel trial-owner-actions"><h2>Invite your first testers</h2><p>Ask one specific question, then send a personal invitation. Commit to replying so testers know a real person is listening.</p><div class="cw-row">${feedbackRequestAction(p)}<button type="button" class="secondary-button" data-invite-project="${e(p.slug)}">Prepare invitation</button></div><p><a href="/guides/first-app-testers">No audience yet? Start here →</a></p></section>`:''}
+ ${p.listing_status==='published'?`<section class="cw-panel trial-owner-actions"><h2>Invite friends or specific people to try your app</h2><p>Choose one clear task, then invite someone who could realistically use your app.</p><div class="cw-row">${feedbackRequestAction(p)}<button type="button" class="primary-button" data-invite-project="${e(p.slug)}">Send an invite</button></div><p><a href="/guides/first-app-testers">Not sure whom to invite? Start here →</a></p></section>`:''}
  <p><a href="/dashboard/messages?project=${encodeURIComponent(p.title)}">Read comments and reply →</a></p>${await quickFeedbackPanel(m.db,p.slug,m.member.id)}<p data-project-action-status role="status"></p></section></div>`,'creator',m.admin);
  }catch{return unavailable();}
 };

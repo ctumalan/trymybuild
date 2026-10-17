@@ -39,6 +39,14 @@ document.addEventListener('change',event=>{
  const note=event.target.closest('fieldset')?.querySelector('[data-sharing-note]');if(note)note.textContent=sharingPreferenceNote(event.target.value);
  const assurance=event.target.closest('.listing-preview-decision')?.querySelector('.listing-visibility-assurance');
  if(assurance)assurance.textContent=event.target.value==='public'?'You chose public when ready. Your app stays private until you finish the required details and publish it.':'Private is selected. Only you can see this draft in your dashboard.';
+ const actions=document.querySelector('[data-listing-settings-actions]');
+ if(actions){
+  const publishes=event.target.value==='public';
+  const save=actions.querySelector('.listing-final-save'),publish=actions.querySelector('.listing-final-publish'),note=actions.querySelector('.privacy-note');
+  if(save)save.hidden=publishes;
+  if(publish)publish.hidden=!publishes;
+  if(note)note.textContent=publishes?'Publishing adds the app to the public catalog and opens its catalog page. You can unpublish later.':'Your app stays private until you choose to publish it.';
+ }
  const form=event.target.closest('[data-listing-step]');if(form)form.querySelector('button[type="submit"]')?.removeAttribute('disabled');
 });
 const creatorQuotes=[

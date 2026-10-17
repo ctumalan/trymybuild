@@ -3175,7 +3175,8 @@ body.public-site .future-discover .catalog-list::before,.invitation-catalog-grid
 /* The preview explains that generated copy is editable without stopping the flow. */
 .listing-copy-assurance { display:grid; gap:3px; margin:14px 0 0; padding:13px 15px; border:1px solid #e1d6ea; border-radius:13px; background:#faf7fc; color:#5e516a; font-size:.8rem; line-height:1.45; }
 .listing-copy-assurance strong { color:#382b46; }
-.listing-preview-heading .listing-founder-note { max-width:680px; margin:20px auto 0; text-align:left; }
+.listing-preview-heading .listing-founder-note { grid-template-columns:64px minmax(0,1fr); max-width:680px; margin:20px auto 0; text-align:left; }
+.listing-preview-heading .listing-founder-note .founder-conversation-avatar { width:52px; min-width:52px; height:52px; aspect-ratio:1; flex:0 0 52px; }
 .listing-preview-heading .listing-founder-note .founder-quote { margin:0; }
 .listing-change-url { display:inline-flex; width:100%; justify-content:center; margin-top:10px; }
 

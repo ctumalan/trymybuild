@@ -1,0 +1,159 @@
+---
+import EditorialLayout from '../../layouts/EditorialLayout.astro';
+import { articles, formatArticleDate } from '../../data/articles';
+const post = articles.find(article => article.href === '/article/how-to-find-willing-beta-testers-for-your-new-app')!;
+const sections = [
+  ['start','Start with one useful task'],['places','Find the right people'],['invitation','Write an easy invitation'],
+  ['fit','Check for a good fit'],['session','Make the test worthwhile'],['followup','Close the loop'],
+];
+const schema = {
+  '@context':'https://schema.org', '@type':'Article', headline:post.title, description:post.description,
+  datePublished:post.date, dateModified:post.date,
+  author:{'@type':'Person',name:'Christian Tumalan'},
+  publisher:{'@type':'Organization',name:'TryMyBuild',url:'https://trymybuild.com'},
+  image:`https://trymybuild.com${post.image}`, mainEntityOfPage:`https://trymybuild.com${post.href}`,
+};
+---
+<EditorialLayout title={post.title} description={post.description} path={post.href} image={post.image} published={post.date}>
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(schema)}/>
+  <header class="article-cover">
+    <a class="back-link" href="/article">← All articles</a>
+    <p class="eyebrow">Finding your first testers</p>
+    <h1>How to find <em>willing beta testers</em> for your new app</h1>
+    <p class="deck">You don’t need a big audience to get started. You need a relevant person, a small task, and a clear reason to give it a go.</p>
+    <div class="byline"><img src="/assets/avatars/chris-nava-founder.jpg" width="44" height="44" alt=""/><div><strong>Christian Tumalan</strong><span><time datetime={post.date}>{formatArticleDate(post.date)}</time> · {post.readTime}</span></div><button type="button" id="share-article">Share article ↗</button></div>
+    <p id="share-status" role="status" aria-live="polite"></p>
+    <figure class="hero"><img src={post.image} width="1536" height="1024" alt={post.alt} fetchpriority="high"/><figcaption>Useful feedback starts with people who have a reason to try what you’re building.</figcaption></figure>
+  </header>
+  <div class="article-body">
+    <aside class="contents"><p class="eyebrow">In this guide</p><nav aria-label="Article contents">{sections.map(([id,label],index)=><a href={`#${id}`}><span>0{index+1}</span>{label}</a>)}</nav><a href="#first-step" class="jump-plan">Your first small plan ↓</a></aside>
+    <article class="prose">
+      <p class="intro">Your app is finally ready for someone else to try. Friends say it looks great. You appreciate that, but you still don’t know whether a new person can finish the thing it was built to do.</p>
+      <p>A willing beta tester brings fresh eyes. They can tell you where the setup feels confusing, what they expected a button to do, or why the app doesn’t quite fit their day. The challenge is finding people who care enough about the problem to spend time with an unfinished solution.</p>
+      <p>Start small. A few thoughtful conversations can give you something concrete to investigate. You can grow the group as you learn who the app helps and what you need to test next.</p>
+      <section id="start"><p class="eyebrow">01 / Before you recruit</p><h2>Make the ask small enough to say yes.</h2>
+        <p>“Can you test my app?” leaves the work undefined. “Can you create one project, add a task, and tell me what felt unclear?” gives someone a starting point and an end.</p>
+        <p>Pick one question you need answered. Can a new user save a meal plan? Does a freelancer understand how to add an expense? Can a learner finish the first exercise without your help?</p>
+        <div class="note"><strong>Before you share a link</strong><ul><li>Try the task yourself and check the invitation link.</li><li>Explain any signup, installation, payment, or device requirements.</li><li>Estimate the time from an actual run, with room for questions.</li><li>Offer sample data so nobody needs to use private information.</li></ul></div>
+        <p>You’re asking for someone’s attention. Being clear about the effort is part of making that exchange fair.</p>
+      </section>
+      <section id="places"><p class="eyebrow">02 / Where to look</p><h2>Go where the problem is already being discussed.</h2>
+        <p>Choose a couple of places where your intended users spend time. A small group of contractors can be more relevant to a job-planning app than a large general startup audience.</p>
+        <h3>App discovery and testing platforms</h3>
+        <p>A directory gives your app a page to share. A testing service can help organize tasks and reports. Decide which of those you need before choosing a platform.</p>
+        <ul><li><strong>TryMyBuild</strong> lets creators swap feedback. You try another creator’s app, and they agree to try yours. It’s free, with no card needed. Create a clear app page, explain what to try, and participate in the exchange. We’re still getting started, so finding a partner may take time.</li>
+        <li><a href="https://betalist.com/support">BetaList</a> is a discovery platform for upcoming and recently launched startups. Its current submissions require payment and editorial review. Treat it as an optional discovery channel, with no promise of completed tests.</li>
+        <li><a href="https://betafamily.com/how-it-works">Beta Family</a> supports task-based testing and written reports. Check its current plans, audience, and device support against the test you need.</li></ul>
+        <p>A listing by itself doesn’t guarantee testers. It still helps to invite people who fit your app and give them a specific reason to try it.</p>
+        <h3>Reddit and communities around your niche</h3>
+        <p>Search for conversations about the problem you’re solving, as well as communities that explicitly welcome app feedback. Read the rules and recent posts before joining in. Some groups allow a feedback thread; others don’t allow promotion or recruitment at all.</p>
+        <p>Ask a moderator if the policy is unclear. Describe who you’re looking for and what the test involves. Avoid copying the same request across communities or sending unsolicited messages to everyone who comments. <a href="https://support.reddithelp.com/hc/en-us/articles/28012014962580-How-do-I-keep-spam-out-of-my-community">Reddit’s own guidance</a> makes clear that community rules differ and repeated unwanted promotion can be spam.</p>
+        <h3>Discord, maker groups, and your own network</h3>
+        <p>Join conversations you can contribute to. A fellow maker may spot a confusing interface, while someone who lives with the problem can tell you more about whether the app fits their routine. Both views help, but they answer different questions.</p>
+        <p>Use the group’s designated feedback channel when there is one. Past colleagues, clients, and people who already asked about your idea are also a reasonable place to begin.</p>
+        <h3>Social posts that show something real</h3>
+        <p>Show one task, a short demo, or a problem you’re trying to fix. Choose the channel for the people you want to reach, whether that’s a professional discussion on LinkedIn or a relevant hobby group. Ask one focused question, and follow the group’s rules before sharing links.</p>
+      </section>
+      <section id="invitation"><p class="eyebrow">03 / What to say</p><h2>Give people a reason, a task, and a next step.</h2>
+        <p>Personal invitations work best when the connection is real. Explain why this person’s experience matters, say what you’d like them to do, and leave them an easy way to decline.</p>
+        <div class="template"><p class="eyebrow">Personal invitation · adapt before sending</p><p>Hi [Name],</p><p>I’m building [App] for [people who have this problem]. Your post about [specific experience] caught my eye.</p><p>Would you be interested in trying [one task] and telling me where anything feels unclear? It takes about [time you’ve checked] on [device]. [Explain signup or installation, and any incentive.]</p><p>If that sounds useful, reply and I’ll send the details. No worries if it’s not for you.</p></div>
+        <div class="template"><p class="eyebrow">Community post · where recruitment is allowed</p><p>I’m building [App] to help [specific people] with [problem]. I’m looking for a few people who currently [relevant behavior].</p><p>The test is to [one task] and tell me what you expected and what happened. You’ll need [device/access requirements], and it takes about [checked time]. [State whether it’s voluntary or paid, with the terms.]</p><p>If you’d like to help, [one clear next step]. I’m especially trying to understand [one question].</p></div>
+        <p>Replace every placeholder. Keep the invitation truthful, make the requirements visible, and avoid claiming spots are running out unless there is a real limit.</p>
+      </section>
+      <section id="fit"><p class="eyebrow">04 / Choose for relevance</p><h2>Ask about experience, not enthusiasm.</h2>
+        <p>A long application can make a small favor feel like work. Start with a few questions that tell you whether the person can help with this particular test.</p>
+        <ol><li>When did you last encounter [the problem]?</li><li>What did you use or do to handle it?</li><li>Which device would you use to try the app?</li></ol>
+        <p>Add another question only if it changes whom you invite or how you run the session. Someone who recently did the task can describe a real situation. “I love trying apps” tells you much less about that fit.</p>
+        <p>Keep general usability feedback separate from specialist judgments. A tester can find an unclear button without being qualified to verify every technical or professional claim your app makes.</p>
+      </section>
+      <figure class="supporting"><img src="/assets/articles/beta-feedback-session.webp" srcset="/assets/articles/beta-feedback-session-768.webp 768w, /assets/articles/beta-feedback-session.webp 1536w" sizes="(max-width:760px) 90vw, 680px" width="1536" height="1024" alt="A maker listens and takes notes while a tester uses an app on a phone, with task and feedback cards between them." loading="lazy"/><figcaption>Give someone room to try the task before explaining how it works.</figcaption></figure>
+      <section id="session"><p class="eyebrow">05 / Make their time count</p><h2>Listen for what happened.</h2>
+        <p>Let the person try the task before jumping in to guide them. Ask what they expected, where they hesitated, and what they would do next. If you help them past a step, note it so you don’t mistake an assisted result for a clear flow.</p>
+        <div class="observation"><span>Task</span><p>Save a plan for tomorrow.</p><span>Expected</span><p>“I thought Save would be beside the title.”</p><span>Happened</span><p>“I opened the menu and found it at the bottom.”</p><span>Next investigation</span><p>Try moving Save beside the title and test again.</p></div>
+        <p class="small-note">An illustrative example, not a user testimonial.</p>
+        <h3>Be clear about what’s in it for them</h3>
+        <p>A brief voluntary test, a reciprocal feedback exchange, early access, or a paid session can each make sense. Match the offer to the effort and state the terms before someone agrees.</p>
+        <p>If you pay, reward participation and honest reporting rather than praise or positive public reviews. If you offer to try their app in return, make time to do it. Don’t promise exposure as though it were a guaranteed result.</p>
+      </section>
+      <section id="followup"><p class="eyebrow">06 / After the test</p><h2>Show them their feedback went somewhere.</h2>
+        <p>Thank the person and clarify anything you didn’t understand. Group observations by the task or moment they describe, then choose what to investigate first. One opinion is a useful lead, not proof that everyone needs the same change.</p>
+        <p>When you fix something they found, send a short update if they agreed to hear from you. “I moved Save beside the title after your test” gives them a concrete result. Ask whether they’d like to try again, and respect a no or a quiet inbox.</p>
+        <p>Track invitations, replies, completed tasks, and the issues you learn about. Those tell you more about this round of testing than a signup total alone. Whether people return to the app is a separate question to keep watching.</p>
+      </section>
+      <aside class="next-step" id="first-step"><p class="eyebrow">Your first small plan</p><h2>One task. A few people.<br/>Something worth improving.</h2><p>Choose a task, invite a few relevant people, and share a request in one community that welcomes it. Learn from the first conversations before widening the search.</p><p>Give your app and its feedback a place to live. Then try someone else’s build and put the same care into their feedback that you’d like in yours.</p><a href="/?listing=settings">Create your TryMyBuild app page →</a><a class="text-link" href="/">Explore apps first →</a></aside>
+      <p class="source-note">Platform details checked October 16, 2026. See <a href="https://betalist.com/support">BetaList’s submission information</a>, <a href="https://betafamily.com/how-it-works">Beta Family’s testing overview</a>, and <a href="https://support.reddithelp.com/hc/en-us/articles/28012014962580-How-do-I-keep-spam-out-of-my-community">Reddit’s community promotion guidance</a> for current details.</p>
+      <a class="back-link end-link" href="/article">← More articles for your next build</a>
+    </article>
+  </div>
+</EditorialLayout>
+<script>
+const share = document.querySelector<HTMLButtonElement>('#share-article');
+share?.addEventListener('click', async () => {
+  const url = document.querySelector<HTMLLinkElement>('link[rel="canonical"]')?.href || location.href.split('#')[0];
+  const status = document.querySelector('#share-status');
+  try {
+    if (navigator.share) await navigator.share({title:'How to find willing beta testers for your new app',url});
+    else { await navigator.clipboard.writeText(url); if(status) status.textContent='Article link copied.'; }
+  } catch(error) {
+    if(error instanceof Error && error.name === 'AbortError') return;
+    if(status) status.textContent='Share this link: ' + url;
+  }
+});
+</script>
+<style>
+  .article-cover { max-width:1100px; margin:48px auto 0; padding:0 28px; }
+  .back-link { display:inline-block; color:#76508b; font-size:12px; text-decoration:none; }
+  .article-cover>.eyebrow { margin-top:36px; }
+  h1 { max-width:900px; font:400 clamp(39px,5.7vw,70px)/1.08 Georgia,serif; letter-spacing:-.045em; margin:20px 0; }
+  h1 em { color:#76508b; font-weight:400; }
+  .deck { max-width:700px; color:#716775; font-size:19px; line-height:1.65; }
+  .byline { display:flex; align-items:center; gap:12px; margin:28px 0 0; }
+  .byline img { object-fit:cover; border-radius:50%; }
+  .byline strong { display:block; font-size:12px; }
+  .byline span { display:block; font-size:11px; margin-top:6px; color:#817587; }
+  .byline button { margin-left:auto; border:1px solid #d8cddd; background:transparent; color:#62456f; border-radius:25px; padding:12px 16px; font-size:12px; cursor:pointer; }
+  #share-status { font-size:12px; color:#76508b; }
+  .hero { margin:28px 0 0; }
+  .hero img { width:100%; height:auto; display:block; border-radius:12px; }
+  figcaption { color:#847889; font-size:11px; line-height:1.6; margin-top:10px; }
+  .article-body { max-width:1100px; margin:60px auto 0; padding:0 28px; display:grid; grid-template-columns:220px minmax(0,680px); gap:70px; }
+  .contents { align-self:start; position:sticky; top:30px; }
+  .contents nav { display:flex; flex-direction:column; gap:20px; margin:26px 0; }
+  .contents nav a { display:flex; gap:12px; font-size:12px; line-height:1.5; color:#746779; text-decoration:none; }
+  .contents nav span { color:#ab91b8; font-size:10px; padding-top:2px; }
+  .jump-plan { display:block; color:#76508b; border-top:1px solid #ded9d0; padding-top:20px; font-size:12px; }
+  .prose { min-width:0; }
+  .prose p,.prose li { font-size:17px; color:#5e5463; line-height:1.85; }
+  .prose p { margin:16px 0; }
+  .prose a { color:#76508b; overflow-wrap:anywhere; }
+  .prose .intro { font-size:21px; line-height:1.65; color:#403246; margin-top:0; }
+  .prose section { margin-top:44px; padding-top:28px; border-top:1px solid #ded9d0; scroll-margin-top:30px; }
+  .prose .eyebrow { font-size:11px; line-height:1.5; color:#76508b; }
+  h2 { font:400 35px/1.2 Georgia,serif; letter-spacing:-.03em; margin:16px 0 22px; }
+  h3 { font-size:19px; line-height:1.4; margin:30px 0 12px; }
+  .prose ul,.prose ol { padding-left:23px; }
+  .prose li { padding-left:5px; margin:10px 0; }
+  .note { background:#f0ebe2; padding:24px; border-radius:10px; margin:26px 0; }
+  .note>strong { font-size:14px; color:#524333; }
+  .note li { font-size:15px; }
+  .note ul { margin-bottom:0; }
+  .template { background:#efe7f4; padding:24px 28px; border-radius:10px; margin:26px 0; border-left:3px solid #9b7ab0; }
+  .template p { font-size:16px; color:#5d446d; }
+  .template p:last-child { margin-bottom:0; }
+  .supporting { margin:40px 0; }
+  .supporting img { width:100%; height:auto; display:block; border-radius:10px; }
+  .observation { display:grid; grid-template-columns:125px 1fr; gap:0 16px; background:white; border:1px solid #e5dce9; border-radius:12px; padding:24px; margin-top:26px; }
+  .observation span { border-bottom:1px solid #eee6f2; padding:14px 0; color:#846c91; font-size:11px; line-height:1.7; }
+  .observation p { border-bottom:1px solid #eee6f2; padding:14px 0; margin:0; font-size:14px; line-height:1.7; }
+  .observation>:nth-last-child(-n+2) { border-bottom:0; }
+  .prose .small-note { font-size:11px; color:#8c7d92; }
+  .next-step { background:#34253e; color:white; padding:34px; border-radius:12px; margin-top:44px; scroll-margin-top:30px; }
+  .next-step .eyebrow { color:#d5b6e5; }
+  .next-step p { color:#e0d4e5; font-size:15px; }
+  .next-step>a { display:inline-block; background:#ecdef4; color:#3d2a48; border-radius:30px; font-weight:700; font-size:12px; padding:16px 20px; margin-top:12px; text-decoration:none; }
+  .next-step>a.text-link { background:transparent; color:#dbc1e8; padding:8px 0; display:block; font-weight:400; }
+  .prose .source-note { color:#8c7d92; font-size:12px; line-height:1.7; margin-top:32px; }
+  .end-link { margin-top:24px; }
+  @media(max-width:850px){ .article-body { max-width:740px; grid-template-columns:1fr; gap:28px; } .contents { position:static; } .contents nav { flex-direction:row; flex-wrap:wrap; gap:12px 20px; } .jump-plan { display:none; } }
+  @media(max-width:520px){ .article-cover { margin-top:32px; padding:0 22px; } .article-cover>.eyebrow { margin-top:28px; } .deck { font-size:17px; } .byline { flex-wrap:wrap; } .byline button { padding:10px; font-size:10px; } .byline span { font-size:10px; } .article-body { padding:0 22px; margin-top:35px; } .prose p,.prose li { font-size:16px; } .prose .intro { font-size:19px; } h2 { font-size:30px; } .template,.note { padding:22px; } .next-step { padding:26px; } .observation { grid-template-columns:90px 1fr; padding:18px; gap:0 12px; } }
+</style>

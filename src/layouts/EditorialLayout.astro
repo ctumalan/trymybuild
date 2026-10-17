@@ -1,0 +1,49 @@
+---
+interface Props { title: string; description: string; path: string; image?: string; published?: string; }
+const { title, description, path, image = '/assets/articles/find-willing-beta-testers.webp', published } = Astro.props;
+const canonical = new URL(path, 'https://trymybuild.com').href;
+---
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>{title} | TryMyBuild</title><meta name="description" content={description}/>
+  <link rel="canonical" href={canonical}/>
+  <meta property="og:type" content={published ? 'article' : 'website'}/>
+  <meta property="og:title" content={title}/><meta property="og:description" content={description}/>
+  <meta property="og:url" content={canonical}/><meta property="og:image" content={`https://trymybuild.com${image}`}/>
+  {published && <meta property="article:published_time" content={published}/>}
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content={title}/><meta name="twitter:description" content={description}/>
+  <meta name="twitter:image" content={`https://trymybuild.com${image}`}/>
+  <link rel="icon" type="image/svg+xml" href="/assets/brand/trymybuild-favicon.svg"/>
+  <link rel="stylesheet" href="/styles.css"/><link rel="stylesheet" href="/feedback.css"/>
+  <link rel="stylesheet" href="/ui-refinements.css"/><link rel="stylesheet" href="/future-design.css"/>
+  <slot name="head"/>
+</head>
+<body class="editorial-page">
+  <a class="skip-content" href="#main-content">Skip to content</a>
+  <header class="cw-bar">
+    <a class="cw-brand" href="/" aria-label="TryMyBuild"><img class="brand-mark" src="/assets/brand/trymybuild-mark.svg" width="40" height="40" alt=""/><span class="brand-name">TryMy<span class="brand-name-works">Build</span></span></a>
+    <nav aria-label="Website navigation"><div class="header-menu-links"><a class="header-menu-link" href="/">Explore apps</a><a class="header-menu-link" href="/article" aria-current={path === '/article' ? 'page' : undefined}>Articles</a><a class="header-menu-link" href="/?page=about">About</a><a class="header-menu-link" href="/?page=contact">Contact</a><a href="/?listing=settings" class="header-menu-action">Get feedback</a></div><a href="/dashboard/overview" data-account-nav>My account</a></nav>
+  </header>
+  <main id="main-content"><slot/></main>
+  <footer class="editorial-footer"><a href="/" class="footer-brand">TryMyBuild</a><p>Real people. Useful feedback. Better builds.</p><a href="/article">All articles →</a></footer>
+  <script is:inline src="/notification-bell.js" defer></script>
+  <script is:inline src="/account-nav.js" defer></script>
+</body>
+</html>
+<style is:global>
+  .editorial-page { margin:0; background:#fcfaf6; color:#27222f; font-family:Arial,Helvetica,sans-serif; }
+  .editorial-page *, .editorial-page *::before, .editorial-page *::after { box-sizing:border-box; }
+  .editorial-page a { text-underline-offset:4px; }
+  .editorial-page .cw-bar nav a[aria-current="page"] { background:#eee5f4; color:#684581; }
+  .editorial-page a:focus-visible, .editorial-page button:focus-visible { outline:3px solid #9263b1; outline-offset:5px; }
+  .editorial-page .eyebrow { color:#76508b; font-size:11px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; }
+  .editorial-page .skip-content { position:absolute; left:20px; top:-100px; z-index:100; background:white; padding:12px; }
+  .editorial-page .skip-content:focus { top:12px; }
+  .editorial-footer { max-width:1180px; margin:80px auto 0; border-top:1px solid #ded9d0; padding:32px 28px; display:flex; align-items:center; justify-content:space-between; gap:20px; font-size:12px; color:#766b7b; }
+  .editorial-footer a { color:inherit; }
+  .editorial-footer .footer-brand { font-size:22px; font-weight:800; letter-spacing:-1px; text-decoration:none; color:#33263c; }
+  @media(max-width:600px){ .editorial-footer { flex-wrap:wrap; margin-top:50px; padding:24px; } .editorial-footer p { width:100%; order:3; margin:0; } }
+</style>

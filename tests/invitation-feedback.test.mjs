@@ -27,6 +27,19 @@ test('feedback is invitation-specific and safely renders prose without personal 
  assert.doesNotMatch(contact,/maker@example.test|14155550123/);
  assert.match(contact,/email address omitted/);
 });
+test('guests can preview sharing choices while only the invited account can use them',async()=>{
+ const row={title:'Fir & Field',headline:'Plan one job clearly',summary:'A simple planning tool',help_text:'Keep the crew aligned',category:'Productivity',first_try:'Plan tomorrow',recipient_email:'maker@example.com',created_at:new Date().toISOString(),expires_at:new Date(Date.now()+86400000).toISOString()};
+ let user=null;
+ const scope={URL,loadInvitation:async()=>row,invitationOpen:()=>true,currentUser:async()=>user,origin:()=> 'https://trymybuild.com',json:(body,status=200)=>new Response(JSON.stringify(body),{status,headers:{'Content-Type':'application/json'}})};
+ const GET=moduleFixture('src/pages/api/listing-invitation/[token]/share.ts',['GET'],scope).GET;
+ const context={params:{token:'fixture'}};
+ const guest=await GET(context),guestData=await guest.json();
+ assert.equal(guest.status,200);assert.equal(guestData.canShare,false);assert.equal(guestData.social.headline,'Plan one job clearly');
+ user={email:'other@example.com',emailVerified:true};
+ assert.equal((await (await GET(context)).json()).canShare,false);
+ user={email:'maker@example.com',emailVerified:true};
+ assert.equal((await (await GET(context)).json()).canShare,true);
+});
 test('feedback stays behind the invitation lifecycle checks and is below its app preview',async()=>{
  let row={id,created_at:new Date().toISOString(),expires_at:new Date(Date.now()+86400000).toISOString(),title:'Fir & Field',external_url:'https://example.com/',recipient_email:'maker@example.com'};
  const surface=(_title,body,_unused,status=200)=>new Response(body,{status});

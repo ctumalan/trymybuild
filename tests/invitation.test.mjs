@@ -17,8 +17,8 @@ test('server rejects oversized answers and incomplete publication',()=>{
 });
 test('opening an invitation does not send, copy, or open external sharing apps',async()=>{
  let shared=0,copied=0,shown=false,assigned='';const handlers={};
- const controls=new Map();const control=key=>{if(!controls.has(key))controls.set(key,{value:'Hello there',textContent:'',addEventListener(){},select(){}});return controls.get(key);};
- const dialog={isConnected:true,setAttribute(){},showModal(){shown=true;},addEventListener(){},querySelector:control,innerHTML:''};
+ const controls=new Map();const control=key=>{if(key==='[data-suggested-testers]')return null;if(!controls.has(key))controls.set(key,{value:'Hello there',textContent:'',addEventListener(){},select(){}});return controls.get(key);};
+ const dialog={isConnected:true,setAttribute(){},showModal(){shown=true;},close(){},remove(){},addEventListener(){},querySelector:control,innerHTML:''};
  const location={search:'',href:'https://trymybuild.com/listing-invitation/token',origin:'https://trymybuild.com',assign:value=>{assigned=value;}};
  const ctx=vm.createContext({AbortController,URL,URLSearchParams,location,history:{replaceState(){}},window:{addEventListener(){}},navigator:{share:async()=>shared++,clipboard:{writeText:async()=>copied++}},fetch:async()=>({ok:true,json:async()=>({name:'MealMap',description:'Plan meals for your family',category:'Food',builder:'Builder',url:'https://example.com/projects/mealmap',image:'/image.png'})}),document:{readyState:'loading',addEventListener:(type,h)=>{handlers[type]=h;},querySelector:()=>null,createElement:()=>dialog,body:{append(){}}}});
  vm.runInContext(readFileSync(new URL('../share-invitation.js',import.meta.url),'utf8'),ctx);
@@ -26,5 +26,7 @@ test('opening an invitation does not send, copy, or open external sharing apps',
  assert.equal(shown,true);assert.equal(shared,0);assert.equal(copied,0);assert.match(dialog.innerHTML,/Review and send in your chosen app/);assert.match(dialog.innerHTML,/Gmail in browser/);assert.match(dialog.innerHTML,/data-send-invitation/);
  shown=false;
  await handlers.click({target:{closest:()=>({dataset:{invitationShare:'token',invitationAuthenticated:'false',signupHref:'/auth/sign-in?signup=1&next=preview'}})},preventDefault(){}});
- assert.equal(shown,false);assert.equal(assigned,'/auth/sign-in?signup=1&next=preview');
+ assert.equal(shown,true);assert.equal(assigned,'');
+ await controls.get('[data-send-invitation]').onclick();
+ assert.equal(assigned,'/auth/sign-in?signup=1&next=preview');
 });

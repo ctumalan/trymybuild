@@ -22,7 +22,9 @@ test('sign-in destinations are allowlisted same-origin routes',()=>{
  for(const path of ['/tell/mealmap','/?project=mealmap','/dashboard','/dashboard?view=creator'])assert.equal(feedbackDestination(path),path);
  assert.equal(feedbackDestination('listing'),'/?listing=settings');
  assert.equal(feedbackDestination('/?listing=settings'),'/?listing=settings');
- assert.equal(feedbackDestination('listing-dashboard'),'/?listing=settings&after=dashboard');
+ assert.equal(feedbackDestination('listing-dashboard'),'/?after=dashboard');
+ const token='87829b6d-f5bb-4a3d-afd1-c823a3d812f0.'+'a'.repeat(64);
+ assert.equal(feedbackDestination('/listing-invitation/'+token+'?share=menu'),'/listing-invitation/'+token+'?share=menu');
  for(const path of ['//evil.com','https://evil.com','/admin','/tell/../admin','/tell/%2f%2fevil.com','/?project=../admin','/?project=mealmap&next=https://evil.com','/dashboard?view=creator&next=https://evil.com',null])assert.equal(feedbackDestination(path),'/?account=1');
 });
 test('canonical thread IDs only',()=>{

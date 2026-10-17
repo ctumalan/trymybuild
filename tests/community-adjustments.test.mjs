@@ -64,7 +64,7 @@ test('listing journey asks only for the URL before the preview and visibility de
 test('signup and wish return paths remain same-origin and strictly allowlisted',()=>{
  assert.equal(feedbackDestination('/?welcome=1'),'/?welcome=1');
  assert.equal(feedbackDestination('/?wish=1#wish-list'),'/?wish=1#wish-list');
- assert.equal(feedbackDestination('listing-dashboard'),'/?listing=settings&after=dashboard');
+ assert.equal(feedbackDestination('listing-dashboard'),'/?after=dashboard');
  assert.notEqual(feedbackDestination('https://evil.example/?welcome=1'),'https://evil.example/?welcome=1');
 });
 test('wish persistence protects writes and participates in account deletion',()=>{

@@ -20,7 +20,7 @@ test('a creator with a preview returns to the saved draft and never submits pref
 });
 test('general signup prioritizes creators while browsing signup returns to optional recommendations',async()=>{
  const creator=fixture();await creator.submit('[data-welcome-signup]');
- assert.equal(creator.navigations[0],'/auth/sign-in?signup=1&next=%2Fdashboard%3Fview%3Dcreator');
+ assert.equal(creator.navigations[0],'/auth/sign-in?signup=1&next=%2Fdashboard%2Foverview');
  const visitor=fixture({visitor:true,draft:{title:'Old draft',url:'https://example.com'}});await visitor.submit('[data-welcome-signup]');
  assert.equal(visitor.navigations[0],'/auth/sign-in?signup=1&next=%2F%3Fwelcome%3D1');
  assert.doesNotMatch(visitor.scope.welcomeAccountPage(),/Old draft/);

@@ -144,7 +144,7 @@ function readGuestPersonalization() { try { return localStorage.getItem('trymybu
 const storedCategoryClicks = (()=>{try{const value=JSON.parse(localStorage.getItem('trymybuild-category-clicks-v1')||'{}');return value&&typeof value==='object'&&!Array.isArray(value)?value:{};}catch{return {};}})();
 const rankedStoredCategories = Object.entries(storedCategoryClicks).sort((a,b)=>b[1]-a[1]).map(([name])=>name);
 const state = {
-  route: new URLSearchParams(location.search).get('listing') === 'settings' ? "share" : new URLSearchParams(location.search).has('account') ? "account" : "discover",
+  route: new URLSearchParams(location.search).get('listing') === 'settings' || new URLSearchParams(location.search).get('after') === 'dashboard' ? "share" : new URLSearchParams(location.search).has('account') ? "account" : "discover",
   session: null,
   selected: null,
   category: new URLSearchParams(location.search).get("category") || "All",
@@ -828,7 +828,7 @@ function readListingDraft() {
 }
 const listingDraft = readListingDraft();
 let listingStep = 0;
-let listingSettings = new URLSearchParams(location.search).get('listing') === 'settings';
+let listingSettings = new URLSearchParams(location.search).get('listing') === 'settings' || new URLSearchParams(location.search).get('after') === 'dashboard';
 let listingCategoryOtherOpen = !primaryCategoryNames.includes(normalizeCategory(listingDraft.category));
 // Start a brand-new listing (independent of any existing draft), used by "＋ New listing".
 function resetListingDraft() {
@@ -1017,6 +1017,7 @@ function listingSettingsPage() {
 }
 function listingAccountPage() {
   if (state.session?.authenticated) return listingSettingsPage();
+  if (new URLSearchParams(location.search).get('after') === 'dashboard') return `<section class="listing-signup-handoff" aria-live="polite"><span class="listing-handoff-spinner" aria-hidden="true"></span><p class="eyebrow">Your account is ready</p><h1>Saving your app…</h1><p data-listing-status>We’re adding your private draft, then taking you to your dashboard.</p></section>`;
   return listingSignupPreview();
 }
 function sharePage() {
@@ -1457,7 +1458,11 @@ document.addEventListener("click", async event => {
   const profile = event.target.closest("[data-profile]");
   if (profile) { state.profileSlug = profile.dataset.profile; if(window.CW_SERVER && !state.profileSlug.startsWith("creator-"))window.CWPanels.open("/people/"+encodeURIComponent(state.profileSlug),"profile"); else window.CWPanels.show(profilePage(),"profile"); return; }
   const route = event.target.closest("[data-route]");
-  if (route?.dataset.route === 'account' && window.CW_SERVER && state.session?.authenticated) { location.assign('/dashboard'); return; }
+  if (route?.dataset.route === 'account' && window.CW_SERVER) {
+    event.preventDefault();
+    location.assign(state.session?.authenticated ? '/dashboard/overview' : '/auth/sign-in?signup=1&next=%2Fdashboard%2Foverview');
+    return;
+  }
   if (route) { event.preventDefault(); state.route = route.dataset.route; if (state.route === 'share') homeView = 'test'; if (state.route === 'discover') homeView = 'find'; render(); const heading=app.querySelector('h1'); if(heading)heading.tabIndex=-1; (heading || app).focus({preventScroll:true}); return; }
   const productButton = event.target.closest("[data-product]");
   if (productButton) {

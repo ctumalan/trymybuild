@@ -19,7 +19,7 @@ export function feedbackInput(data) {
 export function threadAccess(memberId, authorId, ownerId) { return !!memberId && (memberId === authorId || memberId === ownerId); }
 export function feedbackDestination(value) {
   if(value==='/admin/invitations')return value;
-  if(typeof value==='string'&&/^\/listing-invitation\/[a-f0-9-]{36}\.[a-f0-9]{64}$/.test(value))return value;
+  if(typeof value==='string'&&/^\/listing-invitation\/[a-f0-9-]{36}\.[a-f0-9]{64}(?:\?share=(?:copy|menu))?$/.test(value))return value;
   if(typeof value==='string'&&/^\/people\/[a-z0-9-]{1,80}$/.test(value))return value;
   if(value==='/dashboard/messages' || typeof value==='string' && /^\/dashboard\/messages\?thread=[0-9a-f-]{36}$/.test(value))return value;
   // Only a local category return path is accepted; never an arbitrary redirect.
@@ -34,7 +34,7 @@ export function feedbackDestination(value) {
   if (['/','/dashboard/community','/dashboard/exchange','/dashboard/security','/dashboard/overview','/dashboard/preferences','/dashboard/notifications','/dashboard/privacy','/dashboard/help'].includes(value)) return value;
   if (value === '/?welcome=1' || value === '/?wish=1#wish-list') return value;
   if (value === 'listing' || value === '/?listing=settings') return '/?listing=settings';
-  if (value === 'listing-dashboard' || value === '/?listing=settings&after=dashboard') return '/?listing=settings&after=dashboard';
+  if (value === 'listing-dashboard' || value === '/?listing=settings&after=dashboard' || value === '/?after=dashboard') return '/?after=dashboard';
   if (value === '/dashboard' || value === '/dashboard?view=creator' || value === '/dashboard/profile') return value;
   if(typeof value==='string' && /^\/projects\/[a-z0-9-]{1,80}$/.test(value))return value;
   if (typeof value === 'string' && /^\/tell\/[a-z0-9-]{1,80}$/.test(value)) return value;

@@ -458,6 +458,19 @@ a.secondary-button,.cw-main a.secondary-button { background: #f2edf8; color: #5e
   .discovery-benefits li { font-size: .7rem; }
 }
 
+.listing-signup-handoff { display:grid; justify-items:center; width:min(560px,calc(100% - 32px)); margin:clamp(72px,14vh,150px) auto; padding:44px 30px; border:1px solid var(--line); border-radius:24px; background:#fff; text-align:center; box-shadow:0 18px 52px #2d1d3d12; }
+.listing-signup-handoff h1 { margin:.2rem 0 .6rem; }
+.listing-signup-handoff p:last-child { margin:0; color:var(--muted); }
+.listing-handoff-spinner { width:34px; height:34px; margin-bottom:18px; border:3px solid #eadff2; border-top-color:#7b46b4; border-radius:50%; animation:listing-handoff-spin .8s linear infinite; }
+@keyframes listing-handoff-spin { to { transform:rotate(360deg); } }
+.invitation-preview-sharing { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:14px 24px; margin:22px 20px 0; padding:18px; border:1px solid #ddcfe8; border-radius:16px; background:linear-gradient(145deg,#fff,#f8f3fb); }
+.invitation-preview-sharing h2,.invitation-preview-sharing p { margin:0; }
+.invitation-preview-sharing>div:first-child p { margin-top:4px; color:var(--muted); font-size:.86rem; }
+.invitation-preview-share-actions { display:flex; gap:10px; }
+.invitation-preview-sharing>.cw-meta { flex-basis:100%; }
+@media(max-width:620px) { .invitation-preview-sharing { align-items:stretch; flex-direction:column; margin-inline:0; } .invitation-preview-share-actions { display:grid; grid-template-columns:1fr 1fr; } }
+@media(prefers-reduced-motion:reduce) { .listing-handoff-spinner { animation:none; } }
+
 /* Consolidated app identity and supporting copy. */
 .detail-creator { margin: 0 0 20px; }
 .detail-creator .creator-link,.detail-creator .public-builder { display: grid; grid-template-columns: 36px minmax(0,1fr); align-items: center; gap: 10px; width: fit-content; max-width: 100%; margin: 0; }

@@ -102,7 +102,7 @@ function listingJourneyVisibility(){
 function accountSignupJourney() {
  const visitor=new URLSearchParams(location.search).get('journey')==='visitor';
  const draft=!visitor&&listingDraft.title?.trim()&&listingUrl(listingDraft.url);
- return {visitor,appName:draft?listingDraft.title.trim():'',destination:visitor?'/?welcome=1':draft?'listing-dashboard':'/dashboard?view=creator'};
+ return {visitor,appName:draft?listingDraft.title.trim():'',destination:visitor?'/?welcome=1':draft?'listing-dashboard':'/dashboard/overview'};
 }
 function welcomeAccountPage() {
  const journey=accountSignupJourney();

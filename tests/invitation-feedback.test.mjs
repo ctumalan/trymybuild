@@ -38,6 +38,11 @@ test('feedback stays behind the invitation lifecycle checks and is below its app
  assert.ok(html.indexOf('id="invitation-review"')<html.indexOf('Your listing details'));
  assert.ok(html.indexOf('Your listing details')<html.indexOf('class="invitation-signup-action"'));
  assert.doesNotMatch(html,/invitation-expiry-notice|expires 48 hours|data-invitation-review/);
+ assert.match(html,/Share your app/);
+ assert.match(html,/data-invitation-share="fixture"/);
+ assert.match(html,/data-share-intent="copy"/);
+ assert.match(html,/data-share-intent="menu"/);
+ assert.match(html,/Create your free account to share this preview/);
  assert.match(html,/<a class="primary-button" href="https:\/\/example.com\/"[^>]*>Open your site ↗<\/a>/);
  assert.match(html,/Creator profile is optional/);
  assert.doesNotMatch(html,/preview-try-disabled|preview-launch-note|maker@example.com/);
@@ -46,7 +51,7 @@ test('feedback stays behind the invitation lifecycle checks and is below its app
  assert.match(html,/invitation-catalog-grid/);
  scope.currentUser=async()=>({email:'maker@example.com',emailVerified:true});
  const matched=await(await route(request)).text();
- assert.match(matched,/data-invitation-edit/);assert.match(matched,/<a class="primary-button" href="https:\/\/example.com\/"/);assert.doesNotMatch(matched,/disabled aria-label="Try this app|data-try-app=/);
+ assert.match(matched,/data-invitation-edit/);assert.match(matched,/data-invitation-authenticated="true"/);assert.match(matched,/<a class="primary-button" href="https:\/\/example.com\/"/);assert.doesNotMatch(matched,/disabled aria-label="Try this app|data-try-app=/);
  scope.currentUser=async()=>({email:'other@example.com',emailVerified:true});
  const other=await(await route(request)).text();
  assert.match(other,/<form action="\/auth\/sign-out" method="post">/);assert.match(other,/Switch account &amp; save your preview/);assert.doesNotMatch(other,/data-try-app=/);

@@ -11,13 +11,16 @@
    return;
   }
 
-  const trigger=event.target.closest('[data-share-product],[data-invite-project],[data-share-profile]');if(!trigger)return;event.preventDefault();dismissPrevious?.();
-  const slug=trigger.dataset.shareProduct||trigger.dataset.inviteProject,profile=trigger.dataset.shareProfile,dialog=document.createElement('dialog');dialog.className='invitation-dialog';dialog.setAttribute('aria-labelledby','invite-title');
+  const trigger=event.target.closest('[data-share-product],[data-invite-project],[data-share-profile],[data-invitation-share]');if(!trigger)return;event.preventDefault();
+  if(trigger.dataset.invitationShare&&trigger.dataset.invitationAuthenticated!=='true'){location.assign(trigger.dataset.signupHref);return;}
+  dismissPrevious?.();
+  const slug=trigger.dataset.shareProduct||trigger.dataset.inviteProject,profile=trigger.dataset.shareProfile,invitationToken=trigger.dataset.invitationShare,dialog=document.createElement('dialog');dialog.className='invitation-dialog';dialog.setAttribute('aria-labelledby','invite-title');
   dialog.innerHTML='<button type="button" class="invite-close" aria-label="Close invitation">×</button><h2 id="invite-title">Your invitation</h2><p role="status">Preparing preview…</p>';document.body.append(dialog);dialog.showModal();
   let imageFile,imageUrl,extraPdf,disposeSocial;const controller=new AbortController();
   const close=()=>{disposeSocial?.();controller.abort();if(imageUrl)URL.revokeObjectURL(imageUrl);dialog.close();dialog.remove();trigger.isConnected&&trigger.focus({preventScroll:true});dismissPrevious=undefined;};dismissPrevious=close;dialog.querySelector('.invite-close').onclick=close;dialog.addEventListener('cancel',e=>{e.preventDefault();close();});
   try{
-   const r=await fetch(profile?'/api/profile-invitation/'+encodeURIComponent(profile):'/api/invitation/'+encodeURIComponent(slug),{signal:controller.signal});if(!r.ok)throw Error();const p=await r.json();if(!dialog.isConnected)return;
+   const endpoint=invitationToken?'/api/listing-invitation/'+encodeURIComponent(invitationToken)+'/share':profile?'/api/profile-invitation/'+encodeURIComponent(profile):'/api/invitation/'+encodeURIComponent(slug);
+   const r=await fetch(endpoint,{signal:controller.signal});if(r.status===401){location.assign(trigger.dataset.signupHref);return;}if(!r.ok)throw Error();const p=await r.json();if(!dialog.isConnected)return;
    const trial=Boolean(p.isOwner&&p.trialQuestion),graphicEmail=Boolean(!profile&&!p.privateListing&&p.image),inviteUrl=p.feedbackUrl||p.url,defaultText=profile?`Meet ${p.name} on TryMyBuild and explore their projects.`:trial?`Hi! I selected you as one of the first people to try ${p.name}. Would you spend about 5–10 minutes trying this: ${p.firstTry || 'the main feature'}? I especially want to learn: ${p.trialQuestion} Open the link, try the app, then return to share your feedback. I’d like to hear what worked and where you got stuck.`:p.isOwner?`Hi! I’ve been working on ${p.name}, and it’s ready for a first try. Would you try ${p.firstTry || 'the main feature'}? I’d like to learn what felt useful, confusing, or missing. Open the link, try the app, then return to share your feedback.`:`Hi! I found ${p.name} and thought you might enjoy it. Would you give it a try? I’d love to hear what you think.`;
    const preview=graphicEmail?`<section class="invitation-preview invitation-preview-graphic" aria-label="Project preview"><figure><a href="${escape(inviteUrl)}" target="_blank" rel="noopener"><img src="${escape(p.image)}" alt="Invitation to try ${escape(p.name)}"></a><figcaption class="visually-hidden"><strong>${escape(p.name)}</strong><span>${escape(p.category)} · Built by ${escape(p.builder)}</span></figcaption>${trial?`<div class="invitation-trial-details"><p><strong>Try this:</strong> ${escape(p.firstTry)}</p><p><strong>Question:</strong> ${escape(p.trialQuestion)}</p></div>`:''}</figure></section>`:`<section class="invitation-preview" aria-label="Project preview"><article>${p.image?`<a href="${escape(inviteUrl)}" target="_blank" rel="noopener"><img src="${escape(p.image)}" alt="${escape(p.name)} — ${escape(p.description)}"></a>`:''}<div><span class="eyebrow">${escape(p.category)}</span><h3>${escape(p.name)}</h3><p>${escape(p.description)}</p>${trial?`<p><strong>Try this:</strong> ${escape(p.firstTry)}</p><p><strong>Question:</strong> ${escape(p.trialQuestion)}</p>`:''}<small>Built by ${escape(p.builder)}</small></div></article></section>`;
    const memberInvites=p.isOwner&&!p.privateListing?`<section class="suggested-testers" data-suggested-testers><div><p class="eyebrow">TryMyBuild members</p><h3>Invite someone who wants a feedback swap</h3><p>These members agreed to appear as suggested testers. If you invite someone, offer to try their app and share honest feedback too.</p></div><div class="suggested-tester-list" data-suggested-list><p class="cw-meta" role="status">Finding available members…</p></div></section>`:'';
@@ -47,7 +50,7 @@
      if(!dialog.isConnected)return;const list=testerPanel.querySelector('[data-public-tester-list]'),testers=Array.isArray(data.testers)?data.testers:[];
      list.innerHTML=testers.length?testers.map(t=>{const initials=String(t.name||'Member').split(/\s+/).slice(0,2).map(part=>part[0]).join('').toUpperCase();return `<article class="suggested-tester public-tester"><a class="suggested-tester-profile" href="/people/${encodeURIComponent(t.slug)}" target="_blank" rel="noopener">${t.avatar?`<img src="${escape(t.avatar)}" alt="">`:`<span aria-hidden="true">${escape(initials)}</span>`}<span><strong>${escape(t.name)}</strong><small>${escape(t.label||'TryMyBuild member')}</small></span></a><a class="primary-button" href="/?listing=settings">Ask this tester</a></article>`;}).join(''):'<p class="cw-meta">No users are available right now. Check again soon.</p>';
     }).catch(error=>{if(error?.name!=='AbortError'&&dialog.isConnected)testerPanel.querySelector('[data-public-tester-list]').innerHTML='<p class="cw-meta">Member suggestions are temporarily unavailable.</p>';});
-    import('/social-share.js').then(module=>{if(dialog.isConnected)disposeSocial=module.mountSocialShare(panel,p,controller.signal);}).catch(()=>{if(dialog.isConnected)panel.innerHTML='<p role="status">Social tools are unavailable. You can still share using Email & text.</p>';});
+    import('/social-share.js').then(module=>{if(!dialog.isConnected)return;disposeSocial=module.mountSocialShare(panel,p,controller.signal);if(trigger.dataset.shareIntent==='copy')panel.querySelector('[data-social-link]')?.click();}).catch(()=>{if(dialog.isConnected)panel.innerHTML='<p role="status">Social tools are unavailable. You can still share using Email & text.</p>';});
    }
    dialog.querySelector('.invite-close').onclick=close;const message=dialog.querySelector('#invite-message'),status=dialog.querySelector('[data-invite-status]'),body=()=>message.value.trim()+'\n\n'+inviteUrl;
    dialog.addEventListener('click',async event=>{
@@ -91,4 +94,13 @@
 
   }catch(error){if(error.name!=='AbortError'&&dialog.isConnected)dialog.querySelector('[role="status"]').textContent='This invitation is temporarily unavailable. Please try again.';}
  });
+ const resumePendingShare=()=>{
+  const pendingShare=new URLSearchParams(location.search).get('share');
+  if(!['copy','menu'].includes(pendingShare))return;
+  const trigger=document.querySelector(`[data-invitation-share][data-share-intent="${pendingShare}"][data-invitation-authenticated="true"]`);
+  if(!trigger)return;
+  const url=new URL(location.href);url.searchParams.delete('share');history.replaceState({},'',url);trigger.click();
+ };
+ window.addEventListener('cw-panel-ready',resumePendingShare);
+ if(document.readyState==='complete')resumePendingShare();else document.addEventListener('DOMContentLoaded',resumePendingShare,{once:true});
 })();

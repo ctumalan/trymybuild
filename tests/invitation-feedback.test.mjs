@@ -65,6 +65,7 @@ test('feedback stays behind the invitation lifecycle checks and is below its app
  const open=await route(request),html=await open.text();
  assert.ok(html.indexOf('studio-app-card')<html.indexOf('id="invitation-review"'));
  assert.match(html,/Public website review/);
+ assert.ok(html.indexOf('Only listed apps receive reviews from other users.')<html.indexOf('Save your preview'));
  assert.match(html,/Save your preview/);
  assert.match(html,/data-invitation-share="fixture"/);
  assert.match(html,/data-share-intent="menu"/);

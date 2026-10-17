@@ -50,7 +50,20 @@
   if(event.target.closest('[data-invitation-open]')){event.preventDefault();openInvitationPanel();}
   if(event.target.closest('[data-invitation-edit]')){event.preventDefault();openInvitationPanel('claim');}
   if(event.target.closest('[data-invitation-review]')){event.preventDefault();cancelReviewArrival();document.querySelector('.cw-overlay #invitation-review')?.scrollIntoView({block:'start',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});}
+  const decline=event.target.closest('[data-decline-invitation]');
+  if(decline){event.preventDefault();void declineInvitation(decline);}
  });
+ async function declineInvitation(button){
+  if(button.disabled||!confirm('Remove this private preview from TryMyBuild? This invitation link will stop working. Your own website will not be affected.'))return;
+  const status=button.parentElement.querySelector('[data-decline-status]');button.disabled=true;status.textContent='Removing preview…';
+  try{
+   const response=await fetch('/api/listing-invitation/'+encodeURIComponent(button.dataset.declineInvitation)+'/decline',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'}),data=await response.json();
+   if(!response.ok)throw Error(data.error||'This preview could not be removed.');
+   cancelReviewArrival();
+   const panel=button.closest('[data-panel-content]');
+   panel.innerHTML='<section class="invitation-declined"><p class="eyebrow">Invitation declined</p><h1>This preview has been removed.</h1><p>TryMyBuild will no longer show this private preview. Your own website has not been changed.</p><a class="secondary-button" href="/">Explore TryMyBuild</a></section>';
+  }catch(error){status.textContent=error.message;button.disabled=false;}
+ }
  const boot=()=>{if(document.querySelector('#invitation-app-panel')){openInvitationPanel();if(arrivalHash)reviewArrival(arrivalHash);}mountInvitationForm();};
  if(document.readyState==='complete')boot();else document.addEventListener('DOMContentLoaded',boot,{once:true});
  window.addEventListener('cw-panel-ready',mountInvitationForm);

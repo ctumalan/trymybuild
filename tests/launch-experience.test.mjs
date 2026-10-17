@@ -4,10 +4,10 @@ import {readFileSync} from 'node:fs';
 import '../project-view.js';
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 
-test('signup and global navigation expose the legal agreement',()=>{
- const app=read('app.js'),css=read('future-design.css'),index=read('index.html'),terms=read('src/pages/terms.ts'),privacy=read('src/pages/privacy.ts');
- assert.match(app,/legal-agreement/);assert.match(app,/Terms of Service/);assert.match(app,/Privacy Policy/);
+test('signup continues to the hosted Join page where the legal agreement is shown',()=>{
+ const app=read('app.js'),css=read('future-design.css'),index=read('index.html'),terms=read('src/pages/terms.ts'),privacy=read('src/pages/privacy.ts'),auth=read('src/pages/auth/sign-in.ts');
  assert.match(app,/data-listing-create-account/);assert.match(app,/location\.assign\('\/auth\/sign-in\?signup=1&next=listing-dashboard'\)/);
+ assert.match(auth,/screenHint: context\.url\.searchParams\.get\('signup'\) === '1' \? 'sign-up' : 'sign-in'/);
  assert.match(app,/location\.assign\(state\.session\?\.authenticated \? '\/dashboard\/overview' : '\/auth\/sign-in\?signup=1&next=%2Fdashboard%2Foverview'\)/);
  assert.match(app,/Your account is ready/);assert.match(app,/Saving your app…/);
  assert.match(app,/Congratulations—your app has started\./);
@@ -25,10 +25,9 @@ test('signup and global navigation expose the legal agreement',()=>{
  assert.match(app,/function revealLinkedCatalogProject\(\)[\s\S]*?scrollIntoView/);
  assert.match(app,/listing-settings-layout/);assert.match(app,/listing-live-preview/);assert.match(app,/Updates as you type/);
  assert.match(globalThis.CWProjectView.hero({url:'https://example.com/'},{disabledLaunch:true}),/preview-try-disabled[^>]+aria-expanded="false" aria-label="Try this app, available after saving"/);
- const guestDecision=app.slice(app.indexOf('<div class="legal-signup listing-save-block">'),app.indexOf('</div>`;\n  const testerPreview'));
- assert.ok(guestDecision.indexOf('legal-agreement')<guestDecision.indexOf('listing-save-hero'));
+ const guestDecision=app.slice(app.indexOf(': `<div class="listing-save-block">'),app.indexOf('</div>`;\n  const testerPreview'));
+ assert.doesNotMatch(guestDecision,/data-listing-terms|legal-agreement/);assert.match(guestDecision,/listing-save-hero/);
  assert.match(guestDecision,/Already have an account\? <a[^>]+>Sign in<\/a>/);assert.doesNotMatch(guestDecision,/secondary-button/);
- assert.match(app,/Agree to the Terms of Service and Privacy Policy to continue\./);
  assert.match(app,/location\.assign\('\/dashboard\/overview\?started='/);
  assert.match(index,/href="\/terms"/);assert.match(index,/href="\/privacy"/);
  assert.match(terms,/Your projects and content/);assert.match(privacy,/categories you open or select/);

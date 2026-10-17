@@ -587,6 +587,7 @@ a.secondary-button,.cw-main a.secondary-button { background: #f2edf8; color: #5e
 .discovery-categories details>div { position:absolute; z-index:50; top:calc(100% + 8px); right:0; display:grid; gap:7px; box-sizing:border-box; width:220px; max-height:min(420px,50vh); padding:10px; overflow-y:auto; border:1px solid #ded3eb; border-radius:14px; background:#fff; box-shadow:0 16px 40px #17332a1f; }
 .discovery-categories details>div button { width:100%; justify-content:flex-start; }
 .discovery-categories details>div button[data-category-slot="responsive-overflow"] { display:none; }
+.discovery-categories>button[data-category-slot="wide"] { display:none; }
 .future-discover .catalog-filter-options .sort-control { min-height:44px; padding:0; border:0; border-bottom:1px solid #ded3eb; border-radius:0; background:transparent; }
 .future-discover .catalog-filter-options .sort-control select { min-height:42px; padding:0 4px; background:transparent; }
 .future-discover .catalog-filter-options .sort-control:last-of-type { border-bottom:0; }
@@ -2055,13 +2056,14 @@ body.public-site #app[tabindex="-1"]:focus { outline:none; }
  .future-discover .discovery-categories>button[data-category-filter="Technology"] { display:none; }
  .future-discover .discovery-categories details>div button[data-category-filter="Technology"] { display:inline-flex; }
 }
-@media(min-width:1280px) {
+@media(min-width:900px) {
  .future-discover .results-heading + .discovery-categories,
- .future-discover .catalog-results > .discovery-categories { flex-wrap:wrap; }
- .future-discover .discovery-categories>details { display:contents; }
- .future-discover .discovery-categories>details>summary { display:none; }
- .future-discover .discovery-categories>details>div { display:contents; }
- .future-discover .discovery-categories>details>div button[data-category-slot="overflow"] { display:inline-flex; width:auto; }
+ .future-discover .catalog-results > .discovery-categories { flex-wrap:wrap; gap:10px; }
+ .future-discover .discovery-categories>.all-apps-guide,
+ .future-discover .discovery-categories>button { flex:1 1 120px; }
+ .future-discover .discovery-categories>button { justify-content:center; }
+ .future-discover .discovery-categories>button[data-category-slot="wide"] { display:inline-flex; }
+ .future-discover .discovery-categories>details { display:none; }
 }
 
 /* Shared lettering palette for both site logos. */

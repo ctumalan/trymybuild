@@ -77,8 +77,8 @@ test('feedback stays behind the invitation lifecycle checks and is below its app
  assert.ok(html.indexOf('studio-app-card')<html.indexOf('id="invitation-review"'));
  assert.match(html,/Public website review/);
  assert.match(html,/This is your preview of Fir & Field/);
- assert.ok(html.indexOf('id="invitation-review-heading"')<html.indexOf('Website pricing:'));
- assert.ok(html.indexOf('Website pricing:')>html.indexOf('class="invitation-signup-action"'));
+ assert.doesNotMatch(html,/Website pricing:/);
+ assert.ok(html.indexOf('id="invitation-review-heading"')<html.indexOf('Listing on TryMyBuild is free.'));
  assert.ok(html.indexOf('Save privately now.')<html.indexOf('Save your preview'));
  assert.match(html,/Publish when you’re ready for broader feedback from other makers\./);
  assert.doesNotMatch(html,/Only listed apps receive reviews from other users\./);

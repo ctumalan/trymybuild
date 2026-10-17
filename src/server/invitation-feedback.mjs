@@ -2,6 +2,17 @@
 // never in the public catalog or client assets. The invitation route checks its
 // signed link and lifecycle before rendering these notes.
 const reviews = {
+  '28e23e48-912d-49e5-b80a-7d1e4e9926c2': {
+    author: 'Christian Tumalan',
+    date: 'October 16, 2026',
+    scope: 'Public website quick look. I reviewed the opening sign-in and create-account screens, plus the public help and recommendations pages. I haven’t created an account, tested the feed or verified the recommendation system.',
+    headline: 'Show the discovery promise before asking a new creator to sign up.',
+    notes: [
+      {title: 'What I noticed', text: 'The public Content and recommendations page explains that discovery includes opportunities for new creators and posts with limited exposure. It also makes clear that follower count does not guarantee recommendation. That gives a visitor more useful context than the broad promise of a fair chance alone.'},
+      {title: 'One improvement I would try first', text: 'Put a short version of the Discovery and diversity explanation next to Create account, with a link to a sample public post or clearly labeled demo feed. Right now a visitor sees Sign in first, while that useful reason to join is a few clicks away in Help and trust.'},
+      {title: 'A useful first test', text: 'Ask a creator who hasn’t seen SARELY before to open the homepage and explain who it is for and what they expect discovery to do differently. Then ask whether the sample gives them enough context to decide about signing up. This would test the clarity of the introduction, not the fairness or performance of the recommendation system.'},
+    ],
+  },
   '87829b6d-f5bb-4a3d-afd1-c823a3d812f0': {
     author: 'Christian Tumalan',
     date: 'October 15, 2026',

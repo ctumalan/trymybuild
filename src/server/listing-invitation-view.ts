@@ -1,6 +1,7 @@
 import {e} from './feedback-ui';
 import {pricingKind} from './listing-policy.mjs';
 export function invitationFields(row:any={},admin=false){
+ const pricing=row.price_label==='Not confirmed'?'unconfirmed':pricingKind(row.price_label||'Free');
  const input=(name:string,label:string,value:string,max:number,type='text')=>`<label>${label}<input name="${name}" type="${type}" value="${e(value||'')}" maxlength="${max}" ${['title','url','recipientEmail'].includes(name)?'required':''}></label>`;
  const area=(name:string,label:string,value:string,max:number,placeholder:string)=>`<label>${label}<textarea name="${name}" maxlength="${max}" rows="3" placeholder="${e(placeholder)}">${e(value||'')}</textarea></label>`;
  const stages=['Still taking shape','Ready for a first try','Being tested by early users','Finished and launched'];
@@ -9,9 +10,9 @@ export function invitationFields(row:any={},admin=false){
  ${input('does','What it does',row.headline,140)}
  ${area('helps','How it helps',row.help_text,500,'What will someone gain from using your app?')}
  ${area('firstTry','One thing to try first',row.first_try,500,'Give someone one simple action to start with.')}
- <details><summary>Category, stage and pricing</summary>${input('category','Category',row.category||'Technology',48)}
+ <details ${!admin&&pricing==='unconfirmed'?'open':''}><summary>Category, stage and pricing</summary>${input('category','Category',row.category||'Technology',48)}
  <label>Stage<select name="stage">${stages.map(s=>`<option ${s===(row.stage||'Ready for a first try')?'selected':''}>${e(s)}</option>`).join('')}</select></label>
- <label>Your app’s pricing<select name="pricing">${[['free','Free'],['paid','Paid'],['freemium','Free + paid options']].map(([v,l])=>`<option value="${v}" ${v===pricingKind(row.price_label||'Free')?'selected':''}>${l}</option>`).join('')}</select></label>
+ <label>Your app’s pricing<select name="pricing" required>${admin||pricing==='unconfirmed'?`<option value="unconfirmed" ${pricing==='unconfirmed'?'selected':''} ${admin?'':'disabled'}>${admin?'Not confirmed':'Choose your app’s pricing'}</option>`:''}${[['free','Free'],['paid','Paid'],['freemium','Free + paid options']].map(([v,l])=>`<option value="${v}" ${v===pricing?'selected':''}>${l}</option>`).join('')}</select></label>
  <input type="hidden" name="video" value="${e(row.video_url||'')}"></details>`;
 }
 export function invitationPreview(row:any,image:string){

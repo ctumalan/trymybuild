@@ -34,6 +34,17 @@ test('a readable preview requires an active, unclaimed invitation',()=>{
  for(const patch of [{claimed_by:memberId},{revoked_at:new Date().toISOString()},{expires_at:new Date(Date.now()-1000).toISOString()}])assert.equal(invitationOpen({...row(),...patch}),false);
  assert.equal(invitationOpen(null),false);
 });
+test('an unconfirmed invitation price is honest in the preview and must be confirmed when claimed',async()=>{
+ const prepared=normalizeInvitation({...input,recipientEmail:email,pricing:'unconfirmed'});
+ assert.equal(prepared.value.price_label,'Not confirmed');assert.equal(prepared.value.is_free,false);
+ let writes=0;
+ const store={find:async()=>({...row(),price_label:'Not confirmed'}),claim:async()=>{writes++;return {slug:'confirmed'};}};
+ const base={id,memberId,user:{email,emailVerified:true},version:2};
+ for(const pricing of [undefined,'unconfirmed'])assert.equal((await claimInvitation(store,{...base,input:{...input,pricing}})).status,400);
+ assert.equal(writes,0);
+ assert.equal((await claimInvitation(store,{...base,input:{...input,pricing:'free'}})).project.slug,'confirmed');
+ assert.equal(writes,1);
+});
 test('unclaimed previews remain available for 11 days; earlier stored expiry and revocation remain authoritative',()=>{
  const created=Date.parse('2026-10-15T18:00:00Z');
  assert.equal(INVITATION_TTL_MS,11*86400000);
@@ -97,4 +108,7 @@ test('preview renders untrusted creator text as text and offers the two requeste
  const fields=view.invitationFields({help_text:'A benefit',first_try:'A task'});
  assert.match(fields,/>How it helps<textarea name="helps"/);assert.match(fields,/>One thing to try first<textarea name="firstTry"/);
  assert.doesNotMatch(fields,/recipient_email|owner_user_id|listing_status/);
+ const unconfirmed=view.invitationFields({price_label:'Not confirmed'});
+ assert.match(unconfirmed,/<details open>/);
+ assert.match(unconfirmed,/<option value="unconfirmed" selected disabled>Choose your app’s pricing<\/option>/);
 });

@@ -144,7 +144,7 @@ function readGuestPersonalization() { try { return localStorage.getItem('trymybu
 const storedCategoryClicks = (()=>{try{const value=JSON.parse(localStorage.getItem('trymybuild-category-clicks-v1')||'{}');return value&&typeof value==='object'&&!Array.isArray(value)?value:{};}catch{return {};}})();
 const rankedStoredCategories = Object.entries(storedCategoryClicks).sort((a,b)=>b[1]-a[1]).map(([name])=>name);
 const state = {
-  route: new URLSearchParams(location.search).get('listing') === 'settings' || new URLSearchParams(location.search).get('after') === 'dashboard' ? "share" : new URLSearchParams(location.search).has('account') ? "account" : "discover",
+  route: new URLSearchParams(location.search).has('listing') || new URLSearchParams(location.search).get('after') === 'dashboard' ? "share" : new URLSearchParams(location.search).has('account') ? "account" : "discover",
   session: null,
   selected: null,
   category: new URLSearchParams(location.search).get("category") || "All",
@@ -835,7 +835,13 @@ function resetListingDraft() {
   Object.assign(listingDraft, { title: '', url: '', does: '', helps: '', firstTry: '', pricing: 'free', stage: 'Ready for a first try', category: 'Technology', visibility: 'draft', sharingPreference: 'private', image: '', imageData: '', imageSourceUrl: '', imageMode: '', imageCapturedAt: '', imageTheme: '', imageHistory: '[]', serverId: '', serverSlug: '', serverStatus: '', imported: '', imageUploadedFor: '', clientToken: '', video: '', accountOwner: '' });
   CWListingStorage.clear();
 }
-if (new URLSearchParams(location.search).get('new') === '1') { resetListingDraft(); listingSettings = false; const url = new URL(location.href); url.searchParams.delete('new'); history.replaceState({}, '', url); }
+function startFreshListingUrl() {
+  invalidateListingCapture(); resetListingDraft(); listingSettings = false; listingStep = 0; listingCategoryOtherOpen = false;
+  state.route = 'share'; state.listingInProgress = true; state.entryMode = 'list'; state.entryUrl = '';
+  history.replaceState({}, '', '/?listing=start'); render();
+  requestAnimationFrame(() => { const field=document.querySelector('[data-inline-listing] [data-listing-field="url"]'); field?.focus({preventScroll:true}); field?.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth',block:'center'}); });
+}
+if (new URLSearchParams(location.search).get('new') === '1') { resetListingDraft(); listingSettings = false; history.replaceState({}, '', '/?listing=start'); }
 function saveListingDraft() {
   return CWListingStorage.save(listingDraft);
 }
@@ -1032,7 +1038,7 @@ function listingSignupPreview() {
   const preference=['private','public'].includes(listingDraft.sharingPreference)?listingDraft.sharingPreference:'private';
   listingDraft.sharingPreference=preference;
   const signIn='/auth/sign-in?next='+encodeURIComponent('listing-dashboard');
-  const changeUrl='<button class="text-button listing-change-url" type="button" data-listing-back>Use a different URL</button>';
+  const changeUrl='<button class="text-button listing-change-url" type="button" data-listing-change-url>Use a different URL</button>';
   const saveControls=state.session?.authenticated
     ? `<div class="listing-save-block"><button class="primary-button listing-save-hero" type="button" data-listing-create-account>Save this app</button><div class="listing-save-secondary">${changeUrl}</div></div>`
     : `<div class="listing-save-block"><button class="primary-button listing-save-hero" type="button" data-listing-create-account>Save this app</button><div class="listing-save-secondary"><p class="listing-account-signin">Already have an account? <a href="${signIn}">Sign in</a></p><span aria-hidden="true">·</span>${changeUrl}</div></div>`;
@@ -1219,6 +1225,7 @@ document.addEventListener('click', async event => {
 document.addEventListener('click', event => {
   const stage = event.target.closest('[data-listing-stage]');
   if (stage) { listingDraft.stage = stage.dataset.listingStage; saveListingDraft(); render(); }
+  if (event.target.closest('[data-listing-change-url]')) { event.preventDefault(); startFreshListingUrl(); return; }
   if (event.target.closest('[data-listing-back]')) { listingStep = Math.max(0,listingStep-1); render(); }
   if (event.target.closest('[data-listing-review]')) { listingSettings = false; listingStep = 7; state.route = 'share'; render(); }
   if (event.target.closest('[data-listing-decide-later]')) { listingDraft.sharingPreference = 'not_sure'; saveListingDraft(); listingStep = 7; render(); }

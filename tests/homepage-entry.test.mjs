@@ -27,7 +27,7 @@ test('keywords never become a hidden search',()=>{const x=setup('meal planner');
 
 test('URL entry, preview and settings retain the same navigation',()=>{
  const fn=name=>{const start=source.indexOf('function '+name+'(');return source.slice(start,source.indexOf('\n}',start)+2);};
- const context=vm.createContext({URL,esc:v=>v,state:{entryMode:'list'},homeView:'test',listingStep:0,listingSettings:false,
+ const context=vm.createContext({URL,URLSearchParams,location:{search:''},esc:v=>v,state:{entryMode:'list'},homeView:'test',listingStep:0,listingSettings:false,
   inlineListingForm:()=>'<h1>Question</h1>',listingPreview:()=>'<div>Preview</div>',
   listingSignupPreview:()=>'<h1>Preview</h1>',
   listingAccountPage:()=>'<h1>Account</h1>',listingSettingsPage:()=>'<h1>Settings</h1>'});
@@ -56,6 +56,17 @@ test('browsing mid-listing and returning preserves the draft and current questio
   assert.equal(context.listingStep,4);
   assert.equal(context.listingDraft,draft);
  }
+});
+
+test('Use a different URL clears the old draft and opens an empty URL submission',()=>{
+ const start=source.indexOf('function startFreshListingUrl()');
+ const handler=source.slice(start,source.indexOf('\n}',start)+2);
+ let reset=0,invalidated=0,rendered=0,focused=0,scrolled=0,replaced='';
+ const field={focus(){focused++;},scrollIntoView(){scrolled++;}};
+ const context=vm.createContext({listingSettings:true,listingStep:1,listingCategoryOtherOpen:true,listingDraft:{url:'https://old.example/'},state:{route:'share',listingInProgress:true,entryMode:'list',entryUrl:'old.example'},invalidateListingCapture(){invalidated++;},resetListingDraft(){reset++;context.listingDraft.url='';},history:{replaceState(_a,_b,url){replaced=url;}},render(){rendered++;},requestAnimationFrame(fn){fn();},document:{querySelector:()=>field},matchMedia:()=>({matches:true})});
+ vm.runInContext(handler,context);context.startFreshListingUrl();
+ assert.equal(context.listingDraft.url,'');assert.equal(context.listingSettings,false);assert.equal(context.listingStep,0);assert.equal(context.state.route,'share');assert.equal(context.state.entryUrl,'');
+ assert.deepEqual({reset,invalidated,rendered,focused,scrolled,replaced},{reset:1,invalidated:1,rendered:1,focused:1,scrolled:1,replaced:'/?listing=start'});
 });
 
 

@@ -1110,13 +1110,13 @@ document.addEventListener('submit', event => {
   if (!saveListingDraft()) { form.querySelector('[data-entry-status]').textContent = 'This browser cannot keep your draft through sign-in. Open TryMyBuild in Safari or Chrome, or enable site storage, then try again.'; return; }
   if (!['private','public'].includes(listingDraft.sharingPreference)) listingDraft.sharingPreference='private';
   listingSettings = false; listingStep = 1; state.route = 'share'; state.listingInProgress = true; state.entryMode = 'list';
-  const publishAfterSave = Boolean(event.submitter?.matches?.('[data-listing-save-publish]'));
   void ensureListingScreenshot(); render(true);
 });
 document.addEventListener('submit', event => {
   const form = event.target.closest('[data-listing-step], [data-listing-settings]');
   if (!form) return;
   event.preventDefault();
+  const publishAfterSave = Boolean(event.submitter?.matches?.('[data-listing-save-publish]'));
   const status = form.querySelector('[data-listing-status]');
   const firstInvalidField = markListingFieldsForAttention(form);
   const journeyFields = {0:['url'],1:['title'],2:['does'],3:['helps'],4:['firstTry']};
@@ -1180,6 +1180,12 @@ async function saveServerListing(statusEl) {
     listingFailedImage='';listingDraft.image=upData.preview||listingDraft.image;listingDraft.imageData='';listingDraft.imageMode=upData.previewSource==='captured'?'automatic':upData.previewSource==='studio'?'studio':'upload';listingDraft.imageSourceUrl=upData.previewSourceUrl||listingDraft.imageSourceUrl;listingDraft.imageCapturedAt=upData.previewCapturedAt||listingDraft.imageCapturedAt;setListingImageHistory(upData.previewHistory);
     listingDraft.imageUploadedFor = data.project.slug; saveListingDraft();
   }
+  // Trigger the one-time welcome only after the draft and any captured preview are safely stored,
+  // so its completion numbers match the dashboard the creator is about to see.
+  await fetch('/api/projects', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'welcome', id: data.project.id }), keepalive: true }).catch(() => {});
+  return data.project;
+}
+
 async function publishServerListing(statusEl) {
   if (listingDraft.sharingPreference && listingDraft.sharingPreference !== 'public' && listingDraft.serverStatus !== 'published') throw new Error('Choose Publicly in sharing preferences before publishing.');
   await saveServerListing(statusEl);
@@ -1191,12 +1197,6 @@ async function publishServerListing(statusEl) {
   listingDraft.serverSlug = data.project.slug || listingDraft.serverSlug;
   saveListingDraft();
   location.assign('/?catalog=' + encodeURIComponent(listingDraft.serverSlug));
-  return data.project;
-}
-
-  // Trigger the one-time welcome only after the draft and any captured preview are safely stored,
-  // so its completion numbers match the dashboard the creator is about to see.
-  await fetch('/api/projects', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'welcome', id: data.project.id }), keepalive: true }).catch(() => {});
   return data.project;
 }
 

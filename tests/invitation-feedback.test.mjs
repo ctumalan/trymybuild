@@ -5,7 +5,7 @@ import {invitationOpen} from '../src/server/listing-invitation.mjs';
 import {moduleFixture,read} from '../scripts/workspace-fixtures.mjs';
 const id='87829b6d-f5bb-4a3d-afd1-c823a3d812f0';
 test('all pilot previews have bounded feedback with visible scope and no personal contact details',()=>{
- for(const invitationId of [id,'426ff309-33bd-4188-9f05-9a8be9ef59f5','efbe74b2-e9de-4de7-9aa6-4f8703678d02']){
+ for(const invitationId of [id,'426ff309-33bd-4188-9f05-9a8be9ef59f5','efbe74b2-e9de-4de7-9aa6-4f8703678d02','c11bc6b4-a1de-4d1d-a1fc-0e27c13fb7ac']){
   const review=invitationFeedback(invitationId),html=renderInvitationFeedback(invitationId);
   assert.equal(review.author,'Christian Tumalan');
   assert.ok(review.notes.length>=2);
@@ -13,6 +13,13 @@ test('all pilot previews have bounded feedback with visible scope and no persona
   assert.doesNotMatch(html,/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i);
   assert.match(review.scope,/haven’t/i);
  }
+});
+test('MeSIM preview includes the scoped founder review promised in outreach',()=>{
+ const html=renderInvitationFeedback('c11bc6b4-a1de-4d1d-a1fc-0e27c13fb7ac');
+ assert.match(html,/Make it unmistakable which plans cover the traveler’s full trip/);
+ assert.match(html,/haven’t tested the revised results flow or checkout/);
+ assert.match(html,/May not cover your full trip/);
+ assert.match(html,/first-time traveler/);
 });
 test('feedback is invitation-specific and safely renders prose without personal contact details',()=>{
  assert.equal(renderInvitationFeedback('another-invitation'),'');

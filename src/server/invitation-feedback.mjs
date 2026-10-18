@@ -2,6 +2,17 @@
 // never in the public catalog or client assets. The invitation route checks its
 // signed link and lifecycle before rendering these notes.
 const reviews = {
+  'c11bc6b4-a1de-4d1d-a1fc-0e27c13fb7ac': {
+    author: 'Christian Tumalan',
+    date: 'October 18, 2026',
+    scope: 'Public website quick look and our earlier Reddit exchange. I reviewed the updated homepage and the earlier trip-length issue we discussed. I haven’t tested the revised results flow or checkout.',
+    headline: 'Make it unmistakable which plans cover the traveler’s full trip.',
+    notes: [
+      {title: 'What works well', text: 'The updated homepage makes the starting point clearer. Destination comes first, while trip length and data preference are presented as optional details. That keeps the first decision simple without hiding useful filters.'},
+      {title: 'One improvement I would try first', text: 'When someone selects a 14-day trip, show plans that cover at least 14 days by default. If shorter plans still belong in the results, separate them under a clear “May not cover your full trip” label so they cannot be mistaken for complete-trip options.'},
+      {title: 'A useful first test', text: 'Ask a first-time traveler to select a 14-day trip and choose a plan without help. Then ask which options cover the whole trip and why a 15-day plan may be recommended. Note whether the recommendation section and comparison results feel consistent.'},
+    ],
+  },
   '28e23e48-912d-49e5-b80a-7d1e4e9926c2': {
     author: 'Christian Tumalan',
     date: 'October 16, 2026',

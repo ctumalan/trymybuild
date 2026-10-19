@@ -185,6 +185,13 @@ textarea,.cw-main textarea,.detail-comment-form textarea{resize:none!important;m
 .invitation-dialog .share-preview-note{display:grid;justify-items:start;gap:5px;margin:22px 0 0;padding:14px;border-radius:10px;background:#f6f0fb;color:#55465f;line-height:1.45}
 .invitation-dialog .share-preview-note p{margin:0}
 .invitation-dialog .share-preview-note .secondary-button{margin-top:5px;padding:9px 12px;font-size:.84rem}
+.conversation-bubble .conversation-edit{margin-left:auto;padding:0;border:0;background:transparent;color:#7545ad;font:600 .72rem/1.3 "DM Sans",sans-serif;text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+.conversation-edit-form{display:grid;gap:9px;margin-top:9px;min-width:min(420px,70vw)}
+.conversation-edit-form label{display:grid;gap:5px;font-size:.76rem;font-weight:650;color:#51445b}
+.conversation-edit-form textarea{box-sizing:border-box;width:100%;min-height:78px;padding:10px 12px;border:1px solid #cdbbe0;border-radius:10px;background:#fff;color:#24172e;font:400 .875rem/1.5 "Inter",Arial,sans-serif;resize:vertical}
+.conversation-edit-form>div{display:flex;justify-content:flex-end;gap:8px}
+.conversation-edit-form .secondary-button{padding:8px 12px;font-size:.78rem}
+.conversation-edit-form [role=status]{margin:0;font-size:.76rem;color:#65596f}
 .share-modes button,.social-formats button{border:1px solid transparent;border-radius:10px;background:transparent;padding:10px 14px;color:#66576f;font:600 .88rem "DM Sans",sans-serif;cursor:pointer;min-height:42px}
 .share-modes button[aria-pressed=true],.social-formats button[aria-pressed=true]{background:#eee5f8;border-color:#d7c4ed;color:#6035aa}
 .social-intro{font-size:.94rem;color:#66576f;line-height:1.5;margin:0 0 16px}

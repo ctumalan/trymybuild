@@ -70,7 +70,7 @@ function composer(slug) {
 function conversationPost(post) {
   const when = new Date(post.createdAt);
   const dated = Number.isFinite(when.getTime());
-  return `<article class="conversation-post"><span class="person-avatar small" aria-hidden="true">${post.avatar ? `<img src="${esc(post.avatar)}" alt="">` : esc(post.initials || 'G')}</span><div class="conversation-post-body"><div class="conversation-bubble"><header><strong>${esc(post.author || 'Guest')}</strong>${post.isCreator === true ? '<span class="conversation-creator">Creator</span>' : ''}</header><p>${esc(post.response)}</p></div>${dated ? `<time datetime="${esc(when.toISOString())}" title="${esc(when.toLocaleString())}">${esc(when.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}))}</time>` : ''}</div></article>`;
+  return `<article class="conversation-post" data-comment-id="${esc(post.id||'')}"><span class="person-avatar small" aria-hidden="true">${post.avatar ? `<img src="${esc(post.avatar)}" alt="">` : esc(post.initials || 'G')}</span><div class="conversation-post-body"><div class="conversation-bubble"><header><strong>${esc(post.author || 'Guest')}</strong>${post.isCreator === true ? '<span class="conversation-creator">Creator</span>' : ''}${post.canEdit===true?`<button type="button" class="conversation-edit" data-edit-comment="${esc(post.id)}">Edit</button>`:''}</header><p>${esc(post.response)}</p></div>${dated ? `<time datetime="${esc(when.toISOString())}" title="${esc(when.toLocaleString())}">${esc(when.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}))}</time>` : ''}</div></article>`;
 }
 function conversationFeed(posts) {
   if (!posts.length) return '';
@@ -158,6 +158,18 @@ document.addEventListener('click', event => {
  }
  const retry = event.target.closest('[data-conversation-retry]');
  if (retry) void loadProjectConversation(retry.closest('[data-conversation]'));
+ const edit = event.target.closest('[data-edit-comment]');
+ if(edit){
+  const region=edit.closest('[data-conversation]'),post=region?.conversationPosts?.find(item=>item.id===edit.dataset.editComment),bubble=edit.closest('.conversation-bubble'),text=bubble?.querySelector('p');
+  if(!region||!post||!bubble||!text||bubble.querySelector('.conversation-edit-form'))return;
+  const form=document.createElement('form');form.className='conversation-edit-form';form.innerHTML='<label>Edit your comment<textarea name="response" rows="3" maxlength="800" required></textarea></label><div><button type="button" class="text-button" data-cancel-comment-edit>Cancel</button><button type="submit" class="secondary-button">Save changes</button></div><p role="status" aria-live="polite"></p>';
+  const field=form.elements.response,status=form.querySelector('[role="status"]');field.value=post.response;text.hidden=true;edit.hidden=true;bubble.append(form);field.focus();field.setSelectionRange(field.value.length,field.value.length);
+  form.querySelector('[data-cancel-comment-edit]').onclick=()=>{form.remove();text.hidden=false;edit.hidden=false;edit.focus();};
+  form.onsubmit=async submit=>{submit.preventDefault();const response=field.value.trim();if(!response){status.textContent='Write a comment.';field.focus();return;}const buttons=form.querySelectorAll('button');buttons.forEach(button=>button.disabled=true);status.textContent='Saving…';
+   try{const result=await fetch('/api/experiences',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({slug:region.dataset.conversation,response,editId:post.id})}),data=await result.json();if(!result.ok)throw Error(data.error||'Your changes could not be saved.');await loadProjectConversation(region);}
+   catch(error){status.textContent=error.message||'Your changes could not be saved.';buttons.forEach(button=>button.disabled=false);}
+  };
+ }
 });
 // Native catalog drawers are added after page hydration too.
 document.addEventListener('toggle', event => {

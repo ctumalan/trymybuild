@@ -9,19 +9,21 @@ import {guestToken} from '../../server/guest-comments';
 
 export const GET: APIRoute = async context => {
   if (!databaseReady()) return json({ posts: [], connected: false });
-  let query=database().from('project_experiences').select('id,project_slug,response,created_at,author_user_id,projects!inner(listing_status,owner_user_id)').eq('projects.listing_status','published').eq('moderation_status','published');
+  const db=database(),user=await currentUser(context);
+  const account=user?await db.from('users').select('id').eq('workos_user_id',user.id).eq('account_status','active').maybeSingle():{data:null,error:null};
+  let query=db.from('project_experiences').select('id,project_slug,response,created_at,author_user_id,projects!inner(listing_status,owner_user_id)').eq('projects.listing_status','published').eq('moderation_status','published');
   const slug=context.url.searchParams.get('project');if(slug)query=query.eq('project_slug',slug);
   const result = await query.order('created_at', { ascending: false }).limit(100);
   if (result.error) return json({ error: 'Community is temporarily unavailable.' }, 503);
   const ids = [...new Set(result.data.map(row => row.author_user_id).filter(Boolean))];
-  const profiles = ids.length ? await database().from('profiles').select('user_id,display_name,identity_label,avatar_path').in('user_id', ids) : { data: [], error: null };
+  const profiles = ids.length ? await db.from('profiles').select('user_id,display_name,identity_label,avatar_path').in('user_id', ids) : { data: [], error: null };
   if (profiles.error) return json({ error: 'Community is temporarily unavailable.' }, 503);
   return json({ connected: true, posts: result.data.map(row => {
     const profile = profiles.data?.find(item => item.user_id === row.author_user_id);
     const project = Array.isArray(row.projects) ? row.projects[0] : row.projects;
     const isCreator = Boolean(row.author_user_id && row.author_user_id === project?.owner_user_id);
     const author: string = row.author_user_id ? profile?.display_name || 'Member' : 'Guest';
-    return { id: row.id, projectSlug: row.project_slug, response: row.response, author, isCreator, avatar: profile?.avatar_path || '', label: row.author_user_id ? profile?.identity_label || 'TryMyBuild member' : 'Guest participant', initials: author.split(/\s+/).slice(0, 2).map(word => word[0]).join(''), createdAt: row.created_at, source: 'community', signals: [] };
+    return { id: row.id, projectSlug: row.project_slug, response: row.response, author, isCreator, canEdit:Boolean(account.data?.id&&row.author_user_id===account.data.id), avatar: profile?.avatar_path || '', label: row.author_user_id ? profile?.identity_label || 'TryMyBuild member' : 'Guest participant', initials: author.split(/\s+/).slice(0, 2).map(word => word[0]).join(''), createdAt: row.created_at, source: 'community', signals: [] };
   }) });
 };
 
@@ -33,6 +35,18 @@ export const POST: APIRoute = async context => {
     const raw=await context.request.text();if(raw.length>262144)return json({error:'Request too large.'},413);
     const body = JSON.parse(raw);
     if (!thoughtfulComment(body.response) || typeof body.slug !== 'string') return json({ error: 'Write a comment.' }, 400);
+    if(body.editId){
+      if(!user)return json({error:'Sign in to edit your comment.'},401);
+      if(!validId(body.editId))return json({error:'This comment cannot be edited.'},400);
+      if(!await allowRequest(user.id,'experiences'))return json({error:'Please wait a minute before trying again.'},429);
+      const member=await ensureMember(user),db=database();
+      const project=await db.from('projects').select('slug').eq('slug',body.slug).eq('listing_status','published').maybeSingle();
+      if(!project.data)return json({error:'Project not found.'},404);
+      const edited=await db.from('project_experiences').update({response:body.response.trim()}).eq('id',body.editId).eq('project_slug',body.slug).eq('author_user_id',member.id).neq('moderation_status','hidden').select('id').maybeSingle();
+      if(edited.error)throw edited.error;
+      if(!edited.data)return json({error:'You can only edit your own public comment.'},403);
+      return json({saved:true,message:'Your comment was updated.'});
+    }
     if(!user){
       if(!validId(body.requestId))return json({error:'Please reload this comment box.'},400);
       const address=context.clientAddress;if(!address)return json({error:'Guest sharing is unavailable. Please sign in.'},503);

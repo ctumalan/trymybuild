@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import {readFileSync} from 'node:fs';
+import {moduleFixture} from '../scripts/workspace-fixtures.mjs';
 const source=readFileSync(new URL('../project-view.js',import.meta.url),'utf8');
 const setup=extra=>vm.createContext({document:{readyState:'loading',addEventListener(){}},Date,window:{addEventListener(){}},...extra});
 test('conversation renders escaped public comments with dates and only trusted creator labels',()=>{
@@ -10,6 +11,31 @@ test('conversation renders escaped public comments with dates and only trusted c
  assert.doesNotMatch(html,/<script>|<img onerror/);assert.match(html,/datetime="2026-09-28/);
  assert.equal((html.match(/class="conversation-creator"/g)||[]).length,1);
  assert.doesNotMatch(html,/Invalid Date/);
+});
+test('only the signed-in author receives an edit control',()=>{
+ const c=setup();vm.runInContext(source,c);
+ const own=c.CWProjectView.conversationFeed([{id:'11111111-1111-4111-8111-111111111111',author:'Christian',response:'My comment',createdAt:'2026-10-19',canEdit:true}]);
+ const other=c.CWProjectView.conversationFeed([{id:'22222222-2222-4222-8222-222222222222',author:'Someone else',response:'Their comment',createdAt:'2026-10-19',canEdit:false}]);
+ assert.match(own,/data-edit-comment="11111111-1111-4111-8111-111111111111">Edit<\/button>/);
+ assert.doesNotMatch(other,/data-edit-comment|>Edit<\/button>/);
+});
+test('comment API identifies the viewer’s own public comment',async()=>{
+ const owner='11111111-1111-4111-8111-111111111111',comment='22222222-2222-4222-8222-222222222222';
+ const query=data=>{const q={select(){return q;},eq(){return q;},in(){return q;},order(){return q;},limit(){return q;},maybeSingle:async()=>({data:Array.isArray(data)?data[0]||null:data,error:null}),then(resolve){return Promise.resolve({data:Array.isArray(data)?data:[data],error:null}).then(resolve);}};return q;};
+ const db={from(table){if(table==='users')return query({id:owner});if(table==='profiles')return query([{user_id:owner,display_name:'Christian',identity_label:'Creator',avatar_path:''}]);return query([{id:comment,project_slug:'sample',response:'My comment',created_at:'2026-10-19T17:00:00Z',author_user_id:owner,projects:{listing_status:'published',owner_user_id:owner}}]);}};
+ const scope={Response,databaseReady:()=>true,database:()=>db,currentUser:async()=>({id:'workos-user'}),json:(body,status=200)=>Response.json(body,{status})};
+ const GET=moduleFixture('src/pages/api/experiences.ts',['GET'],scope).GET;
+ const data=await(await GET({url:new URL('https://trymybuild.com/api/experiences?project=sample')})).json();
+ assert.equal(data.posts[0].canEdit,true);
+});
+test('comment edits require the matching signed-in author',async()=>{
+ const owner='11111111-1111-4111-8111-111111111111',comment='22222222-2222-4222-8222-222222222222';let memberId=owner,saved='';
+ const db={from(table){if(table==='projects'){const q={select(){return q;},eq(){return q;},maybeSingle:async()=>({data:{slug:'sample'},error:null})};return q;}const filters={};let change={};const q={update(value){change=value;return q;},eq(key,value){filters[key]=value;return q;},neq(){return q;},select(){return q;},maybeSingle:async()=>{const allowed=filters.id===comment&&filters.project_slug==='sample'&&filters.author_user_id===owner;if(allowed)saved=change.response;return {data:allowed?{id:comment}:null,error:null};}};return q;}};
+ const scope={Response,sameOrigin:()=>true,origin:()=> 'https://trymybuild.com',currentUser:async()=>({id:'workos-user'}),databaseReady:()=>true,thoughtfulComment:()=>true,validId:value=>value===comment,allowRequest:async()=>true,ensureMember:async()=>({id:memberId}),database:()=>db,json:(body,status=200)=>Response.json(body,{status})};
+ const POST=moduleFixture('src/pages/api/experiences.ts',['POST'],scope).POST;
+ const context=()=>({request:{text:async()=>JSON.stringify({slug:'sample',response:'Updated comment',editId:comment})}});
+ const updated=await POST(context());assert.equal(updated.status,200);assert.equal(saved,'Updated comment');assert.equal((await updated.json()).message,'Your comment was updated.');
+ memberId='33333333-3333-4333-8333-333333333333';const forbidden=await POST(context());assert.equal(forbidden.status,403);assert.match((await forbidden.json()).error,/only edit your own/);
 });
 test('long conversations show three recent comments and expand the rest',()=>{
  const c=setup();vm.runInContext(source,c);

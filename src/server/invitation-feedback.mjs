@@ -2,6 +2,17 @@
 // never in the public catalog or client assets. The invitation route checks its
 // signed link and lifecycle before rendering these notes.
 const reviews = {
+  'cd700b60-059c-4547-9fb4-d98467232b2f': {
+    author: 'Christian Tumalan',
+    date: 'October 20, 2026',
+    scope: 'Primera revisión de las páginas públicas. Revisé el inicio, Unir PDF, PDF a Word, PDF a DOCX y las páginas de información y contacto. No he procesado archivos ni comprobado la calidad de las conversiones o el comportamiento de privacidad.',
+    headline: 'Aclara la diferencia entre PDF a Word y PDF a DOCX antes de que el usuario tenga que elegir.',
+    notes: [
+      {title: 'Una mejora que probaría primero', text: 'En el inicio aparecen PDF a Word y PDF a DOCX como herramientas distintas, pero la pregunta frecuente de DOCX explica que ambas hacen la misma conversión y generan un archivo .docx. Unificaría las tarjetas o indicaría esa equivalencia directamente en ellas. Así alguien que solo quiere editar su PDF no tiene que abrir las dos páginas para decidir.'},
+      {title: 'Lo que funciona bien', text: 'El inicio explica de inmediato que el servicio es gratuito, está en español y no requiere registro. Las categorías ayudan a recorrer las herramientas. La página Unir PDF presenta un botón claro para elegir archivos y explica cómo ordenarlos antes de descargar el resultado. La afirmación de que los documentos se procesan en el dispositivo está visible desde el inicio; la he leído, pero no la he verificado técnicamente.'},
+      {title: 'Una prueba útil con un usuario nuevo', text: 'Pide a alguien que llegue al inicio y encuentre cómo convertir un PDF en un documento editable de Word. Observa si duda entre las dos tarjetas y si necesita consultar la ayuda. Después, con un archivo de prueba sin datos personales, comprueba si puede completar la tarea y abrir el resultado sin instrucciones adicionales.'},
+    ],
+  },
   'c11bc6b4-a1de-4d1d-a1fc-0e27c13fb7ac': {
     author: 'Christian Tumalan',
     date: 'October 18, 2026',

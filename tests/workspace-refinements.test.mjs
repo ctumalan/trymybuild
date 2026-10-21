@@ -32,12 +32,21 @@ test('apps are one collection with Add project first and settings behind ellipsi
  const published=f.scope.projectActions(f.tables.projects[0]);assert.doesNotMatch(published,/data-project-action="delete"/);
  assert.doesNotMatch(f.scope.projectActions({...f.tables.projects[1],published_at:'2026-01-01'}),/data-project-action="delete"/);
 });
-test('overview advertises qualifying reviews and keeps factual activity',async()=>{
+test('overview leads with one next step, then status, apps, and feedback',async()=>{
  const f=workspaceFixtures(),response=await f.routes['/dashboard/overview'](context('/dashboard/overview',{section:'overview'})),html=await response.text();assert.equal(response.status,200);
  for(const dest of ['?view=creator','?view=visitor','/dashboard/notifications','/dashboard/help','/dashboard/messages'])assert.ok(html.includes(dest));
- assert.match(html,/Founder exception—not earned through feedback/);assert.match(html,/Apps you could help improve/);assert.match(html,/Project performance/);assert.match(html,/Not tracked/);assert.doesNotMatch(html,/Unlock another project slot|Become a Verified Creator/);
+ assert.match(html,/class="dashboard-overview"/);assert.match(html,/Your next step/);assert.match(html,/Your apps/);assert.match(html,/Give &amp; get feedback/);
+ assert.match(html,/Founder exception—not earned through feedback/);assert.doesNotMatch(html,/Apps you could help improve|Project performance|Not tracked|Unlock another project slot|Become a Verified Creator/);
+ assert.equal((html.match(/class="primary-button"/g)||[]).length,1);
+ for(const next of ['overview-primary','overview-kpis','overview-content-grid','overview-secondary-grid'])assert.ok(html.indexOf(next)>=0);
+ assert.ok(html.indexOf('overview-primary')<html.indexOf('overview-kpis'));assert.ok(html.indexOf('overview-kpis')<html.indexOf('overview-content-grid'));assert.ok(html.indexOf('overview-content-grid')<html.indexOf('overview-secondary-grid'));
  const panel=f.scope.performancePanel([{slug:'<script>',title:'<img>',saved_projects:[{count:9}],project_experiences:[{count:3}],creator_feedback:[{count:2}]}],1);
  assert.match(panel,/<td>5<\/td><td>9<\/td>/);assert.doesNotMatch(panel,/<script>|<img>/);
+});
+test('overview layout stays compact and responsive',()=>{
+ const css=read('ui-refinements.css');
+ for(const rule of ['.overview-primary','.overview-kpis','.overview-content-grid','.overview-app-card','.overview-secondary-grid'])assert.match(css,new RegExp(rule.replace('.','\\.')));
+ assert.match(css,/@media\(max-width:680px\)[^{]*\{\.overview-primary/);
 });
 test('saved project review is directly accessible and cannot silently invent qualification answers',async()=>{
  const f=workspaceFixtures(),html=await (await f.routes['/dashboard'](context('/dashboard?view=visitor'))).text();

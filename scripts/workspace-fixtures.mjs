@@ -31,8 +31,8 @@ export function workspaceFixtures(){
  Object.assign(scope,moduleFixture('src/server/feedback-ui.ts',['surface','adminSurface','signals','feedbackCard','pages','pageNumber','signIn','unavailable'],scope));
  Object.assign(scope,moduleFixture('src/server/project-requests.ts',['activeFeedbackRequest','requestState','feedbackRequestAction','trialBrief'],scope));
  Object.assign(scope,moduleFixture('src/server/direct-messages.ts',['directComposer','directThread','directConversation'],scope));
- Object.assign(scope,moduleFixture('src/server/dashboard-cards.ts',['OWNED_CARD_FIELDS','shortStatus','miniPreview','projectActions','ownedProjectCard','performancePanel','replyComposer','savedReviewComposer'],scope));
- Object.assign(scope,moduleFixture('src/server/verification.ts',['verificationProgress','verificationCard'],scope));
+ Object.assign(scope,moduleFixture('src/server/dashboard-cards.ts',['OWNED_CARD_FIELDS','shortStatus','miniPreview','projectActions','ownedProjectCard','overviewProjectCard','performancePanel','replyComposer','savedReviewComposer'],scope));
+ Object.assign(scope,moduleFixture('src/server/verification.ts',['verificationProgress','verificationCard','verificationSummaryCard'],scope));
  Object.assign(scope,moduleFixture('src/server/quick-feedback-view.ts',['quickFeedbackPanel'],scope));
  Object.assign(scope,moduleFixture('src/server/workspace.ts',['workspace','notice','empty'],scope));
  Object.assign(scope,moduleFixture('src/server/conversation.ts',['conversation'],scope));

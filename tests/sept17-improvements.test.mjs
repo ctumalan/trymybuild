@@ -13,10 +13,10 @@ test('the founder display exception does not award review progress or extend to 
  f.tables.profiles[0].creator_type='independent';progress=await f.scope.verificationProgress(f.db,f.owner);
  assert.equal(progress.verified,false);assert.match(f.scope.verificationCard(progress),/Earn your Verified Creator badge/);
 });
-test('overview fills three distinct published cards and links to saved apps even in an owned-only catalog',async()=>{
+test('overview never suggests the creator’s own apps for feedback',async()=>{
  const f=workspaceFixtures();f.tables.projects.find(p=>p.slug==='sample-guest').owner_user_id=f.owner;
  const html=await(await f.routes['/dashboard/overview']({url:new URL('https://example.invalid/dashboard/overview'),params:{section:'overview'}})).text();
- assert.equal((html.match(/class="catalog-row future-card"/g)||[]).length,3);assert.match(html,/Reviews of your own apps do not count/);assert.match(html,/href="\/dashboard\?view=visitor">View saved apps/);
+ assert.equal((html.match(/class="catalog-row future-card"/g)||[]).length,0);assert.match(html,/No published apps are available yet/);assert.match(html,/href="\/dashboard\?view=visitor">View saved apps/);assert.doesNotMatch(html,/Reviews of your own apps do not count/);
 });
 test('creator type filtering still excludes Studio from Independent while its disclosed badge passes Verified',()=>{
  const source=read('app.js'),context=vm.createContext({});vm.runInContext(source.slice(source.indexOf('function creatorMatchesFilters'),source.indexOf('function experienceCount')),context);

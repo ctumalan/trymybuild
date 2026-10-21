@@ -17,9 +17,9 @@ test('blank values never count as completed setup',()=>{
 
 test('a complete unpublished app keeps a visible final publishing step',()=>{
  const dashboard=readFileSync(new URL('../src/pages/dashboard/[section].ts',import.meta.url),'utf8');
- assert.match(dashboard,/awaitingPublication=!!setupProject&&setupProject\.listing_status!=='published'/);
- assert.match(dashboard,/appProgress\.percent<100\|\|awaitingPublication/);
- assert.match(dashboard,/Your app is ready for the final step\./);
- assert.match(dashboard,/Review and publish app/);
- assert.match(dashboard,/choose Publish my app to add it to Explore apps/);
+ assert.match(dashboard,/appPublished=setupProject\?\.listing_status==='published'/);
+ assert.match(dashboard,/else if\(!appPublished\)/);
+ assert.match(dashboard,/is ready to publish/);
+ assert.match(dashboard,/Review and publish/);
+ assert.match(dashboard,/when you’re ready for people to find it/);
 });

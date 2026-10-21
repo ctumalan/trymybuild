@@ -67,7 +67,7 @@ test('saved project review is directly accessible and cannot silently invent qua
 });
 test('messages merge replyable feedback and read-only public comments into one responsive inbox',async()=>{
  const f=workspaceFixtures(),html=await (await f.routes['/dashboard/messages'](context('/dashboard/messages?sort=oldest&unread=1&thread='+f.id))).text();
- assert.match(html,/class="message-controls"/);assert.match(html,/class="message-app-filter"/);assert.match(html,/name="app"/);assert.match(html,/All apps/);assert.match(html,/class="messages-inbox"/);assert.match(html,/Feedback and private conversations about your apps/);assert.match(html,/data-conversation-content/);assert.match(html,/data-inline-compose/);assert.match(html,/aria-label="Send reply" hidden/);
+ assert.match(html,/class="message-controls"/);assert.match(html,/class="message-app-filter"/);assert.match(html,/name="app"/);assert.match(html,/All apps/);assert.match(html,/class="messages-inbox"/);assert.match(html,/Feedback and private conversations about your apps/);assert.match(html,/class="feedback-conversation"/);assert.match(html,/class="conversation-app-header"/);assert.match(html,/class="feedback-focus-card"/);assert.match(html,/class="conversation-thread"/);assert.match(html,/data-inline-compose/);assert.match(html,/class="inline-composer conversation-composer"/);assert.match(html,/aria-label="Send reply" disabled/);
  assert.doesNotMatch(html,/>Apply<|>Reset</);assert.match(html,/Feedback · Grocery planner/);
  assert.equal(f.db.calls.find(c=>c[0]==='cw_combined_inbox')[1].p_sort,'oldest');
  const comment=f.tables.project_experiences[0],commentHtml=await(await f.routes['/dashboard/messages'](context('/dashboard/messages?comment='+comment.id))).text();

@@ -70,7 +70,7 @@
   document.querySelectorAll('.inline-help[open],.project-actions[open],.cw-member-menu[open]').forEach(el=>{if(!el.contains(event.target))el.open=false;});
  });
  document.addEventListener('keydown',event=>{if(event.key==='Escape'){const opened=[...document.querySelectorAll('.inline-help[open],.project-actions[open],.cw-member-menu[open]')];if(opened.length){event.preventDefault();opened.forEach(el=>el.open=false);opened.at(-1).querySelector('summary').focus();}}});
- function composer(form){const field=form.querySelector('textarea[name="message"]');if(!field)return;form.querySelector('.send-arrow').hidden=!field.value.trim();field.setCustomValidity(field.value.trim()?'':'Write a message.');}
+ function composer(form){const field=form.querySelector('textarea[name="message"]');if(!field)return;const button=form.querySelector('.send-arrow'),empty=!field.value.trim();if(form.classList.contains('conversation-composer')){button.hidden=false;button.disabled=empty;}else button.hidden=empty;field.setCustomValidity(empty?'Write a message.':'');}
  document.addEventListener('input',event=>{const form=event.target.closest('[data-inline-compose]');if(form)composer(form);});
  document.addEventListener('input',event=>{const form=event.target.closest('[data-direct-compose]');if(form)form.querySelector('.send-arrow').hidden=!form.elements.message.value.trim();});
  // Native validation must be able to focus required controls inside collapsed details.
@@ -89,6 +89,7 @@
  document.addEventListener('change',event=>{const form=event.target.closest('[data-message-filters]');if(form&&event.target.matches('select'))applyMessageFilters(form);});
  document.addEventListener('input',event=>{const form=event.target.closest('[data-message-filters]');if(!form||!event.target.matches('input[name="q"]'))return;clearTimeout(messageFilterTimer);messageFilterTimer=setTimeout(()=>applyMessageFilters(form),350);});
  document.addEventListener('toggle',event=>{const details=event.target;if(details.matches?.('[data-conversation]')&&details.open)loadConversation(details);},true);
+ document.addEventListener('click',event=>{const trigger=event.target.closest('[data-recognition-total]');if(!trigger)return;const panel=trigger.closest('[data-conversation-content]')?.querySelector('[data-recognition-panel]');if(!panel)return;panel.open=true;const select=panel.querySelector('select[name="total"]');if(select&&[...select.options].some(option=>option.value===trigger.dataset.recognitionTotal))select.value=trigger.dataset.recognitionTotal;panel.querySelector('textarea')?.focus({preventScroll:true});panel.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'nearest'});});
  document.addEventListener('submit',async event=>{
   const block=event.target.closest('[data-direct-block]');if(block){if(!confirm(block.elements.action.value==='block'?'Block messages between you and this person?':'Allow messages between you and this person again?'))event.preventDefault();return;}
   const direct=event.target.closest('[data-direct-compose]');if(direct){event.preventDefault();const field=direct.elements.message,status=direct.querySelector('[data-direct-status]'),button=direct.querySelector('.send-arrow');if(!direct.reportValidity())return;button.disabled=true;status.textContent='Sending…';

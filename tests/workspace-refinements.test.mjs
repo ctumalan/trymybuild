@@ -35,13 +35,14 @@ test('apps are one collection with Add project first and settings behind ellipsi
 test('overview leads with one next step, then status, apps, and feedback',async()=>{
  const f=workspaceFixtures(),response=await f.routes['/dashboard/overview'](context('/dashboard/overview',{section:'overview'})),html=await response.text();assert.equal(response.status,200);
  for(const dest of ['?view=creator','?view=visitor','/dashboard/notifications','/dashboard/help','/dashboard/messages'])assert.ok(html.includes(dest));
- assert.match(html,/class="dashboard-overview"/);assert.match(html,/Your next step/);assert.match(html,/Your apps/);assert.match(html,/Give &amp; get feedback/);
+ assert.match(html,/class="dashboard-overview"/);assert.match(html,/Your apps/);assert.match(html,/Give &amp; get feedback/);
  assert.match(html,/class="workspace-landscape"/);assert.match(html,/class="overview-task-art"/);assert.match(html,/class="overview-kpi-icon"/);assert.match(html,/class="sidebar-account"/);
  assert.equal((html.match(/class="overview-app-card"/g)||[]).length,2);
- assert.doesNotMatch(html,/Your work|<p class="eyebrow">Feedback<\/p>/);
+ assert.doesNotMatch(html,/<p class="eyebrow">(?:Your next step|Your work|Feedback)<\/p>/);
  for(const [status,label] of [['published','View app'],['draft','Continue setup'],['in_review','Review & publish'],['unpublished','Publish']]){
-  const card=f.scope.overviewProjectCard({...f.tables.projects[0],listing_status:status});assert.match(card,new RegExp('>'+label.replace('&','&amp;')+'<'));assert.match(card,/>\d+<\/strong> feedback/);
+  const project={...f.tables.projects[0],listing_status:status},card=f.scope.overviewProjectCard(project),owned=f.scope.ownedProjectCard(project,0);for(const markup of [card,owned])assert.match(markup,new RegExp('>'+label.replace('&','&amp;')+'<'));assert.match(card,/>\d+<\/strong> feedback/);
  }
+ assert.equal(f.tables.projects[2].listing_status,'in_review');assert.notEqual(f.tables.projects[0].headline,f.tables.projects[1].headline);assert.match(f.tables.projects.at(-1).headline,/drawing idea/);
  assert.match(html,/Founder exception—not earned through feedback/);assert.doesNotMatch(html,/Apps you could help improve|Project performance|Not tracked|Unlock another project slot|Become a Verified Creator/);
  assert.equal((html.match(/class="primary-button"/g)||[]).length,1);
  for(const next of ['overview-primary','overview-kpis','overview-content-grid','overview-secondary-grid'])assert.ok(html.indexOf(next)>=0);

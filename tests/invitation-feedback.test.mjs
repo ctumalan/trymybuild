@@ -84,10 +84,11 @@ test('feedback stays behind the invitation lifecycle checks and is below its app
  assert.ok(html.indexOf('studio-app-card')<html.indexOf('id="invitation-review"'));
  assert.match(html,/Public website review/);
  assert.match(html,/This is your preview of Fir & Field/);
- assert.doesNotMatch(html,/Website pricing:/);
- assert.ok(html.indexOf('id="invitation-review-heading"')<html.indexOf('Listing on TryMyBuild is free.'));
- assert.ok(html.indexOf('Save privately now.')<html.indexOf('Save your preview'));
- assert.match(html,/Publish when you’re ready for broader feedback from other makers\./);
+ assert.doesNotMatch(html,/Website pricing:|Listing on TryMyBuild is free\./);
+ assert.ok(html.indexOf('id="invitation-review-heading"')<html.indexOf('Save now.'));
+ assert.ok(html.indexOf('Save now.')<html.indexOf('Save your preview'));
+ assert.match(html,/Publish later for broader feedback\./);
+ assert.match(html,/Free to join\. You choose when to publish\./);
  assert.doesNotMatch(html,/Only listed apps receive reviews from other users\./);
  assert.match(html,/Save your preview/);
  assert.match(html,/data-invitation-share="fixture"/);
@@ -118,10 +119,10 @@ test('feedback stays behind the invitation lifecycle checks and is below its app
  assert.match(html,/invitation-catalog-grid/);
  scope.currentUser=async()=>({email:'maker@example.com',emailVerified:true});
  const matched=await(await route(request)).text();
- assert.match(matched,/data-invitation-edit/);assert.match(matched,/data-invitation-authenticated="true"/);assert.match(matched,/<a class="primary-button" href="https:\/\/example.com\/"/);assert.doesNotMatch(matched,/disabled aria-label="Try this app|data-try-app=/);
+ assert.match(matched,/data-invitation-edit/);assert.match(matched,/data-invitation-authenticated="true"/);assert.match(matched,/<a class="primary-button" href="https:\/\/example.com\/"/);assert.match(matched,/You choose when to publish\./);assert.doesNotMatch(matched,/Free to join|disabled aria-label="Try this app|data-try-app=/);
  scope.currentUser=async()=>({email:'other@example.com',emailVerified:true});
  const other=await(await route(request)).text();
- assert.match(other,/<form action="\/auth\/sign-out" method="post">/);assert.match(other,/Switch account &amp; save your preview/);assert.doesNotMatch(other,/data-try-app=/);
+ assert.match(other,/<form action="\/auth\/sign-out" method="post">/);assert.match(other,/Switch account &amp; save your preview/);assert.match(other,/Use the invited email\. TryMyBuild is free\./);assert.doesNotMatch(other,/listing stays out|Listing on TryMyBuild|data-try-app=/);
  scope.currentUser=async()=>({email:'maker@example.com',emailVerified:false});
  assert.doesNotMatch(await(await route(request)).text(),/data-try-app=/);
  scope.currentUser=async()=>null;

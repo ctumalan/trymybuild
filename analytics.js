@@ -7,10 +7,14 @@
   // arbitrary query strings, click IDs, search text, or user-supplied UTM values.
   function campaign() {
     const params = new URLSearchParams(location.search);
-    if (params.get('utm_source') !== 'youtube' || params.get('utm_medium') !== 'paid_video' || params.get('utm_campaign') !== 'trymybuild_launch') return {};
+    const source = params.get('utm_source');
+    const medium = params.get('utm_medium');
+    const name = params.get('utm_campaign');
     const content = params.get('utm_content');
-    if (!['guys_talking', 'chalkboard'].includes(content)) return {};
-    return {campaign_source:'youtube', campaign_medium:'paid_video', campaign_name:'trymybuild_launch', campaign_content:content};
+    const youtube = source === 'youtube' && medium === 'paid_video' && name === 'trymybuild_launch' && ['guys_talking', 'chalkboard'].includes(content);
+    const meta = ['fb', 'ig'].includes(source) && medium === 'paid_social' && name === 'trymybuild_video_test_20261021' && ['guy_talking', 'chalkboard'].includes(content);
+    if (!youtube && !meta) return {};
+    return {campaign_source:source, campaign_medium:medium, campaign_name:name, campaign_content:content};
   }
   window.CWAnalytics = {
     urlAttempt(valid) {

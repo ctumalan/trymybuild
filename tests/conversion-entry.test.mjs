@@ -22,4 +22,21 @@ test('unknown or denied consent never loads Google or queues submission attempts
 test('approved attribution and attempt events exclude URLs, identity and query strings',async()=>{const a=await analytics('granted',campaign);a.c.CWAnalytics.urlAttempt(true);a.c.CWAnalytics.urlAttempt(false);const calls=a.calls();const config=calls.find(c=>c[0]==='config')[2];assert.equal(config.campaign_content,'guys_talking');assert.equal(config.page_location,'https://trymybuild.com/');assert.equal(config.page_referrer,'https://example.com');const attempts=calls.filter(c=>c[1]==='url_submit_attempt');assert.equal(attempts.length,2);assert.equal(attempts[0][2].validation_result,'valid');assert.equal(attempts[1][2].validation_result,'invalid_url');assert.deepEqual(Object.keys(attempts[0][2]),['validation_result']);assert.doesNotMatch(JSON.stringify(calls),/secret|private\.example|gclid|email=/);a.local.setItem('cw-analytics-consent','denied');a.c.CWAnalytics.urlAttempt(true);assert.equal(a.calls().length,calls.length);});
 test('unapproved campaign values never enter Analytics',async()=>{for(const search of [campaign.replace('guys_talking','someone@example.com'),campaign.replace('youtube','private-source')]){const a=await analytics('granted',search);assert.equal(a.calls().find(c=>c[0]==='config')[2].campaign_content,undefined);assert.doesNotMatch(JSON.stringify(a.calls()),/someone@|private-source/);}});
 
+test('Meta creative attribution accepts only the approved campaign after consent',async()=>{
+ for(const platform of ['fb','ig'])for(const creative of ['guy_talking','chalkboard']){
+  const search=`?utm_source=${platform}&utm_medium=paid_social&utm_campaign=trymybuild_video_test_20261021&utm_content=${creative}&email=secret&fbclid=private-click-id&url=https://private.example`;
+  for(const consent of [null,'denied']){const a=await analytics(consent,search);assert.equal(a.scripts.length,0);assert.equal(a.calls().length,0);}
+  const a=await analytics('granted',search),config=a.calls().find(c=>c[0]==='config')[2];
+  assert.equal(config.campaign_source,platform);assert.equal(config.campaign_medium,'paid_social');assert.equal(config.campaign_name,'trymybuild_video_test_20261021');assert.equal(config.campaign_content,creative);
+  assert.equal(config.page_location,'https://trymybuild.com/');assert.doesNotMatch(JSON.stringify(a.calls()),/secret|private-click-id|private\.example|fbclid|email=/);
+ }
+});
+
+test('Meta attribution rejects unknown values and mixed campaign vocabularies',async()=>{
+ for(const [platform,medium,name,creative] of [['facebook','paid_social','trymybuild_video_test_20261021','guy_talking'],['fb','paid_video','trymybuild_video_test_20261021','guy_talking'],['ig','paid_social','unknown','chalkboard'],['fb','paid_social','trymybuild_video_test_20261021','person@example.com'],['youtube','paid_social','trymybuild_video_test_20261021','chalkboard'],['fb','paid_video','trymybuild_launch','guys_talking']]){
+  const a=await analytics('granted',`?utm_source=${platform}&utm_medium=${medium}&utm_campaign=${name}&utm_content=${creative}`);
+  assert.equal(a.calls().find(c=>c[0]==='config')[2].campaign_content,undefined);
+ }
+});
+
 test('fallback stays newest when saves share a millisecond',()=>{const local=storage(),session=storage();const c={window:null,localStorage:local,sessionStorage:session,Date:{now:()=>100}};c.window=c;vm.runInNewContext(source('listing-storage.js'),c);c.CWListingStorage.save({title:'Old'});local.setItem=()=>{throw Error('quota');};c.CWListingStorage.save({title:'New'});assert.equal(drafts(local,session).read().title,'New');});

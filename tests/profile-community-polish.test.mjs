@@ -27,9 +27,9 @@ test('empty project lists avoid empty database filters and deleted profiles are 
  const f=workspaceFixtures();await f.scope.requestState(f.db,f.owner,[]);assert.ok(!f.db.calls.some(c=>c[0]==='feedback_requests'));
  f.tables.users[0].account_status='deleted';assert.equal(await f.scope.publicProfile(f.db,'sample-creator'),null);
 });
-test('profile stats include only published projects and private self profiles have no share action',async()=>{
+test('profile stats include only published apps and private self profiles have no share action',async()=>{
  const f=workspaceFixtures();const route=moduleFixture('src/server/profile-view.ts',['profileView'],f.scope).profileView;
- let r=await route({...ctx('/people/sample-creator'),params:{slug:'sample-creator'}});assert.equal(r.status,200);let html=await r.text();assert.match(html,/Public project activity/);assert.match(html,/data-share-profile="sample-creator"/);assert.doesNotMatch(html,/Trip notebook|sample-1/);
+ let r=await route({...ctx('/people/sample-creator'),params:{slug:'sample-creator'}});assert.equal(r.status,200);let html=await r.text();assert.match(html,/Public app activity/);assert.match(html,/data-share-profile="sample-creator"/);assert.doesNotMatch(html,/Trip notebook|sample-1/);
  f.tables.profiles[0].is_public=false;r=await route({...ctx('/people/me'),params:{slug:'me'}});html=await r.text();assert.match(html,/Make your profile public before sharing/);assert.doesNotMatch(html,/data-share-profile/);
  assert.equal(feedbackDestination('/people/sample-creator'),'/people/sample-creator');assert.notEqual(feedbackDestination('//evil.example/people/test'),'//evil.example/people/test');
 });
@@ -65,7 +65,7 @@ test('motion respects reduced motion; textareas grow; sharing remains a delibera
 test('a native invitation keeps Escape and keyboard focus above the project drawer',()=>{
  const app=read('app.js');
  const handler=app.slice(app.indexOf('document.addEventListener("keydown"'),app.indexOf('document.addEventListener("input"'));
- assert.match(handler,/if \(event.defaultPrevented \|\| document.querySelector\('\.cw-overlay\[open\], \.invitation-dialog\[open\], \.return-feedback-dialog\[open\]'\)\) return;/);
- assert.ok(handler.indexOf('.invitation-dialog[open]')<handler.indexOf('event.key === "Escape"'));
+ assert.match(handler,/if \(event.defaultPrevented \|\| document.querySelector\('dialog\[open\]'\)\) return;/);
+ assert.ok(handler.indexOf('dialog[open]')<handler.indexOf('event.key === "Escape"'));
  assert.match(read('share-invitation.js'),/dialog.addEventListener\('cancel',e=>\{e.preventDefault\(\);close\(\);\}\)/);
 });

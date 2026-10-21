@@ -22,15 +22,19 @@ test('editing a paid listing without changing pricing retains the existing price
  const result=await saveDraft(store,{ownerId:'owner',id:row.id,input:{price_label:'Paid',is_free:false}});
  assert.equal(result.project.price_label,'$5 per month');assert.equal(result.reviewReset,false);
 });
-test('apps are one collection with Add project first and settings behind ellipsis',async()=>{
+test('apps use a status-aware management list with filters and secondary actions',async()=>{
  const f=workspaceFixtures(),response=await f.routes['/dashboard'](context('/dashboard?view=creator')),html=await response.text();assert.equal(response.status,200);
  assert.match(html,/My apps/);assert.doesNotMatch(html,/My projects/);
- assert.equal((html.match(/data-project-card/g)||[]).length,6);assert.ok(html.indexOf('＋ Add project')<html.indexOf('data-project-card'));
+ assert.equal((html.match(/data-project-card/g)||[]).length,6);assert.ok(html.indexOf('+ Add app')<html.indexOf('data-project-card'));
  assert.doesNotMatch(html,/Your next insight starts|Manage builds & release notes|project-selector/);
- assert.match(html,/<details class="project-actions">/);assert.match(html,/2 unread conversations/);assert.match(html,/mini-preview/);
+ assert.match(html,/<details class="project-actions">/);assert.match(html,/class="unread-badge"[^>]*>2 unread</);assert.match(html,/mini-preview/);
+ assert.match(html,/Manage your apps, drafts, and feedback/);assert.match(html,/All required details complete/);assert.match(html,/details remaining/);assert.match(html,/% complete/);
+ assert.ok(html.indexOf('owned-project-grid')<html.indexOf('feedback-swap-banner'));assert.doesNotMatch(html,/All your projects|Add project|unread conversations/);
  assert.match(html,/data-project-action="delete"/);assert.match(html,/data-project-action="unpublish"/);
  const published=f.scope.projectActions(f.tables.projects[0]);assert.doesNotMatch(published,/data-project-action="delete"/);
  assert.doesNotMatch(f.scope.projectActions({...f.tables.projects[1],published_at:'2026-01-01'}),/data-project-action="delete"/);
+ const draft=f.scope.ownedProjectCard(f.tables.projects[1],2),ready=f.scope.ownedProjectCard(f.tables.projects[2],2);assert.doesNotMatch(draft,/owned-project-metrics|unread-badge|\d+ saves/);assert.match(draft,/Continue setup/);assert.match(ready,/All required details complete/);assert.match(ready,/Review &amp; publish/);
+ const filtered=await (await f.routes['/dashboard'](context('/dashboard?view=creator&status=drafts'))).text();assert.equal((filtered.match(/data-project-card/g)||[]).length,4);assert.doesNotMatch(filtered,/data-project-status="published"/);assert.match(filtered,/data-project-status="draft"/);assert.match(filtered,/data-project-status="in_review"/);assert.doesNotMatch(filtered,/>Ready<\/a>/);
 });
 test('overview leads with one next step, then status, apps, and feedback',async()=>{
  const f=workspaceFixtures(),response=await f.routes['/dashboard/overview'](context('/dashboard/overview',{section:'overview'})),html=await response.text();assert.equal(response.status,200);
@@ -61,10 +65,14 @@ test('saved project review is directly accessible and cannot silently invent qua
  f.tables.projects.find(p=>p.slug==='sample-guest').listing_status='draft';
  const hidden=await (await f.routes['/dashboard'](context('/dashboard?view=visitor'))).text();assert.doesNotMatch(hidden,/Daily sketchbook/);assert.match(hidden,/no longer publicly available/);
 });
-test('messages use server-side sorting and inline conversations, with one empty state',async()=>{
+test('messages merge replyable feedback and read-only public comments into one responsive inbox',async()=>{
  const f=workspaceFixtures(),html=await (await f.routes['/dashboard/messages'](context('/dashboard/messages?sort=oldest&unread=1&thread='+f.id))).text();
- assert.match(html,/class="cw-message-toolbar"/);assert.match(html,/data-conversation-content/);assert.match(html,/data-inline-compose/);assert.match(html,/aria-label="Send reply" hidden/);
+ assert.match(html,/class="message-controls"/);assert.match(html,/class="message-app-filter"/);assert.match(html,/name="app"/);assert.match(html,/All apps/);assert.match(html,/class="messages-inbox"/);assert.match(html,/Feedback and private conversations about your apps/);assert.match(html,/data-conversation-content/);assert.match(html,/data-inline-compose/);assert.match(html,/aria-label="Send reply" hidden/);
+ assert.doesNotMatch(html,/>Apply<|>Reset</);assert.match(html,/Feedback · Grocery planner/);
  assert.equal(f.db.calls.find(c=>c[0]==='cw_combined_inbox')[1].p_sort,'oldest');
+ const comment=f.tables.project_experiences[0],commentHtml=await(await f.routes['/dashboard/messages'](context('/dashboard/messages?comment='+comment.id))).text();
+ assert.match(commentHtml,/Public comment/);assert.match(commentHtml,/Pending public moderation/);assert.match(commentHtml,/visible to you/);assert.match(commentHtml,/Public comments are read-only in Messages/);assert.doesNotMatch(commentHtml,/data-inline-compose/);
+ await f.routes['/dashboard/messages'](context('/dashboard/messages?project=Grocery%20planner'));assert.equal(f.db.calls.filter(c=>c[0]==='cw_combined_inbox').at(-1)[1].p_project,'Grocery planner');
  const privateRoute=moduleFixture('src/pages/dashboard/thread/[id].ts',['GET'],{...f.scope,memberContext:async()=>null}).GET;
  assert.equal((await privateRoute(context('/dashboard/thread/'+f.id+'?fragment=1',{id:f.id}))).status,401);
  assert.equal(await f.scope.conversation(f.db,'unrelated-user',f.id,new URL('https://example.invalid')),null);

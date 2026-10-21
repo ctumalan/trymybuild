@@ -9,19 +9,20 @@ test('exchange page distinguishes waiting, one response and both responses witho
  const rpc=f.db.rpc;f.db.rpc=async(name,args)=>name==='cw_maker_exchange_state'?{data:state,error:null}:rpc(name,args);
  const route=moduleFixture('src/pages/dashboard/exchange.ts',['GET'],f.scope).GET;
  const html=async()=> (await route(ctx('/dashboard/exchange'))).text();
- assert.match(await html(),/You try their app. They try yours./);
+ const start=await html();
+ assert.match(start,/How it works/);assert.match(start,/data-exchange-begin/);assert.match(start,/data-exchange-wizard hidden/);assert.match(start,/data-exchange-step="1"/);assert.match(start,/data-exchange-step="2" hidden/);assert.match(start,/data-exchange-step="3" hidden/);assert.match(start,/data-exchange-step="4" hidden/);assert.match(start,/>Request<\/button>/);assert.doesNotMatch(start,/previous exchange ended/);
  state={...paired,state:'waiting',partner:null};
- assert.match(await html(),/Waiting for a feedback partner/);assert.doesNotMatch(await html(),/name="action" value="join"/);
- state=paired;assert.match(await html(),/Was it clear how to save your first drawing/);assert.match(await html(),/still waiting for feedback from your partner/);
- state={...paired,given:f.id};assert.match(await html(),/Feedback shared/);assert.doesNotMatch(await html(),/You both shared feedback/);
- state={...paired,given:f.id,received:f.id,complete:true};assert.match(await html(),/You both shared feedback/);assert.match(await html(),/You try their app. They try yours./);
+ const waiting=await html();assert.match(waiting,/You’re in the queue/);assert.match(waiting,/Christian may take a look/);assert.match(waiting,/Try another maker’s app/);assert.doesNotMatch(waiting,/name="action" value="join"/);
+ state=paired;const matched=await html();assert.match(matched,/Was it clear how to save your first drawing/);assert.match(matched,/Meet Another maker/);assert.match(matched,/Share your feedback/);assert.match(matched,/Receive their feedback/);
+ state={...paired,given:f.id};const given=await html();assert.match(given,/You shared your feedback/);assert.doesNotMatch(given,/previous exchange is complete/);
+ state={...paired,given:f.id,received:f.id,complete:true};const complete=await html();assert.match(complete,/previous exchange is complete/);assert.match(complete,/Start a feedback swap/);assert.match(complete,/data-dismiss-exchange-ended/);
 });
 test('exchange forms escape creator content and only offer owned published public apps',async()=>{
  const f=workspaceFixtures();f.db.rpc=async()=>({data:null,error:null});
  f.tables.projects[0].title='<script>bad</script>';
  const route=moduleFixture('src/pages/dashboard/exchange.ts',['GET'],f.scope).GET;
  const html=await (await route(ctx('/dashboard/exchange'))).text();
- assert.match(html,/&lt;script&gt;bad&lt;\/script&gt;/);assert.doesNotMatch(html,/<option[^>]+value="sample-(?:1|2|guest)"/);
+ assert.match(html,/&lt;script&gt;bad&lt;\/script&gt;/);assert.match(html,/name="slug" value="sample-0"/);assert.doesNotMatch(html,/name="slug" value="sample-(?:1|2|guest)"/);
  f.tables.feedback_requests=[{id:f.id,user_id:f.owner,project_slug:'sample-0',question:'What did you expect to happen after saving?',status:'queued'}];
  const existing=await (await route(ctx('/dashboard/exchange'))).text();assert.match(existing,/uses your existing open feedback request/);assert.match(existing,/required readonly/);
 });
@@ -40,6 +41,8 @@ test('exchange endpoint requires origin, verified membership, bounded question a
  assert.equal((await call(fields,'https://evil.invalid')).status,403);
  const response=await call(fields);assert.equal(response.headers.get('location'),'/dashboard/exchange?saved=1');
  assert.ok(f.db.calls.some(([name,args])=>name==='cw_join_maker_exchange'&&args.p_user===f.owner));
+ const requested=await call({...fields,action:'request',partner:'sample-reviewer'});assert.match(requested.headers.get('location'),/^\/dashboard\/messages\?direct=/);
+ assert.ok(f.db.calls.some(([name,args])=>name==='cw_send_direct_message'&&args.p_actor===f.owner&&args.p_recipient===f.author));
  await call({action:'leave',id:f.id});assert.ok(f.db.calls.some(([name,args])=>name==='cw_leave_maker_exchange'&&args.p_user===f.owner));
  const denied=moduleFixture('src/pages/api/maker-exchange.ts',['POST'],{...scope,memberContext:async()=>({user:{emailVerified:false}})}).POST;
  assert.equal((await denied({...ctx('/api/maker-exchange'),request:new Request('https://example.invalid/api/maker-exchange',{method:'POST',headers:{origin:'https://example.invalid'},body:new URLSearchParams(fields)})})).status,401);

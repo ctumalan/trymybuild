@@ -756,10 +756,8 @@ function openProductDetail(product, trigger) {
   CWProjectView.mountGuidanceTyping(document.querySelector('.detail-overlay'));
   void loadProjectConversation();
   document.body.classList.add("is-dialog-open");
-  document.body.style.position = "fixed";
-  document.body.style.top = `-${detailScrollY}px`;
-  document.body.style.width = "100%";
-  document.querySelector(".detail-close")?.focus();
+  window.CWDrawerState.lock('catalog', {inertBackground:true});
+  document.querySelector(".detail-close")?.focus({preventScroll:true});
 }
 
 function backProductDetail() {
@@ -782,14 +780,10 @@ function closeProductDetail(restoreFocus = true) {
     closing.querySelector('.detail-backdrop').animate([{opacity:1},{opacity:0}],{duration:200,fill:'forwards'});
     setTimeout(()=>{if(document.querySelector('.detail-overlay')===closing){closing.dataset.finished='true';closeProductDetail(true);}},210);return;
   }
-  const wasOpen = Boolean(document.querySelector(".detail-overlay"));
   document.querySelector(".detail-overlay")?.remove();
   document.body.classList.remove("is-dialog-open");
-  document.body.style.position = "";
-  document.body.style.top = "";
-  document.body.style.width = "";
+  window.CWDrawerState.unlock('catalog');
   if (restoreFocus && detailReturnFocus?.isConnected) detailReturnFocus.focus({ preventScroll: true });
-  if (wasOpen) window.scrollTo({ top: detailScrollY, behavior: "auto" });
   detailReturnFocus = null;
   detailProjectHistory = [];
 }
@@ -1024,13 +1018,13 @@ function listingSettingsPage() {
 }
 function listingAccountPage() {
   if (state.session?.authenticated) return listingSettingsPage();
-  if (new URLSearchParams(location.search).get('after') === 'dashboard') return `<section class="listing-signup-handoff" aria-live="polite"><span class="listing-handoff-spinner" aria-hidden="true"></span><p class="eyebrow">Your account is ready</p><h1>Saving your app…</h1><p data-listing-status>We’re adding your private draft, then taking you to your dashboard.</p></section>`;
   return listingSignupPreview();
 }
 function sharePage() {
   return discover(true);
 }
 function listingJourney() {
+  if (new URLSearchParams(location.search).get('after') === 'dashboard') return `<section class="listing-signup-handoff" aria-live="polite"><span class="listing-handoff-spinner" aria-hidden="true"></span><p class="eyebrow">Your account is ready</p><h1>Saving your app…</h1><p data-listing-status>We’re adding your private draft, then taking you to your dashboard.</p></section>`;
   if (listingSettings) return listingSettingsPage();
   if (listingStep === 0) return inlineListingForm();
   return listingSignupPreview();
@@ -1565,18 +1559,24 @@ document.addEventListener("click", async event => {
   if (event.target.closest("[data-demo-drop]")) { const zone = event.target.closest("[data-demo-drop]"); zone.innerHTML = `<span>✓</span><strong>Safe preview ready</strong><small>Nothing is public yet</small>`; }
 });
 
+document.addEventListener('focusin', event => {
+  if (document.querySelector('dialog[open]')) return;
+  const drawer=document.querySelector('.detail-dialog');
+  if (drawer && !drawer.contains(event.target)) drawer.querySelector('.detail-close')?.focus({preventScroll:true});
+});
+
 document.addEventListener("keydown", event => {
-  if (event.defaultPrevented || document.querySelector('.cw-overlay[open], .invitation-dialog[open], .return-feedback-dialog[open]')) return;
+  if (event.defaultPrevented || document.querySelector('dialog[open]')) return;
   const dialog = document.querySelector(".detail-dialog");
   if (!dialog) return;
   if (event.key === "Escape") { event.preventDefault(); closeProductDetail(); return; }
   if (event.key !== "Tab") return;
-  const focusable = [...dialog.querySelectorAll('button:not([disabled]), a[href], input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])')];
-  if (!focusable.length) return;
+  const focusable = [...dialog.querySelectorAll('button:not([disabled]), a[href], input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])')].filter(element => element.getClientRects().length && !element.closest('[inert],[hidden]'));
+  if (!focusable.length) { event.preventDefault(); dialog.focus(); return; }
   const first = focusable[0];
   const last = focusable[focusable.length - 1];
-  if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
-  else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+  if (event.shiftKey && (document.activeElement === first || !dialog.contains(document.activeElement))) { event.preventDefault(); last.focus(); }
+  else if (!event.shiftKey && (document.activeElement === last || !dialog.contains(document.activeElement))) { event.preventDefault(); first.focus(); }
 });
 
 document.addEventListener("input", event => {

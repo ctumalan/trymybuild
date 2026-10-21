@@ -1,13 +1,48 @@
 // In-place reading uses the same protected routes as full pages; no client grants access.
 (() => {
+ // Shared ownership keeps the page locked while drawers are stacked.
+ function createDrawerState(){
+  const owners=new Map(),inertRoots=new Map();let saved;
+  function restoreBackground(){for(const [element,inert] of inertRoots)element.inert=inert;inertRoots.clear();}
+  return {
+   lock(owner,{inertBackground=false}={}){
+    if(owners.has(owner))return;
+    if(!owners.size){
+     const style=document.body.style,properties=['position','top','left','width','overflow','paddingRight'];
+     saved={styles:Object.fromEntries(properties.map(key=>[key,style[key]])),x:window.scrollX,y:window.scrollY};
+     const stableGutter=(getComputedStyle(document.documentElement).scrollbarGutter||'').includes('stable');
+     const gutter=stableGutter?0:Math.max(0,window.innerWidth-document.documentElement.clientWidth);
+     if(gutter)style.paddingRight=`${parseFloat(getComputedStyle(document.body).paddingRight||'0')+gutter}px`;
+     style.position='fixed';style.top=`-${saved.y}px`;style.left=`-${saved.x}px`;style.width='100%';style.overflow='hidden';
+    }
+    owners.set(owner,inertBackground);
+    if(inertBackground)for(const element of document.body.children){
+     if(element.matches('dialog,[data-detail-overlay],script,style,link'))continue;
+     if(!inertRoots.has(element))inertRoots.set(element,element.inert);
+     element.inert=true;
+    }
+   },
+   unlock(owner){
+    if(!owners.delete(owner))return;
+    if(![...owners.values()].some(Boolean))restoreBackground();
+    if(owners.size)return;
+    // Joining can restore a different catalog position while a drawer is open.
+    const y=Number.parseFloat(document.body.style.top),x=Number.parseFloat(document.body.style.left);
+    Object.assign(document.body.style,saved.styles);
+    window.scrollTo({left:Number.isFinite(x)?-x:saved.x,top:Number.isFinite(y)?-y:saved.y,behavior:'instant'});
+    saved=undefined;
+   }
+  };
+ }
+ window.CWDrawerState=createDrawerState();
  let dialog,opener,loadVersion=0,panelId=0;const parents=[];
  function closePanel(){const target=dialog;if(!target||target.dataset.closing)return;loadVersion++;if(matchMedia('(prefers-reduced-motion: reduce)').matches){target.close();return;}target.dataset.closing='true';target.animate([{opacity:1,transform:'translateX(0)'},{opacity:0,transform:`translateX(${target.classList.contains('profile-panel')?'-':''}65px)`}],{duration:200,easing:'ease-in',fill:'forwards'}).finished.then(()=>target.isConnected&&target.dataset.closing==='true'&&target.close(),()=>{});}
  const allowed=url=>url.origin===location.origin&&(/^\/(people|projects)\/[a-z0-9-]+$/.test(url.pathname)||['/admin/project','/dashboard/project'].includes(url.pathname));
  function show(content,kind='project'){
   if(dialog?.dataset.closing){delete dialog.dataset.closing;dialog.getAnimations().forEach(animation=>animation.cancel());}
   if(kind==='project'&&dialog?.classList.contains('profile-panel')){parents.push({dialog,opener});dialog=undefined;}
-  if(!dialog){opener=document.activeElement;dialog=document.createElement('dialog');dialog.className='cw-overlay';dialog.setAttribute('aria-label','Details');dialog.innerHTML='<header class="overlay-toolbar"><span class="overlay-brand" aria-label="TryMyBuild"><img class="brand-mark" src="/assets/brand/trymybuild-mark.svg" width="40" height="40" alt=""><span class="brand-name">TryMy<span class="brand-name-works">Build</span></span></span><button type="button" aria-label="Close detail window">×</button></header><div class="overlay-content"></div>';document.body.append(dialog);dialog.querySelector('button').onclick=closePanel;dialog.addEventListener('cancel',event=>{event.preventDefault();closePanel();});dialog.addEventListener('click',event=>{if(event.target===dialog){const r=dialog.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)closePanel();}});dialog.addEventListener('close',()=>{loadVersion++;dialog.remove();opener?.isConnected&&opener.focus({preventScroll:true});const parent=parents.pop();dialog=parent?.dialog||null;opener=parent?.opener;});dialog.showModal();}
-  dialog.classList.toggle('profile-panel',kind==='profile');dialog.classList.toggle('public-project-panel',kind==='project'&&!!(content.matches?.('.project-detail-content.invitation-detail')||content.querySelector?.('.project-detail-content.invitation-detail')));dialog.querySelector('.overlay-content').replaceChildren(content);return dialog;
+  if(!dialog){opener=document.activeElement;dialog=document.createElement('dialog');dialog.className='cw-overlay';dialog.setAttribute('aria-label','Details');dialog.innerHTML='<header class="overlay-toolbar"><span class="overlay-brand" aria-label="TryMyBuild"><img class="brand-mark" src="/assets/brand/trymybuild-mark.svg" width="40" height="40" alt=""><span class="brand-name">TryMy<span class="brand-name-works">Build</span></span></span><button type="button" aria-label="Close detail window">×</button></header><div class="overlay-content"></div>';document.body.append(dialog);dialog.querySelector('button').onclick=closePanel;dialog.addEventListener('cancel',event=>{event.preventDefault();closePanel();});dialog.addEventListener('click',event=>{if(event.target===dialog){const r=dialog.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)closePanel();}});const created=dialog,returnFocus=opener;dialog.addEventListener('close',()=>{loadVersion++;created.remove();window.CWDrawerState.unlock(created);const parent=parents.pop();dialog=parent?.dialog||null;opener=parent?.opener;returnFocus?.isConnected&&returnFocus.focus({preventScroll:true});});window.CWDrawerState.lock(created);dialog.showModal();}
+  dialog.classList.toggle('profile-panel',kind==='profile');dialog.classList.toggle('public-project-panel',kind==='project'&&!!(content.matches?.('.project-detail-content.invitation-detail')||content.querySelector?.('.project-detail-content.invitation-detail')));dialog.querySelector('.overlay-content').replaceChildren(content);if(!dialog.contains(document.activeElement))dialog.querySelector('.overlay-toolbar button').focus({preventScroll:true});return dialog;
  }
  async function open(href,kind='project'){
   const url=new URL(href,location.origin);if(!allowed(url))return;
@@ -49,6 +84,10 @@
  }
  function markVisibleReads(){document.querySelectorAll('[data-mark-thread-read]').forEach(form=>{if(form.dataset.marked||!form.getClientRects().length&&form.closest('details')&&!form.closest('details').open)return;form.dataset.marked='true';fetch(form.action,{method:'POST',body:new URLSearchParams(new FormData(form))}).then(r=>{if(!r.ok)delete form.dataset.marked;}).catch(()=>delete form.dataset.marked);});}
  new MutationObserver(markVisibleReads).observe(document.body,{childList:true,subtree:true});markVisibleReads();
+ let messageFilterTimer;
+ function applyMessageFilters(form){const params=new URLSearchParams(new FormData(form));for(const [key,value] of [...params])if(!String(value).trim()||key==='sort'&&value==='newest')params.delete(key);location.assign('/dashboard/messages'+(params.size?'?'+params:''));}
+ document.addEventListener('change',event=>{const form=event.target.closest('[data-message-filters]');if(form&&event.target.matches('select'))applyMessageFilters(form);});
+ document.addEventListener('input',event=>{const form=event.target.closest('[data-message-filters]');if(!form||!event.target.matches('input[name="q"]'))return;clearTimeout(messageFilterTimer);messageFilterTimer=setTimeout(()=>applyMessageFilters(form),350);});
  document.addEventListener('toggle',event=>{const details=event.target;if(details.matches?.('[data-conversation]')&&details.open)loadConversation(details);},true);
  document.addEventListener('submit',async event=>{
   const block=event.target.closest('[data-direct-block]');if(block){if(!confirm(block.elements.action.value==='block'?'Block messages between you and this person?':'Allow messages between you and this person again?'))event.preventDefault();return;}
@@ -78,3 +117,55 @@
 document.addEventListener('click',event=>{const tab=event.target.closest('[data-profile-tab]');if(!tab)return;const card=tab.closest('[data-profile-slug]');card.querySelectorAll('[data-profile-tab]').forEach(t=>{t.setAttribute('aria-selected',String(t===tab));t.tabIndex=t===tab?0:-1;});card.querySelectorAll('[data-profile-pane]').forEach(p=>p.hidden=p.dataset.profilePane!==tab.dataset.profileTab);});
 
 document.addEventListener('keydown',event=>{const tab=event.target.closest('[data-profile-tab]');if(!tab||!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;event.preventDefault();const tabs=[...tab.parentElement.querySelectorAll('[data-profile-tab]')],index=tabs.indexOf(tab),next=event.key==='Home'?0:event.key==='End'?tabs.length-1:(index+(event.key==='ArrowRight'?1:-1)+tabs.length)%tabs.length;tabs[next].click();tabs[next].focus();});
+
+document.addEventListener('click',async event=>{
+ const begin=event.target.closest('[data-exchange-begin]');
+ if(begin){
+  const onboarding=begin.closest('[data-exchange-onboarding]'),intro=onboarding?.querySelector('[data-exchange-intro]'),wizard=onboarding?.querySelector('[data-exchange-wizard]');
+  if(intro&&wizard){intro.hidden=true;wizard.hidden=false;wizard.classList.add('is-entering');setTimeout(()=>wizard.classList.remove('is-entering'),260);wizard.querySelector('input[name="slug"]')?.focus();}
+  return;
+ }
+ const move=event.target.closest('[data-exchange-next],[data-exchange-back]');
+ if(move){
+  const wizard=move.closest('[data-exchange-wizard]'),current=wizard?.querySelector('.exchange-wizard-step:not([hidden])');
+  if(!wizard||!current)return;
+  const step=Number(current.dataset.exchangeStep);
+  if(move.matches('[data-exchange-next]')){
+   const invalid=current.querySelector(':invalid');if(invalid){invalid.reportValidity();return;}
+   if(step===2)await loadExchangePartners(wizard);
+   showExchangeStep(wizard,step+1);
+  }else if(step===1){
+   wizard.hidden=true;const intro=wizard.closest('[data-exchange-onboarding]')?.querySelector('[data-exchange-intro]');if(intro){intro.hidden=false;intro.querySelector('[data-exchange-begin]')?.focus();}
+  }else showExchangeStep(wizard,step-1);
+  return;
+ }
+ const suggestion=event.target.closest('[data-exchange-prompt]');
+ if(suggestion){
+  const field=suggestion.closest('.exchange-start-form')?.querySelector('textarea[name="question"]');
+  if(field&&!suggestion.disabled){field.value=suggestion.dataset.exchangePrompt;field.dispatchEvent(new Event('input',{bubbles:true}));field.focus();}
+  return;
+ }
+ const dismiss=event.target.closest('[data-dismiss-exchange-ended]');
+ if(dismiss)dismiss.closest('[data-exchange-ended]')?.remove();
+});
+
+function showExchangeStep(wizard,step){
+ wizard.querySelectorAll('[data-exchange-step]').forEach(panel=>{const active=Number(panel.dataset.exchangeStep)===step;panel.hidden=!active;if(active){panel.classList.add('is-entering');setTimeout(()=>panel.classList.remove('is-entering'),260);}});
+ wizard.querySelectorAll('[data-exchange-progress]').forEach(item=>{const value=Number(item.dataset.exchangeProgress);item.classList.toggle('is-current',value===step);item.classList.toggle('is-done',value<step);});
+ const active=wizard.querySelector(`[data-exchange-step="${step}"]`);active?.setAttribute('tabindex','-1');active?.focus({preventScroll:true});active?.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'nearest'});
+}
+
+async function loadExchangePartners(wizard){
+ const slug=wizard.querySelector('input[name="slug"]:checked')?.value,list=wizard.querySelector('[data-exchange-partner-list]');
+ if(!slug||!list||list.dataset.loadedFor===slug)return;
+ list.innerHTML='<p class="cw-meta" role="status">Finding available partners…</p>';
+ try{
+  const response=await fetch('/api/suggested-testers?project='+encodeURIComponent(slug));if(!response.ok)throw Error();
+  const data=await response.json(),testers=Array.isArray(data.testers)?data.testers:[];
+  const cards=testers.map((tester,index)=>{const name=String(tester.name||'TryMyBuild maker'),initials=name.split(/\s+/).slice(0,2).map(part=>part[0]).join('').toUpperCase();return `<label class="exchange-partner-option"><input type="radio" name="partner" value="${exchangeEscape(tester.slug)}" ${index===0?'checked':''} required><span class="exchange-partner-avatar">${tester.avatar?`<img src="${exchangeEscape(tester.avatar)}" alt="">`:`<span aria-hidden="true">${exchangeEscape(initials)}</span>`}</span><span class="exchange-partner-copy"><strong>${exchangeEscape(name)}</strong><small>${exchangeEscape(tester.label||'TryMyBuild maker')}</small><span>Wants feedback on <b>${exchangeEscape(tester.project?.title||'their app')}</b></span></span><span class="exchange-partner-check" aria-hidden="true">✓</span></label>`;}).join('');
+  const queue=`<label class="exchange-partner-option exchange-partner-queue"><input type="radio" name="partner" value="queue" ${testers.length?'':'checked'} required><span class="exchange-partner-avatar" aria-hidden="true">⌛</span><span class="exchange-partner-copy"><strong>Let TryMyBuild match me</strong><small>Join the queue if you do not have a preference.</small></span><span class="exchange-partner-check" aria-hidden="true">✓</span></label>`;
+  list.innerHTML=cards+queue;list.dataset.loadedFor=slug;
+ }catch{list.innerHTML='<p class="exchange-partner-error" role="status">Partners could not be loaded right now. Go back and try again.</p>';}
+}
+
+function exchangeEscape(value){return String(value||'').replace(/[&<>"']/g,character=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[character]));}

@@ -38,6 +38,10 @@ test('overview leads with one next step, then status, apps, and feedback',async(
  assert.match(html,/class="dashboard-overview"/);assert.match(html,/Your next step/);assert.match(html,/Your apps/);assert.match(html,/Give &amp; get feedback/);
  assert.match(html,/class="workspace-landscape"/);assert.match(html,/class="overview-task-art"/);assert.match(html,/class="overview-kpi-icon"/);assert.match(html,/class="sidebar-account"/);
  assert.equal((html.match(/class="overview-app-card"/g)||[]).length,2);
+ assert.doesNotMatch(html,/Your work|<p class="eyebrow">Feedback<\/p>/);
+ for(const [status,label] of [['published','View app'],['draft','Continue setup'],['in_review','Review & publish'],['unpublished','Publish']]){
+  const card=f.scope.overviewProjectCard({...f.tables.projects[0],listing_status:status});assert.match(card,new RegExp('>'+label.replace('&','&amp;')+'<'));assert.match(card,/>\d+<\/strong> feedback/);
+ }
  assert.match(html,/Founder exception—not earned through feedback/);assert.doesNotMatch(html,/Apps you could help improve|Project performance|Not tracked|Unlock another project slot|Become a Verified Creator/);
  assert.equal((html.match(/class="primary-button"/g)||[]).length,1);
  for(const next of ['overview-primary','overview-kpis','overview-content-grid','overview-secondary-grid'])assert.ok(html.indexOf(next)>=0);

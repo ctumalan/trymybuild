@@ -40,10 +40,9 @@ test('homepage categories come only from published catalog projects and deduplic
   ]);
 });
 
-test('listing UI exposes Other search without adding drafts to homepage filters', () => {
+test('listing UI exposes Other search while homepage navigation uses published categories', () => {
   assert.match(source, />Other…<\/option>/);
   assert.match(source, /data-listing-category-custom/);
   assert.match(source, /creatorworks-category-catalog/);
-  assert.match(source, /Drafts never create public filters/);
   assert.match(source, /const categories=publishedCategories\(\)/);
 });

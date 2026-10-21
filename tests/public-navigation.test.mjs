@@ -10,8 +10,9 @@ test('informational routes render their own content without a submission hero',(
  assert.match(scope.contactPage(),/Have a question/);
 });
 test('article includes the shared navigation and account menu',()=>{
- const article=read('src/pages/article.astro');
- assert.match(article,/class="cw-bar"/);assert.match(article,/aria-label="Website navigation"/);
- assert.match(article,/href="\/\?listing=settings"/);assert.match(article,/data-account-nav/);
- assert.match(article,/src="\/account-nav.js"/);assert.doesNotMatch(article,/class="masthead"/);
+ const article=read('src/pages/article.astro'),layout=read('src/layouts/EditorialLayout.astro');
+ assert.match(article,/import EditorialLayout/);assert.match(article,/<EditorialLayout/);
+ assert.match(layout,/class="cw-bar"/);assert.match(layout,/aria-label="Website navigation"/);
+ assert.match(layout,/href="\/\?listing=settings"/);assert.match(layout,/data-account-nav/);
+ assert.match(layout,/src="\/account-nav.js"/);assert.doesNotMatch(layout,/class="masthead"/);
 });

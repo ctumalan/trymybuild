@@ -11,7 +11,9 @@ test('header keeps account menu and footer avoids duplicate app navigation',()=>
  const header=html.slice(html.indexOf('<header'),html.indexOf('</header>'));
  assert.doesNotMatch(header,/data-home-view|menu-toggle/);
  assert.match(header,/profile-button.*data-route="account"/);
- assert.doesNotMatch(html,/>Explore projects<|>Community<|>Get feedback</);
+ assert.match(header,/>Explore apps<\/a>/);assert.match(header,/>Get feedback<\/a>/);
+ const footer=html.slice(html.indexOf('<footer'),html.indexOf('</footer>'));
+ assert.doesNotMatch(footer,/>Explore apps<|>Get feedback</);
  assert.doesNotMatch(app,/>Get feedback →|>Find a project →|>Get feedback on your project</);
 });
 test('homepage offers functioning paths for visitors and makers',()=>{

@@ -61,9 +61,14 @@ test('overview layout stays compact and responsive',()=>{
 });
 test('saved project review is directly accessible and cannot silently invent qualification answers',async()=>{
  const f=workspaceFixtures(),html=await (await f.routes['/dashboard'](context('/dashboard?view=visitor'))).text();
- assert.match(html,/Give feedback/);assert.match(html,/href="\/tell\/sample-guest"/);assert.match(html,/saved-project-card compact-app-card/);assert.doesNotMatch(html,/action="\/api\/feedback"/);
+ assert.match(html,/Give feedback/);assert.match(html,/href="\/tell\/sample-guest"/);assert.match(html,/saved-project-card compact-app-card/);assert.match(html,/class="saved-apps-toolbar"/);assert.match(html,/1<\/strong> saved app/);assert.match(html,/Feedback &amp; replies/);assert.doesNotMatch(html,/All my feedback|saved projects|action="\/api\/feedback"/);
  f.tables.projects.find(p=>p.slug==='sample-guest').listing_status='draft';
  const hidden=await (await f.routes['/dashboard'](context('/dashboard?view=visitor'))).text();assert.doesNotMatch(hidden,/Daily sketchbook/);assert.match(hidden,/no longer publicly available/);
+});
+test('public profile editor leads with essentials and previews changes before optional details',async()=>{
+ const f=workspaceFixtures(),route=moduleFixture('src/pages/dashboard/profile.ts',['GET'],f.scope).GET,response=await route(context('/dashboard/profile')),html=await response.text();assert.equal(response.status,200);
+ assert.match(html,/<h1>Public profile<\/h1>/);assert.match(html,/Help other makers know who’s behind your apps/);assert.match(html,/class="profile-editor-layout"/);assert.match(html,/class="profile-preview-card"/);assert.match(html,/data-profile-preview-name/);assert.match(html,/What do you do\?/);assert.match(html,/Introduce yourself/);assert.match(html,/<details class="profile-more">/);assert.match(html,/More profile details/);assert.match(html,/class="profile-visibility-card"/);assert.match(html,/Save changes/);assert.doesNotMatch(html,/Save my profile|>Sign out</);
+ const js=read('profile-editor.js');assert.match(js,/function updatePreview/);assert.match(js,/data-profile-visibility-chip/);
 });
 test('messages merge replyable feedback and read-only public comments into one responsive inbox',async()=>{
  const f=workspaceFixtures(),html=await (await f.routes['/dashboard/messages'](context('/dashboard/messages?sort=oldest&unread=1&thread='+f.id))).text();
@@ -73,6 +78,9 @@ test('messages merge replyable feedback and read-only public comments into one r
  const comment=f.tables.project_experiences[0],commentHtml=await(await f.routes['/dashboard/messages'](context('/dashboard/messages?comment='+comment.id))).text();
  assert.match(commentHtml,/Public comment/);assert.match(commentHtml,/Pending public moderation/);assert.match(commentHtml,/visible to you/);assert.match(commentHtml,/Public comments are read-only in Messages/);assert.doesNotMatch(commentHtml,/data-inline-compose/);
  await f.routes['/dashboard/messages'](context('/dashboard/messages?project=Grocery%20planner'));assert.equal(f.db.calls.filter(c=>c[0]==='cw_combined_inbox').at(-1)[1].p_project,'Grocery planner');
+ const sentFeedback={...f.tables.creator_feedback[0],id:'44444444-4444-4444-8444-444444444444',project_slug:'sample-guest',author_user_id:f.owner,message:'The daily prompt was clear, but I wanted a quicker way to save my sketch.'},sentComment={...f.tables.project_experiences[0],id:'55555555-5555-4555-8555-555555555555',project_slug:'sample-guest',author_user_id:f.owner,response:'The drawing flow was easy to understand.'};f.tables.creator_feedback.push(sentFeedback);f.tables.project_experiences.push(sentComment);
+ const sentHtml=await(await f.routes['/dashboard/messages'](context('/dashboard/messages?scope=sent'))).text();assert.match(sentHtml,/Sent by me/);assert.match(sentHtml,/Feedback and public comments you shared on other makers’ apps/);assert.match(sentHtml,/To Sample Reviewer/);assert.match(sentHtml,/Daily sketchbook/);assert.match(sentHtml,/The drawing flow was easy to understand/);
+ const sentDetail=await(await f.routes['/dashboard/messages'](context('/dashboard/messages?scope=sent&comment='+sentComment.id))).text();assert.match(sentDetail,/Your comment/);assert.match(sentDetail,/View or edit on the app page/);
  const privateRoute=moduleFixture('src/pages/dashboard/thread/[id].ts',['GET'],{...f.scope,memberContext:async()=>null}).GET;
  assert.equal((await privateRoute(context('/dashboard/thread/'+f.id+'?fragment=1',{id:f.id}))).status,401);
  assert.equal(await f.scope.conversation(f.db,'unrelated-user',f.id,new URL('https://example.invalid')),null);

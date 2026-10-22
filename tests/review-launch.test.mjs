@@ -42,6 +42,15 @@ test('review navigation shares the admin shell',()=>{
  assert.match(read('src/server/feedback-ui.ts'),/Review queues/);assert.match(read('src/server/feedback-ui.ts'),/admin-page-heading/);
  assert.match(read('src/server/feedback-ui.ts'),/\['messages','\/dashboard\/messages','Messages'\]/);
 });
+test('every administration destination uses the current operational layouts',()=>{
+ const workspace=read('src/pages/admin/workspace.ts'),index=read('src/pages/admin/index.ts'),invitations=read('src/pages/admin/invitations.ts'),community=read('src/pages/admin/community.ts'),feedback=read('src/pages/admin/feedback.ts'),project=read('src/pages/admin/project.ts'),accountRequests=read('src/pages/admin/account-requests.ts'),css=read('ui-refinements.css');
+ for(const marker of ['admin-member-list','admin-case-list','admin-request-list','admin-activity-list','admin-settings-grid'])assert.match(workspace,new RegExp(marker));
+ assert.match(workspace,/return surface\('Administration'/);assert.doesNotMatch(workspace,/return workspace\('Administration'/);
+ for(const marker of ['admin-moderation-list','admin-review-queue','admin-record-list'])assert.match(index,new RegExp(marker));
+ for(const marker of ['admin-invitation-hero','admin-invitations-list','admin-invitation-editor'])assert.match(invitations,new RegExp(marker));
+ assert.match(community,/admin-decision-list/);assert.match(feedback,/admin-feedback-list/);assert.match(project,/admin-project-review-layout/);assert.match(accountRequests,/admin-account-request/);
+ for(const selector of ['.admin-comment-row','.admin-app-review','.admin-invitation-row','.admin-decision-card','.admin-feedback-review','.admin-project-review-layout','.admin-account-request'])assert.ok(css.includes(selector));
+});
 test('catalog stays simple while listing preview pairs screenshot with description',()=>{
  const app=read('app.js'),css=read('launch-refinements.css');
  assert.match(app,/creatorMatchesFilters\(creatorFor\(product\), state\.creatorType, state\.verifiedOnly\)/);

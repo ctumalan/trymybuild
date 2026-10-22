@@ -15,7 +15,7 @@ test('member directory uses compact rows and collapsed action disclosures',async
   assert.ok(row.indexOf('<details')<row.indexOf('Member ID:'));
  }
  for(const i of [0,4]){
-  assert.match(rows[i],/Protected account/);
+  assert.match(rows[i],/Protected administrator account/);
   assert.doesNotMatch(rows[i],/<form/);
  }
  assert.match(rows[1],/Restore account access/);

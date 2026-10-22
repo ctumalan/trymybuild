@@ -93,3 +93,7 @@
 .setup-app-preview { display:block; width:100%; max-height:320px; object-fit:contain; border-radius:12px; margin:16px 0; }
 .pending-invitations { margin:0 0 24px; padding:22px; border-left:4px solid #7545ad; }
 .pending-invitations .primary-button { white-space:normal; }
+.project-detail-content.invitation-native-detail > .public-detail-header { display:grid; grid-template-columns:minmax(0,1fr); align-items:start; gap:10px; }
+.invitation-native-detail > .public-detail-header > * { min-width:0; max-width:100%; }
+.invitation-native-detail .setup-language { margin:0; }
+.invitation-native-detail .invitation-setup-steps { margin:0; }

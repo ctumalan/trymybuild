@@ -44,7 +44,7 @@ test('review navigation shares the admin shell',()=>{
 });
 test('every administration destination uses the current operational layouts',()=>{
  const workspace=read('src/pages/admin/workspace.ts'),index=read('src/pages/admin/index.ts'),invitations=read('src/pages/admin/invitations.ts'),community=read('src/pages/admin/community.ts'),feedback=read('src/pages/admin/feedback.ts'),project=read('src/pages/admin/project.ts'),accountRequests=read('src/pages/admin/account-requests.ts'),css=read('ui-refinements.css');
- for(const marker of ['admin-member-list','admin-case-list','admin-request-list','admin-activity-list','admin-settings-grid'])assert.match(workspace,new RegExp(marker));
+ for(const marker of ['admin-people-workspace','admin-member-apps','admin-case-list','admin-request-list','admin-activity-list','admin-settings-grid'])assert.match(workspace,new RegExp(marker));
  assert.match(workspace,/return surface\('Administration'/);assert.doesNotMatch(workspace,/return workspace\('Administration'/);
  for(const marker of ['admin-moderation-list','admin-review-queue','admin-record-list'])assert.match(index,new RegExp(marker));
  for(const marker of ['admin-invitation-hero','admin-invitations-list','admin-invitation-editor'])assert.match(invitations,new RegExp(marker));

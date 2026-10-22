@@ -69,7 +69,8 @@ export function workspaceFixtures(){
 export function adminPeopleFixture(){
  const f=workspaceFixtures();
  const profiles=Array.from({length:15},(_,i)=>({user_id:`member-${i}`,display_name:i===3?'A creator with a longer public name':`Sample Member ${i+1}`,verified:i===2,users:{account_status:i===1?'suspended':'active',workos_user_id:i===0?'fixture-user':`user-${i}`,system_role:i===4?'admin':'member'}}));
- const db=mockDatabase({profiles});
+ const projects=[{owner_user_id:'member-2',slug:'member-app',title:'Member app',summary:'A submitted app to inspect.',external_url:'https://example.invalid/member-app',preview_public_url:'/assets/previews/stackscout.png',listing_status:'in_review',ownership_status:'confirmed',updated_at:'2026-10-22T12:00:00Z'}],feedback_qualifications=[{user_id:'member-2',status:'qualified'}];
+ const db=mockDatabase({profiles,projects,feedback_qualifications});
  const scope={...f.scope,...moduleFixture('src/server/feedback-ui.ts',['adminNavigation'],f.scope),memberContext:async()=>({user:{id:'fixture-user'},db,admin:true})};
- return {GET:moduleFixture('src/pages/admin/workspace.ts',['GET'],scope).GET,profiles};
+ return {GET:moduleFixture('src/pages/admin/workspace.ts',['GET'],scope).GET,profiles,projects};
 }

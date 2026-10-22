@@ -48,8 +48,8 @@ test('every administration destination uses the current operational layouts',()=
  assert.match(workspace,/return surface\('Administration'/);assert.doesNotMatch(workspace,/return workspace\('Administration'/);
  for(const marker of ['admin-moderation-list','admin-review-queue','admin-record-list'])assert.match(index,new RegExp(marker));
  for(const marker of ['admin-invitation-hero','admin-invitations-list','admin-invitation-editor'])assert.match(invitations,new RegExp(marker));
- assert.match(community,/admin-decision-list/);assert.match(feedback,/admin-feedback-list/);assert.match(project,/admin-project-review-layout/);assert.match(accountRequests,/admin-account-request/);
- for(const selector of ['.admin-comment-row','.admin-app-review','.admin-invitation-row','.admin-decision-card','.admin-feedback-review','.admin-project-review-layout','.admin-account-request'])assert.ok(css.includes(selector));
+ assert.match(community,/admin-decision-list/);assert.match(feedback,/admin-feedback-workspace/);assert.match(feedback,/admin-feedback-reader/);assert.match(feedback,/admin-feedback-decision/);assert.match(project,/admin-project-review-layout/);assert.match(accountRequests,/admin-account-request/);
+ for(const selector of ['.admin-comment-row','.admin-app-review','.admin-invitation-row','.admin-decision-card','.admin-feedback-workspace','.admin-feedback-reader','.admin-feedback-decision','.admin-project-review-layout','.admin-account-request'])assert.ok(css.includes(selector));
 });
 test('catalog stays simple while listing preview pairs screenshot with description',()=>{
  const app=read('app.js'),css=read('launch-refinements.css');

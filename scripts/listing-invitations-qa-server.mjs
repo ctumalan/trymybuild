@@ -1,3 +1,8 @@
+import {validSlug} from '../src/server/feedback-policy.mjs';
+import {submit} from '../src/server/listing-service.mjs';
+import {publishReadiness} from '../src/server/listing-policy.mjs';
+import {welcomeEmail,accountSetupEmail} from '../src/server/welcome-email.mjs';
+import {setupLanguage,invitationSetupPath,publishSetupPath} from '../src/server/setup-language.mjs';
 // Local synthetic invitation preview. No production credentials, emails or accounts.
 import http from 'node:http';
 import {readFile} from 'node:fs/promises';
@@ -10,31 +15,41 @@ const root=new URL('../',import.meta.url),port=Number(process.argv[2]||4396),bas
 const id='77777777-7777-4777-8777-777777777777',member='88888888-8888-4888-8888-888888888888',secret='synthetic-fixture-not-a-production-secret-12345',token=invitationToken(id,secret);
 const row={id,created_by:member,recipient_email:'maker@example.invalid',title:'Trip Notebook',external_url:'https://example.com/',category:'Travel',stage:'Ready for a first try',headline:'Keep the useful details of your next trip together.',help_text:'Spend less time hunting through tabs when you are away.',first_try:'Create one trip and add the first place you want to visit.',preview_path:'sample.jpg',price_label:'Free',lock_version:0,expires_at:new Date(Date.now()+2*86400000).toISOString(),created_at:new Date().toISOString(),claimed_by:null,revoked_at:null};
 const e=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const scope={e,Response,URL,Date,pricingKind,console,CWProjectView:globalThis.CWProjectView,invitationFeedback:()=>invitationFeedback('87829b6d-f5bb-4a3d-afd1-c823a3d812f0'),origin:()=>base,validId:()=>true,signedInvitation:()=>token,invitationOpen,invitationExpiresAt,loadInvitation:async()=>row,ensureMember:async()=>({id:member}),renderInvitationFeedback:()=>feedbackPanel({...invitationFeedback('87829b6d-f5bb-4a3d-afd1-c823a3d812f0'),headline:'The sample trip makes the idea easy to understand.'})};
+const scope={e,validSlug,submit,publishReadiness,setupLanguage,invitationSetupPath,publishSetupPath,Response,URL,Date,pricingKind,console,CWProjectView:globalThis.CWProjectView,invitationFeedback:()=>invitationFeedback('87829b6d-f5bb-4a3d-afd1-c823a3d812f0'),origin:()=>base,validId:()=>true,signedInvitation:()=>token,invitationOpen,invitationExpiresAt,loadInvitation:async()=>row,ensureMember:async()=>({id:member}),renderInvitationFeedback:()=>feedbackPanel({...invitationFeedback('87829b6d-f5bb-4a3d-afd1-c823a3d812f0'),headline:'The sample trip makes the idea easy to understand.'})};
 Object.assign(scope,moduleFixture('src/server/feedback-ui.ts',['surface','adminSurface','unavailable','signIn'],scope));
+Object.assign(scope,moduleFixture('src/server/workspace.ts',['workspace'],scope));
 Object.assign(scope,moduleFixture('src/server/listing-invitation-view.ts',['invitationFields','invitationPreview','invitationAssets'],scope));
 Object.assign(scope,moduleFixture('src/server/project-ui.ts',['discoveryCard'],scope));
 Object.assign(scope,moduleFixture('src/server/project-detail-ui.ts',['projectDetailContent','projectDetailTitle','projectTheme','projectReviewCard'],scope));
 Object.assign(scope,moduleFixture('src/server/invitation-catalog-view.ts',['invitationCatalogPage'],scope));
 scope.listPublished=async()=>['stackscout','dayframe','packlight','mealmap'].map((slug,i)=>({slug,name:['StackScout','DayFrame','PackLight','MealMap'][i],summary:'A practical tool for everyday life.',category:['Technology','Productivity','Travel','Food & home'][i],price:'Free',url:'https://example.invalid/'+slug,preview:'/assets/previews/'+slug+'.png',creator:{name:'TryMyBuild Studio',slug:'creatorworks-studio'}}));
 const db=mockDatabase({listing_invitations:[row]});let user=null,project=null;
-scope.currentUser=async()=>user;scope.memberContext=async()=>({user:{email:'admin@example.invalid',emailVerified:true},member:{id:member},db,admin:true});
+scope.currentUser=async()=>user;scope.memberContext=async()=>({user:user||{email:'admin@example.invalid',emailVerified:true},member:{id:member},db,admin:true});
 const admin=moduleFixture('src/pages/admin/invitations.ts',['GET'],scope).GET;
+scope.database=()=>db;
+scope.projectStore=()=>({findOwnedBySlug:async()=>project,findOwnedById:async()=>project,updateOwnedGuarded:async(_id,_owner,expected,patch)=>{if(project.lock_version!==expected.lockVersion)return null;Object.assign(project,patch,{lock_version:project.lock_version+1});return project;}});
+scope.invitationStore=()=>({findProject:async()=>project});scope.publicationAccess=async()=>({allowed:true});scope.allowRequest=async()=>true;scope.sameOrigin=request=>request.headers.get('origin')===base;
+const publish=moduleFixture('src/pages/dashboard/publish.ts',['GET','POST'],scope);
 const creator=moduleFixture('src/pages/listing-invitation/[token].ts',['GET'],scope).GET;
 http.createServer(async(req,res)=>{
  try{
   const url=new URL(req.url,base);let response;
   user=url.searchParams.get('guest')!=='1'&&req.headers.cookie?.includes('fixture_creator=1')?{email:'maker@example.invalid',emailVerified:true}:null;
-  const context={url,params:{token},redirect:(href,status)=>new Response(null,{status,headers:{location:href}})};
-  if(url.pathname==='/responsive-qa')response=new Response(`<!doctype html><html><head><title>Invitation 390px layout check</title></head><body><p>Local 390px layout check</p><iframe title="390px invitation preview" src="/listing-invitation/${token}#founder-feedback" width="390" height="844" style="border:1px solid #ddd"></iframe></body></html>`,{headers:{'Content-Type':'text/html'}});
+  const context={url,request:new Request(url),params:{token},redirect:(href,status)=>new Response(null,{status,headers:{location:href}})};
+  if(url.pathname==='/welcome-email')response=new Response((url.searchParams.get('stage')==='account'?accountSetupEmail({user:{firstName:'Sample Creator'},invitation:{title:row.title,path:invitationSetupPath(token,'es',true)},language:'es',siteUrl:base}):welcomeEmail({user:{firstName:'Sample Creator'},project:project||{...row,slug:'local-trip-notebook'},language:'es',siteUrl:base})).html,{headers:{'Content-Type':'text/html; charset=utf-8'}});
+  else if(url.pathname==='/dashboard/publish'){
+   if(req.method==='POST'){const chunks=[];for await(const part of req)chunks.push(part);context.request=new Request(url,{method:'POST',headers:{origin:req.headers.origin||'', 'content-type':req.headers['content-type']||''},body:Buffer.concat(chunks).toString()});}
+   response=await publish[req.method==='POST'?'POST':'GET'](context);
+  }
+  else if(url.pathname==='/responsive-qa')response=new Response(`<!doctype html><html><head><title>Invitation 390px layout check</title></head><body><p>Local 390px layout check</p><iframe title="390px invitation preview" src="/listing-invitation/${token}#founder-feedback" width="390" height="844" style="border:1px solid #ddd"></iframe></body></html>`,{headers:{'Content-Type':'text/html; charset=utf-8'}});
   else if(url.pathname==='/admin/invitations')response=await admin(context);
   else if(url.pathname==='/listing-invitation/'+token)response=await creator(context);
   else if(url.pathname==='/auth/sign-in'){
    response=new Response(null,{status:303,headers:{Location:url.searchParams.get('next')||'/','Set-Cookie':'fixture_creator=1; Path=/; SameSite=Lax'}});
   }else if(url.pathname.endsWith('/claim')&&req.method==='POST'){
    const chunks=[];for await(const part of req)chunks.push(part);const body=JSON.parse(Buffer.concat(chunks).toString());
-   const result=await claimInvitation({find:async()=>row,findProject:async()=>project,claim:async(_id,owner,_email,_version,details)=>{project={id:'local-project',slug:'local-trip-notebook',owner_user_id:owner,...details,visibility:'draft',listing_status:'draft'};row.claimed_by=owner;row.project_id=project.id;return project;}},{id,memberId:member,user,version:body.version,input:body});
-   response=new Response(JSON.stringify(result.error?result:{href:'/?listing=settings&project=local-trip-notebook'}),{status:result.error?result.status:200,headers:{'Content-Type':'application/json'}});
+   const result=await claimInvitation({find:async()=>row,findProject:async()=>project,claim:async(_id,owner,_email,_version,details)=>{project={id:'local-project',slug:'local-trip-notebook',owner_user_id:owner,...details,preview_path:'sample.jpg',preview_public_url:'/assets/previews/packlight.png',sharing_preference:'private',lock_version:0,visibility:'draft',listing_status:'draft'};row.claimed_by=owner;row.project_id=project.id;return project;}},{id,memberId:member,user,version:body.version,input:body});
+   response=new Response(JSON.stringify(result.error?result:{href:publishSetupPath('local-trip-notebook',body.language)}),{status:result.error?result.status:200,headers:{'Content-Type':'application/json'}});
   }else if(url.pathname==='/api/listing-invitation/'+token+'/image'){
    const screenshot=await readFile(new URL('assets/previews/packlight.png',root));const image=url.searchParams.get('card')==='1'?await renderInvitationImage({name:row.title,category:row.category,presentation:{headline:row.headline},creator:{name:''}},screenshot,{listingPreview:true}):screenshot;
    response=new Response(image,{headers:{'Content-Type':'image/png'}});

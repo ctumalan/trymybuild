@@ -19,7 +19,18 @@ export function feedbackInput(data) {
 export function threadAccess(memberId, authorId, ownerId) { return !!memberId && (memberId === authorId || memberId === ownerId); }
 export function feedbackDestination(value) {
   if(value==='/admin/invitations')return value;
-  if(typeof value==='string'&&/^\/listing-invitation\/[a-f0-9-]{36}\.[a-f0-9]{64}(?:\?share=(?:copy|menu))?$/.test(value))return value;
+  if(typeof value==='string'&&value.startsWith('/listing-invitation/')){
+    const url=new URL(value,'https://local.invalid');
+    const allowed={lang:['en','es'],step:['save'],share:['copy','menu']};
+    if(/^\/listing-invitation\/[a-f0-9-]{36}\.[a-f0-9]{64}$/.test(url.pathname)&&!url.hash&&
+      [...url.searchParams.keys()].every(key=>Object.hasOwn(allowed,key)&&url.searchParams.getAll(key).length===1&&allowed[key].includes(url.searchParams.get(key))))return url.pathname+url.search;
+  }
+  if(typeof value==='string'&&value.startsWith('/dashboard/publish?')){
+    const url=new URL(value,'https://local.invalid');
+    if(url.pathname==='/dashboard/publish'&&!url.hash&&validSlug(url.searchParams.get('project'))&&
+      [...url.searchParams.keys()].every(key=>['project','lang'].includes(key)&&url.searchParams.getAll(key).length===1)&&
+      (!url.searchParams.has('lang')||['en','es'].includes(url.searchParams.get('lang'))))return url.pathname+url.search;
+  }
   if(typeof value==='string'&&/^\/people\/[a-z0-9-]{1,80}$/.test(value))return value;
   if(value==='/dashboard/messages' || typeof value==='string' && /^\/dashboard\/messages\?thread=[0-9a-f-]{36}$/.test(value))return value;
   // Only a local category return path is accepted; never an arbitrary redirect.

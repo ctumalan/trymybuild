@@ -63,15 +63,16 @@ export async function saveDraft(store, { ownerId, id, clientToken, input }, deps
 
 // Launch policy: an authenticated owner explicitly publishes a ready public listing.
 // Existing review-queue entries can use the same action; no bulk publication is implied.
-export async function submit(store, { ownerId, id }) {
+export async function submit(store, { ownerId, id, confirmPublic = false, version = -1 }) {
   const row = await store.findOwnedById(ownerId, id);
   if (!row) return { status: 404, error: 'That project was not found in your account.' };
   if (row.listing_status === 'published') return { status: 200, project: row, idempotent: true };
+  if(confirmPublic&&(!Number.isSafeInteger(version)||version!==row.lock_version))return {status:409,error:'This listing changed. Reload and review it before publishing.'};
   const readiness = publishReadiness(row);
-  if(row.sharing_preference && row.sharing_preference!=='public')return {status:400,error:'Choose Publicly in sharing preferences before publishing.'};
+  if(!confirmPublic&&row.sharing_preference && row.sharing_preference!=='public')return {status:400,error:'Choose Publicly in sharing preferences before publishing.'};
   if (!readiness.ready) return { status: 400, error: `Add ${readiness.missing.join(', ')} before publishing.`, missing: readiness.missing };
   const now = new Date().toISOString();
-  const updated = await store.updateOwnedGuarded(id, ownerId, { status: row.listing_status, lockVersion: row.lock_version }, { listing_status: 'published', visibility: 'public', submitted_at: now, published_at: row.published_at || now });
+  const updated = await store.updateOwnedGuarded(id, ownerId, { status: row.listing_status, lockVersion: row.lock_version }, { listing_status: 'published', visibility: 'public', ...(confirmPublic?{sharing_preference:'public'}:{}), submitted_at: now, published_at: row.published_at || now });
   if (!updated) return { status: 409, error: 'This listing changed. Reload and try again.' };
   return { status: 200, project: updated };
 }

@@ -82,3 +82,14 @@
 .invitation-declined { display:grid; justify-items:start; gap:12px; min-height:55vh; align-content:center; padding:32px; }
 .invitation-declined h1,.invitation-declined p { margin:0; }
 .invitation-native-feedback .public-review-card>.invitation-feedback-scope { margin:13px 0 0; padding:0; border:0; background:transparent; color:#716779; font-size:.82rem; line-height:1.6; }
+
+/* Keep the account, private draft and public listing steps distinct. */
+.setup-language { display:flex; flex-wrap:wrap; gap:14px; margin:12px 0; font-size:.9rem; }
+.setup-language [aria-current=page] { font-weight:700; text-decoration-thickness:2px; }
+.invitation-setup-steps { padding:12px 14px; border-radius:10px; background:#f2edf8; color:#51356b; line-height:1.6; font-weight:600; overflow-wrap:anywhere; }
+.setup-publish-guide { max-width:800px; margin:0 auto; }
+.setup-publish-guide .cw-panel { margin:20px 0; }
+.setup-publish-guide dd { margin:4px 0 16px; overflow-wrap:anywhere; }
+.setup-app-preview { display:block; width:100%; max-height:320px; object-fit:contain; border-radius:12px; margin:16px 0; }
+.pending-invitations { margin:0 0 24px; padding:22px; border-left:4px solid #7545ad; }
+.pending-invitations .primary-button { white-space:normal; }

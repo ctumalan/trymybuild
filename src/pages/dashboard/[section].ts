@@ -9,6 +9,7 @@ import type { APIRoute } from 'astro';
 import { memberContext, workspace, notice, empty } from '../../server/workspace';
 import { signIn, e, unavailable } from '../../server/feedback-ui';
 import { randomUUID } from 'node:crypto';
+import {pendingInvitationNotice} from '../../server/pending-invitations';
 
 const field=(name:string,value:string)=>`<input type="hidden" name="${name}" value="${e(value)}">`;
 const start=(action:string,section:string)=>`<form method="post" action="/api/dashboard">${field('action',action)}${field('section',section)}`;
@@ -28,6 +29,7 @@ export const GET:APIRoute=async context=>{
   const m=await memberContext(context);if(!m)return signIn('/dashboard/'+section);
   const {db,member,admin}=m;let body=notice(context),title='',identity:any;
   if(section==='overview'){
+   body+=await pendingInvitationNotice(context,m);
    const profile=await db.from('profiles').select('display_name,avatar_path,identity_label,bio').eq('user_id',member.id).single();if(profile.error)throw Error();
    const first=(m.user.firstName||profile.data.display_name.split(/\s+/)[0]||'there').trim();title=`Welcome, ${first}.`;identity={name:profile.data.display_name,avatar:profile.data.avatar_path||''};
    const results=await Promise.all([db.from('projects').select('id',{head:true,count:'exact'}).eq('owner_user_id',member.id),db.from('saved_projects').select('project_slug',{head:true,count:'exact'}).eq('user_id',member.id),db.from('notifications').select('id',{head:true,count:'exact'}).eq('user_id',member.id).is('read_at',null),db.from('support_cases').select('id',{head:true,count:'exact'}).eq('user_id',member.id).neq('status','resolved')]);
@@ -43,7 +45,7 @@ export const GET:APIRoute=async context=>{
    let primaryKind='app',primaryTitle='',primaryCopy='',primaryHref='',primaryLabel='',primaryPercent:number|null=null;
    if(!setupProject){primaryTitle='Add your first app';primaryCopy='Create a private app page you can finish at your pace.';primaryHref='/?listing=settings&amp;new=1';primaryLabel='Add your app';primaryPercent=0;}
    else if(appProgress.percent<100){primaryTitle=`Finish ${e(setupProject.title||'your app page')}`;primaryCopy='Complete the remaining details before you publish.';primaryHref='/?listing=settings&amp;project='+e(setupProject.slug);primaryLabel='Complete app page';primaryPercent=appProgress.percent;}
-   else if(!appPublished){primaryTitle=`${e(setupProject.title||'Your app')} is ready to publish`;primaryCopy='Review the page, then publish when you’re ready for people to find it.';primaryHref='/?listing=settings&amp;project='+e(setupProject.slug);primaryLabel='Review and publish';primaryPercent=100;}
+   else if(!appPublished){primaryTitle=`${e(setupProject.title||'Your app')} is ready to publish`;primaryCopy='Review the page, then publish when you’re ready for people to find it.';primaryHref='/dashboard/publish?project='+e(setupProject.slug);primaryLabel='Review and publish';primaryPercent=100;}
    else if(profileProgress.percent<100){primaryKind='profile';primaryTitle='Finish your creator profile';primaryCopy='Help people understand who made your app.';primaryHref='/dashboard/profile';primaryLabel='Complete profile';primaryPercent=profileProgress.percent;}
    else{primaryKind='live';primaryTitle=`${e(setupProject.title||'Your app')} is live`;primaryCopy='Open the listing or ask another maker for feedback.';primaryHref='/dashboard/project?slug='+e(setupProject.slug);primaryLabel='View your app';}
    const primaryProgress=primaryPercent===null?'':`<div class="overview-primary-progress"><progress max="100" value="${primaryPercent}">${primaryPercent}%</progress><strong>${primaryPercent}%</strong></div>`;

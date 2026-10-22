@@ -1,18 +1,19 @@
 import {e} from './feedback-ui';
 import {pricingKind} from './listing-policy.mjs';
-export function invitationFields(row:any={},admin=false){
+export function invitationFields(row:any={},admin=false,language='en'){
+ const es=!admin&&language==='es',t=(en:string,spanish:string)=>es?spanish:en;
  const pricing=row.price_label==='Not confirmed'?'unconfirmed':pricingKind(row.price_label||'Free');
  const input=(name:string,label:string,value:string,max:number,type='text')=>`<label>${label}<input name="${name}" type="${type}" value="${e(value||'')}" maxlength="${max}" ${['title','url','recipientEmail'].includes(name)?'required':''}></label>`;
  const area=(name:string,label:string,value:string,max:number,placeholder:string)=>`<label>${label}<textarea name="${name}" maxlength="${max}" rows="3" placeholder="${e(placeholder)}">${e(value||'')}</textarea></label>`;
  const stages=['Still taking shape','Ready for a first try','Being tested by early users','Finished and launched'];
  return `${admin?input('recipientEmail','Creator’s email',row.recipient_email,254,'email'):''}
- ${input('title','App name',row.title,80)}${input('url','App website',row.external_url,2000,'url')}
- ${input('does','What it does',row.headline,140)}
- ${area('helps','How it helps',row.help_text,500,'What will someone gain from using your app?')}
- ${area('firstTry','One thing to try first',row.first_try,500,'Give someone one simple action to start with.')}
- <details ${!admin&&pricing==='unconfirmed'?'open':''}><summary>Category, stage and pricing</summary>${input('category','Category',row.category||'Technology',48)}
- <label>Stage<select name="stage">${stages.map(s=>`<option ${s===(row.stage||'Ready for a first try')?'selected':''}>${e(s)}</option>`).join('')}</select></label>
- <label>Your app’s pricing<select name="pricing" required>${admin||pricing==='unconfirmed'?`<option value="unconfirmed" ${pricing==='unconfirmed'?'selected':''} ${admin?'':'disabled'}>${admin?'Not confirmed':'Choose your app’s pricing'}</option>`:''}${[['free','Free'],['paid','Paid'],['freemium','Free + paid options']].map(([v,l])=>`<option value="${v}" ${v===pricing?'selected':''}>${l}</option>`).join('')}</select></label>
+ ${input('title',t('App name','Nombre de la app'),row.title,80)}${input('url',t('App website','Sitio web de la app'),row.external_url,2000,'url')}
+ ${input('does',t('What it does','Qué hace'),row.headline,140)}
+ ${area('helps',t('How it helps','Cómo ayuda'),row.help_text,500,t('What will someone gain from using your app?','¿Qué obtiene alguien al usar tu app?'))}
+ ${area('firstTry',t('One thing to try first','Una cosa para probar primero'),row.first_try,500,t('Give someone one simple action to start with.','Indica una acción sencilla para empezar.'))}
+ <details ${!admin&&pricing==='unconfirmed'?'open':''}><summary>${t('Category, stage and pricing','Categoría, etapa y precio')}</summary>${input('category',t('Category','Categoría'),row.category||'Technology',48)}
+ <label>${t('Stage','Etapa')}<select name="stage">${stages.map((s,i)=>`<option value="${e(s)}" ${s===(row.stage||'Ready for a first try')?'selected':''}>${e(es?['En desarrollo','Lista para probar','En pruebas con primeros usuarios','Terminada y lanzada'][i]:s)}</option>`).join('')}</select></label>
+ <label>${t('Your app’s pricing','Precio de tu app')}<select name="pricing" required>${admin||pricing==='unconfirmed'?`<option value="unconfirmed" ${pricing==='unconfirmed'?'selected':''} ${admin?'':'disabled'}>${admin?'Not confirmed':t('Choose your app’s pricing','Elige el precio de tu app')}</option>`:''}${[['free',t('Free','Gratis')],['paid',t('Paid','De pago')],['freemium',t('Free + paid options','Gratis con opciones de pago')]].map(([v,l])=>`<option value="${v}" ${v===pricing?'selected':''}>${l}</option>`).join('')}</select></label>
  <input type="hidden" name="video" value="${e(row.video_url||'')}"></details>`;
 }
 export function invitationPreview(row:any,image:string){

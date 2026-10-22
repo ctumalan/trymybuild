@@ -5,6 +5,8 @@ import {sameOrigin} from '../../../../server/security.mjs';
 import {claimInvitation,invitationId} from '../../../../server/listing-invitation.mjs';
 import {invitationStore} from '../../../../server/listing-invitation-store';
 import {allowRequest} from '../../../../server/abuse';
+import {sendFirstProjectWelcome} from '../../../../server/welcome-email.mjs';
+import {publishSetupPath} from '../../../../server/setup-language.mjs';
 export const POST:APIRoute=async context=>{
  if(!sameOrigin(context.request,origin(context)))return json({error:'Request not allowed.'},403);
  try{
@@ -15,6 +17,8 @@ export const POST:APIRoute=async context=>{
   const body=JSON.parse(raw);if(body.confirm!=='yes'||body.terms!=='yes')return json({error:'Confirm this is your app and agree to the terms before saving.'},400);
   const result=await claimInvitation(invitationStore(m.db),{id,memberId:m.member.id,user:m.user,version:body.version,input:body});
   if(result.error)return json({error:result.error},result.status);
-  return json({ok:true,href:'/?listing=settings&project='+encodeURIComponent(result.project.slug),idempotent:!!result.idempotent});
+  const language=body.language==='es'?'es':'en';
+  await sendFirstProjectWelcome({db:m.db,user:m.user,member:m.member,project:result.project,language}).catch(()=>console.warn('Invitation welcome email could not be sent'));
+  return json({ok:true,href:publishSetupPath(result.project.slug,language),idempotent:!!result.idempotent});
  }catch{return json({error:'Saving was not confirmed. Reload this preview to check before trying again.'},503);}
 };

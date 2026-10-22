@@ -64,7 +64,7 @@
    panel.innerHTML='<section class="invitation-declined"><p class="eyebrow">Invitation declined</p><h1>This preview has been removed.</h1><p>This invitation link is no longer available. Your own website has not been changed.</p><a class="secondary-button" href="/">Explore TryMyBuild</a></section>';
   }catch(error){status.textContent=error.message;button.disabled=false;}
  }
- const boot=()=>{if(document.querySelector('#invitation-app-panel')){openInvitationPanel();if(arrivalHash)reviewArrival(arrivalHash);}mountInvitationForm();};
+ const boot=()=>{if(document.querySelector('#invitation-app-panel')){openInvitationPanel(document.querySelector('#invitation-app-panel').dataset?.resumeClaim==='true'?'claim':'app');if(arrivalHash)reviewArrival(arrivalHash);}mountInvitationForm();};
  if(document.readyState==='complete')boot();else document.addEventListener('DOMContentLoaded',boot,{once:true});
  window.addEventListener('cw-panel-ready',mountInvitationForm);
  window.addEventListener('hashchange',()=>{if(reviewHashes.has(location.hash)){const hash=location.hash;history.replaceState(history.state,'',location.pathname+location.search);openInvitationPanel();reviewArrival(hash);}});
@@ -101,14 +101,14 @@
   const details=formData();status.textContent='';
   if(claim&&claim.dataset.authenticated!=='true'){
    if(!preserve()){status.textContent='Your browser could not keep these edits for sign-in. Enable browser storage and try again.';return;}
-   location.href='/auth/sign-in?signup=1&next='+encodeURIComponent(location.pathname);return;
+   location.href='/auth/sign-in?signup=1&next='+encodeURIComponent(location.pathname+'?lang='+(claim.dataset.language==='es'?'es':'en')+'&step=save');return;
   }
   if(claim&&claim.dataset.matchingAccount!=='true'){status.textContent='Use the email address that received this invitation.';return;}
   if(admin&&image&&source==='captured'&&details.url!==imageUrl){status.textContent='The website URL changed after capture. Capture it again or upload a screenshot for this URL.';return;}
   const payload={...details};let url;
   if(admin){if(!form.dataset.id)form.dataset.id=crypto.randomUUID();payload.id=form.dataset.id;if(form.dataset.version!==undefined)payload.version=Number(form.dataset.version);if(image){payload.image=image;payload.source=source;}url='/api/admin/listing-invitations';}
   else{payload.version=Number(form.dataset.version);url='/api/listing-invitation/'+claim.dataset.token+'/claim';}
-  status.textContent='Saving preview…';
+  status.textContent=claim?.dataset.language==='es'?'Guardando borrador privado…':'Saving private draft…';
   try{const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}),data=await r.json();if(!r.ok)throw Error(data.error||'Saving was not confirmed. Reload to check before retrying.');if(claim){try{sessionStorage.removeItem(storageKey);}catch{}}location.href=admin?data.adminUrl+'&saved=1':data.href;}catch(error){status.textContent=error.message;}
  });});
  }

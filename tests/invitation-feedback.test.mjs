@@ -1,3 +1,4 @@
+import {setupLanguage,invitationSetupPath,publishSetupPath} from '../src/server/setup-language.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {feedbackPanel,invitationFeedback,renderInvitationFeedback,reviewText} from '../src/server/invitation-feedback.mjs';
@@ -74,7 +75,7 @@ test('guest sharing reveals the real tools before claim-gating final actions',()
 test('feedback stays behind the invitation lifecycle checks and is below its app preview',async()=>{
  let row={id,created_at:new Date().toISOString(),expires_at:new Date(Date.now()+86400000).toISOString(),title:'Fir & Field',price_label:'Free',external_url:'https://example.com/',recipient_email:'maker@example.com'};
  const surface=(_title,body,_unused,status=200)=>new Response(body,{status});
- const scope={CWProjectView:globalThis.CWProjectView,invitationFeedback,listPublished:async()=>[],Response,invitationOpen,loadInvitation:async()=>row,currentUser:async()=>null,ensureMember:async()=>null,renderInvitationFeedback,invitationAssets:'',surface,e:String,unavailable:()=>new Response('Unavailable'),invitationFields:()=>'',invitationPreview:()=>'<article>App preview</article>'};
+ const scope={setupLanguage,invitationSetupPath,publishSetupPath,CWProjectView:globalThis.CWProjectView,invitationFeedback,listPublished:async()=>[],Response,invitationOpen,loadInvitation:async()=>row,currentUser:async()=>null,ensureMember:async()=>null,renderInvitationFeedback,invitationAssets:'',surface,e:String,unavailable:()=>new Response('Unavailable'),invitationFields:()=>'',invitationPreview:()=>'<article>App preview</article>'};
  Object.assign(scope,moduleFixture('src/server/project-ui.ts',['discoveryCard'],scope));
  Object.assign(scope,moduleFixture('src/server/project-detail-ui.ts',['projectDetailContent','projectDetailTitle','projectTheme','projectReviewCard'],scope));
  Object.assign(scope,moduleFixture('src/server/invitation-catalog-view.ts',['invitationCatalogPage'],scope));
@@ -85,16 +86,16 @@ test('feedback stays behind the invitation lifecycle checks and is below its app
  assert.match(html,/Public website review/);
  assert.match(html,/This is your preview of Fir & Field/);
  assert.doesNotMatch(html,/Website pricing:|Listing on TryMyBuild is free\./);
- assert.ok(html.indexOf('id="invitation-review-heading"')<html.indexOf('Save now.'));
- assert.ok(html.indexOf('Save now.')<html.indexOf('Save your preview'));
- assert.match(html,/Publish later for broader feedback\./);
- assert.match(html,/Free to join\. You choose when to publish\./);
+ assert.ok(html.indexOf('id="invitation-review-heading"')<html.indexOf('Save a private draft first.'));
+ assert.ok(html.indexOf('Save a private draft first.')<html.indexOf('Create account &amp; continue'));
+ assert.match(html,/Then review and publish it so other creators can find it\./);
+ assert.match(html,/Registration alone does not save or publish the app\./);
  assert.doesNotMatch(html,/Only listed apps receive reviews from other users\./);
  assert.match(html,/Save your preview/);
  assert.match(html,/data-invitation-share="fixture"/);
  assert.match(html,/data-share-intent="menu"/);
  assert.match(html,/<div class="invite-actions"><button[^>]+aria-label="Share this app">Share<\/button>/);
- assert.match(html,/data-signup-href="\/auth\/sign-in\?signup=1&next=%2Flisting-invitation%2Ffixture%3Fshare%3Dmenu"/);
+ assert.match(html,/data-signup-href="\/auth\/sign-in\?signup=1&next=%2Flisting-invitation%2Ffixture%3Flang%3Den%26step%3Dsave%26share%3Dmenu"/);
  assert.doesNotMatch(html,/invitation-preview-sharing|Copy app link|<h2>Share your app<\/h2>/);
  assert.match(html,/<div class="studio-preview-label"><strong>Product preview<\/strong><\/div>/);
  assert.doesNotMatch(html,/recipient-art-live[^>]*>[\s\S]*?Preview<\/span>/);
@@ -119,10 +120,10 @@ test('feedback stays behind the invitation lifecycle checks and is below its app
  assert.match(html,/invitation-catalog-grid/);
  scope.currentUser=async()=>({email:'maker@example.com',emailVerified:true});
  const matched=await(await route(request)).text();
- assert.match(matched,/data-invitation-edit/);assert.match(matched,/data-invitation-authenticated="true"/);assert.match(matched,/<a class="primary-button" href="https:\/\/example.com\/"/);assert.match(matched,/You choose when to publish\./);assert.doesNotMatch(matched,/Free to join|disabled aria-label="Try this app|data-try-app=/);
+ assert.match(matched,/data-invitation-edit/);assert.match(matched,/data-invitation-authenticated="true"/);assert.match(matched,/<a class="primary-button" href="https:\/\/example.com\/"/);assert.match(matched,/Your account is ready\. The app is not saved or published yet\./);assert.doesNotMatch(matched,/Free to join|disabled aria-label="Try this app|data-try-app=/);
  scope.currentUser=async()=>({email:'other@example.com',emailVerified:true});
  const other=await(await route(request)).text();
- assert.match(other,/<form action="\/auth\/sign-out" method="post">/);assert.match(other,/Switch account &amp; save your preview/);assert.match(other,/Use the invited email\. TryMyBuild is free\./);assert.doesNotMatch(other,/listing stays out|Listing on TryMyBuild|data-try-app=/);
+ assert.match(other,/<form action="\/auth\/sign-out" method="post">/);assert.match(other,/Switch account &amp; save your preview/);assert.match(other,/Use the email that received this invitation\./);assert.doesNotMatch(other,/listing stays out|Listing on TryMyBuild|data-try-app=/);
  scope.currentUser=async()=>({email:'maker@example.com',emailVerified:false});
  assert.doesNotMatch(await(await route(request)).text(),/data-try-app=/);
  scope.currentUser=async()=>null;

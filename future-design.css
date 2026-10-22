@@ -334,7 +334,7 @@ button:disabled { opacity: .5; cursor: not-allowed; }
 input::placeholder,textarea::placeholder { color: #5e6f68; opacity: 1; }
 input[type=checkbox],input[type=radio],progress { accent-color: #7545ad; }
 .inline-composer textarea { background: var(--platform-field) !important; color: var(--ink); border-color: #ded3eb; }
-.cw-choice,.feedback-choice,.benefit-choice,.interest-options label { background: #f2edf8; color: var(--ink); border-color: var(--line); }
+.cw-choice,.feedback-choice,.benefit-choice { background: #f2edf8; color: var(--ink); border-color: var(--line); }
 .cw-choice:has(input:checked),.feedback-choice:has(input:checked),.benefit-choice:has(input:checked) { background: #f2edf8; border-color: #ded3eb; }
 .send-arrow,.inline-composer .send-arrow,.recipient-comments .comment-send { background: #7545ad; color: #ffffff; }
 .account-menu-panel,.project-action-menu,.inline-help>div,.notification-panel,.catalog-filter-options,.cw-overlay,.overlay-toolbar,.detail-dialog,.detail-scroll,.invitation-detail .detail-scroll { background: var(--platform-surface); color: var(--ink); border-color: var(--line); box-shadow: 0 18px 60px #17332a12; }

@@ -38,6 +38,8 @@ test('deleted users are excluded, stale proof is explicit, and cleanup has a ret
 });
 test('review navigation shares the admin shell',()=>{
  for(const page of ['index','community','feedback','project'])assert.match(read('src/pages/admin/'+page+'.ts'),/adminSurface/);
+ assert.match(read('src/pages/admin/account-requests.ts'),/adminSurface/);
+ assert.match(read('src/server/feedback-ui.ts'),/Review queues/);assert.match(read('src/server/feedback-ui.ts'),/admin-page-heading/);
  assert.match(read('src/server/feedback-ui.ts'),/\['messages','\/dashboard\/messages','Messages'\]/);
 });
 test('catalog stays simple while listing preview pairs screenshot with description',()=>{

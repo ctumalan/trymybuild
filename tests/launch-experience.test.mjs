@@ -37,7 +37,7 @@ test('personalization is measured, ranked, optional, and resettable',()=>{
  const sql=read('database/012_launch_experience.sql'),dashboard=read('src/pages/dashboard/[section].ts'),api=read('src/pages/api/category-interest.ts');
  assert.match(sql,/create table if not exists public\.category_engagement/);
  assert.match(sql,/order by clicks desc/);assert.match(sql,/personalization/);
- assert.match(dashboard,/Your learned priorities/);assert.match(dashboard,/preferences-reset/);
+ assert.match(dashboard,/What you explore/);assert.match(dashboard,/preferences-reset/);
  assert.doesNotMatch(dashboard,/name="interests"/);assert.match(api,/cw_record_category_interest/);
 });
 

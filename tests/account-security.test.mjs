@@ -50,6 +50,6 @@ test('security remains in dashboard and old account navigation is preserved',()=
  const ui=read('../src/server/feedback-ui.ts');assert.match(ui,/\/dashboard\/security/);
  assert.match(ui,/active===key/);
  const page=read('../src/pages/dashboard/security.ts');assert.match(page,/'security',200,admin/);
- assert.match(page,/does not delete or hide anything/);
+ assert.match(page,/Submitting a request does not delete anything immediately/);
  assert.match(read('../src/pages/auth/callback.ts'),/validProof\(securityChallenge,result.user.id/);
 });

@@ -2,6 +2,26 @@
 // never in the public catalog or client assets. The invitation route checks its
 // signed link and lifecycle before rendering these notes.
 const reviews = {
+  "e2b2ec87-6eb6-4f4a-8c19-dfe19a442c20": {
+    "author": "Christian Tumalan",
+    "date": "October 22, 2026",
+    "scope": "Public website quick look. I read the homepage, About, pricing, public signup screen and creator-linked feedback form. I clicked Choose Core and reached the signup screen. I have not created an account, built an agent, tested voice or analytics, or reproduced the chat-reset issue reported by the founder.",
+    "headline": "Make the pricing button and signup screen agree about free beta access.",
+    "notes": [
+      {
+        "title": "What works well",
+        "text": "The homepage distinguishes the AI agents and voice agents available now from Knowledge Base and Workflows that are locked during beta. The free plan gives a concrete allowance of three AI agents and three voice agents. That makes the current beta scope easier to understand."
+      },
+      {
+        "title": "One improvement I would try first",
+        "text": "I clicked Choose Core on the pricing card labeled Locked during beta and reached the generic Create your account screen. That screen did not explain whether I was joining the free beta or selecting Core. I would label the action Join free beta, or keep future plan choices unavailable, and repeat the three AI agents, three voice agents and no-card details beside signup. This would keep a visitor from interpreting account creation as choosing a paid plan."
+      },
+      {
+        "title": "A useful first test",
+        "text": "Ask a new tester to start from the pricing section and explain what they expect to receive and pay before creating an account. Then give them one simple first-agent task and see whether they can reach a first response without help. Treat the chat-reset problem mentioned in the Reddit post as a separate test; I have not reproduced it."
+      }
+    ]
+  },
   'cd700b60-059c-4547-9fb4-d98467232b2f': {
     author: 'Christian Tumalan',
     date: 'October 20, 2026',

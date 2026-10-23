@@ -2060,7 +2060,9 @@ body.public-site #app[tabindex="-1"]:focus { outline:none; }
  .future-discover .results-heading + .discovery-categories,
  .future-discover .catalog-results > .discovery-categories { flex-wrap:wrap; gap:10px; }
  .future-discover .discovery-categories>.all-apps-guide,
- .future-discover .discovery-categories>button { flex:1 1 120px; }
+ .future-discover .discovery-categories>button { flex:0 0 auto; }
+ .future-discover .discovery-categories>.all-apps-guide>button,
+ .future-discover .discovery-categories>button { min-width:110px; }
  .future-discover .discovery-categories>button { justify-content:center; }
  .future-discover .discovery-categories>button[data-category-slot="wide"] { display:inline-flex; }
  .future-discover .discovery-categories>details { display:none; }

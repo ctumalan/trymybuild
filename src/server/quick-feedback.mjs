@@ -1,10 +1,17 @@
 export const quickFeedbackOptions = {
+  completed: 'I completed it',
+  stuck: 'I got stuck',
+  blocked: 'I couldn’t start',
+  not_tried: 'I’m still exploring',
+};
+export const legacyQuickFeedbackOptions = {
   love_it: 'The website is great. I love it.',
   too_much_to_read: 'Too much to read',
   hard_to_understand: 'Hard to understand',
   unexpected: 'Not what I expected',
   curious: 'Just curious',
 };
+export const quickFeedbackLabel = key => quickFeedbackOptions[key] || legacyQuickFeedbackOptions[key] || key;
 export function quickFeedbackInput(body) {
   if (!body || typeof body.slug !== 'string' || !/^[a-z0-9][a-z0-9-]{0,119}$/.test(body.slug)) return null;
   if (typeof body.requestId !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(body.requestId)) return null;

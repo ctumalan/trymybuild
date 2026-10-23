@@ -1,5 +1,5 @@
 import {e} from './feedback-ui';
-import {quickFeedbackOptions} from './quick-feedback.mjs';
+import {quickFeedbackOptions,quickFeedbackLabel} from './quick-feedback.mjs';
 export async function quickFeedbackPanel(db:any,slug:string,owner:string){
  // Verify ownership even when called outside the project dashboard.
  const project=await db.from('projects').select('slug').eq('slug',slug).eq('owner_user_id',owner).maybeSingle();
@@ -9,5 +9,5 @@ export async function quickFeedbackPanel(db:any,slug:string,owner:string){
  const rows=result.data||[];
  if(!rows.length)return '<section class="cw-panel"><h2>Quick visitor responses</h2><p>No quick responses yet. Visitors can share a few choices after a short visit to your app.</p></section>';
  const counts=Object.entries(quickFeedbackOptions).map(([key,label])=>`<li>${e(label)}: <strong>${rows.filter((r:any)=>r.reasons.includes(key)).length}</strong></li>`).join('');
- return `<section class="cw-panel"><h2>Quick visitor responses</h2><p>Private to you · Latest ${rows.length} responses, up to 100. Visitors can select more than one reason. These are early impressions, not reviews or proof of time spent using the app.</p><ul>${counts}</ul><details><summary>View individual responses</summary>${rows.map((r:any)=>`<p><time>${e(new Date(r.created_at).toLocaleDateString('en-US'))}</time> — ${r.reasons.map((key:string)=>e(quickFeedbackOptions[key as keyof typeof quickFeedbackOptions]||key)).join(' · ')}</p>`).join('')}</details></section>`;
+ return `<section class="cw-panel"><h2>Quick visitor responses</h2><p>Private to you · Latest ${rows.length} responses, up to 100. Each response captures the visitor’s progress after opening your app. These are early impressions, not proof of time spent using it.</p><ul>${counts}</ul><details><summary>View individual responses</summary>${rows.map((r:any)=>`<p><time>${e(new Date(r.created_at).toLocaleDateString('en-US'))}</time> — ${r.reasons.map((key:string)=>e(quickFeedbackLabel(key))).join(' · ')}</p>`).join('')}</details></section>`;
 }

@@ -12,9 +12,11 @@ test('discovery language, navigation and destinations use the requested public w
  assert.match(app,/return parsed\.href/);
 });
 
-test('feedback prompts keep session-only suppression and close after successful submissions',()=>{
+test('feedback prompts keep session-only suppression and reveal progressive completion states',()=>{
  assert.match(read('return-preferences.js'),/Do not ask again for this session/);
- assert.match(read('app.js'),/setTimeout\(dismiss, 350\)/);
+ assert.match(read('app.js'),/showSuccess\(false,data\)/);
+ assert.match(read('app.js'),/cw-feedback-complete[\s\S]*showSuccess\(true/);
+ assert.match(read('app.js'),/showPublicTip/);
  for(const file of ['community-input.js','public-comments.js','project-actions.js'])assert.match(read(file),/cw-feedback-complete|setTimeout\(close,350\)/);
 });
 
@@ -28,6 +30,13 @@ test('visual fixes cover navigation contrast, compact actions, badges and failed
  assert.match(css,/\.future-card-foot \.card-try-actions \{ display:contents/);
  assert.match(app,/class="listing-capture-fallback"/);
  assert.match(app,/Preview unavailable/);
+});
+
+test('desktop category tabs keep content-sized proportions when they wrap',()=>{
+ const css=read('future-design.css');
+ assert.match(css,/@media\(min-width:900px\)[\s\S]*?\.discovery-categories>button \{ flex:0 0 auto; \}/);
+ assert.match(css,/\.discovery-categories>button \{ min-width:110px; \}/);
+ assert.doesNotMatch(css,/@media\(min-width:900px\)[\s\S]*?\.discovery-categories>button \{ flex:1 1 120px; \}/);
 });
 
 test('catalog cards lead with the project purpose and keep price beside category',()=>{

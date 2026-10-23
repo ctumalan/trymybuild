@@ -124,8 +124,15 @@ function normalizeCategory(value) {
   return known?.name || clean.replace(/\b\p{L}/gu, letter => letter.toLocaleUpperCase());
 }
 
+function categoriesMatch(left, right) {
+  const normalizedLeft = normalizeCategory(left);
+  const normalizedRight = normalizeCategory(right);
+  return !!normalizedLeft && normalizedLeft === normalizedRight;
+}
+
 function categoryDefinition(name) {
-  return categoryCatalog.find(category => category.name === name) || { name, icon: '◇', prompt: `Explore ${name.toLocaleLowerCase()}`, color: 'teal' };
+  const normalized = normalizeCategory(name) || String(name || '').trim();
+  return categoryCatalog.find(category => category.name === normalized) || { name: normalized, icon: '◇', prompt: `Explore ${normalized.toLocaleLowerCase()}`, color: 'teal' };
 }
 
 function publishedCategories() {
@@ -147,7 +154,7 @@ const state = {
   route: new URLSearchParams(location.search).has('listing') || new URLSearchParams(location.search).get('after') === 'dashboard' ? "share" : new URLSearchParams(location.search).has('account') ? "account" : "discover",
   session: null,
   selected: null,
-  category: new URLSearchParams(location.search).get("category") || "All",
+  category: (() => { const value = new URLSearchParams(location.search).get("category"); return value ? normalizeCategory(value) || "All" : "All"; })(),
   sort: "recent",
   price: "all",
   creatorType: "all",
@@ -415,7 +422,7 @@ function discover(communityFocused = false) {
   if (activeView === 'test') return `<section class="page-shell discover-page future-discover listing-in-place">${discoveryHero(true)}<div id="home-panel" class="listing-entry-panel" aria-label="Share your app">${listingJourney()}</div></section>`;
   if (window.CW_SERVER && catalogState !== 'ready') return `<section class="page-shell discover-page future-discover">${discoveryHero()}<div id="home-panel" tabindex="-1">${catalogStatusPanel()}</div></section>`;
   const candidates = projects.filter(product => {
-    const categoryMatch = state.category === "All" || product.category === state.category;
+    const categoryMatch = state.category === "All" || categoriesMatch(product.category, state.category);
     const kind = CWPricing.kind(product.price);
     const priceMatch = state.price === 'all' || state.price === kind;
     const creatorMatch = creatorMatchesFilters(creatorFor(product), state.creatorType, state.verifiedOnly);
@@ -445,7 +452,7 @@ function communityRail() {
   const category=state.category, draft=discussionDraft();
   const now=new Date(),day=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
   const comments=state.discussionCategory===category?state.dailyComments:[];
-  const posts=state.communityPosts.filter(post=>projects.some(project=>project.slug===post.projectSlug&&project.category===category));
+  const posts=state.communityPosts.filter(post=>projects.some(project=>project.slug===post.projectSlug&&categoriesMatch(project.category,category)));
   return `<section id="category-community" class="category-community" aria-labelledby="category-community-title">
     <header><h2 id="category-community-title">Conversations about ${esc(category.toLowerCase())}</h2><p>See what people tried, what helped, and what they’re still looking for.</p></header>
     <div class="category-conversations">${comments.length||posts.length?[...comments.map(dailyCommentCard),...posts.map(post=>experienceCard(post,true))].slice(0,state.discussionExpanded?Infinity:3).join(''):'<p class="category-community-empty">No conversations yet. What would make this part of your life easier?</p>'}</div>
@@ -590,63 +597,102 @@ function maybeShowReturnFeedback() {
   pendingReturnFeedback = null;
   const awayMs = Date.now() - pending.awayAt;
   if (awayMs < 7000) return;
-  const quick = awayMs < 15000;
-  const detailed = awayMs > 120000;
-  const promptKey = `${pending.slug}:${quick ? 'quick' : detailed ? 'detailed' : 'review'}`;
-  if (promptedReturnApps.has(promptKey) || window.CWReturnPrompts?.suppressed(detailed?'detailed':quick?'quick':'comment')) return;
+  const promptKey = `${pending.slug}:quick`;
+  if (promptedReturnApps.has(promptKey) || window.CWReturnPrompts?.suppressed('quick')) return;
   if (document.querySelector('dialog[open]:not(.cw-overlay)') || document.activeElement?.matches('textarea, input, [contenteditable="true"]')) return;
   const product = projects.find(item => item.slug === pending.slug);
   if (!product) return;
   promptedReturnApps.add(promptKey);
   const previousFocus = document.activeElement;
   const dialog = document.createElement('dialog');
+  dialog.dataset ||= {};
   dialog.className = 'return-feedback-dialog';
   dialog.setAttribute('aria-labelledby', 'return-feedback-title');
-  const quickOptions = ['The website is great. I love it.', 'Too much to read', 'Hard to understand', 'Not what I expected', 'Just curious'];
-  dialog.innerHTML = `<button type="button" class="return-feedback-close" aria-label="Close feedback prompt">×</button>${quick ? `<h2 id="return-feedback-title">A quick thought on ${esc(product.name)}?</h2><p>What stood out during your visit?</p><form data-quick-return-feedback><fieldset><legend>Select any that fit</legend>${quickOptions.map((label,index)=>`<label><input type="checkbox" name="reason" value="${index}"><span>${label}</span></label>`).join('')}</fieldset><button class="primary-button return-feedback-send" type="submit">Send response</button><p class="quick-preview-note">Shared privately with the creator.</p><p data-quick-status role="status"></p></form>` : detailed ? `<h2 id="return-feedback-title">What stood out in ${esc(product.name)}?</h2><p>Tell the creator what worked and what could improve.</p>${guidedReturnComposer(product)}` : `<h2 id="return-feedback-title">How was ${esc(product.name)}?</h2><p>Leave a public comment about what worked or could be better.</p>${projectCommentComposer(product, false, 'return-')}`}${!detailed?window.CWReturnPrompts?.option()||'':''}<button type="button" class="text-button" data-return-dismiss>Not now</button>`;
-  if (!quick && !detailed) {
-    const submit = dialog.querySelector('[type="submit"]');
-    submit.textContent = 'Send comment';
-    submit.setAttribute('aria-label', 'Send comment');
-    submit.className = 'primary-button return-feedback-send';
-    dialog.querySelector('textarea').placeholder = 'For example: “I liked how easy it was to get started. I’d love a way to…”';
-  } else if (quick) {
-    dialog.querySelector('form').addEventListener('submit', async event => {
-      event.preventDefault();
-      const answers = [...dialog.querySelectorAll('input[name=reason]:checked')].map(input=>quickOptions[Number(input.value)]);
-      const status = dialog.querySelector('[data-quick-status]');
-      if (!answers.length) {status.textContent='Choose an option, or select Not now.';return;}
-      const form = event.currentTarget;
-      const button = form.querySelector('[type="submit"]');
-      const reasonKeys = ['love_it','too_much_to_read','hard_to_understand','unexpected','curious'];
-      const reasons = [...dialog.querySelectorAll('input[name=reason]:checked')].map(input=>reasonKeys[Number(input.value)]);
-      form.dataset.requestId ||= crypto.randomUUID();
-      button.disabled = true;
-      status.textContent = 'Sending…';
-      try {
-        const response = await fetch('/api/quick-feedback', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({slug:product.slug,reasons,requestId:form.dataset.requestId})});
-        const data = await response.json();
-        if (!response.ok || !data.ok) throw Error(data.error || 'Your response could not be sent.');
-        status.textContent = data.message;
-        dialog.querySelector('fieldset').disabled = true;
-        setTimeout(dismiss, 350);
-      } catch(error) {status.textContent=error.message || 'Your response could not be sent. Please try again.';button.disabled=false;}
-
-    });
-  }
+  const quickOptions = [
+    {value:'completed',label:'I completed it',icon:'✓'},
+    {value:'stuck',label:'I got stuck',icon:'!'},
+    {value:'blocked',label:'I couldn’t start',icon:'×'},
+    {value:'not_tried',label:'I’m still exploring',icon:'↗'}
+  ];
+  let selectedAttempt='';
+  const productContext=()=>`<header class="return-app-context"><span class="return-app-thumb">${product.preview?`<img src="${esc(product.preview)}" alt="">`:'▣'}</span><span><strong>${esc(product.name)}</strong><small>Back from the app</small></span><span class="return-private-badge">▣ 10 seconds · Private</span></header>`;
+  const closeButton=()=>'<button type="button" class="return-feedback-close" aria-label="Close feedback prompt">×</button>';
   const dismiss = () => {
     dialog.close(); dialog.remove();
     if (previousFocus?.isConnected) previousFocus.focus({preventScroll:true});
   };
-  dialog.querySelector('.return-feedback-close').onclick = dismiss;
-  dialog.querySelector('[data-return-dismiss]').onclick = dismiss;
-  dialog.addEventListener('cw-feedback-complete', dismiss, {once:true});
+  const bindChrome=()=>{dialog.querySelector('.return-feedback-close').onclick=dismiss;dialog.querySelector('[data-return-dismiss]')?.addEventListener('click',dismiss);};
+  const showQuick=()=>{
+    dialog.dataset.phase='quick';dialog.classList.remove('guided-feedback-dialog','return-feedback-success','return-feedback-public');
+    dialog.innerHTML=`${closeButton()}${productContext()}<div class="return-feedback-intro"><h2 id="return-feedback-title">How did ${esc(product.name)} go?</h2><p>Give the maker one quick signal.</p></div><form data-quick-return-feedback><fieldset><legend class="visually-hidden">Choose one quick signal</legend><div class="return-signal-grid">${quickOptions.map(option=>`<label class="return-signal"><input type="radio" name="reason" value="${option.value}" required><span class="return-signal-icon" aria-hidden="true">${option.icon}</span><strong>${esc(option.label)}</strong></label>`).join('')}</div></fieldset><button class="primary-button return-feedback-send" type="submit">Send privately →</button><button type="button" class="return-more-action" data-return-more>Want to say more? <strong>Add one useful detail</strong></button><p class="return-privacy-note"><span aria-hidden="true">▣</span> Shared privately with the maker. Add detail if you want a reply in Messages.</p><p data-quick-status role="status"></p></form>${window.CWReturnPrompts?.option()||''}<button type="button" class="text-button" data-return-dismiss>Maybe later</button>`;
+    bindChrome();
+    const form=dialog.querySelector('[data-quick-return-feedback]');
+    form.addEventListener('change',event=>{if(event.target.name==='reason')selectedAttempt=event.target.value;});
+    form.addEventListener('submit', async event => {
+      event.preventDefault();
+      const status = dialog.querySelector('[data-quick-status]');
+      const chosen=form.elements.reason.value;
+      if (!chosen) {status.textContent='Choose the option that fits best, or select Maybe later.';return;}
+      selectedAttempt=chosen;
+      const form = event.currentTarget;
+      const button = form.querySelector('[type="submit"]');
+      form.dataset.requestId ||= crypto.randomUUID();
+      button.disabled = true;
+      status.textContent = 'Sending…';
+      try {
+        const response = await fetch('/api/quick-feedback', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({slug:product.slug,reasons:[chosen],requestId:form.dataset.requestId})});
+        const data = await response.json();
+        if (!response.ok || !data.ok) throw Error(data.error || 'Your response could not be sent.');
+        showSuccess(false,data);
+      } catch(error) {status.textContent=error.message || 'Your response could not be sent. Please try again.';button.disabled=false;}
+    });
+    dialog.querySelector('[data-return-more]').onclick=()=>showGuided();
+    dialog.querySelector('input').focus({preventScroll:true});
+  };
+  const showGuided=()=>{
+    dialog.dataset.phase='guided';dialog.classList.add('guided-feedback-dialog');dialog.classList.remove('return-feedback-success','return-feedback-public');
+    dialog.innerHTML=`${closeButton()}${productContext()}<div class="return-guided-heading"><span>Optional · Add useful detail</span><strong data-return-step-label>Step 1 of 3</strong></div>${guidedReturnComposer(product)}`;
+    bindChrome();
+    const form=dialog.querySelector('[data-guided-feedback]');
+    if(selectedAttempt){const input=form.querySelector(`input[name="attempt"][value="${selectedAttempt}"]`);if(input)input.checked=true;}
+    const helpful=form.elements.helpful;
+    const updateHelpful=()=>{helpful.value={completed:'yes',stuck:'somewhat',blocked:'not_yet',not_tried:'not_tried'}[form.elements.attempt.value]||'unclear';};
+    const showStep=step=>{
+      form.dataset.step=String(step);form.querySelectorAll('[data-return-step]').forEach(panel=>panel.hidden=Number(panel.dataset.returnStep)!==step);
+      dialog.querySelector('[data-return-step-label]').textContent=`Step ${step} of 3`;
+      form.querySelectorAll('[data-return-progress]').forEach(item=>{item.classList.toggle('is-current',Number(item.dataset.returnProgress)===step);item.classList.toggle('is-complete',Number(item.dataset.returnProgress)<step);});
+      if(step===3){updateHelpful();form.querySelector('[data-return-summary]').textContent=`${quickOptions.find(option=>option.value===form.elements.attempt.value)?.label||'Your experience'} · ${form.elements.focus.options?form.elements.focus.options[form.elements.focus.selectedIndex]?.text:form.querySelector('input[name="focus"]:checked')?.dataset.label||'Your focus'}`;}
+      form.querySelector(`[data-return-step="${step}"] h3`)?.focus({preventScroll:true});
+    };
+    form.addEventListener('change',event=>{if(event.target.name==='attempt'){selectedAttempt=event.target.value;updateHelpful();}});
+    form.querySelectorAll('[data-return-next]').forEach(button=>button.onclick=()=>{
+      const step=Number(form.dataset.step||1);
+      if(step===1&&!form.elements.attempt.value){form.querySelector('[data-return-step-status]').textContent='Choose the option that fits best.';return;}
+      if(step===2){if(!form.elements.focus.value){form.querySelector('[data-return-step-status]').textContent='Choose what the maker should look at first.';return;}if(!form.elements.message.value.trim()){form.querySelector('[data-return-step-status]').textContent='Add one useful detail.';form.elements.message.focus();return;}}
+      form.querySelector('[data-return-step-status]').textContent='';showStep(Math.min(3,step+1));
+    });
+    form.querySelectorAll('[data-return-back]').forEach(button=>button.onclick=()=>showStep(Math.max(1,Number(form.dataset.step||1)-1)));
+    window.CWGuidedFeedback?.hydrate(dialog);form.elements.visibility.value='private';updateHelpful();showStep(1);
+  };
+  const showSuccess=(guided,data={})=>{
+    dialog.dataset.phase='success';dialog.classList.remove('guided-feedback-dialog','return-feedback-public');dialog.classList.add('return-feedback-success');
+    dialog.innerHTML=`${closeButton()}${productContext()}<section class="return-success-card"><span class="return-success-check" aria-hidden="true">✓</span><h2 id="return-feedback-title">${guided?'Your feedback is with the maker.':'Your signal is with the maker.'}</h2><p>${guided?'They can reply in Messages. Want to help the next person too?':'Want to make your signal more useful or help the next person?'}</p><div class="return-success-actions">${guided&&data.href?`<a class="secondary-button" href="${esc(data.href)}">Open conversation</a>`:`<button type="button" class="secondary-button" data-return-more>Add one useful detail</button>`}<button type="button" class="primary-button" data-return-public>Share a public tip →</button></div><button type="button" class="text-button" data-return-dismiss>Done</button><small>Public tips appear only after review.</small></section>`;
+    bindChrome();dialog.querySelector('[data-return-more]')?.addEventListener('click',showGuided);dialog.querySelector('[data-return-public]').onclick=showPublicTip;dialog.querySelector('h2').focus({preventScroll:true});
+  };
+  const showPublicTip=()=>{
+    dialog.dataset.phase='public';dialog.classList.remove('guided-feedback-dialog','return-feedback-success');dialog.classList.add('return-feedback-public');
+    dialog.innerHTML=`${closeButton()}${productContext()}<div class="return-feedback-intro"><span class="return-public-label">Optional · Community</span><h2 id="return-feedback-title">Share what others should know</h2><p>Help the next person with one useful tip.</p></div><div class="return-tip-starters"><button type="button" data-tip-starter="Best part: ">Best part</button><button type="button" data-tip-starter="Watch out for: ">Watch out for</button><button type="button" data-tip-starter="I’d improve: ">I’d improve</button></div>${projectCommentComposer(product,false,'return-')}<p class="return-public-note">Visible publicly after review. Your private feedback stays private.</p><button type="button" class="text-button" data-return-dismiss>Done</button>`;
+    bindChrome();const textarea=dialog.querySelector('textarea');dialog.querySelectorAll('[data-tip-starter]').forEach(button=>button.onclick=()=>{if(!textarea.value.trim())textarea.value=button.dataset.tipStarter;textarea.focus();});const submit=dialog.querySelector('[type="submit"]');submit.textContent='Share with the community →';submit.className='primary-button return-feedback-send';textarea.focus({preventScroll:true});
+  };
+  const showFinal=()=>{
+    dialog.dataset.phase='final';dialog.classList.remove('return-feedback-public');dialog.classList.add('return-feedback-success');dialog.innerHTML=`${closeButton()}<section class="return-success-card"><span class="return-success-check" aria-hidden="true">✓</span><h2 id="return-feedback-title">Thanks for helping shape ${esc(product.name)}.</h2><p>Your private feedback is with the maker, and your public tip is awaiting review.</p><button type="button" class="primary-button" data-return-dismiss>Done</button></section>`;bindChrome();dialog.querySelector('[data-return-dismiss]').focus({preventScroll:true});
+  };
+  dialog.addEventListener('cw-feedback-complete',event=>{if(dialog.dataset.phase==='guided')showSuccess(true,event.detail||{});else if(dialog.dataset.phase==='public')showFinal();});
   dialog.addEventListener('cancel', event => {event.preventDefault(); dismiss();});
   dialog.addEventListener('click', event => {if (event.target === dialog) {const r=dialog.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)dismiss();}});
   document.body.append(dialog);
   dialog.showModal();
-  window.CWGuidedFeedback?.hydrate(dialog);
-  dialog.querySelector(quick ? 'input' : 'textarea').focus();
+  showQuick();
 }
 window.addEventListener('blur', markFeedbackDeparture);
 window.addEventListener('focus', maybeShowReturnFeedback);
@@ -654,7 +700,6 @@ document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'hidden') markFeedbackDeparture();
   else maybeShowReturnFeedback();
 });
-
 function projectDetailContent(product, preview = false, disabledLaunch = false) {
   const copy = projectPresentation[product.slug] || ['', '',product.summary,'',''];
   const presentation = product.presentation || {headline:copy[2],help:copy[3],firstTry:copy[4]};
@@ -1609,8 +1654,9 @@ function hydrateCatalog(list) {
   if (!Array.isArray(list)) return;
   projects.length = 0;
   list.forEach((p, index) => {
+    const category = normalizeCategory(p.category) || 'Utilities';
     projects.push({
-      slug: p.slug, name: p.name, category: p.category, color: categoryDefinition(p.category).color || 'teal',
+      slug: p.slug, name: p.name, category, color: categoryDefinition(category).color || 'teal',
       summary: p.summary, purpose: p.purpose || '', audience: p.audience || '', stage: p.stage || 'New',
       price: p.price || 'Free', url: p.url, outcome: p.outcome || (p.presentation && p.presentation.headline) || '',
       video: p.video || '', note: p.note || '', preview: String(p.slug || '').startsWith('codexnest') ? '/assets/previews/codexnest.png' : p.preview, benefits: p.benefits || [],
@@ -1620,7 +1666,7 @@ function hydrateCatalog(list) {
     productBenefits[p.slug] = p.benefits || [];
     const pr = p.presentation || {};
     const headline = p.slug === 'stackscout' ? 'Choose less. Ship sooner.' : pr.headline || p.summary || p.name;
-    projectPresentation[p.slug] = [pr.eyebrow || p.category || '', '', headline, pr.help || '', pr.firstTry || ''];
+    projectPresentation[p.slug] = [pr.eyebrow || category, '', headline, pr.help || '', pr.firstTry || ''];
     if (p.creator && (p.creator.slug || p.creator.name)) {
       const slug = p.creator.slug || 'creator-' + p.slug;
       const data = { slug, type: p.creator.type === 'company' ? 'company' : 'independent', avatar: p.creator.avatar || '', name: p.creator.name, initials: p.creator.initials || String(p.creator.name || 'C').slice(0, 2).toUpperCase(), label: p.creator.label || 'TryMyBuild creator', bio: p.creator.bio || '', verified: !!p.creator.verified, founderException: p.creator.founderException === true };
@@ -1674,8 +1720,9 @@ if (window.CW_SERVER) {
 }
 
 function selectDiscussionCategory(category) {
-  state.category=category;state.dailyComments=[];state.discussionError='';state.discussionExpanded=false;
-  const url=new URL(location.href);if(category==='All')url.searchParams.delete('category');else url.searchParams.set('category',category);
+  const normalized=category==='All'?'All':normalizeCategory(category)||'All';
+  state.category=normalized;state.dailyComments=[];state.discussionError='';state.discussionExpanded=false;
+  const url=new URL(location.href);if(normalized==='All')url.searchParams.delete('category');else url.searchParams.set('category',normalized);
   url.hash='';history.replaceState({},'',url);render(true);void loadDailyComments();
 }
 document.addEventListener('click',event=>{
@@ -1829,8 +1876,8 @@ document.addEventListener('click',event=>{
 window.CWOpenProject = slug => { const project = projects.find(p => p.slug === slug); if (project) openProductDetail(project); return !!project; };
 
 function guidedReturnComposer(product) {
- const group=(name,title,options)=>`<fieldset><legend>${title}</legend><div class="cw-choices">${Object.entries(options).map(([v,l])=>`<label class="cw-choice"><input type="radio" name="${name}" value="${v}" required>${esc(l)}</label>`).join('')}</div></fieldset>`;
- return `<form action="/api/feedback" method="post" data-guided-feedback><input type="hidden" name="slug" value="${esc(product.slug)}"><input type="hidden" name="price" value="unsure">${group('attempt','1. Were you able to complete the task?',{completed:'Yes, I completed it',stuck:'Partly—I got stuck',blocked:'No—I couldn’t get started',not_tried:'I haven’t tried it yet'})}${group('focus','2. Where did you hesitate or get stuck?',{ease:'Finding my way around',bugs:'Something went wrong',results:'The result surprised me',explanation:'I did not understand something',development:'I have an idea for what comes next'})}<label><span data-review-prompt>3. What did you expect, and what happened?</span><textarea data-community-field name="message" required rows="3" placeholder="Describe one specific moment. What did you expect to happen next?"></textarea></label><div class="feedback-field-footer"><a href="/community-guidelines">Feedback guidelines</a></div>${group('helpful','4. Would you use this app?',{yes:'Yes',somewhat:'With improvements',not_yet:'No',unclear:'Not sure'})}${group('visibility','Who can see this?',{private:'Creator only',public:'Community'})}<p class="cw-meta feedback-visibility-note" data-feedback-visibility-note aria-live="polite">Choose who can see your feedback.</p><button type="submit" class="primary-button return-feedback-send">Send feedback</button><p data-guided-status role="status"></p></form>`;
+ const group=(name,options)=>`<div class="return-guided-options">${Object.entries(options).map(([value,label])=>`<label class="return-guided-option"><input type="radio" name="${name}" value="${value}" data-label="${esc(label)}" required><span>${esc(label)}</span><b aria-hidden="true">✓</b></label>`).join('')}</div>`;
+ return `<form action="/api/feedback" method="post" data-guided-feedback data-step="1"><input type="hidden" name="slug" value="${esc(product.slug)}"><input type="hidden" name="price" value="unsure"><input type="hidden" name="helpful" value="unclear"><input type="hidden" name="visibility" value="private"><nav class="return-guided-progress" aria-label="Feedback progress"><span data-return-progress="1" class="is-current"><b>1</b>Your experience</span><span data-return-progress="2"><b>2</b>The moment</span><span data-return-progress="3"><b>3</b>Send it</span></nav><section data-return-step="1"><h3 tabindex="-1">What was your experience?</h3><p>Choose the option that fits best.</p>${group('attempt',{completed:'I completed it',stuck:'I got stuck',blocked:'I couldn’t start',not_tried:'I’m still exploring'})}<div class="return-step-actions"><button type="button" class="primary-button" data-return-next>Next: add the moment →</button></div></section><section data-return-step="2" hidden><h3 tabindex="-1">What happened?</h3><p>Help the maker focus on what to improve first.</p>${group('focus',{ease:'Navigation',bugs:'Something broke',results:'Unexpected result',explanation:'Missing explanation',development:'New idea'})}<label class="return-moment-field"><span>Give them the moment</span><textarea data-community-field name="message" required rows="4" maxlength="1000" placeholder="What happened, what did you expect, and what would make it better?"></textarea></label><div class="feedback-field-footer"><a href="/community-guidelines">Feedback guidelines</a><span>One specific moment is enough.</span></div><div class="return-step-actions"><button type="button" class="text-button" data-return-back>← Back</button><button type="button" class="primary-button" data-return-next>Next: review and send →</button></div></section><section data-return-step="3" hidden><h3 tabindex="-1">Send it privately</h3><p>Your note starts a conversation with the maker.</p><div class="return-feedback-summary"><span aria-hidden="true">◎</span><strong data-return-summary>Your experience</strong></div><div class="return-private-choice"><span aria-hidden="true">▣</span><div><strong>Creator only</strong><small>Only you and the maker can see this. They can reply in Messages.</small></div><span aria-hidden="true">✓</span></div><div class="return-step-actions"><button type="button" class="text-button" data-return-back>← Back</button><button type="submit" class="primary-button return-feedback-send">Send feedback →</button></div></section><p data-return-step-status role="status"></p><p data-guided-status role="status"></p></form>`;
 }
 
 

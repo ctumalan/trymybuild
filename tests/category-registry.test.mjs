@@ -11,6 +11,7 @@ function registry(projects = []) {
   vm.runInContext(registrySource, context);
   return {
     normalize: value => vm.runInContext(`normalizeCategory(${JSON.stringify(value)})`, context),
+    matches: (left, right) => vm.runInContext(`categoriesMatch(${JSON.stringify(left)}, ${JSON.stringify(right)})`, context),
     published: () => JSON.parse(vm.runInContext('JSON.stringify(publishedCategories())', context)),
     catalog: JSON.parse(vm.runInContext('JSON.stringify(categoryCatalog)', context)),
   };
@@ -38,6 +39,26 @@ test('homepage categories come only from published catalog projects and deduplic
     ['Music & audio', 1],
     ['Climate Technology', 1],
   ]);
+});
+
+test('every displayed category includes all of its apps despite casing and aliases', () => {
+  const projects = [
+    { category: 'Food & Home' },
+    { category: 'Food & home' },
+    { category: 'food' },
+    { category: 'TECHNOLOGY' },
+    { category: 'Artificial Intelligence' },
+    { category: 'music' },
+    { category: 'Sports & Teams' },
+  ];
+  const categories = registry(projects);
+  for (const project of projects) {
+    const displayed = categories.normalize(project.category);
+    assert.equal(categories.matches(project.category, displayed), true, `${project.category} must remain visible under ${displayed}`);
+  }
+  assert.equal(categories.matches('Food & Home', 'Food & home'), true);
+  assert.equal(categories.matches('Artificial Intelligence', 'AI & automation'), true);
+  assert.equal(categories.matches('Technology', 'Shopping'), false);
 });
 
 test('listing UI exposes Other search while homepage navigation uses published categories', () => {
